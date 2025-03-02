@@ -15,6 +15,7 @@ import { Earn,
   import React from "react";
 import BuySection from "./BuySection";
 import NavigationMenu from "./NavigationMenu";
+import Footer from "./footer";
 
 
 import {
@@ -198,7 +199,7 @@ const [activeButton, setActiveButton] = useState('deposit');
   </div>
 
   {/* Main content section that stays centered */}
-  <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca">
+  <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca" className='max-w-sm mx-auto'>
     {/* EarnDeposit Component */}
     {earnSection === 'deposit' && (
       <EarnDeposit className="bg-[#fefefe] rounded-md p-4 border border-gray-200 shadow-sm">
@@ -231,18 +232,7 @@ const [activeButton, setActiveButton] = useState('deposit');
 
       </main>
 
-      <footer className="flex justify-between items-center p-4 text-sm text-gray-800 bg-white-100">
-  <div>
-    <span>2025 © AirborneEagle Solutions, </span>
-    <span className="font-bold">v1.0.0</span>
-    <span> · </span>
-  </div>
-  <div className="flex items-center">
-    <span>A public good for</span>
-    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mx-1"></div>
-    <span className="font-bold">Base</span>
-  </div>
-</footer>
+      <Footer />
 
     </div>
   );
