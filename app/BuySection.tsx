@@ -69,8 +69,7 @@ const BuySection: React.FC = () => {
     <div className={`${getContainerWidth()} mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg border border-gray-300`}>
       <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-4 text-center">Buy Crypto</h2>
       <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6"> 
-        You can buy using your ETH balance, directly from your Coinbase account,  
-        or even with a debit card for convenience.
+        We accept visa and mastercard.
       </p>
 
       <div className="space-y-3 sm:space-y-4">
@@ -79,7 +78,7 @@ const BuySection: React.FC = () => {
             key={index} 
             className="flex items-center justify-between p-3 sm:p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300"
           >
-            <span className="font-medium text-gray-800">{item.name}</span>
+            
             <Buy toToken={item.token} />
           </div>
         ))}

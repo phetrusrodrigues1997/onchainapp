@@ -5,6 +5,7 @@ import { Earn, EarnDeposit, EarnDetails, DepositBalance, DepositAmountInput, Dep
 import React from "react";
 import BuySection from "./BuySection";
 import NavigationMenu from "./NavigationMenu";
+import ResponsiveLogo from './ResponsiveLogo';
 import Footer from "./footer";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
@@ -72,13 +73,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
       <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
         <header className="pt-4 pr-4 pl-4">
           <div className="flex justify-between items-center">
-            <div className="logo-container">
-              <span className="relative inline-block font-sans">
-                <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#c2b709]">
-                  Airborne<span className="text-black">Eagle🦅</span>
-                </span>
-              </span>
-            </div>
+            <ResponsiveLogo />
   
             {/* Pass activeSection and setActiveSection to NavigationMenu */}
             <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
@@ -121,7 +116,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     swappableTokens={swappableTokens}
                     token={EURCToken}
                     type="from"
-                    className="mb-1 bg-[#ffffff] text-white rounded-2xl border border-gray-600 shadow-sm"
+                    className="mb-1 bg-[#fcfcfc] text-white rounded-2xl border border-gray-600 shadow-sm"
                   />
                   <SwapToggleButton className="mb-2" />
                   <SwapAmountInput
@@ -131,7 +126,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     type="to"
                     className="mb-1 bg-[#fbfbfb] text-white rounded-2xl border border-gray-600 shadow-sm"
                   />
-                  <SwapButton className="w-full bg-[#c2b709] text-white rounded-md py-2 hover:bg-green-600 transition-colors" />
+                  <SwapButton className="w-full bg-[#c2b709] text-white rounded-md py-2 transition-colors" />
                   <SwapMessage className="mt-2 text-gray-800 text-sm" />
                   <SwapToast />
                 </Swap>
@@ -169,7 +164,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                 </div>
                 <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca" className="max-w-sm mx-auto">
                   {earnSection === 'deposit' && (
-                    <EarnDeposit className="bg-[#fefefe] rounded-md p-4 border border-gray-200 shadow-sm max-w-sm mx-auto">
+                    <EarnDeposit className="bg-[#fefefe] p-4 rounded-2xl shadow-sm max-w-sm mx-auto">
                       <EarnDetails className="text-white font-medium text-lg mb-2" />
                       <DepositBalance className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
                       <DepositAmountInput className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
@@ -177,7 +172,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     </EarnDeposit>
                   )}
                   {earnSection === 'withdraw' && (
-                    <EarnWithdraw className="bg-[#fafafa] rounded-md p-4 border border-gray-200 shadow-sm max-w-sm mx-auto">
+                    <EarnWithdraw className="bg-[#fefefe] p-4 rounded-2xl shadow-sm max-w-sm mx-auto">
                       <EarnDetails className="text-white font-medium text-lg mb-2" />
                       <WithdrawBalance className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
                       <WithdrawAmountInput className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />

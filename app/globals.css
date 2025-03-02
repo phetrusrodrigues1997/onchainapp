@@ -8,19 +8,14 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
 
 [data-testid="ockSwap_Title"] {
   color:black !important;
 }
 
 .mt-2.text-red-500.text-center {
-  color: white !important; /* Override Tailwind's text-red-500 */
+  display: none !important; /* Override Tailwind's text-red-500 */
 }
 
 
@@ -88,7 +83,7 @@ body {
 }
 
 [data-testid="ockConnectButton"] {
-  background: #E8E393 !important; /* from-gray-700 to-gray-800 */
+  background: #c2b709 !important; /* from-gray-700 to-gray-800 */
 }
 
 [data-testid="ockConnectButton"]:hover {
