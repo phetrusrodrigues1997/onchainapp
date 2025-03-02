@@ -87,7 +87,7 @@ import {
 
 
 export default function App() {
-const [activeSection, setActiveSection] = useState('swap');
+const [activeSection] = useState('swap');
 const [earnSection, setEarnSection] = useState('deposit');
 const [activeButton, setActiveButton] = useState('deposit');
   return (
