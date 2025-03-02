@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 
-const NavigationMenu = () => {
-  const [activeSection, setActiveSection] = useState('swap');
+interface NavigationMenuProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -11,13 +15,13 @@ const NavigationMenu = () => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Initial check
     checkIfMobile();
-    
+
     // Add event listener for window resize
     window.addEventListener('resize', checkIfMobile);
-    
+
     // Clean up
     return () => {
       window.removeEventListener('resize', checkIfMobile);
@@ -32,14 +36,14 @@ const NavigationMenu = () => {
     { id: 'market', label: 'Market' },
     { id: 'send', label: 'Send' },
     { id: 'card', label: 'Debit Card' },
-    { id: 'help', label: 'Help' }
+    { id: 'help', label: 'Help' },
   ];
 
   return (
     <nav className="relative">
       {/* Mobile hamburger menu button */}
       {isMobile && (
-        <button 
+        <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className="p-2 text-gray-700 bg-white rounded-md shadow-md md:hidden"
           aria-label="Toggle menu"
@@ -57,8 +61,8 @@ const NavigationMenu = () => {
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
                 className={`font-medium ${
-                  activeSection === item.id 
-                    ? 'text-[#c2b709]' 
+                  activeSection === item.id
+                    ? 'text-[#c2b709]'
                     : 'text-[#2E2E2E] hover:text-black'
                 }`}
               >
