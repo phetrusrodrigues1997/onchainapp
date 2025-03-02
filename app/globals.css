@@ -20,7 +20,7 @@
 
 
 [data-testid="ockTextInput_Input"] {
-  color: #c2b709 !important; /* Tailwind's green-500 */
+  color: #000000 !important; /* Tailwind's green-500 */
 }
 
 [data-testid="ockTransactionButton_Button"] {
