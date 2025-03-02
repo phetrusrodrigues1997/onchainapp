@@ -84,221 +84,136 @@ import {
   const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken, CbBTCToken];
 
 
-export default function App() {
-const [activeSection, setActiveSection] = useState('swap');
-const [earnSection, setEarnSection] = useState('deposit');
-const [activeButton, setActiveButton] = useState('deposit');
-  return (
-    <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
-      <header className="pt-4 pr-4 pl-4">
-  <div className="flex justify-between items-center">
-    {/* Logo */}
-    <div className="logo-container">
-      <span className="relative inline-block font-sans">
-      {/* bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 */}
-      <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#c2b709]">
-
-          Airborne<span className="text-black">Eagle🦅</span>
-        </span>
-      </span>
-    </div>
-
-    {/* Navigation Menu */}
-    <nav className="flex space-x-10"> {/* Increased space-x to 8 */}
-  <div className="bg-white-400 rounded-full px-6 py-2 flex space-x-10"> {/* Added space-x-6 for button spacing */}
-    <button 
-      onClick={() => setActiveSection('swap')} 
-      className={`font-medium ${activeSection === 'swap' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Swap
-    </button>
-    <button 
-      onClick={() => setActiveSection('earn')} 
-      className={`font-medium ${activeSection === 'earn' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Earn
-    </button>
-
-    <button 
-      onClick={() => setActiveSection('buy')} 
-      className={`font-medium ${activeSection === 'buy' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Buy
-    </button>
-
-    <button 
-      onClick={() => setActiveSection('market')} 
-      className={`font-medium ${activeSection === 'market' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Market
-    </button>
-    <button 
-      onClick={() => setActiveSection('send')} 
-      className={`font-medium ${activeSection === 'send' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Send
-    </button>
-
-    <button 
-      onClick={() => setActiveSection('card')} 
-      className={`font-medium ${activeSection === 'card' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Debit Card
-    </button>
-    <button 
-      onClick={() => setActiveSection('help')} 
-      className={`font-medium ${activeSection === 'help' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Help
-    </button>
-
-    
-  </div>
-</nav>
-
-
-    {/* Wallet Container */}
-    <div className="wallet-container">
-      <Wallet>
-        <ConnectWallet className='bg-[#FFFFFF]'>
-          <Avatar className="h-6 w-6" />
-          <Name />
-        </ConnectWallet>
-        <WalletDropdown>
-          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar />
-            <Name />
-            <Address />
-            <EthBalance />
-          </Identity>
-          <WalletDropdownLink
-            icon="wallet"
-            href="https://keys.coinbase.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Wallet
-          </WalletDropdownLink>
-          <WalletDropdownDisconnect />
-        </WalletDropdown>
-      </Wallet>
-    </div>
-  </div>
-</header>
-
-
-
-<main className="flex-grow flex items-center justify-center mt-14">
-        <div className="max-w-3xl w-full p-1">
-  {activeSection === 'swap' && (
-    <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-md mx-auto">
-      <SwapAmountInput
-        label="Sell"
-        swappableTokens={swappableTokens}
-        token={EURCToken}
-        type="from"
-        className="mb-1 bg-[#ffffff] text-white rounded-2xl border border-gray-600 shadow-sm"
-
-      />
-      <SwapToggleButton className="mb-2" />
-      <SwapAmountInput
-        label="Buy"
-        swappableTokens={swappableTokens}
-        token={USDCToken}
-        type="to"
-        className="mb-1 bg-[#fbfbfb] text-white rounded-2xl border border-gray-600 shadow-sm"
-
-      />
-      <SwapButton className="w-full bg-[#c2b709] text-white rounded-md py-2 hover:bg-green-600 transition-colors" />
-      <SwapMessage className="mt-2 text-gray-800 text-sm" />
-      <SwapToast />
-    </Swap>
-  )}
-
-  {activeSection === 'earn' && (
-    
-    <div className="flex flex-col items-center p-3 gap-2">
-  {/* Button section aligned to the left */}
-  <div className="flex justify-start w-full mb-2 ml-60">
-  <button 
-        onClick={() => {
-          setEarnSection('deposit');
-          setActiveButton('deposit'); // Set the active button
-        }} 
-        className={`${
-          activeButton === 'deposit' ? 'bg-gray-200' : 'bg-[#ffffff]'
-        } text-gray-800 px-4 py-2 rounded-full focus:outline-none transition-colors`}
-      >
-        Deposit
-      </button>
-
-      <button 
-        onClick={() => {
-          setEarnSection('withdraw');
-          setActiveButton('withdraw'); // Set the active button
-        }} 
-        className={`${
-          activeButton === 'withdraw' ? 'bg-gray-200' : 'bg-[#ffffff]'
-        } text-gray-800 px-4 py-2 rounded-full focus:outline-none transition-colors`}
-      >
-        Withdraw
-      </button>
-  </div>
-
-  {/* Main content section that stays centered */}
-  <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca">
-    {/* EarnDeposit Component */}
-    {earnSection === 'deposit' && (
-      <EarnDeposit className="bg-[#fefefe] rounded-md p-4 border border-gray-200 shadow-sm">
-        <EarnDetails className="text-white font-medium text-lg mb-2" />
-        <DepositBalance className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
-        <DepositAmountInput className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
-        <DepositButton />
-      </EarnDeposit>
-    )}
-
-    {earnSection === 'withdraw' && (
-      <EarnWithdraw className="bg-[#fafafa] rounded-md p-4 border border-gray-200 shadow-sm">
-        <EarnDetails className="text-white font-medium text-lg mb-2" />
-        <WithdrawBalance className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
-        <WithdrawAmountInput className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
-        <WithdrawButton />
-      </EarnWithdraw>
-    )}
-  </Earn>
-</div>
-
-
-
-  )}
-
-{activeSection === 'buy' && (
-      <BuySection/>
-    )}
-</div>
-
-      </main>
-
-      <footer className="flex justify-between items-center p-4 text-sm text-gray-800 bg-white-100">
-  <div>
-    <span>2025 © AirborneEagle Solutions, </span>
-    <span className="font-bold">v1.0.0</span>
-    <span> · </span>
-  </div>
-  <div className="flex items-center">
-    <span>A public good for</span>
-    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mx-1"></div>
-    <span className="font-bold">Base</span>
-  </div>
-</footer>
-
-    </div>
-  );
-}
+  export default function App() {
+    const [activeSection, setActiveSection] = useState('swap');
+    const [earnSection, setEarnSection] = useState('deposit');
+    const [activeButton, setActiveButton] = useState('deposit');
+  
+    return (
+      <div className="flex flex-col min-h-screen font-sans bg-background text-foreground">
+        <header className="p-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <div className="logo-container mb-4 sm:mb-0">
+              <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#c2b709]">
+                Airborne<span className="text-black">Eagle🦅</span>
+              </span>
+            </div>
+  
+            <nav className="flex flex-wrap justify-center gap-4">
+              <div className="bg-white rounded-full px-4 py-2 flex flex-wrap gap-4">
+                {['swap', 'earn', 'buy', 'market', 'send', 'card', 'help'].map((section) => (
+                  <button
+                    key={section}
+                    onClick={() => setActiveSection(section)}
+                    className={`font-medium text-sm sm:text-base ${
+                      activeSection === section ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'
+                    }`}
+                  >
+                    {section.charAt(0).toUpperCase() + section.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </nav>
+  
+            <div className="wallet-container mt-4 sm:mt-0">
+              <Wallet>
+                <ConnectWallet className="bg-white">
+                  <Avatar className="h-6 w-6" />
+                  <Name />
+                </ConnectWallet>
+                <WalletDropdown>
+                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                    <Avatar />
+                    <Name />
+                    <Address />
+                    <EthBalance />
+                  </Identity>
+                  <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com" target="_blank" rel="noopener noreferrer">
+                    Wallet
+                  </WalletDropdownLink>
+                  <WalletDropdownDisconnect />
+                </WalletDropdown>
+              </Wallet>
+            </div>
+          </div>
+        </header>
+  
+        <main className="flex-grow flex items-center justify-center p-4">
+          <div className="w-full max-w-3xl">
+            {activeSection === 'swap' && (
+              <Swap className="p-4 rounded-lg bg-white shadow-md">
+                <SwapAmountInput label="Sell" swappableTokens={swappableTokens} token={EURCToken} type="from" className="mb-2" />
+                <SwapToggleButton className="mb-2" />
+                <SwapAmountInput label="Buy" swappableTokens={swappableTokens} token={USDCToken} type="to" className="mb-2" />
+                <SwapButton className="w-full" />
+                <SwapMessage className="mt-2 text-gray-800 text-sm" />
+                <SwapToast />
+              </Swap>
+            )}
+  
+            {activeSection === 'earn' && (
+              <div className="flex flex-col items-center p-4">
+                <div className="flex flex-wrap justify-center gap-2 mb-4">
+                  <button
+                    onClick={() => {
+                      setEarnSection('deposit');
+                      setActiveButton('deposit');
+                    }}
+                    className={`px-4 py-2 rounded-full text-sm sm:text-base ${
+                      activeButton === 'deposit' ? 'bg-gray-200' : 'bg-white'
+                    }`}
+                  >
+                    Deposit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEarnSection('withdraw');
+                      setActiveButton('withdraw');
+                    }}
+                    className={`px-4 py-2 rounded-full text-sm sm:text-base ${
+                      activeButton === 'withdraw' ? 'bg-gray-200' : 'bg-white'
+                    }`}
+                  >
+                    Withdraw
+                  </button>
+                </div>
+  
+                <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca" className="w-full max-w-md">
+                  {earnSection === 'deposit' && (
+                    <EarnDeposit className="p-4 rounded-md bg-white shadow-md">
+                      <EarnDetails className="font-medium text-lg mb-2" />
+                      <DepositBalance className="mb-2" />
+                      <DepositAmountInput className="mb-2" />
+                      <DepositButton />
+                    </EarnDeposit>
+                  )}
+                  {earnSection === 'withdraw' && (
+                    <EarnWithdraw className="p-4 rounded-md bg-white shadow-md">
+                      <EarnDetails className="font-medium text-lg mb-2" />
+                      <WithdrawBalance className="mb-2" />
+                      <WithdrawAmountInput className="mb-2" />
+                      <WithdrawButton />
+                    </EarnWithdraw>
+                  )}
+                </Earn>
+              </div>
+            )}
+  
+            {activeSection === 'buy' && <BuySection />}
+          </div>
+        </main>
+  
+        <footer className="p-4 text-sm text-gray-800 bg-white flex flex-col sm:flex-row justify-between items-center">
+          <div className="mb-2 sm:mb-0">
+            <span>2025 © AirborneEagle Solutions, </span>
+            <span className="font-bold">v1.0.0</span>
+          </div>
+          <div className="flex items-center">
+            <span>A public good for</span>
+            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full mx-1"></div>
+            <span className="font-bold">Base</span>
+          </div>
+        </footer>
+      </div>
+    );
+  }

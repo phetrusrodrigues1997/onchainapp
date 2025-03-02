@@ -38,40 +38,23 @@ const EURCToken: Token = {
   };
 
   
-
-
-const BuySection: React.FC = () => {
-  return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg border border-gray-300">
-    <h2 className="text-2xl font-semibold text-gray-900 mb-4 text-center">Buy Crypto</h2>
-    <p className="text-gray-600 text-center mb-6"> 
-  You can buy using your ETH balance, directly from your Coinbase account,  
-  or even with a debit card for convenience.
-</p>
-
-
-    <div className="space-y-4">
-      <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300">
-        <span className="font-medium text-gray-800">USDC</span>
-        <Buy toToken={USDCToken} />
+  const BuySection: React.FC = () => {
+    return (
+      <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg border border-gray-300">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-4 text-center">Buy Crypto</h2>
+        <p className="text-gray-600 text-center mb-6 text-sm sm:text-base">
+          You can buy using your ETH balance, directly from your Coinbase account, or even with a debit card for convenience.
+        </p>
+        <div className="space-y-4">
+          {[USDCToken, EURCToken, ETHToken, CbBTCToken].map((token) => (
+            <div key={token.symbol} className="flex flex-col sm:flex-row items-center justify-between p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300">
+              <span className="font-medium text-gray-800 mb-2 sm:mb-0">{token.symbol}</span>
+              <Buy toToken={token} />
+            </div>
+          ))}
+        </div>
       </div>
-
-      <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300">
-        <span className="font-medium text-gray-800">EURC</span>
-        <Buy toToken={EURCToken} />
-      </div>
-
-      <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300">
-        <span className="font-medium text-gray-800">ETH</span>
-        <Buy toToken={ETHToken} />
-      </div>
-      <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300">
-        <span className="font-medium text-gray-800">cbBTC</span>
-        <Buy toToken={CbBTCToken} />
-      </div>
-    </div>
-  </div>
-  );
-};
+    );
+  };
 
 export default BuySection;
