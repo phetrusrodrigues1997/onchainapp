@@ -141,9 +141,9 @@ const [activeButton, setActiveButton] = useState('deposit');
 
 
 <main className="flex-grow flex items-center justify-center mt-14">
-        <div className="max-w-3xl w-full p-1">
+        <div className="max-w-sm w-full p-1">
   {activeSection === 'swap' && (
-    <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-md mx-auto">
+    <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-sm mx-auto">
       <SwapAmountInput
         label="Sell"
         swappableTokens={swappableTokens}
