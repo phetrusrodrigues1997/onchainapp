@@ -30,8 +30,6 @@ import {
   EthBalance,
 } from '@coinbase/onchainkit/identity';
 
-import ImageSvg from './svg/Image';
-import OnchainkitSvg from './svg/OnchainKit';
 import type { Token } from '@coinbase/onchainkit/token';
 
 import { 
