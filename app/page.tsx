@@ -14,6 +14,8 @@ import { Earn,
 
   import React from "react";
 import BuySection from "./BuySection";
+import NavigationMenu from "./NavigationMenu";
+
 
 import {
   ConnectWallet,
@@ -105,65 +107,7 @@ const [activeButton, setActiveButton] = useState('deposit');
     </div>
 
     {/* Navigation Menu */}
-    <nav className="flex space-x-10"> {/* Increased space-x to 8 */}
-  <div className="bg-white-400 rounded-full px-6 py-2 flex space-x-10"> {/* Added space-x-6 for button spacing */}
-    <button 
-      onClick={() => setActiveSection('swap')} 
-      className={`font-medium ${activeSection === 'swap' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Swap
-    </button>
-    <button 
-      onClick={() => setActiveSection('earn')} 
-      className={`font-medium ${activeSection === 'earn' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Earn
-    </button>
-
-    <button 
-      onClick={() => setActiveSection('buy')} 
-      className={`font-medium ${activeSection === 'buy' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Buy
-    </button>
-
-    <button 
-      onClick={() => setActiveSection('market')} 
-      className={`font-medium ${activeSection === 'market' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Market
-    </button>
-    <button 
-      onClick={() => setActiveSection('send')} 
-      className={`font-medium ${activeSection === 'send' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Send
-    </button>
-
-    <button 
-      onClick={() => setActiveSection('card')} 
-      className={`font-medium ${activeSection === 'card' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Debit Card
-    </button>
-    <button 
-      onClick={() => setActiveSection('help')} 
-      className={`font-medium ${activeSection === 'help' ? 'text-[#c2b709]' : 'text-[#2E2E2E] hover:text-black'}`}
-
-    >
-      Help
-    </button>
-
-    
-  </div>
-</nav>
-
+    <NavigationMenu />
 
     {/* Wallet Container */}
     <div className="wallet-container">
