@@ -169,7 +169,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                 </div>
                 <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca" className="max-w-sm mx-auto">
                   {earnSection === 'deposit' && (
-                    <EarnDeposit className="bg-[#fefefe] rounded-md p-4 border border-gray-200 shadow-sm">
+                    <EarnDeposit className="bg-[#fefefe] rounded-md p-4 border border-gray-200 shadow-sm max-w-sm mx-auto">
                       <EarnDetails className="text-white font-medium text-lg mb-2" />
                       <DepositBalance className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
                       <DepositAmountInput className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
@@ -177,7 +177,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     </EarnDeposit>
                   )}
                   {earnSection === 'withdraw' && (
-                    <EarnWithdraw className="bg-[#fafafa] rounded-md p-4 border border-gray-200 shadow-sm">
+                    <EarnWithdraw className="bg-[#fafafa] rounded-md p-4 border border-gray-200 shadow-sm max-w-sm mx-auto">
                       <EarnDetails className="text-white font-medium text-lg mb-2" />
                       <WithdrawBalance className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />
                       <WithdrawAmountInput className="mb-1 bg-[#fafafa] text-white rounded-2xl border border-gray-600 shadow-sm" />

@@ -19,8 +19,9 @@
   color:black !important;
 }
 
-
-
+.mt-2.text-red-500.text-center {
+  color: white !important; /* Override Tailwind's text-red-500 */
+}
 
 
 [data-testid="ockTextInput_Input"] {
