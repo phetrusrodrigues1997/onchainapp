@@ -2,6 +2,7 @@ import '@coinbase/onchainkit/styles.css';
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-background dark">
+      <SpeedInsights/>
         <Providers>{children}</Providers>
       </body>
     </html>
