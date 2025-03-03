@@ -51,18 +51,7 @@
   background: #c2b709 !important; /* green-600 */
 }
 
-[data-testid="ockConnectWalletButton"] {
-  background: linear-gradient(to right, #1F2937, #111827) !important; /* from-gray-800 to-gray-900 */
-  color: #D1D5DB !important; /* gray-300 for better contrast */
-  border-radius: 0.5rem !important; /* rounded-lg */
-  border: 1px solid white !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; /* shadow-md */
-  transition: all 150ms ease-in-out !important;
-}
 
-[data-testid="ockConnectWalletButton"]:hover {
-  background: linear-gradient(to right, #374151, #1F2937) !important; /* from-gray-700 to-gray-800 */
-}
 
 .default-light.flex.w-\[375px\].flex-col.overflow-hidden.ock-border-radius.ock-border-line-default.border{
   width: 512px !important;
