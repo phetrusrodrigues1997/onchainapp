@@ -21,7 +21,7 @@ export default function RootLayout({
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <body className="bg-background dark">
+      <body className="bg-background dark min-h-screen w-full">
         <SpeedInsights />
         <Analytics />
         <Providers>{children}</Providers>
