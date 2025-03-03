@@ -137,7 +137,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
             )}
   
             {activeSection === 'earn' && (
-              <div className="flex flex-col items-center p-3 gap-2">
+              <div className="flex flex-col items-center p-3 gap-2 max-w-sm mx-auto">
                 <div className="flex justify-start w-full mb-2 ml-60">
                   <button
                     onClick={() => {
@@ -162,7 +162,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     Withdraw
                   </button>
                 </div>
-                <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca" className="max-w-sm mx-auto">
+                <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca">
                   {earnSection === 'deposit' && (
                     <EarnDeposit className="bg-[#fefefe] p-4 rounded-2xl shadow-sm max-w-sm mx-auto">
                       <EarnDetails className="text-white font-medium text-lg mb-2" />
