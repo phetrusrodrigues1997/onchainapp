@@ -8,6 +8,15 @@
   --foreground: #171717;
 }
 
+@media (prefers-color-scheme: dark) {
+  svg[data-testid="ock-defaultAvatarSVG"] {
+    filter: none !important;
+    fill: #000000 !important; /* Change to your preferred color */
+    stroke: #000000 !important;
+  }
+}
+
+
 
 
 [data-testid="ockSwap_Title"] {
