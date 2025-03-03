@@ -23,6 +23,10 @@
   color: #000000 !important; /* Tailwind's green-500 */
 }
 
+[data-testid="ockIdentity_Text"] {
+  color: #000000 !important; /* Tailwind's green-500 */
+}
+
 [data-testid="ockTransactionButton_Button"] {
   background: #c2b709 !important; /* green-500 */
   color: white !important;
