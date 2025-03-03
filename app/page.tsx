@@ -80,7 +80,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   
             <div className="wallet-container">
               <Wallet>
-                <ConnectWallet className="bg-[#FFFFFF]">
+              <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9]">
                   <Avatar className="h-6 w-6" />
                   <Name />
                 </ConnectWallet>
