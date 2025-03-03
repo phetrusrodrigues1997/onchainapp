@@ -9,8 +9,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  svg[data-testid="ock-defaultAvatarSVG"] {
-    display: none !important;
+  .ock-font-family.font-semibold{
+    color: #000000 !important; /* Tailwind's green-500 */
   }
 }
 
