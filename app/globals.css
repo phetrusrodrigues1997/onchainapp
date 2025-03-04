@@ -13,10 +13,11 @@
     color: black !important; /* Change to your desired color */
 }
 }
+
 @media (prefers-color-scheme: dark) {
-[data-testid="ockTokenSelectButton_Symbol"]{
-  color: #FFFFFF !important; /* Tailwind's green-500 */
-}
+  span[data-testid="ockTokenSelectButton_Symbol"] {
+    color: #FFFFFF !important;
+  }
 }
 
 
@@ -92,6 +93,8 @@ body {
 [data-testid="ockConnectButton"]:hover {
   background: #c2b709 !important; /* from-gray-700 to-gray-800 */
 }
+
+
 
 @layer utilities {
   .text-balance {
