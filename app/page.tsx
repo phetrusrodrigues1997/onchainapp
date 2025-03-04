@@ -6,7 +6,6 @@ import React from "react";
 import BuySection from "./BuySection";
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
-import WarningBanner from './Disclaimer';
 import Footer from "./footer";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
