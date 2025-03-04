@@ -75,7 +75,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Mobile menu dropdown */}
       {isMobile && isMenuOpen && (
-        <div className="absolute top-12 right-0 z-10 w-32 mt-2 ml-16 bg-white rounded-md shadow-lg">
+        <div className="absolute top-12 right-0 z-10 w-32 mt-2 bg-white rounded-md shadow-lg">
           <div className="py-2">
             {menuItems.map((item) => (
               <button
@@ -86,8 +86,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
                 }}
                 className={`block w-full text-left px-4 py-2 ${
                   activeSection === item.id
-                    ? 'bg-gray-100 text-[#000000]'
-                    : 'text-[#A5a5a5] hover:bg-gray-50'
+                    ? 'bg-gray-100 text-[#000070]'
+                    : 'text-black hover:bg-gray-50'
                 }`}
               >
                 {item.label}
