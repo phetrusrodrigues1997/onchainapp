@@ -8,7 +8,11 @@
   --foreground: #171717;
 }
 
-
+@media (prefers-color-scheme: dark) {
+  .flex.flex-col.ock-text-foreground .font-semibold {
+    color: black !important; /* Change to your desired color */
+}
+}
 @media (prefers-color-scheme: dark) {
 [data-testid="ockTokenSelectButton_Symbol"]{
   color: #FFFFFF !important; /* Tailwind's green-500 */
