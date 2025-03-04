@@ -66,7 +66,7 @@ const BuySection: React.FC = () => {
   };
 
   return (
-    <div className={`${getContainerWidth()} mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg border border-gray-300`}>
+    <div className={`${getContainerWidth()} mx-auto p-4 sm:p-6 bg-[#FcFcFc] rounded-xl shadow-lg border border-gray-600`}>
       <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-4 text-center">Buy Crypto</h2>
       <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6"> 
         We accept visa and mastercard.

@@ -41,7 +41,7 @@
 [data-testid="ockTransactionButton_Button"] {
   background: #000070 !important; /* green-500 */
   color: white !important;
-  border-radius: 0.375rem !important; /* Tailwind's rounded-md */
+  border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
   padding-bottom: 0.5rem !important;
   padding-left: 1rem !important; /* Tailwind's px-4 */
@@ -70,6 +70,7 @@
 
 .default-light.flex.w-\[375px\].flex-col.overflow-hidden.ock-border-radius.ock-border-line-default.border{
   width: 512px !important;
+  border:none !important;
 }
 
 [data-testid="ockWalletDropdown"] {
