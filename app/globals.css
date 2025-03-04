@@ -16,7 +16,7 @@
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenSelectButton_Button"] {
-    color: #FAFAFA !important;
+    background: #FAFAFA !important;
   }
 }
 
