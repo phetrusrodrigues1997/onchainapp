@@ -62,8 +62,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
                 onClick={() => setActiveSection(item.id)}
                 className={`font-medium ${
                   activeSection === item.id
-                    ? 'text-[#c2b709]'
-                    : 'text-[#2E2E2E] hover:text-black'
+                    ? 'text-[#000000]'
+                    : 'text-[#A0A0A0] hover:text-black'
                 }`}
               >
                 {item.label}
@@ -86,8 +86,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
                 }}
                 className={`block w-full text-left px-4 py-2 ${
                   activeSection === item.id
-                    ? 'bg-gray-100 text-[#c2b709]'
-                    : 'text-[#2E2E2E] hover:bg-gray-50'
+                    ? 'bg-gray-100 text-[#000000]'
+                    : 'text-[#A5a5a5] hover:bg-gray-50'
                 }`}
               >
                 {item.label}

@@ -39,7 +39,7 @@
 }
 
 [data-testid="ockTransactionButton_Button"] {
-  background: #c2b709 !important; /* green-500 */
+  background: #000070 !important; /* green-500 */
   color: white !important;
   border-radius: 0.375rem !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
@@ -58,12 +58,12 @@
 
 
 [data-testid="ockTransactionButton_Button"]:hover {
-  background: #c2b709 !important; /* green-600 */
+  background: #000000 !important; /* green-600 */
 }
 
 
 [data-testid="ockBuyButton_Button"] {
-  background: #c2b709 !important; /* green-600 */
+  background: #000070 !important; /* green-600 */
 }
 
 
@@ -87,11 +87,11 @@ body {
 }
 
 [data-testid="ockConnectButton"] {
-  background: #c2b709 !important; /* from-gray-700 to-gray-800 */
+  background: #000070 !important; /* from-gray-700 to-gray-800 */
 }
 
 [data-testid="ockConnectButton"]:hover {
-  background: #c2b709 !important; /* from-gray-700 to-gray-800 */
+  background: #000088 !important; /* from-gray-700 to-gray-800 */
 }
 
 

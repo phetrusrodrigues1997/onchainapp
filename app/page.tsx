@@ -6,6 +6,7 @@ import React from "react";
 import BuySection from "./BuySection";
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
+import WarningBanner from './Disclaimer';
 import Footer from "./footer";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
@@ -72,7 +73,9 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     return (
       <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
         <header className="pt-4 pr-4 pl-4">
+        <WarningBanner />
           <div className="flex justify-between items-center">
+            
             <ResponsiveLogo />
   
             {/* Pass activeSection and setActiveSection to NavigationMenu */}
@@ -126,7 +129,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     type="to"
                     className="mb-1 bg-[#fbfbfb] text-white rounded-2xl border border-gray-600 shadow-sm"
                   />
-                  <SwapButton className="w-full bg-[#c2b709] text-white rounded-md py-2 transition-colors" />
+                  <SwapButton className="w-full bg-[#000070] text-white rounded-full py-2 transition-colors" />
                   <SwapMessage className="mt-2 text-gray-800 text-sm" />
                   <SwapToast />
                 </Swap>
@@ -145,8 +148,8 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                       setActiveButton('deposit');
                     }}
                     className={`${
-                      activeButton === 'deposit' ? 'bg-gray-200' : 'bg-[#ffffff]'
-                    } text-gray-800 px-4 py-2 rounded-full focus:outline-none transition-colors`}
+                      activeButton === 'deposit' ? 'bg-[#EAEAEA]' : 'bg-[#ffffff]'
+                    } text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
                   >
                     Deposit
                   </button>
@@ -156,8 +159,8 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                       setActiveButton('withdraw');
                     }}
                     className={`${
-                      activeButton === 'withdraw' ? 'bg-gray-200' : 'bg-[#ffffff]'
-                    } text-gray-800 px-4 py-2 rounded-full focus:outline-none transition-colors`}
+                      activeButton === 'withdraw' ? 'bg-[#EAEAEA]' : 'bg-[#ffffff]'
+                    } text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
                   >
                     Withdraw
                   </button>
