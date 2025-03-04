@@ -12,12 +12,13 @@
   .flex.flex-col.ock-text-foreground .font-semibold {
     color: black !important; /* Change to your desired color */
 }
-span[data-testid="ockTokenSelectButton_Button"] {
-  color: #FAFAFA !important;
-}
 }
 
-
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockTokenSelectButton_Button"] {
+    color: #FAFAFA !important;
+  }
+}
 
 
 [data-testid="ockSwap_Title"] {
