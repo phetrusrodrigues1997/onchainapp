@@ -72,9 +72,10 @@
 [data-testid="ockTransactionButton_Button"]:hover {
   background: #000000 !important; /* green-600 */
 }
-
+@media (prefers-color-scheme: dark) {
 [data-testid="ockAvatar_ImageContainer"] {
   display: none !important; /* green-600 */
+}
 }
 
 [data-testid="ockBuyButton_Button"] {
