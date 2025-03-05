@@ -73,7 +73,7 @@
   background: #000000 !important; /* green-600 */
 }
 
-[data-testid="ock-defaultAvatarSVG"] {
+[data-testid="ockAvatar_ImageContainer"] {
   display: none !important; /* green-600 */
 }
 
