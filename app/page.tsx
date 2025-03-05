@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Earn, EarnDeposit, EarnDetails, DepositBalance, DepositAmountInput, DepositButton, EarnWithdraw, WithdrawBalance, WithdrawAmountInput, WithdrawButton } from '@coinbase/onchainkit/earn';
 import React from "react";
 import BuySection from "./BuySection";
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
-// import Footer from "./footer";
+import EarnSection from "./EarnSection";
+import CurrencySlider from "./CurrencySlider";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
@@ -62,8 +62,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
 
   export default function App() {
     const [activeSection, setActiveSection] = useState('swap'); // Include setActiveSection
-    const [earnSection, setEarnSection] = useState('deposit');
-    const [activeButton, setActiveButton] = useState('deposit');
+    
     const [isMounted, setIsMounted] = useState(false);
   
     
@@ -87,7 +86,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
 </div>
             <div className="wallet-container">
               <Wallet>
-              <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9]">
+              <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9] rounded-full">
                   <Avatar className="h-6 w-6" />
                   <Name />
                 </ConnectWallet>
@@ -114,95 +113,60 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
         </header>
   
         <main className="flex-grow flex items-center justify-center mt-14">
-          <div className="max-w-sm w-full p-1">
-            {activeSection === 'swap' && (
-              <div>
-                <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-sm mx-auto" >
-                <SwapSettings>
-    <SwapSettingsSlippageTitle className="text-[#EA580C]">
-      Max. slippage
-    </SwapSettingsSlippageTitle>
-    <SwapSettingsSlippageDescription className="text-[#EA580C]">
-      Your swap will revert if the prices change by more than the selected
-      percentage.
-    </SwapSettingsSlippageDescription>
-    <SwapSettingsSlippageInput/>
-  </SwapSettings>
-                  <SwapAmountInput
-                    label="Sell"
-                    swappableTokens={swappableTokens}
-                    token={EURCToken}
-                    type="from"
-                    className="mb-1 bg-[#fdfdfd] text-white rounded-2xl shadow-sm border border-gray-100"
-                  />
-                  <SwapToggleButton className="mb-2" />
-                  <SwapAmountInput
-                    label="Buy"
-                    swappableTokens={swappableTokens}
-                    token={USDCToken}
-                    type="to"
-                    className="mb-1 bg-[#f2f2f2] text-white rounded-2xl shadow-sm"
-                  />
-                  <SwapButton className="w-full bg-[#d3c81a] text-white rounded-full py-2 transition-colors" />
-                  <SwapMessage className="mt-2 text-gray-800 text-sm" />
-                  <SwapToast />
-                </Swap>
-                <div className="mt-2 text-red-500 text-center">
-                  Please ensure your wallet is connected and set to the Base network (chainId: 8453).
-                </div>
-              </div>
-            )}
-  
-            {activeSection === 'earn' && (
-              <div className="flex flex-col items-center p-3 gap-2 max-w-sm mx-auto">
-                <div className="flex justify-center w-full mb-2">
-                  <button
-                    onClick={() => {
-                      setEarnSection('deposit');
-                      setActiveButton('deposit');
-                    }}
-                    className={`${
-                      activeButton === 'deposit' ? 'bg-[#000000] text-white' : 'bg-[#ffffff]'
-                    } text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
-                  >
-                    Deposit
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEarnSection('withdraw');
-                      setActiveButton('withdraw');
-                    }}
-                    className={`${
-                      activeButton === 'withdraw' ? 'bg-[#000000] text-white' : 'bg-[#ffffff]'
-                    } text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
-                  >
-                    Withdraw
-                  </button>
-                </div>
-                <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca">
-  {earnSection === 'deposit' && (
-    <EarnDeposit className="bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100">
-      <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
-      <DepositBalance className="mb-3 bg-[#f2f2f2] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
-      <DepositAmountInput className="mb-4 bg-[#f2f2f2] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
-      <DepositButton />
-    </EarnDeposit>
-  )}
-  {earnSection === 'withdraw' && (
-    <EarnWithdraw className="bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100">
-      <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
-      <WithdrawBalance className="mb-3 bg-[#f2f2f2] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
-      <WithdrawAmountInput className="mb-4 bg-[#f2f2f2] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
-      <WithdrawButton  />
-    </EarnWithdraw>
-  )}
-</Earn>
-              </div>
-            )}
-  
-            {activeSection === 'buy' && <BuySection />}
-          </div>
-        </main>
+  <div
+    className={`w-full p-1 ${
+      activeSection === "earn" ? "max-w-5xl" : "max-w-sm"
+    }`}
+  >
+    {activeSection === "swap" && (
+      <div>
+        <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-sm mx-auto">
+          <SwapSettings>
+            <SwapSettingsSlippageTitle className="text-[#EA580C]">
+              Max. slippage
+            </SwapSettingsSlippageTitle>
+            <SwapSettingsSlippageDescription className="text-[#EA580C]">
+              Your swap will revert if the prices change by more than the
+              selected percentage.
+            </SwapSettingsSlippageDescription>
+            <SwapSettingsSlippageInput />
+          </SwapSettings>
+          <SwapAmountInput
+            label="Sell"
+            swappableTokens={swappableTokens}
+            token={EURCToken}
+            type="from"
+            className="mb-1 bg-[#fdfdfd] text-white rounded-2xl shadow-sm border border-gray-100"
+          />
+          <SwapToggleButton className="mb-2" />
+          <SwapAmountInput
+            label="Buy"
+            swappableTokens={swappableTokens}
+            token={USDCToken}
+            type="to"
+            className="mb-1 bg-[#f2f2f2] text-white rounded-2xl shadow-sm"
+          />
+          <SwapButton className="w-full bg-[#d3c81a] text-white rounded-full py-2 transition-colors" />
+          <SwapMessage className="mt-2 text-gray-800 text-sm" />
+          <SwapToast />
+        </Swap>
+        <div className="mt-2 text-red-500 text-center">
+          Please ensure your wallet is connected and set to the Base network
+          (chainId: 8453).
+        </div>
+      </div>
+    )}
+
+    {activeSection === "earn" && (
+      <div>
+        <CurrencySlider />
+        <EarnSection />
+      </div>
+    )}
+
+    {activeSection === "buy" && <BuySection />}
+  </div>
+</main>
   
         {/* <Footer /> */}
       </div>

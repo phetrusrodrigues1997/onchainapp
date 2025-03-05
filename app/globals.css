@@ -41,6 +41,22 @@
   display: none !important; /* Override Tailwind's text-red-500 */
 }
 
+@keyframes marquee {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee 10s linear infinite;
+}
+
+
 
 [data-testid="ockTextInput_Input"] {
   color: #000000 !important; /* Tailwind's green-500 */
