@@ -4,7 +4,7 @@
 
 /* #182848 */
 :root {
-  --background: linear-gradient(to bottom, #ffffff, #fefefe);
+  --background: white;
   --foreground: #171717;
 }
 
