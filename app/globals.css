@@ -58,6 +58,7 @@
 
 
 
+
 [data-testid="ockTextInput_Input"] {
   color: #000000 !important; /* Tailwind's green-500 */
 }
@@ -93,6 +94,12 @@
   display: none !important; /* green-600 */
 }
 }
+
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockTokenRow_Container"] {
+    background: white !important; /* green-600 */
+  }
+  }
 
 @media (prefers-color-scheme: dark) {
   [data-testid="SwapTokensButton"] {
