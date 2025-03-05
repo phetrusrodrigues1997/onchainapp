@@ -74,7 +74,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
   };
   // add other tokens here to display them as options in the swap
-  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken,CADCToken];
+  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken, CbBTCToken, WETHToken];
 
 
   export default function App() {
