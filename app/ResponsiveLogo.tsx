@@ -31,7 +31,7 @@ const ResponsiveLogo = () => {
           
         ) : (
           // Desktop version - full logo
-            <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#551A8B]">
+            <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
             Airborne<span className="text-black">Eagle🦅</span>
           </span>
         )}

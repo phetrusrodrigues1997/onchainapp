@@ -127,7 +127,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     type="to"
                     className="mb-1 bg-[#f2f2f2] text-white rounded-2xl shadow-sm"
                   />
-                  <SwapButton className="w-full bg-[#551A8B] text-white rounded-full py-2 transition-colors" />
+                  <SwapButton className="w-full bg-[#d3c81a] text-white rounded-full py-2 transition-colors" />
                   <SwapMessage className="mt-2 text-gray-800 text-sm" />
                   <SwapToast />
                 </Swap>
