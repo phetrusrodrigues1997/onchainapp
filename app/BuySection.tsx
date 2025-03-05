@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Buy } from '@coinbase/onchainkit/buy'; 
 import type { Token } from '@coinbase/onchainkit/token';
+import { base } from 'viem/chains';
+import { OnchainKitProvider } from '@coinbase/onchainkit';
 
 const EURCToken: Token = {
   address: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
@@ -46,6 +48,9 @@ const tokens = [
 ];
 
 const BuySection: React.FC = () => {
+  <OnchainKitProvider apiKey="YOUR_API_KEY" chain={base}>
+      <YourKit />
+    </OnchainKitProvider>
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [searchQuery, setSearchQuery] = useState<string>('');
 

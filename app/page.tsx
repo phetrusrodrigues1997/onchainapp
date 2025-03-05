@@ -10,7 +10,10 @@ import ResponsiveLogo from './ResponsiveLogo';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
-import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast } from '@coinbase/onchainkit/swap';
+import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast,SwapSettings,
+  SwapSettingsSlippageDescription,
+  SwapSettingsSlippageInput,
+  SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 
  
 // const { address } = useAccount();
@@ -33,6 +36,15 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     image: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
   };
 
+  const BRZToken: Token = {
+    address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
+    chainId: 8453,
+    decimals: 18,
+    name: "Brazilian Real",
+    symbol: "BRZ",
+    image: "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Flag_of_Brazil.svg/1200px-Flag_of_Brazil.svg.png?20240910145343",
+  };
+
   const CbBTCToken: Token = {
     address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
     chainId: 8453,
@@ -52,7 +64,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   };
  
   // add other tokens here to display them as options in the swap
-  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken, CbBTCToken];
+  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken,BRZToken, CbBTCToken];
 
 
   export default function App() {
@@ -61,6 +73,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     const [activeButton, setActiveButton] = useState('deposit');
     const [isMounted, setIsMounted] = useState(false);
   
+    
     useEffect(() => {
       setIsMounted(true);
     }, []);
@@ -111,7 +124,17 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
           <div className="max-w-sm w-full p-1">
             {activeSection === 'swap' && (
               <div>
-                <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-sm mx-auto">
+                <Swap className="bg-gradient-to-r from-white via-white to-white p-1 max-w-sm mx-auto" >
+                <SwapSettings>
+    <SwapSettingsSlippageTitle className="text-[#EA580C]">
+      Max. slippage
+    </SwapSettingsSlippageTitle>
+    <SwapSettingsSlippageDescription className="text-[#EA580C]">
+      Your swap will revert if the prices change by more than the selected
+      percentage.
+    </SwapSettingsSlippageDescription>
+    <SwapSettingsSlippageInput/>
+  </SwapSettings>
                   <SwapAmountInput
                     label="Sell"
                     swappableTokens={swappableTokens}
@@ -165,7 +188,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                 </div>
                 <Earn vaultAddress="0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca">
   {earnSection === 'deposit' && (
-    <EarnDeposit className="bg-[#fafafa] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100">
+    <EarnDeposit className="bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100">
       <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
       <DepositBalance className="mb-3 bg-[#f2f2f2] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
       <DepositAmountInput className="mb-4 bg-[#f2f2f2] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
@@ -173,7 +196,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     </EarnDeposit>
   )}
   {earnSection === 'withdraw' && (
-    <EarnWithdraw className="bg-[#fafafa] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100">
+    <EarnWithdraw className="bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100">
       <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
       <WithdrawBalance className="mb-3 bg-[#f2f2f2] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
       <WithdrawAmountInput className="mb-4 bg-[#f2f2f2] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
