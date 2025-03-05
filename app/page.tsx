@@ -36,14 +36,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     image: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
   };
 
-  const BRZToken: Token = {
-    address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
-    chainId: 8453,
-    decimals: 18,
-    name: "Brazilian Real",
-    symbol: "BRZ",
-    image: "https://upload.wikimedia.org/wikipedia/en/thumb/0/05/Flag_of_Brazil.svg/1200px-Flag_of_Brazil.svg.png?20240910145343",
-  };
+  
 
   const CbBTCToken: Token = {
     address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
@@ -64,7 +57,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   };
  
   // add other tokens here to display them as options in the swap
-  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken,BRZToken, CbBTCToken];
+  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken, CbBTCToken];
 
 
   export default function App() {

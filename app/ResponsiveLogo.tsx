@@ -26,13 +26,16 @@ const ResponsiveLogo = () => {
         {isMobile ? (
           // Mobile version - just the eagle emoji with smaller text
           <span className="text-xl font-bold tracking-tight">
-            <span className="text-black">🦅</span>
+            <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
+            <span className="text-black"></span><span>🦅</span>
+          </span>
+            {/* <span className="text-black">🦅</span> */}
           </span>
           
         ) : (
           // Desktop version - full logo
             <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
-            Airborne<span className="text-black">Eagle🦅</span>
+            Airborne<span className="text-black">Eagle</span><span>🦅</span>
           </span>
         )}
       </span>
