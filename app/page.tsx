@@ -117,7 +117,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
                     swappableTokens={swappableTokens}
                     token={EURCToken}
                     type="from"
-                    className="mb-1 bg-[#fafafa] text-white rounded-2xl shadow-sm border border-gray-200"
+                    className="mb-1 bg-[#fdfdfd] text-white rounded-2xl shadow-sm border border-gray-100"
                   />
                   <SwapToggleButton className="mb-2" />
                   <SwapAmountInput

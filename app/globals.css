@@ -78,6 +78,28 @@
 }
 }
 
+@media (prefers-color-scheme: dark) {
+  [data-testid="SwapTokensButton"] {
+    background-color: var(--ock-bg-alternate) !important;
+    border-color: var(--ock-border-default) !important;
+    color: inherit !important;
+  }
+
+  [data-testid="SwapTokensButton"]:hover {
+    background-color: var(--ock-bg-alternate-hover) !important;
+  }
+
+  [data-testid="SwapTokensButton"]:active {
+    background-color: var(--ock-bg-alternate-active) !important;
+  }
+
+  /* Ensuring the SVG icon color does not change in dark mode */
+  [data-testid="ock-toggleSvg"] path {
+    fill: currentColor !important;
+  }
+}
+
+
 [data-testid="ockBuyButton_Button"] {
   background: #d3c81a !important; /* green-600 */
 }
