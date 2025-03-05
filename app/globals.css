@@ -18,7 +18,7 @@
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenSelectButton_Button"] {
-    display: none !important;
+    background: #FAFAFA !important;
   }
 }
 
@@ -73,6 +73,9 @@
   background: #000000 !important; /* green-600 */
 }
 
+[data-testid="ock-defaultAvatarSVG"] {
+  display: none !important; /* green-600 */
+}
 
 [data-testid="ockBuyButton_Button"] {
   background: #d3c81a !important; /* green-600 */
