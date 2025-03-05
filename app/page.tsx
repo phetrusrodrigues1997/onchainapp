@@ -65,14 +65,14 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
   };
  
-  const CADCToken: Token = {
-    address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
-    chainId: 8453,
-    decimals: 18,
-    name: "CADC",
-    symbol: "CADC",
-    image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
-  };
+  // const CADCToken: Token = {
+  //   address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
+  //   chainId: 8453,
+  //   decimals: 18,
+  //   name: "CADC",
+  //   symbol: "CADC",
+  //   image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
+  // };
   // add other tokens here to display them as options in the swap
   const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken, CbBTCToken, WETHToken];
 
