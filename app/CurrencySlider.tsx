@@ -4,17 +4,16 @@ import React, { useRef } from "react";
 const ETHToken = {
   address: "",
   chainId: 8453,
-  decimals: 18,
-  name: "Ethereum",
-  symbol: "ETH",
-  image:
-    "https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
+  vaultAddress: "0xa0E430870c4604CcfC7B38Ca7845B1FF653D0ff1" as const, // Empty string, not selectable
+  name: "Wrapped ETH",
+  symbol: "WETH",
+  image:"https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282"
 };
 
 const USDCToken = {
   address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   chainId: 8453,
-  decimals: 6,
+  vaultAddress: "0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca" as const,
   name: "USDC",
   symbol: "USDC",
   image:
@@ -24,7 +23,7 @@ const USDCToken = {
 const CbBTCToken = {
   address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
   chainId: 8453,
-  decimals: 8,
+  vaultAddress: "0x543257eF2161176D7C8cD90BA65C2d4CaEF5a796" as const, // Empty string, not selectable
   name: "Coinbase Bitcoin",
   symbol: "cbBTC",
   image: "https://basescan.org/token/images/cbbtc_32.png",
@@ -33,16 +32,20 @@ const CbBTCToken = {
 const EURCToken = {
   address: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
   chainId: 8453,
-  decimals: 6,
+  vaultAddress: "0xf24608E0CCb972b0b0f4A6446a0BBf58c701a026" as const,
   name: "EURC",
   symbol: "EURC",
   image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
 };
 
-// Array of tokens to display in the slider
-const tokens = [ETHToken, USDCToken, CbBTCToken, EURCToken];
+const tokens = [USDCToken,ETHToken, EURCToken,CbBTCToken];
 
-const CurrencySlider: React.FC = () => {
+// Define props interface
+interface CurrencySliderProps {
+  onSelectVaultAddress: (vaultAddress: `0x${string}`) => void;
+}
+
+const CurrencySlider: React.FC<CurrencySliderProps> = ({ onSelectVaultAddress }) => {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
@@ -111,7 +114,10 @@ const CurrencySlider: React.FC = () => {
           {tokens.map((token, index) => (
             <div
               key={index}
-              className="snap-start flex-shrink-0 w-48 sm:w-64 bg-white rounded-lg shadow-md p-1 sm:p-2 flex items-center"
+              className={`snap-start flex-shrink-0 w-48 sm:w-64 bg-white rounded-lg shadow-md p-1 sm:p-2 flex items-center ${
+                token.vaultAddress ? "cursor-pointer hover:bg-gray-100" : "cursor-not-allowed opacity-50"
+              }`}
+              onClick={token.vaultAddress ? () => onSelectVaultAddress(token.vaultAddress as `0x${string}`) : undefined}
             >
               <img
                 src={token.image}

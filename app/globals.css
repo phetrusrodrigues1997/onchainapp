@@ -101,6 +101,10 @@
   }
   }
 
+  [data-testid="ockTokenSelectDropdown_List"] {
+    overflow-y: auto !important;
+  }
+
 @media (prefers-color-scheme: dark) {
   [data-testid="SwapTokensButton"] {
     background-color: var(--ock-bg-alternate) !important;
