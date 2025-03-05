@@ -35,9 +35,7 @@
   background:#fafafa !important;
 }
 
-.relative{
-  transform: translateX(0px) !important;
-}
+
 
 .mt-2.text-red-500.text-center {
   display: none !important; /* Override Tailwind's text-red-500 */

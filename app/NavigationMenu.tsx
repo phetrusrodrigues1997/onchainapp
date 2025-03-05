@@ -55,22 +55,22 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {/* Desktop menu */}
       {!isMobile && (
         <div className="flex space-x-10 ">
-          <div className="bg-white-400 ml-12 rounded-full px-6 py-2 flex space-x-50">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`font-medium ${
-                  activeSection === item.id
-                    ? 'text-[#000000]'
-                    : 'text-[#A0A0A0] hover:text-black'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+        <div className="bg-white-400 ml-24 rounded-full px-6 py-2 flex space-x-10">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`font-medium ${
+                activeSection === item.id
+                  ? 'text-[#000000]'
+                  : 'text-[#A0A0A0] hover:text-black'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
+      </div>
       )}
 
       {/* Mobile menu dropdown */}

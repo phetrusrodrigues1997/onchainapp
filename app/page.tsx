@@ -74,12 +74,11 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
         <header className="pt-4 pr-4 pl-4">
         
           <div className="flex justify-between items-center">
-            
-            <ResponsiveLogo />
-  
-            {/* Pass activeSection and setActiveSection to NavigationMenu */}
-            <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-  
+          <div className="flex md:gap-10 gap-2 items-center">
+  <ResponsiveLogo />
+  {/* Pass activeSection and setActiveSection to NavigationMenu */}
+  <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+</div>
             <div className="wallet-container">
               <Wallet>
               <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9]">
