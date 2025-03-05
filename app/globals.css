@@ -8,6 +8,8 @@
   --foreground: #171717;
 }
 
+
+
 @media (prefers-color-scheme: dark) {
   .flex.flex-col.ock-text-foreground .font-semibold {
     color: black !important; /* Change to your desired color */
@@ -23,6 +25,18 @@
 
 [data-testid="ockSwap_Title"] {
   color:black !important;
+}
+
+[data-testid="ock-vaultDetails"] {
+  background:#fafafa !important;
+}
+
+[data-testid="ock-yieldDetails"] {
+  background:#fafafa !important;
+}
+
+.relative{
+  transform: translateX(0px) !important;
 }
 
 .mt-2.text-red-500.text-center {

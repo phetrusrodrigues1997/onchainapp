@@ -54,8 +54,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Desktop menu */}
       {!isMobile && (
-        <div className="flex space-x-10">
-          <div className="bg-white-400 rounded-full px-6 py-2 flex space-x-10">
+        <div className="flex space-x-10 ">
+          <div className="bg-white-400 ml-12 rounded-full px-6 py-2 flex space-x-50">
             {menuItems.map((item) => (
               <button
                 key={item.id}
@@ -75,26 +75,26 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Mobile menu dropdown */}
       {isMobile && isMenuOpen && (
-        <div className="absolute top-12 right-0 z-10 w-32 mt-2 mr-12 bg-white rounded-md shadow-lg">
-          <div className="py-2">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveSection(item.id);
-                  setIsMenuOpen(false);
-                }}
-                className={`block w-full text-left px-4 py-2 ${
-                  activeSection === item.id
-                    ? 'bg-gray-100 text-[#000070]'
-                    : 'text-black hover:bg-gray-50'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+        <div className="absolute top-12 z-10 w-32 mt-2 bg-white rounded-md shadow-lg">
+        <div className="py-2">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveSection(item.id);
+                setIsMenuOpen(false);
+              }}
+              className={`block w-full text-left px-4 py-2 ${
+                activeSection === item.id
+                  ? 'bg-gray-100 text-[#000070]'
+                  : 'text-black hover:bg-gray-50'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
+      </div>
       )}
     </nav>
   );
