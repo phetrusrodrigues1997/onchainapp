@@ -1,28 +1,93 @@
-import React, { useState } from 'react';
-import { useAccount, useWriteContract } from 'wagmi';
+import React, { useState, useEffect } from 'react';
+import { useAccount, useWriteContract, useSwitchChain } from 'wagmi';
 import { parseUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
+import { base } from 'wagmi/chains'; // Import Base chain
 
-// Define the Token type and constants
+const ETHToken: Token = {
+  address: "",
+  chainId: 8453,
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "ETH",
+  image: "https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
+};
+
+const WETHToken: Token = {
+  address: "0x4200000000000000000000000000000000000006",
+  chainId: 8453,
+  decimals: 18,
+  name: "Wrapped Eth",
+  symbol: "WETH",
+  image:"https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282"
+};
+
 const USDCToken: Token = {
-  address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+  address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
   chainId: 8453,
   decimals: 6,
-  name: 'USDC',
-  symbol: 'USDC',
-  image: 'https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png',
+  name: "USDC",
+  symbol: "USDC",
+  image: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
+};
+
+
+
+const CbBTCToken: Token = {
+  address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+  chainId: 8453,
+  decimals: 8,
+  name: "Coinbase BTC",
+  symbol: "cbBTC",
+  image: "https://basescan.org/token/images/cbbtc_32.png",
 };
 
 const EURCToken: Token = {
-  address: '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42',
+  address: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
   chainId: 8453,
   decimals: 6,
-  name: 'EURC',
-  symbol: 'EURC',
-  image: 'https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125',
+  name: "EURC",
+  symbol: "EURC",
+  image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
 };
 
-const availableTokens: Token[] = [USDCToken, EURCToken];
+const CADCToken: Token = {
+  address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
+  chainId: 8453,
+  decimals: 18,
+  name: "Canadian Dollar",
+  symbol: "CADC",
+  image: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
+};
+
+const BRZToken: Token = {
+  address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
+  chainId: 8453,
+  decimals: 18,
+  name: "Brazilian Real",
+  symbol: "BRZ",
+  image: "https://www.svgrepo.com/show/401552/flag-for-brazil.svg",
+};
+
+const LiraToken: Token = {
+  address: "0x1A9Be8a692De04bCB7cE5cDDD03afCA97D732c62",
+  chainId: 8453,
+  decimals: 8,
+  name: "Turkish Lira",
+  symbol: "TRYB",
+  image: "https://www.svgrepo.com/show/242355/turkey.svg",
+};
+
+const MEXPeso: Token = {
+  address: "0x269caE7Dc59803e5C596c95756faEeBb6030E0aF",
+  chainId: 8453,
+  decimals: 6,
+  name: "Mexican Peso",
+  symbol: "MXNe",
+  image: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
+};
+
+const availableTokens: Token[] = [USDCToken, EURCToken, CADCToken, BRZToken, LiraToken, MEXPeso, CbBTCToken, ETHToken, WETHToken];
 
 // ERC20 ABI for transfer
 const ERC20_ABI = [
@@ -44,7 +109,8 @@ interface SendProps {
 }
 
 const SendSection: React.FC<SendProps> = ({ className = '' }) => {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
+  const { switchChain } = useSwitchChain(); // Changed from useSwitchNetwork to useSwitchChain
 
   const [selectedToken, setSelectedToken] = useState<Token>(USDCToken);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
@@ -87,14 +153,24 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
         functionName: 'transfer',
         args: [recipientAddress, parseUnits(amount, selectedToken.decimals)],
       });
-      setTransactionStatus('Transaction submitted. Awaiting confirmation...');
+      setTransactionStatus('Transaction submitted.');
     } catch (err) {
       setTransactionStatus(`Transaction failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
+  // Handle network switch
+  useEffect(() => {
+    if (switchChain && chainId && chainId !== base.id) {
+      setTransactionStatus('Please switch to the Base network...');
+      switchChain({ chainId: base.id }); // Use switchChain with chainId
+    } else if (chainId === base.id) {
+      setTransactionStatus(''); // Clear message if on correct network
+    }
+  }, [chainId, switchChain]);
+
   // Handle transaction status updates (e.g., success or error)
-  React.useEffect(() => {
+  useEffect(() => {
     if (error) {
       setTransactionStatus(`Transaction failed: ${error.message || 'Unknown error'}`);
     }
@@ -160,12 +236,12 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
 
       {/* Send Button */}
       <button
-        onClick={handleSend}
-        disabled={isPending || !isValidAddress || !recipientAddress || !amount || !address}
-        className="w-full bg-black text-white rounded-full py-3 transition-colors disabled:bg-gray-400"
-      >
-        {isPending ? 'Sending...' : 'Send Tokens'}
-      </button>
+  onClick={handleSend}
+  disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
+  className="w-full bg-black text-white rounded-full py-3 transition-colors disabled:bg-gray-400"
+>
+  {isPending ? 'Sending...' : 'Send Tokens'}
+</button>
 
       {/* Transaction Status Message */}
       {transactionStatus && <div className="mt-2 text-gray-800 text-sm">{transactionStatus}</div>}
