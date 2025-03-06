@@ -101,7 +101,7 @@
 }
 
 [data-testid="ockTransactionButton_Button"] {
-  background: #d3c81a !important; /* green-500 */
+  background: black !important; /* green-500 */
   color: white !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
