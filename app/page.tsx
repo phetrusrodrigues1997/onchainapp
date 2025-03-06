@@ -96,9 +96,9 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
         <header className="pt-0.1 pr-4 pl-4 relative w-screen">
           
   {/* Top horizontal line - moved down using translateY */}
-  <div className="border-t border-gray-300 absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-1"></div>
+  {/* <div className="bg-[#fafafa] absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-1"> */}
 
-  <div className="flex justify-between items-center py-2">
+  <div className="flex justify-between items-center py-2 bg-[#fefefe] ">
     <div className="flex md:gap-10 gap-2 items-center w-full">
       <ResponsiveLogo />
       <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
@@ -131,7 +131,8 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   </div>
 
   {/* Bottom horizontal line */}
-  <div className="border-b border-gray-300 absolute bottom-0 left-0 right-0 w-screen max-md:block hidden"></div>
+  {/* <div className="border-b border-gray-300 absolute bottom-0 left-0 right-0 w-screen max-md:block hidden"></div> */}
+  
 </header>
 
 

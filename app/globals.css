@@ -39,7 +39,7 @@
 }
 
 [data-testid="ockTokenSelectDropdown_List"]::-webkit-scrollbar-thumb {
-  background: #ffffff; /* Color of the scrollbar thumb */
+  background: #222222; /* Color of the scrollbar thumb */
   border-radius: 4px; /* Rounded corners for the thumb */
 }
 
