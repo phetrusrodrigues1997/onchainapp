@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useSwitchChain } from 'wagmi';
-import { parseUnits } from 'viem';
+import { useAccount, useWriteContract, useSwitchChain, useReadContract, useBalance } from 'wagmi';
+import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
 import { base } from 'wagmi/chains'; // Import Base chain
 
@@ -30,8 +30,6 @@ const USDCToken: Token = {
   symbol: "USDC",
   image: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
 };
-
-
 
 const CbBTCToken: Token = {
   address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
@@ -101,6 +99,13 @@ const ERC20_ABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
+  {
+    inputs: [{ name: 'owner', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
 ];
 
 // Define the props interface
@@ -110,13 +115,55 @@ interface SendProps {
 
 const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   const { address, chainId } = useAccount();
-  const { switchChain } = useSwitchChain(); // Changed from useSwitchNetwork to useSwitchChain
+  const { switchChain } = useSwitchChain();
 
   const [selectedToken, setSelectedToken] = useState<Token>(USDCToken);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
   const [isValidAddress, setIsValidAddress] = useState<boolean>(true);
   const [transactionStatus, setTransactionStatus] = useState<string>('');
+
+  // Fetch ERC-20 balance using useReadContract (for non-ETH tokens)
+  const { data: erc20BalanceData } = useReadContract({
+    address: selectedToken.address as `0x${string}`,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: [address as `0x${string}`],
+    query: {
+      enabled: !!address && !!selectedToken.address, // Only fetch if address and token are available
+    },
+  });
+
+  // Fetch ETH balance using useBalance (for ETH token)
+  const { data: ethBalanceData } = useBalance({
+    address: address as `0x${string}`,
+    query: {
+      enabled: !!address && !selectedToken.address, // Only fetch for ETH (address === '')
+    },
+  });
+
+  // State to store formatted balance
+  const [balance, setBalance] = useState<string | null>(null);
+
+  // Update balance based on selected token
+  useEffect(() => {
+    if (!address) {
+      setBalance(null);
+      return;
+    }
+
+    if (selectedToken.address === '') {
+      // Handle ETH balance
+      if (ethBalanceData) {
+        setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
+      }
+    } else {
+      // Handle ERC-20 balance
+      if (erc20BalanceData) {
+        setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
+      }
+    }
+  }, [ethBalanceData, erc20BalanceData, selectedToken, address]);
 
   // Function to validate Ethereum addresses
   const validateAddress = (address: string): boolean => {
@@ -197,6 +244,11 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
             </option>
           ))}
         </select>
+        {balance !== null && address && (
+          <p className="mt-1 text-sm text-gray-600">
+            Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}
+          </p>
+        )}
       </div>
 
       {/* Recipient Address Input */}
@@ -236,12 +288,12 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
 
       {/* Send Button */}
       <button
-  onClick={handleSend}
-  disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
-  className="w-full bg-black text-white rounded-full py-3 transition-colors disabled:bg-gray-400"
->
-  {isPending ? 'Sending...' : 'Send Tokens'}
-</button>
+        onClick={handleSend}
+        disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
+        className="w-full bg-black text-white rounded-full py-3 transition-colors disabled:bg-gray-400"
+      >
+        {isPending ? 'Sending...' : 'Send Tokens'}
+      </button>
 
       {/* Transaction Status Message */}
       {transactionStatus && <div className="mt-2 text-gray-800 text-sm">{transactionStatus}</div>}
