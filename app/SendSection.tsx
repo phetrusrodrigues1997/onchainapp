@@ -236,7 +236,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           id="token-select"
           value={selectedToken.address}
           onChange={handleTokenChange}
-          className="w-full p-3 border border-gray-300 rounded-xl bg-[#f2f2f2] text-black"
+          className="w-full p-3 border border-gray-300 rounded-xl bg-[#eaeaea] text-black"
         >
           {availableTokens.map((token) => (
             <option key={token.address} value={token.address}>
@@ -262,7 +262,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           placeholder="0x..."
           value={recipientAddress}
           onChange={handleAddressChange}
-          className={`w-full p-3 border ${isValidAddress ? 'border-gray-300' : 'border-red-500'} rounded-xl bg-[#f2f2f2] text-black`}
+          className={`w-full p-3 border ${isValidAddress ? 'border-gray-300' : 'border-red-500'} rounded-xl bg-[#eaeaea] text-black`}
         />
         {!isValidAddress && (
           <p className="mt-1 text-sm text-red-600">Please enter a valid Ethereum address</p>
@@ -282,7 +282,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           onChange={handleAmountChange}
           min="0"
           step="0.000001"
-          className="w-full p-3 border border-gray-300 rounded-xl bg-[#f2f2f2] text-black"
+          className="w-full p-3 border border-gray-300 rounded-xl bg-[#eaeaea] text-black"
         />
       </div>
 

@@ -18,6 +18,11 @@ button[aria-label="Toggle swap settings"] {
 }
 }
 
+/* [data-testid="ockSwapMessage_Message"] {
+  color:black !important;
+  font: bold 1.5rem Arial, sans-serif !important;
+} */
+
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenSelectButton_Button"] {
     background: #FAFAFA !important;

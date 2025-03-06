@@ -128,7 +128,7 @@ import Send from './SendSection';
   {/* Top horizontal line - moved down using translateY */}
   {/* <div className="bg-[#fafafa] absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-1"> */}
 
-  <div className="flex justify-between items-center py-2 ">
+  <div className="flex justify-between items-center py-2">
     <div className="flex md:gap-10 gap-2 items-center w-full">
       <ResponsiveLogo />
       <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />

@@ -48,7 +48,7 @@ const MEXPeso: Token = {
 };
 
 // Array of currencies to display
-const currencies: Token[] = [CADCToken, BRZToken, LiraToken, MEXPeso];
+const currencies: Token[] = [ BRZToken, LiraToken, MEXPeso];
 
 // Define the props interface
 interface CurrencySelectionProps {
@@ -62,9 +62,9 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
   const handleCurrencyClick = (symbol: string) => {
     const redirectUrls: { [key: string]: string } = {
       CADC: '/currency/cadc',
-      BRZ: '/currency/brz',
-      TRYB: '/currency/tryb',
-      MXNe: '/currency/mxne',
+      BRZ: 'https://aerodrome.finance/pools?token0=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&token1=0xE9185Ee218cae427aF7B9764A011bb89FeA761B4&type=10&factory=0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A&chain=8453',
+      TRYB: 'https://aerodrome.finance/pools?token0=0x1A9Be8a692De04bCB7cE5cDDD03afCA97D732c62&token1=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&type=-1&factory=0x420DD381b31aEf6683db6B902084cB0FFECe40Da&chain=8453',
+      MXNe: 'https://aerodrome.finance/pools?token0=0x269caE7Dc59803e5C596c95756faEeBb6030E0aF&token1=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&type=10&factory=0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A&chain=8453'
     };
     const url = redirectUrls[symbol] || '/';
     window.location.href = url; // Redirect using window.location
