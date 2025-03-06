@@ -39,7 +39,7 @@
 }
 
 [data-testid="ockTokenSelectDropdown_List"]::-webkit-scrollbar-thumb {
-  background: #222222; /* Color of the scrollbar thumb */
+  background: #ffffff; /* Color of the scrollbar thumb */
   border-radius: 4px; /* Rounded corners for the thumb */
 }
 
@@ -51,7 +51,7 @@
 @supports (scrollbar-width: thin) {
   [data-testid="ockTokenSelectDropdown_List"] {
     scrollbar-width: thin; /* Makes scrollbar thinner */
-    scrollbar-color: #ffffff #f1f1f1; /* Thumb color and track color */
+    scrollbar-color: #000000 #f1f1f1; /* Thumb color and track color */
   }
 }
 

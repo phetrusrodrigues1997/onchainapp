@@ -51,7 +51,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
     chainId: 8453,
     decimals: 8,
-    name: "Coinbase Bitcoin",
+    name: "Coinbase BTC",
     symbol: "cbBTC",
     image: "https://basescan.org/token/images/cbbtc_32.png",
   };
@@ -65,16 +65,44 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
     image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
   };
  
-  // const CADCToken: Token = {
-  //   address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
-  //   chainId: 8453,
-  //   decimals: 18,
-  //   name: "CADC",
-  //   symbol: "CADC",
-  //   image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
-  // };
+  const CADCToken: Token = {
+    address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
+    chainId: 8453,
+    decimals: 18,
+    name: "Canadian Dollar",
+    symbol: "CADC",
+    image: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
+  };
+
+  const BRZToken: Token = {
+    address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
+    chainId: 8453,
+    decimals: 18,
+    name: "Brazilian Real",
+    symbol: "BRZ",
+    image: "https://www.svgrepo.com/show/401552/flag-for-brazil.svg",
+  };
+
+  const LiraToken: Token = {
+    address: "0x1A9Be8a692De04bCB7cE5cDDD03afCA97D732c62",
+    chainId: 8453,
+    decimals: 8,
+    name: "Turkish Lira",
+    symbol: "TRYB",
+    image: "https://www.svgrepo.com/show/242355/turkey.svg",
+  };
+
+  const MEXPeso: Token = {
+    address: "0x269caE7Dc59803e5C596c95756faEeBb6030E0aF",
+    chainId: 8453,
+    decimals: 6,
+    name: "Mexican Peso",
+    symbol: "MXNe",
+    image: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
+  };
   // add other tokens here to display them as options in the swap
-  const swappableTokens: Token[] = [ USDCToken, EURCToken,ETHToken, CbBTCToken, WETHToken];
+  const swappableTokens: Token[] = [ USDCToken, EURCToken,CADCToken,BRZToken,ETHToken, CbBTCToken,MEXPeso,LiraToken,
+     WETHToken];
 
 
   export default function App() {
