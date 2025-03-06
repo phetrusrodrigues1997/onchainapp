@@ -189,6 +189,12 @@ body {
   background: black !important; /* from-gray-700 to-gray-800 */
 }
 
+@meidia prefers-color-scheme: dark {
+  [data-testid="ockConnectButton"] {
+    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+  }
+}
+
 [data-testid="ockConnectButton"]:hover {
   background: #000088 !important; /* from-gray-700 to-gray-800 */
 }
