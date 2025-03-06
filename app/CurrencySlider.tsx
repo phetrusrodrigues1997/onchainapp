@@ -63,7 +63,7 @@ const CurrencySlider: React.FC<CurrencySliderProps> = ({ onSelectVaultAddress })
   return (
     <div className="w-full px-2 sm:px-4 relative">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-4">
-        <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-0">Featured</h2>
+        <h2 className="text-lg text-black sm:text-xl font-bold mb-2 sm:mb-0">Featured</h2>
         <div className="flex space-x-1 sm:space-x-2 self-end sm:self-auto">
           <button
             onClick={scrollLeft}

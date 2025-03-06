@@ -5,6 +5,7 @@ import React from "react";
 import BuySection from "./BuySection";
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
+import CurrencySelection from './Liquidity';
 import EarnSection from "./EarnSection";
 import CurrencySlider from "./CurrencySlider";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
@@ -127,7 +128,7 @@ import Send from './SendSection';
   {/* Top horizontal line - moved down using translateY */}
   {/* <div className="bg-[#fafafa] absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-1"> */}
 
-  <div className="flex justify-between items-center py-2 bg-[#fefefe] ">
+  <div className="flex justify-between items-center py-2 ">
     <div className="flex md:gap-10 gap-2 items-center w-full">
       <ResponsiveLogo />
       <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
@@ -174,7 +175,7 @@ import Send from './SendSection';
   >
     {activeSection === "swap" && (
       <div>
-        <Swap experimental={{ useAggregator: true }} className="bg-gradient-to-r from-white via-white to-white p-1 max-w-sm mx-auto">
+        <Swap experimental={{ useAggregator: true }} className="bg-[#f1f2f5] p-1 max-w-sm mx-auto">
           <SwapSettings>
             <SwapSettingsSlippageTitle className="text-[#EA580C]">
               Max. slippage
@@ -198,9 +199,9 @@ import Send from './SendSection';
             swappableTokens={swappableTokens}
             token={USDCToken}
             type="to"
-            className="mb-1 bg-[#f1f2f5]  text-white rounded-2xl shadow-sm"
+            className="mb-1 bg-[#eaeaea]  text-white rounded-2xl shadow-sm"
           />
-          <SwapButton className="w-full bg-[#000000] text-white dark:bg-[#d3c81a] rounded-full py-2 transition-colors" />
+          <SwapButton className="w-full bg-[#000000] text-white dark:bg-[#d3c81a] border border-gray-100 rounded-full py-2 transition-colors" />
           <SwapMessage className="mt-2 text-gray-800 text-sm" />
           <SwapToast />
         </Swap>
@@ -220,6 +221,10 @@ import Send from './SendSection';
 
 {activeSection === "send" && (
       <Send/>
+    )}
+
+{activeSection === "liquidity" && (
+      <CurrencySelection/>
     )}
 
     {activeSection === "buy" && <BuySection />}

@@ -4,11 +4,13 @@
 
 /* #182848 */
 :root {
-  --background: white;
+  --background: #f1f2f5;
   --foreground: #171717;
 }
 
-
+button[aria-label="Toggle swap settings"] {
+  background:#ebebeb !important;
+}
 
 @media (prefers-color-scheme: dark) {
   .flex.flex-col.ock-text-foreground .font-semibold {

@@ -35,7 +35,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     { id: 'buy', label: 'Buy' },
     { id: 'market', label: 'Market' },
     { id: 'send', label: 'Send' },
-    { id: 'card', label: 'Debit Card' },
+    { id: 'liquidity', label: 'Liquidity' },
     { id: 'help', label: 'Help' },
   ];
 

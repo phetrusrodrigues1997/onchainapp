@@ -17,6 +17,7 @@
     "next": "14.2.15",
     "react": "^18",
     "react-dom": "^18",
+    "react-router-dom": "^7.2.0",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
     "viem": "^2.17.4",
