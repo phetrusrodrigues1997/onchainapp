@@ -31,7 +31,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   // Menu items for reusability
   const menuItems = [
     { id: 'swap', label: 'Swap' },
-    { id: 'earn', label: 'Earn' },
+    { id: 'earn', label: 'Lend' },
     { id: 'buy', label: 'Buy' },
     { id: 'market', label: 'Market' },
     { id: 'send', label: 'Send' },

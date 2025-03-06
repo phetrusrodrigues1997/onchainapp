@@ -14,6 +14,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   SwapSettingsSlippageDescription,
   SwapSettingsSlippageInput,
   SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
+import Send from './SendSection';
 
  
 // const { address } = useAccount();
@@ -215,6 +216,10 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
         <CurrencySlider onSelectVaultAddress={setSelectedVaultAddress} />
         <EarnSection selectedVaultAddress={selectedVaultAddress} />
       </div>
+    )}
+
+{activeSection === "send" && (
+      <Send/>
     )}
 
     {activeSection === "buy" && <BuySection />}
