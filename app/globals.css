@@ -118,6 +118,12 @@
   color: gray !important;
 }
 
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockTransactionButton_Button"] {
+    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+  }
+}
+
 
 [data-testid="ockTransactionButton_Button"]:hover {
   background: #000000 !important; /* green-600 */
@@ -164,6 +170,12 @@
   background: black !important; /* green-600 */
 }
 
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockBuyButton_Button"] {
+    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+  }
+}
+
 
 
 .default-light.flex.w-\[375px\].flex-col.overflow-hidden.ock-border-radius.ock-border-line-default.border{
@@ -189,7 +201,7 @@ body {
   background: black !important; /* from-gray-700 to-gray-800 */
 }
 
-@meidia prefers-color-scheme: dark {
+@media (prefers-color-scheme: dark) {
   [data-testid="ockConnectButton"] {
     background: #d3c81a !important; /* from-gray-700 to-gray-800 */
   }
