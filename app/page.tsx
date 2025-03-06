@@ -93,43 +93,52 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   
     return (
       <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
-        <header className="pt-4 pr-4 pl-4">
-        
-          <div className="flex justify-between items-center">
-          <div className="flex md:gap-10 gap-2 items-center">
-  <ResponsiveLogo />
-  {/* Pass activeSection and setActiveSection to NavigationMenu */}
-  <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-</div>
-            <div className="wallet-container">
-              <Wallet>
-              <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9] rounded-full">
-                  <Avatar className="h-6 w-6" />
-                  <Name />
-                </ConnectWallet>
-                <WalletDropdown>
-                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                    <Avatar />
-                    <Name />
-                    <Address />
-                    <EthBalance />
-                  </Identity>
-                  <WalletDropdownLink
-                    icon="wallet"
-                    href="https://keys.coinbase.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Wallet
-                  </WalletDropdownLink>
-                  <WalletDropdownDisconnect />
-                </WalletDropdown>
-              </Wallet>
-            </div>
-          </div>
-        </header>
+        <header className="pt-4 pr-4 pl-4 relative w-screen">
+  {/* Top horizontal line - moved down using translateY */}
+  <div className="border-t border-gray-300 absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-0.8"></div>
+
+  <div className="flex justify-between items-center py-2">
+    <div className="flex md:gap-10 gap-2 items-center w-full">
+      <ResponsiveLogo />
+      <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+    </div>
+    <div className="wallet-container">
+      <Wallet>
+        <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9] rounded-full">
+          <Avatar className="h-6 w-6" />
+          <Name />
+        </ConnectWallet>
+        <WalletDropdown>
+          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+            <Avatar />
+            <Name />
+            <Address />
+            <EthBalance />
+          </Identity>
+          <WalletDropdownLink
+            icon="wallet"
+            href="https://keys.coinbase.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Wallet
+          </WalletDropdownLink>
+          <WalletDropdownDisconnect />
+        </WalletDropdown>
+      </Wallet>
+    </div>
+  </div>
+
+  {/* Bottom horizontal line */}
+  <div className="border-b border-gray-300 absolute bottom-0 left-0 right-0 w-screen max-md:block hidden"></div>
+</header>
+
+
+
+
+
   
-        <main className="flex-grow flex items-center justify-center mt-14">
+        <main className="flex-grow flex items-center justify-center mt-3">
   <div
     className={`w-full p-1 ${
       activeSection === "earn" ? "max-w-5xl" : "max-w-sm"
