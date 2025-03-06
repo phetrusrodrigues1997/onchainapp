@@ -93,9 +93,10 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
   
     return (
       <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
-        <header className="pt-4 pr-4 pl-4 relative w-screen">
+        <header className="pt-0.1 pr-4 pl-4 relative w-screen">
+          
   {/* Top horizontal line - moved down using translateY */}
-  <div className="border-t border-gray-300 absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-0.8"></div>
+  <div className="border-t border-gray-300 absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-1"></div>
 
   <div className="flex justify-between items-center py-2">
     <div className="flex md:gap-10 gap-2 items-center w-full">
@@ -138,7 +139,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
 
 
   
-        <main className="flex-grow flex items-center justify-center mt-3">
+        <main className="flex-grow flex items-center justify-center mt-2">
   <div
     className={`w-full p-1 ${
       activeSection === "earn" ? "max-w-5xl" : "max-w-sm"
