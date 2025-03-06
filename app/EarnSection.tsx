@@ -41,7 +41,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
             <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
             <DepositBalance className="mb-3 bg-[#f1f2f5] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
             <DepositAmountInput className="mb-4 bg-[#f1f2f5] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
-            <DepositButton />
+            <DepositButton className="dark:bg-[#d3c81a]" />
           </EarnDeposit>
         )}
         {earnSection === "withdraw" && (
@@ -49,7 +49,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
             <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
             <WithdrawBalance className="mb-3 bg-[#f1f2f5] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
             <WithdrawAmountInput className="mb-4 bg-[#f1f2f5] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
-            <WithdrawButton />
+            <WithdrawButton className="dark:bg-[#d3c81a]"/>
           </EarnWithdraw>
         )}
       </Earn>
