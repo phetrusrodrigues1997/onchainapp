@@ -161,7 +161,7 @@
 
 
 [data-testid="ockBuyButton_Button"] {
-  background: #d3c81a !important; /* green-600 */
+  background: black !important; /* green-600 */
 }
 
 
@@ -186,7 +186,7 @@ body {
 }
 
 [data-testid="ockConnectButton"] {
-  background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+  background: black !important; /* from-gray-700 to-gray-800 */
 }
 
 [data-testid="ockConnectButton"]:hover {
