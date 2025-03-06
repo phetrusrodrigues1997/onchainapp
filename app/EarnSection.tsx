@@ -39,16 +39,16 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
         {earnSection === "deposit" && (
           <EarnDeposit className="bg-[#fdfdfd] dark:bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100 dark:border-gray-100">
             <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
-            <DepositBalance className="mb-3 bg-[#f2f2f2] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
-            <DepositAmountInput className="mb-4 bg-[#f2f2f2] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
+            <DepositBalance className="mb-3 bg-[#f1f2f5] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
+            <DepositAmountInput className="mb-4 bg-[#f1f2f5] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
             <DepositButton />
           </EarnDeposit>
         )}
         {earnSection === "withdraw" && (
           <EarnWithdraw className="bg-[#fdfdfd] dark:bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100 dark:border-gray-100">
             <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
-            <WithdrawBalance className="mb-3 bg-[#f2f2f2] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
-            <WithdrawAmountInput className="mb-4 bg-[#f2f2f2] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
+            <WithdrawBalance className="mb-3 bg-[#f1f2f5] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
+            <WithdrawAmountInput className="mb-4 bg-[#f1f2f5] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
             <WithdrawButton />
           </EarnWithdraw>
         )}

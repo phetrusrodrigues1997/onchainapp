@@ -200,7 +200,7 @@ import Send from './SendSection';
             type="to"
             className="mb-1 bg-[#f1f2f5]  text-white rounded-2xl shadow-sm"
           />
-          <SwapButton className="w-full bg-[#000000] text-white dark:text-white rounded-full py-2 transition-colors" />
+          <SwapButton className="w-full bg-[#000000] text-white dark:bg-[#d3c81a] rounded-full py-2 transition-colors" />
           <SwapMessage className="mt-2 text-gray-800 text-sm" />
           <SwapToast />
         </Swap>
