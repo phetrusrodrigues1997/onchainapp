@@ -10,15 +10,15 @@ interface Token {
   image: string;
 }
 
-// Define the token constants
-const CADCToken: Token = {
-  address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
-  chainId: 8453,
-  decimals: 18,
-  name: "Canadian Dollar",
-  symbol: "CADC",
-  image: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
-};
+// // Define the token constants
+// const CADCToken: Token = {
+//   address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
+//   chainId: 8453,
+//   decimals: 18,
+//   name: "Canadian Dollar",
+//   symbol: "CADC",
+//   image: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
+// };
 
 const BRZToken: Token = {
   address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
