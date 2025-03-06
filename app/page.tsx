@@ -164,9 +164,6 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
 </header>
 
 
-
-
-
   
         <main className="flex-grow flex items-center justify-center mt-2">
   <div

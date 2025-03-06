@@ -21,7 +21,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
           }}
           className={`${activeButton === "deposit" ? "bg-[#000000] text-white" : "bg-[#ffffff]"} text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
         >
-          Deposit
+          Lend
         </button>
         <button
           onClick={() => {
