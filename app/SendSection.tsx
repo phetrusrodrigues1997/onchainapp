@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useSwitchChain, useReadContract, useBalance } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
-import { base } from 'wagmi/chains'; // Import Base chain
+import { base } from 'wagmi/chains';
 
 const ETHToken: Token = {
   address: "",
@@ -108,9 +108,14 @@ const ERC20_ABI = [
   },
 ];
 
-// Define the props interface
 interface SendProps {
   className?: string;
+}
+
+interface ParsedCommand {
+  tokenSymbol: string;
+  amount: number;
+  recipientAddress: string;
 }
 
 const SendSection: React.FC<SendProps> = ({ className = '' }) => {
@@ -123,51 +128,41 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   const [isValidAddress, setIsValidAddress] = useState<boolean>(true);
   const [transactionStatus, setTransactionStatus] = useState<string>('');
 
-  // Fetch ERC-20 balance using useReadContract (for non-ETH tokens)
+  // New states for command parsing
+  const [command, setCommand] = useState<string>('');
+  const [isParsing, setIsParsing] = useState<boolean>(false);
+
+  // Fetch ERC-20 balance
   const { data: erc20BalanceData } = useReadContract({
     address: selectedToken.address as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
-    query: {
-      enabled: !!address && !!selectedToken.address, // Only fetch if address and token are available
-    },
+    query: { enabled: !!address && !!selectedToken.address },
   });
 
-  // Fetch ETH balance using useBalance (for ETH token)
+  // Fetch ETH balance
   const { data: ethBalanceData } = useBalance({
     address: address as `0x${string}`,
-    query: {
-      enabled: !!address && !selectedToken.address, // Only fetch for ETH (address === '')
-    },
+    query: { enabled: !!address && !selectedToken.address },
   });
 
-  // State to store formatted balance
   const [balance, setBalance] = useState<string | null>(null);
 
-  // Update balance based on selected token
   useEffect(() => {
     if (!address) {
       setBalance(null);
       return;
     }
-
     if (selectedToken.address === '') {
-      // Handle ETH balance
-      if (ethBalanceData) {
-        setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
-      }
+      if (ethBalanceData) setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
     } else {
-      // Handle ERC-20 balance
-      if (erc20BalanceData) {
-        setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
-      }
+      if (erc20BalanceData) setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
     }
   }, [ethBalanceData, erc20BalanceData, selectedToken, address]);
 
-  // Function to validate Ethereum addresses
   const validateAddress = (address: string): boolean => {
-    return address === '' || /^0x[a-fA-F0-9]{40}$/.test(address); // Simple regex for Ethereum address
+    return address === '' || /^0x[a-fA-F0-9]{40}$/.test(address);
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -192,7 +187,6 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       setTransactionStatus('Please enter valid information and connect your wallet');
       return;
     }
-
     try {
       writeContract({
         address: selectedToken.address as `0x${string}`,
@@ -206,26 +200,77 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
     }
   };
 
-  // Handle network switch
+  // New parsing function
+  const handleParseCommand = async () => {
+    setIsParsing(true);
+    try {
+      const response = await fetch('/api/parse-command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command }),
+      });
+      if (response.ok) {
+        const data: ParsedCommand = await response.json();
+        const token = availableTokens.find(
+          (t) => t.symbol.toUpperCase() === data.tokenSymbol.toUpperCase()
+        );
+        if (token) {
+          setSelectedToken(token);
+          setAmount(data.amount.toString());
+          setRecipientAddress(data.recipientAddress);
+          setIsValidAddress(validateAddress(data.recipientAddress));
+          setTransactionStatus('Command parsed successfully');
+        } else {
+          setTransactionStatus(`Token ${data.tokenSymbol} not found`);
+        }
+      } else {
+        setTransactionStatus('Failed to parse command');
+      }
+    } catch (error) {
+      setTransactionStatus('Error parsing command');
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   useEffect(() => {
     if (switchChain && chainId && chainId !== base.id) {
       setTransactionStatus('Please switch to the Base network...');
-      switchChain({ chainId: base.id }); // Use switchChain with chainId
+      switchChain({ chainId: base.id });
     } else if (chainId === base.id) {
-      setTransactionStatus(''); // Clear message if on correct network
+      setTransactionStatus('');
     }
   }, [chainId, switchChain]);
 
-  // Handle transaction status updates (e.g., success or error)
   useEffect(() => {
-    if (error) {
-      setTransactionStatus(`Transaction failed: ${error.message || 'Unknown error'}`);
-    }
+    if (error) setTransactionStatus(`Transaction failed: ${error.message || 'Unknown error'}`);
   }, [error]);
 
   return (
     <div className={`bg-gradient-to-r from-white via-white to-white p-4 rounded-xl max-w-sm mx-auto ${className}`}>
       <h2 className="text-black text-xl font-bold mb-4">Send Tokens</h2>
+
+      {/* New Command Input */}
+      <div className="mb-4">
+        <label htmlFor="command-input" className="block text-sm font-medium text-gray-700 mb-1">
+          Enter Command
+        </label>
+        <input
+          id="command-input"
+          type="text"
+          placeholder="e.g., send 10 USDC to 0x1234..."
+          value={command}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCommand(e.target.value)}
+          className="w-full p-3 border border-gray-300 rounded-xl bg-[#eaeaea] text-black"
+        />
+        <button
+          onClick={handleParseCommand}
+          disabled={isParsing || !command || !address}
+          className="mt-2 w-full bg-blue-500 text-white rounded-full py-2 transition-colors disabled:bg-gray-400"
+        >
+          {isParsing ? 'Parsing...' : 'Parse Command'}
+        </button>
+      </div>
 
       {/* Token Selection */}
       <div className="mb-4">
@@ -289,7 +334,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       {/* Send Button */}
       <button
         onClick={handleSend}
-        disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
+        disabled={!!(isPending || !isValidAddress || !recipientAddress || !amount || !address || (chainId && chainId !== base.id))}
         className="w-full bg-black text-white rounded-full py-3 transition-colors disabled:bg-gray-400"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}

@@ -32,8 +32,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   const menuItems = [
     { id: 'swap', label: 'Swap' },
     { id: 'earn', label: 'Lend' },
-    { id: 'buy', label: 'Buy' },
-    { id: 'market', label: 'Market' },
+    { id: 'buy', label: 'Purchase' },
+    { id: 'market', label: 'Markets' },
     { id: 'send', label: 'Send' },
     { id: 'liquidity', label: 'Liquidity' },
     { id: 'help', label: 'Help' },
@@ -62,7 +62,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               onClick={() => setActiveSection(item.id)}
               className={`font-medium ${
                 activeSection === item.id
-                  ? 'text-[#000000] font-bold text-base'
+                  ? 'text-[#d3c81a] text-base'
                   : 'text-[#FFFFFF] hover:text-black '
               }`}
             >
@@ -75,7 +75,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Mobile menu dropdown */}
       {isMobile && isMenuOpen && (
-        <div className="absolute top-12 z-10 w-32 mt-2 rounded-md shadow-lg">
+        <div className="absolute bg-white top-12 z-10 w-32 mt-2 rounded-md shadow-lg">
         <div className="py-2">
           {menuItems.map((item) => (
             <button

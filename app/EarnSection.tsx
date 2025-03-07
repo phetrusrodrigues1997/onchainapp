@@ -58,3 +58,5 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
 };
 
 export default EarnSection;
+
+
