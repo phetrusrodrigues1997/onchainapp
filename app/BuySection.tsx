@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Buy } from '@coinbase/onchainkit/buy'; 
 import type { Token } from '@coinbase/onchainkit/token';
 
-
 const EURCToken: Token = {
   address: "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
   chainId: 8453,
@@ -47,7 +46,6 @@ const tokens = [
 ];
 
 const BuySection: React.FC = () => {
-
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -75,35 +73,35 @@ const BuySection: React.FC = () => {
   });
 
   return (
-    <div className={`${getContainerWidth()} mx-auto p-4 sm:p-6 bg-[#Fafafa] rounded-xl shadow-lg border border-gray-200`}>
-      <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-4 text-center">Buy Crypto</h2>
-      <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
+    <div className={`${getContainerWidth()} mx-auto p-4 bg-[#1E1E1E] rounded-lg shadow-md border border-gray-700`}>
+      <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-4 text-center">Buy Crypto</h2>
+      <p className="text-sm sm:text-base text-gray-400 text-center mb-4 sm:mb-6">
         We accept visa and mastercard.
       </p>
 
       <label htmlFor="token-search" className="sr-only">Search tokens</label>
       <input
-  id="token-search"
-  type="text"
-  placeholder="Search tokens..."
-  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-  className="w-full p-2 mb-4 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-/>
+        id="token-search"
+        type="text"
+        placeholder="Search tokens..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full p-2 mb-4 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6] text-black"
+      />
 
       {filteredTokens.length > 0 ? (
         <div className="space-y-3 sm:space-y-4">
           {filteredTokens.map((item) => (
             <div
               key={item.token.symbol}
-              className="flex items-center justify-between p-3 sm:p-4 bg-gray-100 rounded-lg shadow-md border border-gray-300"
+              className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg shadow-md border border-gray-300"
             >
               <Buy toToken={item.token} />
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500">No tokens found.</p>
+        <p className="text-center text-gray-400">No tokens found.</p>
       )}
     </div>
   );

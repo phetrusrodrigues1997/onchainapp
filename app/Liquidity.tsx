@@ -10,16 +10,7 @@ interface Token {
   image: string;
 }
 
-// // Define the token constants
-// const CADCToken: Token = {
-//   address: "0x043eB4B75d0805c43D7C834902E335621983Cf03",
-//   chainId: 8453,
-//   decimals: 18,
-//   name: "Canadian Dollar",
-//   symbol: "CADC",
-//   image: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
-// };
-
+// Define the token constants
 const BRZToken: Token = {
   address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
   chainId: 8453,
@@ -48,7 +39,7 @@ const MEXPeso: Token = {
 };
 
 // Array of currencies to display
-const currencies: Token[] = [ BRZToken, LiraToken, MEXPeso];
+const currencies: Token[] = [BRZToken, LiraToken, MEXPeso];
 
 // Define the props interface
 interface CurrencySelectionProps {
@@ -88,18 +79,18 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
 
   return (
     <div className={`min-h-screen bg-[#0e3993] py-8 px-4 flex items-center justify-center ${className}`}>
-      <div className="max-w-4xl w-full bg-white rounded-lg shadow-md p-6">
+      <div className="max-w-4xl w-full bg-[#1E1E1E] rounded-lg shadow-md p-6 border border-gray-700">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left mb-4 sm:mb-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-white text-center sm:text-left mb-4 sm:mb-0">
             Select a Currency
           </h2>
           <div className="flex space-x-2 self-center sm:self-auto">
             <button
               onClick={scrollLeft}
-              className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors"
+              className="bg-[#3B82F6] rounded-full p-2 hover:bg-[#2563EB] transition-colors"
             >
               <svg
-                className="w-4 h-4 text-gray-600"
+                className="w-4 h-4 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -115,10 +106,10 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
             </button>
             <button
               onClick={scrollRight}
-              className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors"
+              className="bg-[#3B82F6] rounded-full p-2 hover:bg-[#2563EB] transition-colors"
             >
               <svg
-                className="w-4 h-4 text-gray-600"
+                className="w-4 h-4 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -144,14 +135,14 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
               <div
                 key={currency.symbol}
                 onClick={() => handleCurrencyClick(currency.symbol)}
-                className="snap-start flex-shrink-0 w-64 sm:w-72 h-80 bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition-shadow duration-300"
+                className="snap-start flex-shrink-0 w-64 sm:w-72 h-80 bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition-shadow duration-300 border border-gray-300"
               >
                 <img
                   src={currency.image}
                   alt={`${currency.name} flag`}
                   className="w-20 h-20 sm:w-24 sm:h-24 mb-8 object-contain"
                 />
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 text-center line-clamp-2">{currency.name}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-black text-center line-clamp-2">{currency.name}</h3>
                 <p className="text-base sm:text-lg text-gray-600 text-center mt-3">{currency.symbol}</p>
               </div>
             ))}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useSwitchChain, useReadContract, useBalance } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
-import { base } from 'wagmi/chains';
+import { base } from 'wagmi/chains'; // Import Base chain
 
 const ETHToken: Token = {
   address: "",
@@ -19,7 +19,7 @@ const WETHToken: Token = {
   decimals: 18,
   name: "Wrapped Eth",
   symbol: "WETH",
-  image:"https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282"
+  image: "https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282"
 };
 
 const USDCToken: Token = {
@@ -108,14 +108,9 @@ const ERC20_ABI = [
   },
 ];
 
+// Define the props interface
 interface SendProps {
   className?: string;
-}
-
-interface ParsedCommand {
-  tokenSymbol: string;
-  amount: number;
-  recipientAddress: string;
 }
 
 const SendSection: React.FC<SendProps> = ({ className = '' }) => {
@@ -127,42 +122,53 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   const [amount, setAmount] = useState<string>('');
   const [isValidAddress, setIsValidAddress] = useState<boolean>(true);
   const [transactionStatus, setTransactionStatus] = useState<string>('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false); // State to manage dropdown visibility
 
-  // New states for command parsing
-  const [command, setCommand] = useState<string>('');
-  const [isParsing, setIsParsing] = useState<boolean>(false);
-
-  // Fetch ERC-20 balance
+  // Fetch ERC-20 balance using useReadContract (for non-ETH tokens)
   const { data: erc20BalanceData } = useReadContract({
     address: selectedToken.address as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
-    query: { enabled: !!address && !!selectedToken.address },
+    query: {
+      enabled: !!address && !!selectedToken.address, // Only fetch if address and token are available
+    },
   });
 
-  // Fetch ETH balance
+  // Fetch ETH balance using useBalance (for ETH token)
   const { data: ethBalanceData } = useBalance({
     address: address as `0x${string}`,
-    query: { enabled: !!address && !selectedToken.address },
+    query: {
+      enabled: !!address && !selectedToken.address, // Only fetch for ETH (address === '')
+    },
   });
 
+  // State to store formatted balance
   const [balance, setBalance] = useState<string | null>(null);
 
+  // Update balance based on selected token
   useEffect(() => {
     if (!address) {
       setBalance(null);
       return;
     }
+
     if (selectedToken.address === '') {
-      if (ethBalanceData) setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
+      // Handle ETH balance
+      if (ethBalanceData) {
+        setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
+      }
     } else {
-      if (erc20BalanceData) setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
+      // Handle ERC-20 balance
+      if (erc20BalanceData) {
+        setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
+      }
     }
   }, [ethBalanceData, erc20BalanceData, selectedToken, address]);
 
+  // Function to validate Ethereum addresses
   const validateAddress = (address: string): boolean => {
-    return address === '' || /^0x[a-fA-F0-9]{40}$/.test(address);
+    return address === '' || /^0x[a-fA-F0-9]{40}$/.test(address); // Simple regex for Ethereum address
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,9 +177,9 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
     setIsValidAddress(address === '' || validateAddress(address));
   };
 
-  const handleTokenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const token = availableTokens.find((t) => t.address === e.target.value);
-    if (token) setSelectedToken(token);
+  const handleTokenChange = (token: Token) => {
+    setSelectedToken(token);
+    setIsDropdownOpen(false); // Close dropdown after selection
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,6 +193,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       setTransactionStatus('Please enter valid information and connect your wallet');
       return;
     }
+
     try {
       writeContract({
         address: selectedToken.address as `0x${string}`,
@@ -200,97 +207,58 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
     }
   };
 
-  // New parsing function test
-  const handleParseCommand = async () => {
-    setIsParsing(true);
-    try {
-      const response = await fetch('/api/parse-command', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command }),
-      });
-      if (response.ok) {
-        const data: ParsedCommand = await response.json();
-        const token = availableTokens.find(
-          (t) => t.symbol.toUpperCase() === data.tokenSymbol.toUpperCase()
-        );
-        if (token) {
-          setSelectedToken(token);
-          setAmount(data.amount.toString());
-          setRecipientAddress(data.recipientAddress);
-          setIsValidAddress(validateAddress(data.recipientAddress));
-          setTransactionStatus('Command parsed successfully');
-        } else {
-          setTransactionStatus(`Token ${data.tokenSymbol} not found`);
-        }
-      } else {
-        setTransactionStatus('Failed to parse command');
-      }
-    } catch (error) {
-      setTransactionStatus('Error parsing command');
-    } finally {
-      setIsParsing(false);
-    }
-  };
-
+  // Handle network switch
   useEffect(() => {
     if (switchChain && chainId && chainId !== base.id) {
       setTransactionStatus('Please switch to the Base network...');
-      switchChain({ chainId: base.id });
+      switchChain({ chainId: base.id }); // Use switchChain with chainId
     } else if (chainId === base.id) {
-      setTransactionStatus('');
+      setTransactionStatus(''); // Clear message if on correct network
     }
   }, [chainId, switchChain]);
 
+  // Handle transaction status updates (e.g., success or error)
   useEffect(() => {
-    if (error) setTransactionStatus(`Transaction failed: ${error.message || 'Unknown error'}`);
+    if (error) {
+      setTransactionStatus(`Transaction failed: ${error.message || 'Unknown error'}`);
+    }
   }, [error]);
 
   return (
-    <div className={`bg-gradient-to-r from-white via-white to-white p-4 rounded-xl max-w-sm mx-auto ${className}`}>
-      <h2 className="text-black text-xl font-bold mb-4">Send Tokens</h2>
+    <div className={`bg-[#1E1E1E] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
+      <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
 
-      {/* New Command Input */}
+      {/* Token Selection with Custom Dropdown */}
       <div className="mb-4">
-        <label htmlFor="command-input" className="block text-sm font-medium text-gray-700 mb-1">
-          Enter Command
-        </label>
-        <input
-          id="command-input"
-          type="text"
-          placeholder="e.g., send 10 USDC to 0x1234..."
-          value={command}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCommand(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-xl bg-[#eaeaea] text-black"
-        />
-        <button
-          onClick={handleParseCommand}
-          disabled={isParsing || !command || !address}
-          className="mt-2 w-full bg-blue-500 text-white rounded-full py-2 transition-colors disabled:bg-gray-400"
-        >
-          {isParsing ? 'Parsing...' : 'Parse Command'}
-        </button>
-      </div>
-
-      {/* Token Selection */}
-      <div className="mb-4">
-        <label htmlFor="token-select" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="token-select" className="block text-sm font-medium text-gray-400 mb-1">
           Select Token
         </label>
-        <select
-          id="token-select"
-          value={selectedToken.address}
-          onChange={handleTokenChange}
-          className="w-full p-3 border border-gray-300 rounded-xl bg-[#eaeaea] text-black"
-        >
-          {availableTokens.map((token) => (
-            <option key={token.address} value={token.address}>
-              {token.symbol}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle dropdown visibility
+            className="w-full p-3 bg-white border border-gray-300 rounded-lg text-black flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          >
+            <span className="flex items-center">
+              <img src={selectedToken.image ?? ''} alt={selectedToken.symbol} className="w-6 h-6 mr-2" />
+              {selectedToken.symbol}
+            </span>
+            <span>▼</span>
+          </button>
+          <div className={`absolute z-10 text-black w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg ${isDropdownOpen ? '' : 'hidden'}`} id="token-dropdown">
+            {availableTokens.map((token) => (
+              <button
+                key={token.address}
+                onClick={() => handleTokenChange(token)}
+                className="w-full text-left p-2 hover:bg-gray-100 flex items-center"
+              >
+                <img src={token.image ?? undefined} alt={token.symbol} className="w-6 h-6 mr-2" />
+                {token.symbol}
+              </button>
+            ))}
+          </div>
+        </div>
         {balance !== null && address && (
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-400">
             Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}
           </p>
         )}
@@ -298,7 +266,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
 
       {/* Recipient Address Input */}
       <div className="mb-4">
-        <label htmlFor="recipient-address" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="recipient-address" className="block text-sm font-medium text-gray-400 mb-1">
           Recipient Address
         </label>
         <input
@@ -307,16 +275,16 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           placeholder="0x..."
           value={recipientAddress}
           onChange={handleAddressChange}
-          className={`w-full p-3 border ${isValidAddress ? 'border-gray-300' : 'border-red-500'} rounded-xl bg-[#eaeaea] text-black`}
+          className={`w-full p-3 bg-white border ${isValidAddress ? 'border-gray-300' : 'border-red-400'} rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#3B82F6]`}
         />
         {!isValidAddress && (
-          <p className="mt-1 text-sm text-red-600">Please enter a valid Ethereum address</p>
+          <p className="mt-1 text-sm text-red-400">Please enter a valid Ethereum address</p>
         )}
       </div>
 
       {/* Amount Input */}
       <div className="mb-4">
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="amount" className="block text-sm font-medium text-gray-400 mb-1">
           Amount
         </label>
         <input
@@ -327,24 +295,24 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           onChange={handleAmountChange}
           min="0"
           step="0.000001"
-          className="w-full p-3 border border-gray-300 rounded-xl bg-[#eaeaea] text-black"
+          className="w-full p-3 bg-white border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
         />
       </div>
 
       {/* Send Button */}
       <button
         onClick={handleSend}
-        disabled={!!(isPending || !isValidAddress || !recipientAddress || !amount || !address || (chainId && chainId !== base.id))}
-        className="w-full bg-black text-white rounded-full py-3 transition-colors disabled:bg-gray-400"
+        disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
+        className="w-full bg-[#3B82F6] text-black rounded-full py-3 transition-colors hover:bg-[#2563EB] disabled:bg-gray-600"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>
 
       {/* Transaction Status Message */}
-      {transactionStatus && <div className="mt-2 text-gray-800 text-sm">{transactionStatus}</div>}
+      {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
 
       {!address && (
-        <div className="mt-4 text-red-500 text-center text-sm">
+        <div className="mt-4 text-red-400 text-center text-sm">
           Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
         </div>
       )}

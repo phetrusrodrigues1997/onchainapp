@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@coinbase/onchainkit": "latest",
+    "@coinbase/agentkit": "^0.2.3-nightly.20250307.28",
+    "@coinbase/agentkit-langchain": "^0.2.3-nightly.20250307.28",
+    "@coinbase/cdp-agentkit-core": "^0.0.14",
+    "@coinbase/cdp-langchain": "^0.0.15",
+    "@coinbase/onchainkit": "^0.37.6",
+    "@langchain/openai": "^0.4.4",
     "@tanstack/react-query": "^5",
     "@vercel/analytics": "^1.5.0",
-    "@vercel/node": "^5.1.12",
     "@vercel/speed-insights": "^1.2.0",
+    "langchain": "^0.3.19",
     "lucide-react": "^0.477.0",
     "next": "14.2.15",
     "openai": "^4.86.2",
@@ -22,18 +27,19 @@
     "react-router-dom": "^7.2.0",
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
-    "viem": "^2.17.4",
-    "wagmi": "^2.11.0"
+    "viem": "^2.23.7",
+    "wagmi": "^2.14.12"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
+    "@types/node": "^20.17.23",
+    "@types/react": "^18.3.18",
     "@types/react-dom": "^18",
     "@types/react-slick": "^0.23.13",
+    "@vercel/node": "^5.1.12",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5.8.2"
   }
 }
