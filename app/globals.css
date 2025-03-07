@@ -99,10 +99,12 @@ button[aria-label="Toggle swap settings"] {
 }
 
 
-
+.css-1u9des2-indicatorSeparator{
+  display:none !important;
+}
 
 [data-testid="ockTextInput_Input"] {
-  color: white !important; /* Tailwind's green-500 */
+  color: black !important; /* Tailwind's green-500 */
 }
 
 [data-testid="ockIdentity_Text"] {

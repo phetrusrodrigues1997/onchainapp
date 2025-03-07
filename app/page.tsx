@@ -7,7 +7,6 @@ import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
 import CurrencySelection from './Liquidity';
 import EarnSection from "./EarnSection";
-import CurrencySlider from "./CurrencySlider";
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
@@ -214,8 +213,8 @@ import Send from './SendSection';
 
     {activeSection === "earn" && (
       <div>
-        <CurrencySlider onSelectVaultAddress={setSelectedVaultAddress} />
-        <EarnSection selectedVaultAddress={selectedVaultAddress} />
+      
+        <EarnSection />
       </div>
     )}
 
