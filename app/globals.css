@@ -4,12 +4,12 @@
 
 /* #182848 */
 :root {
-  --background: #f1f2f5;
+  --background: #1f4aa4;
   --foreground: #171717;
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#ebebeb !important;
+  background:#1f4aa4 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -64,7 +64,7 @@ button[aria-label="Toggle swap settings"] {
 
 
 [data-testid="ockSwap_Title"] {
-  color:black !important;
+  color:white !important;
 }
 
 [data-testid="ock-vaultDetails"] {
@@ -207,7 +207,19 @@ body {
 }
 
 [data-testid="ockConnectButton"] {
-  background: black !important; /* from-gray-700 to-gray-800 */
+  background: black !important; /* green-500 */
+  color: white !important;
+  border-radius: 9999px !important; /* Tailwind's rounded-md */
+  padding-top: 0.5rem !important; /* Tailwind's py-2 */
+  padding-bottom: 0.5rem !important;
+  padding-left: 1rem !important; /* Tailwind's px-4 */
+  padding-right: 1rem !important;
+  width: 100% !important;
+  transition: background-color 150ms ease-in-out !important;
+  border: none !important; /* Remove any default border */
+  opacity: 1 !important; /* Override the disabled opacity */
+  pointer-events: auto !important; /* Override pointer-events-none if needed */
+   /* from-gray-700 to-gray-800 */
 }
 
 @media (prefers-color-scheme: dark) {

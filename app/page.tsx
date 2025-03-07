@@ -175,7 +175,7 @@ import Send from './SendSection';
   >
     {activeSection === "swap" && (
       <div>
-        <Swap experimental={{ useAggregator: true }} className="bg-[#f1f2f5] p-1 max-w-sm mx-auto">
+        <Swap experimental={{ useAggregator: true }} className="bg-[#1f4aa4] p-1 max-w-sm mx-auto">
           <SwapSettings>
             <SwapSettingsSlippageTitle className="text-[#EA580C]">
               Max. slippage
@@ -189,7 +189,7 @@ import Send from './SendSection';
           <SwapAmountInput
             label="Sell"
             swappableTokens={swappableTokens}
-            token={EURCToken}
+            token={USDCToken}
             type="from"
             className="mb-1 bg-[#fdfdfd] text-white rounded-2xl shadow-sm border border-gray-100"
           />
@@ -197,11 +197,11 @@ import Send from './SendSection';
           <SwapAmountInput
             label="Buy"
             swappableTokens={swappableTokens}
-            token={USDCToken}
+            token={BRZToken}
             type="to"
             className="mb-1 bg-[#eaeaea]  text-white rounded-2xl shadow-sm"
           />
-          <SwapButton className="w-full bg-[#000000] text-white dark:bg-[#d3c81a] border border-gray-100 rounded-full py-2 transition-colors" />
+          <SwapButton className="w-full bg-black border border-gray-100 rounded-full py-2 transition-colors" />
           <SwapMessage className="mt-2 text-gray-800 text-sm" />
           <SwapToast />
         </Swap>
