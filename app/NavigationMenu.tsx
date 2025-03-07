@@ -77,16 +77,21 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMobile && isMenuOpen && (
         <div className="absolute top-12 z-10 w-32 mt-2 rounded-md shadow-lg">
         <div className="py-2">
-          {menuItems.map(() => (
+          {menuItems.map((item) => (
             <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 !bg-[#0e3993] rounded-md shadow-md md:hidden"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X size={24} className="!text-white" /> : <Menu size={24} className="!text-white" />}
-          </button>
-          
-          
+              key={item.id}
+              onClick={() => {
+                setActiveSection(item.id);
+                setIsMenuOpen(false);
+              }}
+              className={`block w-full text-left px-4 py-2 ${
+                activeSection === item.id
+                  ? 'bg-gray-100 text-[#000070]'
+                  : 'text-black hover:bg-gray-50'
+              }`}
+            >
+              {item.label}
+            </button>
           ))}
         </div>
       </div>
