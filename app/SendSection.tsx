@@ -200,7 +200,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
     }
   };
 
-  // New parsing function
+  // New parsing function test
   const handleParseCommand = async () => {
     setIsParsing(true);
     try {
