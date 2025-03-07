@@ -77,7 +77,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMobile && isMenuOpen && (
         <div className="absolute top-12 z-10 w-32 mt-2 rounded-md shadow-lg">
         <div className="py-2">
-          {menuItems.map((item) => (
+          {menuItems.map(() => (
             <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 !bg-[#0e3993] rounded-md shadow-md md:hidden"
