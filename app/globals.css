@@ -4,12 +4,12 @@
 
 /* #182848 */
 :root {
-  --background: #1f4aa4;
-  --foreground: #171717;
+  --background: #0e3993;
+ 
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#1f4aa4 !important;
+  background:#0e3993 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,10 +18,12 @@ button[aria-label="Toggle swap settings"] {
 }
 }
 
-/* [data-testid="ockSwapMessage_Message"] {
-  color:black !important;
-  font: bold 1.5rem Arial, sans-serif !important;
-} */
+[data-testid="ockSwapMessage_Message"] {
+  color: white !important;
+}
+
+
+
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenSelectButton_Button"] {
@@ -100,7 +102,7 @@ button[aria-label="Toggle swap settings"] {
 
 
 [data-testid="ockTextInput_Input"] {
-  color: #000000 !important; /* Tailwind's green-500 */
+  color: white !important; /* Tailwind's green-500 */
 }
 
 [data-testid="ockIdentity_Text"] {
@@ -205,6 +207,19 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+button[aria-label="Toggle menu"] {
+  background-color: #1f4aa4 !important;
+}
+
+button[aria-label="Toggle menu"] svg {
+  stroke: white !important;
+}
+
+svg[aria-label="ock-swapSettingsSvg"] path {
+  fill: white !important;
+}
+
 
 [data-testid="ockConnectButton"] {
   background: black !important; /* green-500 */

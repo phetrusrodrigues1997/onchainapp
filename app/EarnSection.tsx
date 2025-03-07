@@ -19,7 +19,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
             setEarnSection("deposit");
             setActiveButton("deposit");
           }}
-          className={`${activeButton === "deposit" ? "bg-[#000000] text-white" : "bg-[#ffffff]"} text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
+          className={`${activeButton === "deposit" ? "bg-[#000000] text-white" : "bg-[#0e3993]"} text-white px-4 py-2 rounded-full focus:outline-none transition-colors`}
         >
           Lend
         </button>
@@ -28,7 +28,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
             setEarnSection("withdraw");
             setActiveButton("withdraw");
           }}
-          className={`${activeButton === "withdraw" ? "bg-[#000000] text-white" : "bg-[#ffffff]"} text-black px-4 py-2 rounded-full focus:outline-none transition-colors`}
+          className={`${activeButton === "withdraw" ? "bg-[#000000] text-white" : "bg-[#0e3993]"} text-white px-4 py-2 rounded-full focus:outline-none transition-colors`}
         >
           Withdraw
         </button>
@@ -37,7 +37,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
       {/* Earn Section */}
       <Earn vaultAddress={selectedVaultAddress}>
         {earnSection === "deposit" && (
-          <EarnDeposit className="bg-[#fdfdfd] dark:bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100 dark:border-gray-100">
+          <EarnDeposit className="bg-[#1E2B50] dark:bg-[#1E2B50] p-6 rounded-2xl border border-white shadow-md max-w-sm mx-auto">
             <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
             <DepositBalance className="mb-3 bg-[#f1f2f5] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
             <DepositAmountInput className="mb-4 bg-[#f1f2f5] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
@@ -45,7 +45,7 @@ const EarnSection: React.FC<EarnSectionProps> = ({ selectedVaultAddress }) => {
           </EarnDeposit>
         )}
         {earnSection === "withdraw" && (
-          <EarnWithdraw className="bg-[#fdfdfd] dark:bg-[#fdfdfd] p-6 rounded-2xl shadow-md max-w-sm mx-auto border border-gray-100 dark:border-gray-100">
+          <EarnWithdraw className="bg-[#1E2B50] dark:bg-[#1E2B50] p-6 rounded-2xl border border-white shadow-md max-w-sm mx-auto">
             <EarnDetails className="text-gray-900 font-semibold text-xl mb-4" />
             <WithdrawBalance className="mb-3 bg-[#f1f2f5] text-gray-700 rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium" />
             <WithdrawAmountInput className="mb-4 bg-[#f1f2f5] text-gray-900 rounded-xl border border-gray-200 px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
