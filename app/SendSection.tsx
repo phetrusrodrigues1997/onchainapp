@@ -303,7 +303,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       <button
         onClick={handleSend}
         disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
-        className="w-full bg-[#549bEB] text-white rounded-full py-3 transition-colors hover:bg-[#2563EB] disabled:bg-[#65acEB]"
+        className="w-full bg-[#000077] text-white rounded-full py-3 transition-colors hover:bg-[#2563EB] disabled:bg-[#000077]"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>
