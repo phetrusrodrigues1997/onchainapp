@@ -41,7 +41,7 @@ const EarnSection: React.FC = () => {
   const [activeButton, setActiveButton] = useState<"deposit" | "withdraw">("deposit");
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
 
-  // Reusable TokenSelect component
+  // Reusable TokenSelect componenttest
   const TokenSelect = () => (
     <Select
       value={selectedToken}
