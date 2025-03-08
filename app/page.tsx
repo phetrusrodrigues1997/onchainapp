@@ -136,7 +136,7 @@ import Send from './SendSection';
     </div>
     <div className="wallet-container">
       <Wallet>
-        <ConnectWallet className="bg-[#d3c81a] dark:bg-[#F9F9F9] rounded-full">
+        <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full">
           <Avatar className="h-6 w-6" />
           <Name />
         </ConnectWallet>

@@ -5,10 +5,10 @@ import sys
 
 # -------- CONFIGURATION --------
 BASE_RPC_URL = "https://mainnet.base.org"  # Use https://goerli.base.org for testnet
-PRIVATE_KEY = "0x73009294b5617363e6037743351caa684f8399bff50ee5b0195bb15348bf0de5"  # NEVER hardcode this in production!
+PRIVATE_KEY = "0x73009294b5617363e6037743351caa684f8399bff50ee5b0195bb15348"  # NEVER hardcode this in production!
 CONTRACT_ADDRESS = "0x947A1657722453599f95A439f66Fbf418F72e7eD"
 
-# Install and set solc version
+# Install and set solcbf version
 install_solc('0.8.0')
 set_solc_version('0.8.0')
 
@@ -17,7 +17,7 @@ w3 = Web3(Web3.HTTPProvider(BASE_RPC_URL))
 account = w3.eth.account.from_key(PRIVATE_KEY)
 print(f"Using address: {account.address}")
 
-# -------- ERC-20 CONTRACT SOURCE CODE --------
+# -------- ERC-200 CONTRACT SOURCE CODE --------
 erc20_source_code = """
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
@@ -65,18 +65,18 @@ contract AirborneEagle {
 }
 """
 
-# -------- COMPILE CONTRACT --------
+# -------- COMPILEd CONTRACT --------
 compiled_sol = compile_source(erc20_source_code)
 contract_interface = compiled_sol["<stdin>:AirborneEagle"]
 
-# -------- CLASS FOR TOKEN MANAGEMENT --------
+# -------- CLASS FOR TOKEEN MANAGEMENT --------
 class GoldenEagleTokenManager:
     def __init__(self, contract_address, recipient_address):
         self.w3 = w3
         self.account = account
         self.contract_address = contract_address
         self.contract = w3.eth.contract(address=contract_address, abi=contract_interface["abi"])
-        self.recipient_address = recipient_address  # Store the recipient address
+        self.recipient_address = recipient_address  # Store the recipient address5
 
     def send_tokens(self, amount=100):
         """

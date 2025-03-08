@@ -30,6 +30,12 @@ button[aria-label="Toggle swap settings"] {
     background: #FAFAFA !important;
   }
 }
+
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockTokenSelectButton_Symbol"] {
+    color: #000000 !important;
+  }
+}
 [data-testid="ockTokenSelectDropdown_List"] {
   max-height: 200px;
   overflow-y: auto; /* Enables scrolling */
@@ -265,7 +271,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockConnectButton"] {
-    background: #549bEB !important; /* from-gray-700 to-gray-800 */
+    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
     color: white !important;
   }
 }
