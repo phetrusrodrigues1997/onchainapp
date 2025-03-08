@@ -137,7 +137,7 @@ button[aria-label="Toggle swap settings"] {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTransactionButton_Button"] {
-    background: #d3c81a !important;
+    background: #65acEB !important;
     color: white; /* from-gray-700 to-gray-800 */
   }
 }
@@ -191,7 +191,7 @@ button[aria-label="Toggle swap settings"] {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockBuyButton_Button"] {
-    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+    background: #65acEB !important; /* from-gray-700 to-gray-800 */
     color: white !important;
   }
 }
@@ -231,7 +231,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
 
 
 [data-testid="ockConnectButton"] {
-  background: #d3c81a !important; /* green-500 */
+  background: #65acEB !important; /* green-500 */
   color: black !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
@@ -248,7 +248,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockConnectButton"] {
-    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+    background: #65acEB !important; /* from-gray-700 to-gray-800 */
     color: white !important;
   }
 }
