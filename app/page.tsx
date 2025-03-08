@@ -134,7 +134,7 @@ import Send from './SendSection';
     </div>
     <div className="wallet-container">
       <Wallet>
-        <ConnectWallet className="bg-[#FFFFFF] dark:bg-[#F9F9F9] rounded-full">
+        <ConnectWallet className="bg-[#d3c81a] dark:bg-[#F9F9F9] rounded-full">
           <Avatar className="h-6 w-6" />
           <Name />
         </ConnectWallet>
@@ -174,7 +174,7 @@ import Send from './SendSection';
   >
     {activeSection === "swap" && (
       <div>
-        <Swap experimental={{ useAggregator: true }} className="bg-[#0b0660] p-1 max-w-sm mx-auto">
+        <Swap experimental={{ useAggregator: true }} className="bg-[#080330] p-1 max-w-sm mx-auto">
           <SwapSettings>
             <SwapSettingsSlippageTitle className="text-[#EA580C]">
               Max. slippage
@@ -198,9 +198,9 @@ import Send from './SendSection';
             swappableTokens={swappableTokens}
             token={BRZToken}
             type="to"
-            className="mb-1 bg-gray-900  text-white rounded-2xl shadow-sm border border-gray-700"
+            className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-700"
           />
-          <SwapButton className="w-full bg-black !text-black rounded-full py-2 transition-colors" />
+          <SwapButton className="w-full bg-[#65acEB] rounded-full py-2 transition-colors" />
           <SwapMessage className="mt-2 text-gray-800 text-sm" />
           <SwapToast />
         </Swap>

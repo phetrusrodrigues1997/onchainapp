@@ -4,12 +4,12 @@
 
 /* #182848 */
 :root {
-  --background: #0b0660;
+  --background: #080330;
  
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#0b0660 !important;
+  background:#080330 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,7 +19,7 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ockSwapMessage_Message"] {
-  color: white !important;
+  color: black !important;
 }
 
 
@@ -70,11 +70,11 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ock-vaultDetails"] {
-  background:#2a2a2a !important;
+  background:#1F2937 !important;
 }
 
 [data-testid="ock-yieldDetails"] {
-  background:#2a2a2a !important;
+  background:#1F2937 !important;
 }
 
 
@@ -105,6 +105,7 @@ button[aria-label="Toggle swap settings"] {
 
 [data-testid="ockTextInput_Input"] {
   color: white !important; /* Tailwind's green-500 */
+   /* Tailwind's green-500 */
 }
 
 [data-testid="ockIdentity_Text"] {
@@ -112,8 +113,8 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ockTransactionButton_Button"] {
-  background:#9e79f4 !important; /* green-500 */
-  color: black !important;
+  background:#65acEB !important; /* green-500 */
+  color: white !important;
   font-weight: 500 !important; /* Tailwind's font-semibold */
   border-radius: 0.25rem !important; /* Tailwind's rounded-sm */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
@@ -172,6 +173,8 @@ button[aria-label="Toggle swap settings"] {
     background-color: var(--ock-bg-alternate-active) !important;
   }
 
+ 
+
   /* Ensuring the SVG icon color does not change in dark mode */
   [data-testid="ock-toggleSvg"] path {
     fill: currentColor !important;
@@ -180,8 +183,11 @@ button[aria-label="Toggle swap settings"] {
 
 
 [data-testid="ockBuyButton_Button"] {
-  background: #0D47A1 !important; /* green-600 */
+  background: #65acEB !important; /* green-600 */
 }
+/* .flex.h-12.items-center.px-2.pl-4.ock-bg-default.ock-border-radius.ock-border-line-default.border {
+  
+} */
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockBuyButton_Button"] {
@@ -225,8 +231,8 @@ svg[aria-label="ock-swapSettingsSvg"] path {
 
 
 [data-testid="ockConnectButton"] {
-  background: black !important; /* green-500 */
-  color: white !important;
+  background: #d3c81a !important; /* green-500 */
+  color: black !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
   padding-bottom: 0.5rem !important;

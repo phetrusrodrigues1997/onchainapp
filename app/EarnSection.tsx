@@ -73,9 +73,9 @@ const EarnSection: React.FC = () => {
             setEarnSection("deposit");
             setActiveButton("deposit");
           }}
-          className={`rounded flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium ${
+          className={`rounded flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
             activeButton === "deposit"
-              ? "bg-[#9e79f4] text-black font-semibold"
+              ? "bg-[#65acEB] text-white font-semibold"
               : "bg-gray-900 text-gray-400"
           }`}
         >
@@ -86,9 +86,9 @@ const EarnSection: React.FC = () => {
             setEarnSection("withdraw");
             setActiveButton("withdraw");
           }}
-          className={`rounded flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium ${
+          className={`rounded flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
             activeButton === "withdraw"
-              ? "bg-[#9e79f4] text-black font-semibold"
+              ? "bg-[#65acEB] text-white font-semibold"
               : "bg-gray-900 text-gray-400"
           }`}
         >

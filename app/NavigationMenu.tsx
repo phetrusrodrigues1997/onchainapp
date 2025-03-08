@@ -63,7 +63,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               className={`font-medium ${
                 activeSection === item.id
                   ? 'text-[#d3c81a] text-base font-semibold'
-                  : 'text-[#FFFFFF] hover:text-black '
+                  : 'text-[#FFFFFF] hover:text-[#d3c81a] '
               }`}
             >
               {item.label}
