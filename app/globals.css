@@ -147,6 +147,9 @@ button[aria-label="Toggle swap settings"] {
   display: none !important; /* green-600 */
 }
 }
+[data-testid="ockAvatar_ImageContainer"] {
+  display: none !important; /* green-600 */
+}
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenRow_Container"] {
