@@ -13,12 +13,12 @@ const CurrencyDisplay: React.FC = () => {
 
   // Define the currencies and their corresponding countries
   const currencyData = [
-    { code: 'JPY', country: 'Japan' },
-    { code: 'GBP', country: 'United Kingdom' },
-    { code: 'EUR', country: 'Eurozone' },
-    { code: 'BRL', country: 'Brazil' },
-    { code: 'CAD', country: 'Canada' },
-    { code: 'AUD', country: 'Australia' },
+    { code: 'JPY', country: 'Japan', symbol: '¥' },
+    { code: 'GBP', country: 'United Kingdom', symbol: '£' },
+    { code: 'EUR', country: 'Eurozone', symbol: '€' },
+    { code: 'BRL', country: 'Brazil', symbol: 'R$' },
+    { code: 'CAD', country: 'Canada', symbol: 'CA$' },
+    { code: 'AUD', country: 'Australia', symbol: 'A$' },
     { code: 'CHF', country: 'Switzerland' },
   ];
 
@@ -71,7 +71,7 @@ const CurrencyDisplay: React.FC = () => {
 
   return (
     <div className="bg-[#080330] text-white p-4 max-w-full mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center">Currency Exchange Rates (Base: USD)</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Currency Exchange Rates (USD)</h2>
       <p className="mb-6 text-center">Last updated: {lastUpdated}</p>
       
       {/* Desktop Table */}
@@ -88,9 +88,9 @@ const CurrencyDisplay: React.FC = () => {
 
         {/* Currency Rows */}
         <div className="divide-y divide-gray-700">
-          {currencyData.map(({ code, country }) => (
+          {currencyData.map(({ code, country, symbol }) => (
             <div key={code} className="grid grid-cols-6 hover:bg-gray-950 transition-colors">
-              <div className="p-4 text-center">{code}</div>
+              <div className="p-4 text-center">{code} {symbol || ''}</div> {/* Display symbol if available */}
               <div className="p-4 text-center">{exchangeData.rates[code]?.toFixed(2) || 'N/A'}</div>
               <div className="p-4 text-center">{country}</div>
               <div className="p-4 text-center">—</div>
@@ -117,11 +117,11 @@ const CurrencyDisplay: React.FC = () => {
         {/* Filtered Currency Cards */}
         <div className="space-y-3">
           {filteredCurrencyData.length > 0 ? (
-            filteredCurrencyData.map(({ code, country }) => (
+            filteredCurrencyData.map(({ code, country, symbol }) => (
               <div key={code} className="bg-gray-950 rounded-lg p-3 border border-gray-700">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="font-semibold">Currency:</div>
-                  <div>{code}</div>
+                  <div>{code} {symbol || ''}</div> {/* Display symbol if available */}
                   <div className="font-semibold">Rate (USD):</div>
                   <div>{exchangeData.rates[code]?.toFixed(2) || 'N/A'}</div>
                   <div className="font-semibold">Country:</div>

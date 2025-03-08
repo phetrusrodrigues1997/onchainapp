@@ -74,7 +74,7 @@ const EarnSection: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col items-center max-w-sm mx-auto px-0 sm:px-0 scale-80">
+    <div className="flex flex-col items-center max-w-sm mx-auto px-0 sm:px-0 scale-80 sm:scale-100">
       {/* Deposit / Withdraw Toggle Buttons */}
       <div className="flex w-full max-w-sm ">
         <button
