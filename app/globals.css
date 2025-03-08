@@ -231,7 +231,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
 
 
 [data-testid="ockConnectButton"] {
-  background: #549bEB !important; /* green-500 */
+  background: #d3c81a !important; /* green-500 */
   color: black !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */

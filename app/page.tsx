@@ -106,15 +106,17 @@ import Send from './SendSection';
      WETHToken];
 
 
+
   export default function App() {
     const [activeSection, setActiveSection] = useState('swap'); // Include setActiveSection
-    const [selectedVaultAddress, setSelectedVaultAddress] = useState<`0x${string}`>("0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca"); // Default to USDC’s vault address
     const [isMounted, setIsMounted] = useState(false);
   
     
     useEffect(() => {
       setIsMounted(true);
     }, []);
+
+    
   
     if (!isMounted) {
       return <div>Loading...</div>;
