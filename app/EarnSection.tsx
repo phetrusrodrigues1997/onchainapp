@@ -41,6 +41,15 @@ const EarnSection: React.FC = () => {
   const [activeButton, setActiveButton] = useState<"deposit" | "withdraw">("deposit");
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
 
+  // // Use useEffect to change the text color after the component mounts
+  // useEffect(() => {
+  //   // Target the div with class "ock-font-family font-semibold" inside the ockEarnBalance div
+  //   const balanceElement = document.querySelector('[data-testid="ockEarnBalance"] .ock-font-family.font-semibold');
+  //   if (balanceElement) {
+  //     (balanceElement as HTMLElement).style.color = 'white';
+  //   }
+  // }, []); // Empty dependency array ensures this runs once on mount
+
   // Reusable TokenSelect componenttest
   const TokenSelect = () => (
     <Select
@@ -65,7 +74,7 @@ const EarnSection: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col items-center max-w-sm mx-auto px-0 sm:px-0">
+    <div className="flex flex-col items-center max-w-sm mx-auto px-0 sm:px-0 scale-80">
       {/* Deposit / Withdraw Toggle Buttons */}
       <div className="flex w-full max-w-sm ">
         <button
@@ -102,6 +111,7 @@ const EarnSection: React.FC = () => {
           <EarnDeposit className="bg-gray-900 p-4 sm:p-6 rounded border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
             <TokenSelect/>
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
+            <DepositBalance className="bg-gray-800"/>
             <DepositAmountInput className="mb-4 bg-gray-800 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
             <DepositButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
           </EarnDeposit>
@@ -110,6 +120,7 @@ const EarnSection: React.FC = () => {
           <EarnWithdraw className="bg-gray-900 p-4 sm:p-6 rounded border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
             <TokenSelect />
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
+             <WithdrawBalance className="bg-gray-800"/>
             <WithdrawAmountInput className="mb-4 bg-gray-800 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />            <WithdrawButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
           </EarnWithdraw>
         )}

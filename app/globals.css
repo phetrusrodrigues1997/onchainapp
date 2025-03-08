@@ -151,6 +151,20 @@ button[aria-label="Toggle swap settings"] {
   display: none !important; /* green-600 */
 }
 
+[data-testid="ockEarnBalance"] .ock-font-family.font-semibold {
+  color: white !important;
+}
+
+[data-testid="ockWithdrawBalance"] .ock-font-family.font-semibold {
+  color: white !important;
+}
+
+@media (min-width: 640px) { /* sm breakpoint in Tailwind */
+  .ockEarnBalance {
+    font-size: 10px !important;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenRow_Container"] {
     background: white !important; /* green-600 */
