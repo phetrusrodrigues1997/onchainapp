@@ -114,9 +114,34 @@ import Send from './SendSection';
     
     useEffect(() => {
       setIsMounted(true);
-    }, []);
-
-    
+  
+      // Function to apply the black color
+      const setBlackColor = () => {
+        const element = document.querySelector('[data-testid="ockTokenSelectButton_Symbol"]') as HTMLElement;
+        if (element) {
+          element.style.color = 'black'; // Set to black
+          element.style.setProperty('color', 'black', 'important'); // Ensure it overrides other styles
+        }
+      };
+  
+      // Apply initially
+      setBlackColor();
+  
+      // Observe DOM changes to reapply the style if the element is re-rendered
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach(() => {
+          setBlackColor();
+        });
+      });
+  
+      // Start observing the document with a subtree check
+      observer.observe(document.body, { childList: true, subtree: true });
+  
+      // Cleanup observer on component unmount
+      return () => {
+        observer.disconnect();
+      };
+    }, []); // Empty dependency array ensures this runs once on mount and persists
   
     if (!isMounted) {
       return <div>Loading...</div>;

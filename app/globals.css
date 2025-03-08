@@ -31,11 +31,11 @@ button[aria-label="Toggle swap settings"] {
   }
 }
 
-@media (prefers-color-scheme: dark) {
+
   [data-testid="ockTokenSelectButton_Symbol"] {
     color: #000000 !important;
   }
-}
+
 [data-testid="ockTokenSelectDropdown_List"] {
   max-height: 200px;
   overflow-y: auto; /* Enables scrolling */
