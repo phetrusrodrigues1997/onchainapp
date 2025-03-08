@@ -75,7 +75,7 @@ const EarnSection: React.FC = () => {
           }}
           className={`rounded flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
             activeButton === "deposit"
-              ? "bg-[#65acEB] text-white font-semibold"
+              ? "bg-[#549bEB] text-white font-semibold"
               : "bg-gray-900 text-gray-400"
           }`}
         >
@@ -88,7 +88,7 @@ const EarnSection: React.FC = () => {
           }}
           className={`rounded flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
             activeButton === "withdraw"
-              ? "bg-[#65acEB] text-white font-semibold"
+              ? "bg-[#549bEB] text-white font-semibold"
               : "bg-gray-900 text-gray-400"
           }`}
         >
@@ -100,7 +100,7 @@ const EarnSection: React.FC = () => {
       <Earn vaultAddress={selectedToken.vaultAddress as `0x${string}`}>
         {earnSection === "deposit" && (
           <EarnDeposit className="bg-gray-900 p-4 sm:p-6 rounded border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
-            <TokenSelect />
+            <TokenSelect/>
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
             <DepositAmountInput className="mb-4 bg-gray-800 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
             <DepositButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
