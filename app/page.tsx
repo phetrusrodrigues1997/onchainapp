@@ -115,33 +115,37 @@ import Send from './SendSection';
     useEffect(() => {
       setIsMounted(true);
   
-      // Function to apply the black color
-      const setBlackColor = () => {
-        const element = document.querySelector('[data-testid="ockTokenSelectButton_Symbol"]') as HTMLElement;
-        if (element) {
-          element.style.color = 'black'; // Set to black
-          element.style.setProperty('color', 'black', 'important'); // Ensure it overrides other styles
-        }
-      };
-  
-      // Apply initially
-      setBlackColor();
-  
-      // Observe DOM changes to reapply the style if the element is re-rendered
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach(() => {
-          setBlackColor();
-        });
-      });
-  
-      // Start observing the document with a subtree check
-      observer.observe(document.body, { childList: true, subtree: true });
-  
-      // Cleanup observer on component unmount
-      return () => {
-        observer.disconnect();
-      };
-    }, []); // Empty dependency array ensures this runs once on mount and persists
+      // Function to set black color on all matching elements
+  const setBlackColor = () => {
+    const elements = document.querySelectorAll('[data-testid="ockTokenSelectButton_Symbol"]');
+    elements.forEach((element) => {
+      if (element instanceof HTMLElement) {
+        element.style.color = 'black'; // Set the color to black
+        element.style.setProperty('color', 'black', 'important'); // Override conflicting styles
+      }
+    });
+  };
+
+  // Run it once when the component mounts
+  setBlackColor();
+
+  // Set up a MutationObserver to watch for new elements
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.addedNodes.length > 0) {
+        setBlackColor(); // Reapply styles when new nodes are added
+      }
+    });
+  });
+
+  // Observe changes in the entire document
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Clean up the observer when the component unmounts
+  return () => {
+    observer.disconnect();
+  };
+}, []); // Empty dependency array: runs once on mount
   
     if (!isMounted) {
       return <div>Loading...</div>;
