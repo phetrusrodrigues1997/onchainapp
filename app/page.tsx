@@ -190,7 +190,7 @@ import Send from './SendSection';
             swappableTokens={swappableTokens}
             token={USDCToken}
             type="from"
-            className="mb-1 bg-gray-900  text-white rounded-2xl shadow-sm"
+            className="mb-1 bg-gray-900  text-white rounded-2xl shadow-sm border border-gray-700"
           />
           <SwapToggleButton className="mb-2" />
           <SwapAmountInput
@@ -198,7 +198,7 @@ import Send from './SendSection';
             swappableTokens={swappableTokens}
             token={BRZToken}
             type="to"
-            className="mb-1 bg-gray-900  text-white rounded-2xl shadow-sm"
+            className="mb-1 bg-gray-900  text-white rounded-2xl shadow-sm border border-gray-700"
           />
           <SwapButton className="w-full bg-black !text-black rounded-full py-2 transition-colors" />
           <SwapMessage className="mt-2 text-gray-800 text-sm" />

@@ -62,7 +62,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               onClick={() => setActiveSection(item.id)}
               className={`font-medium ${
                 activeSection === item.id
-                  ? 'text-[#d3c81a] text-base'
+                  ? 'text-[#d3c81a] text-base font-semibold'
                   : 'text-[#FFFFFF] hover:text-black '
               }`}
             >
