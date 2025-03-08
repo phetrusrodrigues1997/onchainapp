@@ -13,9 +13,9 @@ button[aria-label="Toggle swap settings"] {
 }
 
 @media (prefers-color-scheme: dark) {
-  .flex.flex-col.ock-text-foreground .font-semibold {
-    color: white !important; /* Change to your desired color */
-}
+  .flex.flex-col.ock-text-foreground :not([data-testid="ockTokenSelectButton_Symbol"]) .font-semibold {
+    color: white !important;
+  }
 }
 
 [data-testid="ockSwapMessage_Message"] {
