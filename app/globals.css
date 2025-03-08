@@ -4,12 +4,12 @@
 
 /* #182848 */
 :root {
-  --background: #0e3993;
+  --background: #0b0660;
  
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#0e3993 !important;
+  background:#0b0660 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -104,7 +104,7 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ockTextInput_Input"] {
-  color: black !important; /* Tailwind's green-500 */
+  color: white !important; /* Tailwind's green-500 */
 }
 
 [data-testid="ockIdentity_Text"] {
@@ -112,9 +112,10 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ockTransactionButton_Button"] {
-  background: #0D47A1 !important; /* green-500 */
-  color: white !important;
-  border-radius: 9999px !important; /* Tailwind's rounded-md */
+  background:#9e79f4 !important; /* green-500 */
+  color: black !important;
+  font-weight: 500 !important; /* Tailwind's font-semibold */
+  border-radius: 0.25rem !important; /* Tailwind's rounded-sm */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
   padding-bottom: 0.5rem !important;
   padding-left: 1rem !important; /* Tailwind's px-4 */
@@ -124,6 +125,10 @@ button[aria-label="Toggle swap settings"] {
   border: none !important; /* Remove any default border */
   opacity: 1 !important; /* Override the disabled opacity */
   pointer-events: auto !important; /* Override pointer-events-none if needed */
+}
+
+[data-testid="ockTransactionButton_Button"]:hover {
+  background:#CCCCFF !important; /* green-600 */
 }
 .ock-font-family.text-sm.ock-text-foreground-muted {
   color: gray !important;
@@ -136,10 +141,6 @@ button[aria-label="Toggle swap settings"] {
   }
 }
 
-
-[data-testid="ockTransactionButton_Button"]:hover {
-  background: #000000 !important; /* green-600 */
-}
 @media (prefers-color-scheme: dark) {
 [data-testid="ockAvatar_ImageContainer"] {
   display: none !important; /* green-600 */
