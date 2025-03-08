@@ -117,7 +117,9 @@ import Send from './SendSection';
   
       // Function to set black color on all matching elements
   const setBlackColor = () => {
-    const elements = document.querySelectorAll('[data-testid="ockTokenSelectButton_Symbol"]');
+    // Combined selector for data-testid and span elements with specific classes
+    const selector = '[data-testid="ockTokenSelectButton_Symbol"], span.ock-font-family.font-semibold.overflow-hidden.text-ellipsis.whitespace-nowrap.text-left';
+    const elements = document.querySelectorAll(selector);
     elements.forEach((element) => {
       if (element instanceof HTMLElement) {
         element.style.color = 'black'; // Set the color to black
