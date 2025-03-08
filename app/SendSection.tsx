@@ -225,7 +225,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   }, [error]);
 
   return (
-    <div className={`bg-gray-900 p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
+    <div className={`bg-gray-950 p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
       <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
 
       {/* Token Selection with Custom Dropdown */}
@@ -303,7 +303,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       <button
         onClick={handleSend}
         disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
-        className="w-full bg-[#000077] text-white rounded-full py-3 transition-colors hover:bg-[#2563EB] disabled:bg-[#000077]"
+        className="w-full bg-[#0000aa] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#0000aa]"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>

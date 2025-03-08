@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import React from "react";
 import BuySection from "./BuySection";
+import CurrencyDisplay from './LiveCurrencies';
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
 import CurrencySelection from './Liquidity';
@@ -223,7 +224,7 @@ import Send from './SendSection';
             swappableTokens={swappableTokens}
             token={USDCToken}
             type="from"
-            className="mb-1 bg-gray-900  text-white rounded-2xl shadow-sm border border-gray-700"
+            className="mb-1 bg-gray-950  text-white rounded-2xl shadow-sm border border-gray-700"
           />
           <SwapToggleButton className="mb-2" />
           <SwapAmountInput
@@ -231,9 +232,9 @@ import Send from './SendSection';
             swappableTokens={swappableTokens}
             token={BRZToken}
             type="to"
-            className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-700"
+            className="mb-1 bg-gray-950 text-white rounded-2xl shadow-sm border border-gray-700"
           />
-          <SwapButton className="w-full bg-[#000077] rounded-full py-2 transition-colors" />
+          <SwapButton className="w-full bg-[#0000aa] rounded-full py-2 transition-colors" />
           <SwapMessage className="mt-2 text-gray-800 text-sm" />
           <SwapToast />
         </Swap>
@@ -260,6 +261,7 @@ import Send from './SendSection';
     )}
 
     {activeSection === "buy" && <BuySection />}
+    {activeSection === "market" && <CurrencyDisplay />}
   </div>
 </main>
   

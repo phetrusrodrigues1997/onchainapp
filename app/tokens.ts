@@ -34,5 +34,7 @@ export const ETHToken = {
     symbol: "EURC",
     image: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125"
   };
+
   
-  export const tokens = [USDCToken, ETHToken, EURCToken, CbBTCToken];
+  
+  export const tokens = [USDCToken, EURCToken,ETHToken, CbBTCToken];

@@ -72,7 +72,7 @@ const BuySection: React.FC = () => {
   return (
     <div>
       <div className="w-full max-w-sm mx-auto p-4">
-        <p className="text-xs sm:text-sm font-bold text-white text-center mb-4 sm:mb-6">
+      <p className="text-xl sm:text-xl font-bold text-white text-center mb-4 sm:mb-6">
           Buy USDC, swap it for the{' '}
           <span className="inline-block transition-all duration-300 ease-in-out">
             {currencies[currencyIndex].symbol} {currencies[currencyIndex].name}
@@ -80,7 +80,7 @@ const BuySection: React.FC = () => {
         </p>
       </div>
 
-      <div className={`${getContainerWidth()} mx-auto p-4 bg-gray-900 rounded-lg shadow-md border border-gray-700`}>
+      <div className={`${getContainerWidth()} mx-auto p-4 bg-gray-950 rounded-lg shadow-md border border-gray-700`}>
         <p className="text-sm sm:text-base text-gray-400 text-center mb-4 sm:mb-6">
           We accept visa and mastercard.
         </p>
