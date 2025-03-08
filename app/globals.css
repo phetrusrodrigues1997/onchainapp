@@ -14,7 +14,7 @@ button[aria-label="Toggle swap settings"] {
 
 @media (prefers-color-scheme: dark) {
   .flex.flex-col.ock-text-foreground .font-semibold {
-    color: black !important; /* Change to your desired color */
+    color: white !important; /* Change to your desired color */
 }
 }
 
