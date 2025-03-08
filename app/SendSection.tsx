@@ -225,7 +225,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   }, [error]);
 
   return (
-    <div className={`bg-gray-950 p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
+    <div className={`bg-[#0e0e1f] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
       <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
 
       {/* Token Selection with Custom Dropdown */}

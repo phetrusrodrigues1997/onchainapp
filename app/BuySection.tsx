@@ -80,7 +80,7 @@ const BuySection: React.FC = () => {
         </p>
       </div>
 
-      <div className={`${getContainerWidth()} mx-auto p-4 bg-gray-950 rounded-lg shadow-md border border-gray-700`}>
+      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#0e0e1f] rounded-lg shadow-md border border-gray-700`}>
         <p className="text-sm sm:text-base text-gray-400 text-center mb-4 sm:mb-6">
           We accept visa and mastercard.
         </p>

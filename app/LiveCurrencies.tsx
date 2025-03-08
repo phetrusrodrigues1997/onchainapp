@@ -89,7 +89,7 @@ const CurrencyDisplay: React.FC = () => {
         {/* Currency Rows */}
         <div className="divide-y divide-gray-700">
           {currencyData.map(({ code, country, symbol }) => (
-            <div key={code} className="grid grid-cols-6 hover:bg-gray-950 transition-colors">
+            <div key={code} className="grid grid-cols-6 hover:bg-[#0e0e1f] transition-colors">
               <div className="p-4 text-center">{code} {symbol || ''}</div> {/* Display symbol if available */}
               <div className="p-4 text-center">{exchangeData.rates[code]?.toFixed(2) || 'N/A'}</div>
               <div className="p-4 text-center">{country}</div>
@@ -110,7 +110,7 @@ const CurrencyDisplay: React.FC = () => {
             placeholder="Search currency or country..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 bg-gray-950 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="w-full p-2 bg-[#0e0e1f] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>
 
@@ -118,7 +118,7 @@ const CurrencyDisplay: React.FC = () => {
         <div className="space-y-3">
           {filteredCurrencyData.length > 0 ? (
             filteredCurrencyData.map(({ code, country, symbol }) => (
-              <div key={code} className="bg-gray-950 rounded-lg p-3 border border-gray-700">
+              <div key={code} className="bg-[#0e0e1f] rounded-lg p-3 border border-gray-700">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="font-semibold">Currency:</div>
                   <div>{code} {symbol || ''}</div> {/* Display symbol if available */}
