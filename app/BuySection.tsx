@@ -25,6 +25,14 @@ const BuySection: React.FC = () => {
     { name: "yen", symbol: "¥" },
     { name: "real", symbol: "R$" },
     { name: "peso", symbol: "$" },
+    { name: "euro", symbol: "€" },
+    { name: "franc", symbol: "Fr" },
+    { name: "rupee", symbol: "₹" },
+    { name: "won", symbol: "₩" },
+    { name: "lira", symbol: "₺" },
+    { name: "krona", symbol: "kr" },
+    { name: "rand", symbol: "R" },
+    { name: "ruble", symbol: "₽" }
   ];
 
   useEffect(() => {

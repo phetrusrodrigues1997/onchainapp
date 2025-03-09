@@ -20,6 +20,15 @@ const CurrencyDisplay: React.FC = () => {
     { code: 'CAD', country: 'Canada', symbol: 'CA$' },
     { code: 'AUD', country: 'Australia', symbol: 'A$' },
     { code: 'CHF', country: 'Switzerland' },
+    { code: 'CNY', country: 'China', symbol: '¥' },
+    { code: 'HKD', country: 'Hong Kong', symbol: 'HK$' },
+    { code: 'INR', country: 'India', symbol: '₹' },
+    { code: 'KRW', country: 'South Korea', symbol: '₩' },
+    { code: 'MXN', country: 'Mexico', symbol: 'Mex$' },
+    { code: 'RUB', country: 'Russia', symbol: '₽' },
+    { code: 'ZAR', country: 'South Africa', symbol: 'R' },
+    {code:'TRY', country:'Turkey', symbol:'₺'},
+    {code:'SEK', country:'Sweden', symbol:'kr'}
   ];
 
   // Fetch exchange rates when the component mounts

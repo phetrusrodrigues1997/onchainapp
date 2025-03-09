@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useSwitchChain, useReadContract, useBalance } from 'wagmi';
+import { useAccount, useWriteContract, useSendTransaction, useSwitchChain, useReadContract, useBalance } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
-import { base } from 'wagmi/chains'; // Import Base chain
+import { base } from 'wagmi/chains';
 
 const ETHToken: Token = {
   address: "",
@@ -107,8 +107,6 @@ const ERC20_ABI = [
     type: 'function',
   },
 ];
-
-// Define the props interface
 interface SendProps {
   className?: string;
 }
@@ -117,200 +115,145 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   const { address, chainId } = useAccount();
   const { switchChain } = useSwitchChain();
 
-  const [selectedToken, setSelectedToken] = useState<Token>(USDCToken);
+  const [sentence, setSentence] = useState<string>('');
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
-  const [isValidAddress, setIsValidAddress] = useState<boolean>(true);
+  const [isSentenceValid, setIsSentenceValid] = useState<boolean>(false);
   const [transactionStatus, setTransactionStatus] = useState<string>('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false); // State to manage dropdown visibility
 
-  // Fetch ERC-20 balance using useReadContract (for non-ETH tokens)
+  // Parse sentence and update states
+  useEffect(() => {
+    const regex = /^\s*send\s+(\d+(?:\.\d+)?)\s+(\w+)\s+to\s+(0x[a-fA-F0-9]{40})\s*$/i;
+    const match = sentence.match(regex);
+    if (match) {
+      const [, amountStr, tokenSymbol, addr] = match;
+      const token = availableTokens.find(t => t.symbol.toLowerCase() === tokenSymbol.toLowerCase());
+      if (token) {
+        setAmount(amountStr);
+        setSelectedToken(token);
+        setRecipientAddress(addr);
+        setIsSentenceValid(true);
+      } else {
+        setIsSentenceValid(false);
+      }
+    } else {
+      setIsSentenceValid(false);
+      setSelectedToken(null);
+      setRecipientAddress('');
+      setAmount('');
+    }
+  }, [sentence]);
+
+  // Fetch balances (unchanged from original)
   const { data: erc20BalanceData } = useReadContract({
-    address: selectedToken.address as `0x${string}`,
+    address: selectedToken?.address as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: [address as `0x${string}`],
-    query: {
-      enabled: !!address && !!selectedToken.address, // Only fetch if address and token are available
-    },
+    query: { enabled: !!address && !!selectedToken?.address },
   });
 
-  // Fetch ETH balance using useBalance (for ETH token)
   const { data: ethBalanceData } = useBalance({
     address: address as `0x${string}`,
-    query: {
-      enabled: !!address && !selectedToken.address, // Only fetch for ETH (address === '')
-    },
+    query: { enabled: !!address && !selectedToken?.address },
   });
 
-  // State to store formatted balance
   const [balance, setBalance] = useState<string | null>(null);
-
-  // Update balance based on selected token
   useEffect(() => {
-    if (!address) {
+    if (!address || !selectedToken) {
       setBalance(null);
       return;
     }
-
     if (selectedToken.address === '') {
-      // Handle ETH balance
-      if (ethBalanceData) {
-        setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
-      }
-    } else {
-      // Handle ERC-20 balance
-      if (erc20BalanceData) {
-        setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
-      }
+      if (ethBalanceData) setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
+    } else if (erc20BalanceData) {
+      setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
     }
   }, [ethBalanceData, erc20BalanceData, selectedToken, address]);
 
-  // Function to validate Ethereum addresses
-  const validateAddress = (address: string): boolean => {
-    return address === '' || /^0x[a-fA-F0-9]{40}$/.test(address); // Simple regex for Ethereum address
-  };
-
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const address = e.target.value;
-    setRecipientAddress(address);
-    setIsValidAddress(address === '' || validateAddress(address));
-  };
-
-  const handleTokenChange = (token: Token) => {
-    setSelectedToken(token);
-    setIsDropdownOpen(false); // Close dropdown after selection
-  };
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(e.target.value);
-  };
-
-  const { writeContract, isPending, error } = useWriteContract();
+  const { writeContract, isPending: isWritePending } = useWriteContract();
+  const { sendTransaction, isPending: isSendPending } = useSendTransaction();
 
   const handleSend = () => {
-    if (!isValidAddress || !recipientAddress || !amount || !address) {
-      setTransactionStatus('Please enter valid information and connect your wallet');
+    if (!isSentenceValid || !selectedToken || !recipientAddress || !amount || !address) {
+      setTransactionStatus('Invalid sentence or wallet not connected');
       return;
     }
 
     try {
-      writeContract({
-        address: selectedToken.address as `0x${string}`,
-        abi: ERC20_ABI,
-        functionName: 'transfer',
-        args: [recipientAddress, parseUnits(amount, selectedToken.decimals)],
-      });
+      if (selectedToken.address === '') {
+        // Send native ETH
+        sendTransaction({
+          to: recipientAddress as `0x${string}`,
+          value: parseUnits(amount, selectedToken.decimals),
+        });
+      } else {
+        // Send ERC-20 token
+        writeContract({
+          address: selectedToken.address as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: 'transfer',
+          args: [recipientAddress, parseUnits(amount, selectedToken.decimals)],
+        });
+      }
       setTransactionStatus('Transaction submitted.');
     } catch (err) {
       setTransactionStatus(`Transaction failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
-  // Handle network switch
+  // Network switch (unchanged)
   useEffect(() => {
     if (switchChain && chainId && chainId !== base.id) {
-      setTransactionStatus('Please switch to the Base network...');
-      switchChain({ chainId: base.id }); // Use switchChain with chainId
+      setTransactionStatus('Please switch to Base network...');
+      switchChain({ chainId: base.id });
     } else if (chainId === base.id) {
-      setTransactionStatus(''); // Clear message if on correct network
+      setTransactionStatus('');
     }
   }, [chainId, switchChain]);
 
-  // Handle transaction status updates (e.g., success or error)
-  useEffect(() => {
-    if (error) {
-      setTransactionStatus(`Transaction failed: ${error.message || 'Unknown error'}`);
-    }
-  }, [error]);
+  const isPending = isWritePending || isSendPending;
 
   return (
     <div className={`bg-[#0e0e1f] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
       <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
 
-      {/* Token Selection with Custom Dropdown */}
+      {/* Single Sentence Input */}
       <div className="mb-4">
-        <label htmlFor="token-select" className="block text-sm font-medium text-gray-400 mb-1">
-          Select Token
-        </label>
-        <div className="relative">
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle dropdown visibility
-            className="w-full p-3 bg-white border border-gray-300 rounded-lg text-black flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
-          >
-            <span className="flex items-center">
-              <img src={selectedToken.image ?? ''} alt={selectedToken.symbol} className="w-6 h-6 mr-2" />
-              {selectedToken.symbol}
-            </span>
-            <span>▼</span>
-          </button>
-          <div className={`absolute z-10 text-black w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg ${isDropdownOpen ? '' : 'hidden'}`} id="token-dropdown">
-            {availableTokens.map((token) => (
-              <button
-                key={token.address}
-                onClick={() => handleTokenChange(token)}
-                className="w-full text-left p-2 hover:bg-gray-100 flex items-center"
-              >
-                <img src={token.image ?? undefined} alt={token.symbol} className="w-6 h-6 mr-2" />
-                {token.symbol}
-              </button>
-            ))}
-          </div>
-        </div>
-        {balance !== null && address && (
-          <p className="mt-1 text-sm text-gray-400">
-            Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}
-          </p>
-        )}
-      </div>
-
-      {/* Recipient Address Input */}
-      <div className="mb-4">
-        <label htmlFor="recipient-address" className="block text-sm font-medium text-gray-400 mb-1">
-          Recipient Address
+        <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
+          Enter Command
         </label>
         <input
-          id="recipient-address"
+          id="sentence"
           type="text"
-          placeholder="0x..."
-          value={recipientAddress}
-          onChange={handleAddressChange}
-          className={`w-full p-3 bg-white border ${isValidAddress ? 'border-gray-300' : 'border-red-400'} rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#3B82F6]`}
-        />
-        {!isValidAddress && (
-          <p className="mt-1 text-sm text-red-400">Please enter a valid Ethereum address</p>
-        )}
-      </div>
-
-      {/* Amount Input */}
-      <div className="mb-4">
-        <label htmlFor="amount" className="block text-sm font-medium text-gray-400 mb-1">
-          Amount
-        </label>
-        <input
-          id="amount"
-          type="number"
-          placeholder="0.00"
-          value={amount}
-          onChange={handleAmountChange}
-          min="0"
-          step="0.000001"
+          value={sentence}
+          onChange={(e) => setSentence(e.target.value)}
+          placeholder="e.g., Send 10 USDC to 0x1234..."
           className="w-full p-3 bg-white border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
         />
+      </div>
+
+      {/* Display Parsed Info */}
+      <div className="mb-4 text-gray-400 text-sm">
+        <p>Token: {selectedToken?.symbol || 'N/A'}</p>
+        <p>Amount: {amount || 'N/A'}</p>
+        <p>To: {recipientAddress || 'N/A'}</p>
+        {balance !== null && selectedToken && (
+          <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
+        )}
       </div>
 
       {/* Send Button */}
       <button
         onClick={handleSend}
-        disabled={!!(isPending || !isValidAddress || !Boolean(recipientAddress) || !Boolean(amount) || !address || (chainId && chainId !== base.id))}
+        disabled={isPending || !isSentenceValid || !address || (!!chainId && chainId !== base.id)}
         className="w-full bg-[#0000aa] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#0000aa]"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>
 
-      {/* Transaction Status Message */}
       {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
-
       {!address && (
         <div className="mt-4 text-red-400 text-center text-sm">
           Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
