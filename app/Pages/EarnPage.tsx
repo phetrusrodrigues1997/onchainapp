@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Earn, EarnDeposit, EarnDetails, DepositBalance, DepositAmountInput, DepositButton, EarnWithdraw, WithdrawBalance, WithdrawAmountInput, WithdrawButton } from '@coinbase/onchainkit/earn';
 import Select from 'react-select';
-import { tokens } from './tokens';
+import { tokens } from '../Token Lists/earnTokens';
 
 // Define custom styles for react-select to match the dark theme
 const customStyles = {
