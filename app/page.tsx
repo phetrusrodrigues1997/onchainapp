@@ -2,20 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import React from "react";
+import { useAccount } from 'wagmi'; // For wallet address
+import { recordSwapPoints, getUserPoints } from './actions'; // Server actions
 import BuySection from "./BuySection";
 import CurrencyDisplay from './LiveCurrencies';
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
 import CurrencySelection from './Liquidity';
 import EarnSection from "./EarnSection";
+import Send from './SendSection';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
-import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast,SwapSettings,
-  SwapSettingsSlippageDescription,
-  SwapSettingsSlippageInput,
-  SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
-import Send from './SendSection';
+import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 
  
 // const { address } = useAccount();
@@ -108,164 +107,121 @@ import Send from './SendSection';
 
 
 
-  export default function App() {
-    const [activeSection, setActiveSection] = useState('swap'); // Include setActiveSection
-    const [isMounted, setIsMounted] = useState(false);
-  
+     export default function App() {
+      const [activeSection, setActiveSection] = useState('swap');
+      const [isMounted, setIsMounted] = useState(false);
+      const [points, setPoints] = useState<number | null>(null); // State for points
+      const { address } = useAccount(); // Get wallet address
     
-    useEffect(() => {
-      setIsMounted(true);
-  
-      // Function to set black color on all matching elements
-  const setBlackColor = () => {
-    // Combined selector for data-testid and span elements with specific classes
-    const selector = '[data-testid="ockTokenSelectButton_Symbol"], span.ock-font-family.font-semibold.overflow-hidden.text-ellipsis.whitespace-nowrap.text-left';
-    const elements = document.querySelectorAll(selector);
-    elements.forEach((element) => {
-      if (element instanceof HTMLElement) {
-        element.style.color = 'black'; // Set the color to black
-        element.style.setProperty('color', 'black', 'important'); // Override conflicting styles
-      }
-    });
-  };
-
-  // Run it once when the component mounts
-  setBlackColor();
-
-  // Set up a MutationObserver to watch for new elements
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.addedNodes.length > 0) {
-        setBlackColor(); // Reapply styles when new nodes are added
-      }
-    });
-  });
-
-  // Observe changes in the entire document
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // Clean up the observer when the component unmounts
-  return () => {
-    observer.disconnect();
-  };
-}, []); // Empty dependency array: runs once on mount
-  
-    if (!isMounted) {
-      return <div>Loading...</div>;
-    }
-  
-    return (
-      <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
-        <header className="pt-0.1 pr-4 pl-4 relative w-screen">
-          
-  {/* Top horizontal line - moved down using translateY */}
-  {/* <div className="bg-[#fafafa] absolute left-0 right-0 w-screen max-md:block hidden transform translate-y-1"> */}
-
-  <div className="flex justify-between items-center py-2">
-    <div className="flex md:gap-10 gap-2 items-center w-full">
-      <ResponsiveLogo />
-      <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-    </div>
-    <div className="wallet-container">
-      <Wallet>
-        <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full">
-          <Avatar className="h-6 w-6" />
-          <Name />
-        </ConnectWallet>
-        <WalletDropdown>
-          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar />
-            <Name />
-            <Address />
-            <EthBalance />
-          </Identity>
-          <WalletDropdownLink
-            icon="wallet"
-            href="https://keys.coinbase.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Wallet
-          </WalletDropdownLink>
-          <WalletDropdownDisconnect />
-        </WalletDropdown>
-      </Wallet>
-    </div>
-  </div>
-
-  {/* Bottom horizontal line */}
-  {/* <div className="border-b border-gray-300 absolute bottom-0 left-0 right-0 w-screen max-md:block hidden"></div> */}
-  
-</header>
-
-
-  
-        <main className="flex-grow flex items-center justify-center mt-2">
-  <div
-    className={`w-full p-1 ${
-      activeSection === "earn" ? "max-w-5xl" : "max-w-sm"
-    }`}
-  >
-    {activeSection === "swap" && (
-      <div>
-        <Swap experimental={{ useAggregator: true }} className="bg-[#080330] p-1 max-w-sm mx-auto">
-          <SwapSettings>
-            <SwapSettingsSlippageTitle className="text-[#EA580C]">
-              Max. slippage
-            </SwapSettingsSlippageTitle>
-            <SwapSettingsSlippageDescription className="text-[#EA580C]">
-              Your swap will revert if the prices change by more than the
-              selected percentage.
-            </SwapSettingsSlippageDescription>
-            <SwapSettingsSlippageInput />
-          </SwapSettings>
-          <SwapAmountInput
-            label="Sell"
-            swappableTokens={swappableTokens}
-            token={USDCToken}
-            type="from"
-            className="mb-1 bg-gray-800  text-white rounded-2xl shadow-sm border border-gray-900"
-          />
-          <SwapToggleButton className="mb-2" />
-          <SwapAmountInput
-            label="Buy"
-            swappableTokens={swappableTokens}
-            token={BRZToken}
-            type="to"
-            className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-900"
-          />
-          <SwapButton className="w-full bg-[#0000aa] rounded-full py-2 transition-colors" />
-          <SwapMessage className="mt-2 text-gray-800 text-sm" />
-          <SwapToast />
-        </Swap>
-        <div className="mt-2 text-red-500 text-center">
-          Please ensure your wallet is connected and set to the Base network
-          (chainId: 8453).
+      // Fetch points when address changes
+      useEffect(() => {
+        if (address) {
+          getUserPoints(address).then(setPoints).catch((err) => console.error(err));
+        }
+      }, [address]);
+    
+      // Existing useEffect for mounting and MutationObserver
+      useEffect(() => {
+        setIsMounted(true);
+        const setBlackColor = () => {
+          const selector = '[data-testid="ockTokenSelectButton_Symbol"], span.ock-font-family.font-semibold.overflow-hidden.text-ellipsis.whitespace-nowrap.text-left';
+          const elements = document.querySelectorAll(selector);
+          elements.forEach((element) => {
+            if (element instanceof HTMLElement) {
+              element.style.color = 'black';
+              element.style.setProperty('color', 'black', 'important');
+            }
+          });
+        };
+        setBlackColor();
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) setBlackColor();
+          });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+        return () => observer.disconnect();
+      }, []);
+    
+      if (!isMounted) return <div>Loading...</div>;
+    
+      return (
+        <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
+          <header className="pt-0.1 pr-4 pl-4 relative w-screen">
+            <div className="flex justify-between items-center py-2">
+              <div className="flex md:gap-10 gap-2 items-center w-full">
+                <ResponsiveLogo />
+                <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+              </div>
+              <div className="wallet-container">
+                <Wallet>
+                  <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full">
+                    <Avatar className="h-6 w-6" />
+                    <Name />
+                  </ConnectWallet>
+                  <WalletDropdown>
+                    <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                      <Avatar />
+                      <Name />
+                      <Address />
+                      <EthBalance />
+                    </Identity>
+                    <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com" target="_blank" rel="noopener noreferrer">
+                      Wallet
+                    </WalletDropdownLink>
+                    <WalletDropdownDisconnect />
+                  </WalletDropdown>
+                </Wallet>
+              </div>
+            </div>
+          </header>
+    
+          <main className="flex-grow flex items-center justify-center mt-2">
+            <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
+              {activeSection === "swap" && (
+                <div>
+                  <Swap
+                    experimental={{ useAggregator: true }}
+                    className="bg-[#080330] p-1 max-w-sm mx-auto"
+                    onSuccess={async () => {
+                      if (address) {
+                        await recordSwapPoints(address); // Record 50 points
+                        const updatedPoints = await getUserPoints(address); // Update displayed points
+                        setPoints(updatedPoints);
+                      }
+                    }}
+                  >
+                    <SwapSettings>
+                      <SwapSettingsSlippageTitle className="text-[#EA580C]">Max. slippage</SwapSettingsSlippageTitle>
+                      <SwapSettingsSlippageDescription className="text-[#EA580C]">
+                        Your swap will revert if the prices change by more than the selected percentage.
+                      </SwapSettingsSlippageDescription>
+                      <SwapSettingsSlippageInput />
+                    </SwapSettings>
+                    <SwapAmountInput label="Sell" swappableTokens={swappableTokens} token={USDCToken} type="from" className="mb-1 bg-gray-800 text-white rounded-2xl shadow-sm border border-gray-900" />
+                    <SwapToggleButton className="mb-2" />
+                    <SwapAmountInput label="Buy" swappableTokens={swappableTokens} token={BRZToken} type="to" className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-900" />
+                    <SwapButton className="w-full bg-[#0000aa] rounded-full py-2 transition-colors" />
+                    <SwapMessage className="mt-2 text-gray-800 text-sm" />
+                    <SwapToast />
+                  </Swap>
+                  {address && points !== null && (
+                    <div className="mt-4 text-white text-center">
+                      Your points: {points}
+                    </div>
+                  )}
+                  <div className="mt-2 text-red-500 text-center">
+                    Please ensure your wallet is connected and set to the Base network (chainId: 8453).
+                  </div>
+                </div>
+              )}
+              {activeSection === "earn" && <EarnSection />}
+              {activeSection === "send" && <Send />}
+              {activeSection === "liquidity" && <CurrencySelection />}
+              {activeSection === "buy" && <BuySection />}
+              {activeSection === "market" && <CurrencyDisplay />}
+            </div>
+          </main>
         </div>
-      </div>
-    )}
-
-    {activeSection === "earn" && (
-      <div>
-      
-        <EarnSection />
-      </div>
-    )}
-
-{activeSection === "send" && (
-      <Send/>
-    )}
-
-{activeSection === "liquidity" && (
-      <CurrencySelection/>
-    )}
-
-    {activeSection === "buy" && <BuySection />}
-    {activeSection === "market" && <CurrencyDisplay />}
-  </div>
-</main>
-  
-        {/* <Footer /> */}
-      </div>
-    );
-  }
+      );
+    }
