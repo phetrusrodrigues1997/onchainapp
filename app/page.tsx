@@ -9,6 +9,7 @@ import CurrencyDisplay from './LiveCurrencies';
 import NavigationMenu from "./NavigationMenu";
 import ResponsiveLogo from './ResponsiveLogo';
 import CurrencySelection from './Liquidity';
+import DiscordXSection from './Discord';
 import EarnSection from "./EarnSection";
 import Send from './SendSection';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
@@ -220,6 +221,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
               {activeSection === "liquidity" && <CurrencySelection />}
               {activeSection === "buy" && <BuySection />}
               {activeSection === "market" && <CurrencyDisplay />}
+              {activeSection === "discord" && <DiscordXSection />}
             </div>
           </main>
         </div>
