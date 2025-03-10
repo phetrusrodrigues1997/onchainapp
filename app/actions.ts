@@ -7,6 +7,7 @@ import { userPoints } from "./schema"; // Import the schema
 import { eq, sql } from "drizzle-orm";
 
 // Initialize database connection
+console.log(process.env.DATABASE_URL!);
 const sqlConnection = neon(process.env.DATABASE_URL!);
 const db = drizzle(sqlConnection);
 
