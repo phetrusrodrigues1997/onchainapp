@@ -103,7 +103,11 @@ export default function App() {
 
       <main className="flex-grow flex items-center justify-center mt-2">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
-          {/* Pass the selection change callback */}
+          
+          {activeSection === "swap" && (
+            
+            <div>
+              {/* Pass the selection change callback */}
           <SwapDropdown
   onSelectionChange={(option) => {
     setSelectedOption(option);
@@ -114,8 +118,6 @@ export default function App() {
     }
   }}
 />
-          {activeSection === "swap" && (
-            <div>
               <Swap
                 experimental={{ useAggregator: true }}
                 className="bg-[#080330] p-1 max-w-sm mx-auto"
@@ -156,7 +158,7 @@ export default function App() {
                 <SwapToast />
               </Swap>
               {address && points !== null && (
-                <div className="mt-4 text-white text-center">Your points: {points}</div>
+                <div className="mt-4 text-white text-center">Swap points: {points}</div>
               )}
               <div className="mt-2 text-red-500 text-center">
                 Please ensure your wallet is connected and set to the Base network (chainId: 8453).

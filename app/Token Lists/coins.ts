@@ -22,6 +22,24 @@ export const WETHToken: Token = {
     "https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282",
 };
 
+export const AEROToken: Token = {
+  address: "0x940181a94A35A4569E4529A3CDfB74e38FD98631", // Replace with the actual contract address
+  chainId: 8453, // Replace with the actual chain ID
+  decimals: 18, // Replace with the actual decimals if different
+  name: "Aerodrome Finance",
+  symbol: "AERO",
+  image: "https://basescan.org/token/images/aerodrome_32.png", // Replace with the actual image URL
+};
+
+export const VIRTUALToken: Token = {
+  address: "0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b", // Contract address on Ethereum
+  chainId: 8453, // Base
+  decimals: 18, // Replace with the actual decimals if different
+  name: "Virtuals Protocol",
+  symbol: "VIRTUAL",
+  image: "https://basescan.org/token/images/virtualprotocol_32.png", // Replace with the actual image URL
+};
+
 export const CbBTCToken: Token = {
   address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
   chainId: 8453,
@@ -30,6 +48,16 @@ export const CbBTCToken: Token = {
   symbol: "cbBTC",
   image: "https://basescan.org/token/images/cbbtc_32.png",
 };
+
+export const AAVEToken: Token = {
+  address: "0x63706e401c06ac8513145b7687A14804d17f814b", // Aave token contract address on Base
+  chainId: 8453, // Base network chain ID
+  decimals: 18,
+  name: "Aave",
+  symbol: "AAVE",
+  image: "https://basescan.org/token/images/aave_32.svg", // Aave logo
+};
+
 
 export const USDCToken: Token = {
   address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -96,4 +124,5 @@ export const stablecoinTokens: Token[] = [
   ];
 
 
-  export const cryptoTokens: Token[] = [ETHToken, CbBTCToken, WETHToken];
+
+  export const cryptoTokens: Token[] = [ETHToken, CbBTCToken,USDCToken, VIRTUALToken, AEROToken, AAVEToken,WETHToken];
