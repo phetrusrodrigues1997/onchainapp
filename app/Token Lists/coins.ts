@@ -58,6 +58,15 @@ export const AAVEToken: Token = {
   image: "https://basescan.org/token/images/aave_32.svg", // Aave logo
 };
 
+export const MORPHOToken: Token = {
+  address: "0xBAa5CC21fd487B8Fcc2F632f3F4E8D37262a0842", // Replace with actual Base address
+  chainId: 8453,
+  decimals: 18,
+  name: "Morpho",
+  symbol: "MORPHO",
+  image: "https://basescan.org/token/images/morphoorg_new_32.png", // Replace with Base-specific logo if available
+};
+
 
 export const USDCToken: Token = {
   address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -125,4 +134,4 @@ export const stablecoinTokens: Token[] = [
 
 
 
-  export const cryptoTokens: Token[] = [ETHToken, CbBTCToken,USDCToken, VIRTUALToken, AEROToken, AAVEToken,WETHToken];
+  export const cryptoTokens: Token[] = [ETHToken, CbBTCToken,USDCToken, VIRTUALToken, AEROToken, AAVEToken,MORPHOToken,WETHToken];

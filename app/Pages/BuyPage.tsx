@@ -52,13 +52,35 @@ const BuySection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
+    const setInputStyles = () => {
       const inputField = document.querySelector('input[data-testid="ockTextInput_Input"]') as HTMLInputElement | null;
       if (inputField) {
-        inputField.style.setProperty("color", "black", "important"); // Ensure color is applied
-        inputField.style.caretColor = "black"; // Change caret color
+        // Set multiple style properties to ensure text is black
+        inputField.style.setProperty("color", "black", "important");
+        inputField.style.caretColor = "black";
+        inputField.style.backgroundColor = "white"; // Optional: ensures contrast
+        // Force style recalculation
+        inputField.style.display = 'none';
+        inputField.offsetHeight; // Trigger reflow
+        inputField.style.display = '';
       }
-    }, 100);
+    };
+  
+    // Initial application
+    const timeoutId = setTimeout(setInputStyles, 100);
+  
+    // Create an observer to watch for changes
+    const observer = new MutationObserver(setInputStyles);
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true 
+    });
+  
+    // Cleanup
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
   }, []);
   
   
@@ -88,17 +110,14 @@ const BuySection: React.FC = () => {
         </p>
       </div>
 
-      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#0e0e1f] rounded-lg shadow-md border border-gray-700`}>
-        <p className="text-sm sm:text-base text-gray-400 text-center mb-4 sm:mb-6">
-          We accept visa and mastercard.
-        </p>
+      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#080330] rounded-lg shadow-md`}>
 
         {filteredTokens.length > 0 ? (
           <div className="space-y-3 sm:space-y-4">
             {filteredTokens.map((item) => (
               <div
                 key={item.token.symbol}
-                className="flex items-center justify-between p-3 sm:p-4 rounded-lg shadow-md border border-gray-300"
+                className="flex items-center justify-between p-3 sm:p-4 rounded-lg shadow-md"
               >
                 <Buy className="text-black" toToken={item.token} />
               </div>
