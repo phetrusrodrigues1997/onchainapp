@@ -82,6 +82,7 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
   ];
 
   return (
+    <div>
     <div className="text-white p-4 bg-[#0e0e1f] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
       {/* Balance Section */}
       <h2 className="text-2xl font-bold mb-4">Your Balance</h2>
@@ -102,17 +103,18 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
           Withdraw
         </button>
       </div>
-
+      </div><div className="mt-2 text-white bg-[#0e0e1f]  rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
       {/* Live Prices Section with Navigation Buttons */}
       
-      <div className='max-w-sm mx-auto mt-16'>
-        <div className="flex items-center justify-between mt-4">
+      <div className='max-w-sm mx-auto'>
+      <h2 className="text-2xl font-bold p-6">Base Tokens</h2>
+        <div className="flex items-center justify-between space-y-4">
           
           <div className="flex flex-wrap">
             {tokenList.map((token) => (
               <div
                 key={token.symbol}
-                className=" p-3 rounded-lg flex items-center space-x-2 space-y-4 w-28"
+                className=" p-2 rounded-lg flex items-center space-x-2 space-y-4 w-28"
                 style={{ backgroundColor: '#0e0e1f' }} // Matches the dark gray from the image
               >
                 <img
@@ -132,7 +134,7 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
           </div>
           </div>
         </div>
-      
+      </div>
     </div>
   );
 }
