@@ -19,18 +19,20 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
-import HomePage from './Pages/HomePage';
+import LiveCryptoPrices from './Pages/LiveCryptoPrices';
 
 
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState('swap');
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
   const { address } = useAccount();
+
+  
 
   // Update user points when wallet address changes
   useEffect(() => {
@@ -159,6 +161,7 @@ export default function App() {
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>
+              <LiveCryptoPrices/>
               {address && points !== null && (
                 <div className="mt-4 text-white text-center">Swap points: {points}</div>
               )}
@@ -173,7 +176,7 @@ export default function App() {
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay />}
           {activeSection === "discord" && <DiscordXSection />}
-          {activeSection === "home" && <HomePage setActiveSection={setActiveSection} />}
+          
         </div>
       </main>
     </div>

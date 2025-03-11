@@ -2,14 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { AEROToken, VIRTUALToken, AAVEToken } from '../Token Lists/coins';
 
-// Define the props interface to accept setActiveSection
-interface HomePageProps {
-  setActiveSection: (section: string) => void;
-}
 
 
 
-export default function HomePage({ setActiveSection }: HomePageProps) {
+
+export default function LiveCryptoPrices() {
   const { address } = useAccount();
   const { data: balance, isLoading, isError } = useBalance({
     address,
@@ -49,28 +46,28 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
     fetchPrices();
   }, []);
 
-  // Handle wallet connection states
-  if (!address) {
-    return <div className="text-white">Please connect your wallet to see your balance.</div>;
-  }
-  if (isLoading) {
-    return <div className="text-white">Loading balance...</div>;
-  }
-  if (isError) {
-    return <div className="text-white">Error fetching balance.</div>;
-  }
+  // // Handle wallet connection states
+  // if (!address) {
+  //   return <div className="text-white">Please connect your wallet to see your balance.</div>;
+  // }
+  // if (isLoading) {
+  //   return <div className="text-white">Loading balance...</div>;
+  // }
+  // if (isError) {
+  //   return <div className="text-white">Error fetching balance.</div>;
+  // }
 
   // Calculate the balance to display
-  let displayBalance;
-  if (prices.ethereum) {
-    const ethBalance = parseFloat(balance?.formatted || '0');
-    const usdBalance = ethBalance * prices.ethereum;
-    displayBalance = `$${usdBalance.toFixed(2)}`;
-  } else if (priceError) {
-    displayBalance = `${balance?.formatted} ${balance?.symbol} (Unable to fetch USD price)`;
-  } else {
-    displayBalance = 'Fetching USD price...';
-  }
+  // let displayBalance;
+  // if (prices.ethereum) {
+  //   const ethBalance = parseFloat(balance?.formatted || '0');
+  //   const usdBalance = ethBalance * prices.ethereum;
+  //   displayBalance = `$${usdBalance.toFixed(2)}`;
+  // } else if (priceError) {
+  //   displayBalance = `${balance?.formatted} ${balance?.symbol} (Unable to fetch USD price)`;
+  // } else {
+  //   displayBalance = 'Fetching USD price...';
+  // }
 
   // Define the tokens to display
   const tokenList = [
@@ -83,31 +80,9 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
 
   return (
     <div>
-    <div className="text-white p-4 bg-[#0e0e1f] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
-      {/* Balance Section */}
-      <h2 className="text-2xl font-bold mb-4">Your Balance</h2>
-      <p className="text-xl">{displayBalance}</p>
-
-      {/* Existing Buttons */}
-      <div className="flex justify-center space-x-4 mt-8">
-        <button
-          onClick={() => setActiveSection('swap')}
-          className="w-24 h-12 rounded-[9999px] bg-[#0000aa] text-white font-bold flex items-center justify-center shadow-lg hover:bg-[#0000cc]"
-        >
-          Swap
-        </button>
-        <button className="w-24 h-12 rounded-[9999px] bg-[#0000aa] text-white font-bold flex items-center justify-center shadow-lg hover:bg-[#0000cc]">
-          Deposit
-        </button>
-        <button className="w-24 h-12 rounded-[9999px] bg-[#0000aa] text-white font-bold flex items-center justify-center shadow-lg hover:bg-[#0000cc]">
-          Withdraw
-        </button>
-      </div>
-      </div><div className="mt-2 text-white bg-[#0e0e1f]  rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
-      {/* Live Prices Section with Navigation Buttons */}
+    
       
       <div className='max-w-sm mx-auto'>
-      <h2 className="text-2xl font-bold p-6">Base Tokens</h2>
         <div className="flex items-center justify-between space-y-4">
           
           <div className="flex flex-wrap">
@@ -115,7 +90,7 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
               <div
                 key={token.symbol}
                 className=" p-2 rounded-lg flex items-center space-x-2 space-y-4 w-28"
-                style={{ backgroundColor: '#0e0e1f' }} // Matches the dark gray from the image
+                style={{ backgroundColor: '#080330' }} // Matches the dark gray from the image
               >
                 <img
                   src={token.image || 'https://via.placeholder.com/32'}
@@ -135,6 +110,6 @@ export default function HomePage({ setActiveSection }: HomePageProps) {
           </div>
         </div>
       </div>
-    </div>
+    
   );
 }
