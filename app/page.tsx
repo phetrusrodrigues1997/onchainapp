@@ -8,6 +8,7 @@ import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZTok
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/LiveCurrencies';
+
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
 import CurrencySelection from './Pages/LiquidityPage';
@@ -18,12 +19,13 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
+import HomePage from './Pages/HomePage';
 
 
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('swap');
+  const [activeSection, setActiveSection] = useState('home');
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
@@ -171,6 +173,7 @@ export default function App() {
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay />}
           {activeSection === "discord" && <DiscordXSection />}
+          {activeSection === "home" && <HomePage setActiveSection={setActiveSection} />}
         </div>
       </main>
     </div>
