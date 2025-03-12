@@ -20,12 +20,13 @@ import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainki
 import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 import LiveCryptoPrices from './Pages/LiveCryptoPrices';
+import HomePage from './Pages/HomePage';
 
 
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('swap');
+  const [activeSection, setActiveSection] = useState('home');
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
@@ -70,10 +71,13 @@ export default function App() {
   if (!isMounted) return <div>Loading...</div>;
 
   return (
+    
     <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
       <header className="pt-0.1 pr-4 pl-4 relative w-screen">
+      {activeSection !== "home" && 
         <div className="flex justify-between items-center py-2">
           <div className="flex md:gap-10 gap-2 items-center w-full">
+          
             <ResponsiveLogo />
             <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
           </div>
@@ -101,8 +105,10 @@ export default function App() {
                 <WalletDropdownDisconnect />
               </WalletDropdown>
             </Wallet>
+          
           </div>
         </div>
+}
       </header>
 
       <main className="flex-grow flex items-center justify-center mt-2">
@@ -147,7 +153,7 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? ETHToken : USDCToken}
   type="from"
-  className="mb-1 bg-gray-800 text-white rounded-2xl shadow-sm border border-gray-900"
+  className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-700"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -155,7 +161,7 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? CbBTCToken : BRZToken}
   type="to"
-  className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-900"
+  className="mb-1 bg-gray-800 text-white rounded-2xl shadow-sm border border-gray-900"
 />
                 <SwapButton className="w-full bg-[#0000aa] rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
@@ -176,6 +182,7 @@ export default function App() {
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay />}
           {activeSection === "discord" && <DiscordXSection />}
+          {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           
         </div>
       </main>

@@ -119,7 +119,7 @@ const BuySection: React.FC = () => {
                 key={item.token.symbol}
                 className="flex items-center justify-between p-3 sm:p-4 rounded-lg shadow-md"
               >
-                <Buy className="text-black" toToken={item.token} />
+                <Buy toToken={item.token} />
               </div>
             ))}
           </div>

@@ -4,6 +4,7 @@ import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
 import { base } from 'wagmi/chains';
 
+// Token definitions (unchanged from the original)
 const ETHToken: Token = {
   address: "",
   chainId: 8453,
@@ -87,7 +88,7 @@ const MEXPeso: Token = {
 
 const availableTokens: Token[] = [USDCToken, EURCToken, CADCToken, BRZToken, LiraToken, MEXPeso, CbBTCToken, ETHToken, WETHToken];
 
-// ERC20 ABI for transfer
+// ERC20 ABI (unchanged from the original)
 const ERC20_ABI = [
   {
     inputs: [
@@ -107,6 +108,7 @@ const ERC20_ABI = [
     type: 'function',
   },
 ];
+
 interface SendProps {
   className?: string;
 }
@@ -121,8 +123,11 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
   const [amount, setAmount] = useState<string>('');
   const [isSentenceValid, setIsSentenceValid] = useState<boolean>(false);
   const [transactionStatus, setTransactionStatus] = useState<string>('');
+  const [addressError, setAddressError] = useState<string>('');
+  const [tokenError, setTokenError] = useState<string>(''); // New state for token error
+  const [balance, setBalance] = useState<string | null>(null);
 
-  // Parse sentence and update states
+  // Parse sentence and validate address and token
   useEffect(() => {
     const regex = /^\s*send\s+(\d+(?:\.\d+)?)\s+(\w+)\s+to\s+(0x[a-fA-F0-9]{40})\s*$/i;
     const match = sentence.match(regex);
@@ -134,18 +139,36 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
         setSelectedToken(token);
         setRecipientAddress(addr);
         setIsSentenceValid(true);
+        setAddressError('');
+        setTokenError(''); // Clear token error if valid
       } else {
         setIsSentenceValid(false);
+        setSelectedToken(null);
+        setRecipientAddress('');
+        setAmount('');
+        setTokenError(`Invalid token symbol: ${tokenSymbol}`); // Set error for invalid token
       }
     } else {
       setIsSentenceValid(false);
       setSelectedToken(null);
       setRecipientAddress('');
       setAmount('');
+      setTokenError(''); // Clear token error if sentence format is invalid
+      const toIndex = sentence.toLowerCase().indexOf('to');
+      if (toIndex !== -1) {
+        const afterTo = sentence.slice(toIndex + 2).trim();
+        if (afterTo && !/^0x[a-fA-F0-9]{40}$/.test(afterTo)) {
+          setAddressError('Please enter a valid address');
+        } else {
+          setAddressError('');
+        }
+      } else {
+        setAddressError('');
+      }
     }
   }, [sentence]);
 
-  // Fetch balances (unchanged from original)
+  // Fetch balances (unchanged from the original)
   const { data: erc20BalanceData } = useReadContract({
     address: selectedToken?.address as `0x${string}`,
     abi: ERC20_ABI,
@@ -156,17 +179,19 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
 
   const { data: ethBalanceData } = useBalance({
     address: address as `0x${string}`,
-    query: { enabled: !!address && !selectedToken?.address },
+    query: { enabled: !!address && selectedToken?.address === '' },
   });
 
-  const [balance, setBalance] = useState<string | null>(null);
+  // Update balance state (unchanged from the original)
   useEffect(() => {
     if (!address || !selectedToken) {
       setBalance(null);
       return;
     }
     if (selectedToken.address === '') {
-      if (ethBalanceData) setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
+      if (ethBalanceData) {
+        setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
+      }
     } else if (erc20BalanceData) {
       setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
     }
@@ -180,16 +205,13 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       setTransactionStatus('Invalid sentence or wallet not connected');
       return;
     }
-
     try {
       if (selectedToken.address === '') {
-        // Send native ETH
         sendTransaction({
           to: recipientAddress as `0x${string}`,
           value: parseUnits(amount, selectedToken.decimals),
         });
       } else {
-        // Send ERC-20 token
         writeContract({
           address: selectedToken.address as `0x${string}`,
           abi: ERC20_ABI,
@@ -203,7 +225,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
     }
   };
 
-  // Network switch (unchanged)
+  // Network switch (unchanged from the original)
   useEffect(() => {
     if (switchChain && chainId && chainId !== base.id) {
       setTransactionStatus('Please switch to Base network...');
@@ -219,7 +241,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
     <div className={`bg-[#0e0e1f] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700`}>
       <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
 
-      {/* Single Sentence Input */}
+      {/* Input with error display */}
       <div className="mb-4">
         <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
           Enter Command
@@ -230,15 +252,20 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           value={sentence}
           onChange={(e) => setSentence(e.target.value)}
           placeholder="e.g., Send 10 USDC to 0x1234..."
-          className="w-full p-3 bg-white border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#3B82F6]"
+          className={`w-full p-3 bg-white border rounded-lg text-black focus:outline-none focus:ring-2 ${
+            addressError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
+          }`}
         />
+        {addressError && (
+          <p className="text-red-400 text-xs mt-1">{addressError}</p>
+        )}
+        {tokenError && (
+          <p className="text-red-400 text-xs mt-1">{tokenError}</p>
+        )}
       </div>
 
       {/* Display Parsed Info */}
       <div className="mb-4 text-gray-400 text-sm">
-        <p>Token: {selectedToken?.symbol || 'N/A'}</p>
-        <p>Amount: {amount || 'N/A'}</p>
-        <p>To: {recipientAddress || 'N/A'}</p>
         {balance !== null && selectedToken && (
           <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
         )}
