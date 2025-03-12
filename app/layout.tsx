@@ -20,6 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GoldenEagle Finance</title>
       </Head>
       <body className="bg-background dark min-h-screen w-full">
         <SpeedInsights />
