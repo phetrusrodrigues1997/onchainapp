@@ -10,22 +10,19 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check if we're on mobile when component mounts and when window resizes
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.matchMedia('(max-width: 787px)').matches);
     };
-
+  
     // Initial check
     checkIfMobile();
-
-    // Add event listener for window resize
+  
+    // Listen for window resize events
     window.addEventListener('resize', checkIfMobile);
-
+  
     // Clean up
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
   // Menu items for reusability

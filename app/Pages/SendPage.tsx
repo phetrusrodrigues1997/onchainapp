@@ -251,7 +251,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
           type="text"
           value={sentence}
           onChange={(e) => setSentence(e.target.value)}
-          placeholder="e.g., Send 10 USDC to 0x1234..."
+          placeholder="Send 10 USDC to 0x1234abc..."
           className={`w-full p-3 bg-white border rounded-lg text-black focus:outline-none focus:ring-2 ${
             addressError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
           }`}
