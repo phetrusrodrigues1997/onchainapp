@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import SwapDropdown from './Sections/TokenTypeDropdown'; // Adjust the path if needed
-import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken } from './Token Lists/coins';
+import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken } from './Token Lists/coins';
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/LiveCurrencies';
@@ -159,7 +159,7 @@ export default function App() {
 <SwapAmountInput
   label="Buy"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? CbBTCToken : BRZToken}
+  token={selectedOption === "Crypto" ? CbBTCToken : CADCToken}
   type="to"
   className="mb-1 bg-gray-800 text-white rounded-2xl shadow-sm border border-gray-900"
 />

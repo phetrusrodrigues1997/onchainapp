@@ -11,34 +11,12 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
     setActiveSection('swap');
   };
   
-  const text = "Trade Foreign Currencies & Crypto—All in One!";
-  const [displayText, setDisplayText] = useState("");
-  const typingSpeed = 50; // Speed in milliseconds
+  
 
-  useEffect(() => {
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < text.length) {
-        setDisplayText(text.slice(0, index + 1)); // Ensure correct slicing
-        index++;
-      } else {
-        clearInterval(interval);
-      }
-    }, typingSpeed);
-
-    return () => clearInterval(interval);
-  }, []); // Runs once when the component mounts
+  
 
 
-  const [showButton, setShowButton] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowButton(true);
-    }, 3000); // 4 seconds delay
-
-    return () => clearTimeout(timer);
-  }, []);
+ 
 
 
   return (
@@ -60,19 +38,19 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
       {/* Hero Section */}
       <main className="flex flex-col items-center justify-center px-4 py-8 text-center">
         <h2 className="text-2xl md:text-2xl font-extrabold text-[#ffffff] mb-4">
-        {displayText}
+        Trade Foreign Currencies & Crypto—All in One!
         </h2>
         <p className="max-w-xl text-lg text-[#080330] mb-10">
           
         </p>
-        {showButton && (
+        
         <button
           onClick={handleEnterClick}
           className="px-8 py-3 bg-[#d3c81a] text-white font-semibold rounded-lg shadow-lg hover:bg-[#0000aa]"
         >
           Launch App
         </button>
-      )}
+    
       </main>
 
       {/* Footer Accent */}

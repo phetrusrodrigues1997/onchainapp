@@ -8,7 +8,7 @@ export function Providers(props: { children: ReactNode }) {
   return (
     <OnchainKitProvider
       apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-      projectId={process.env.projectId}
+      projectId={process.env.NEXT_PUBLIC_PROJECT_ID}
       chain={base}
       config={{ appearance: { 
             mode: 'auto',
