@@ -8,6 +8,11 @@
  
 }
 
+.full-width {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
 button[aria-label="Toggle swap settings"] {
   background:#080330 !important;
 }
