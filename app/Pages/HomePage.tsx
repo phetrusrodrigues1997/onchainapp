@@ -27,9 +27,9 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
       {/* Header */}
       <header className="flex justify-center items-center">
         
-      <span className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
+      {/* <span className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
             Golden<span className="text-[#f3f3f3]">Eagle</span><span>🦅</span>
-          </span>
+          </span> */}
 
         
         
