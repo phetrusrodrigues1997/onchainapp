@@ -9,13 +9,14 @@ export function Providers(props: { children: ReactNode }) {
     <OnchainKitProvider
       apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
       projectId={process.env.projectId}
-          chain={base}
-          config={{ appearance: { 
+      chain={base}
+      config={{ appearance: { 
             mode: 'auto',
         }
       }}
     >
       {props.children}
+      
     </OnchainKitProvider>
   );
 }

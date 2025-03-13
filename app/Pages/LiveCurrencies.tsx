@@ -88,7 +88,7 @@ const CurrencyDisplay: React.FC = () => {
         {/* Header Row */}
         <div className="grid grid-cols-6 bg-white text-black font-semibold">
           <div className="p-4 text-center">Currency</div>
-          <div className="p-4 text-center">Rate (per USD)</div>
+          <div className="p-4 text-center">Price (USD)</div>
           <div className="p-4 text-center">Country</div>
           <div className="p-4 text-center">1D %</div>
           <div className="p-4 text-center">7D %</div>
@@ -116,7 +116,7 @@ const CurrencyDisplay: React.FC = () => {
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search currency or country..."
+            placeholder="Search by acronym or country..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2 bg-[#0e0e1f] border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -127,20 +127,20 @@ const CurrencyDisplay: React.FC = () => {
         <div className="space-y-3">
           {filteredCurrencyData.length > 0 ? (
             filteredCurrencyData.map(({ code, country, symbol }) => (
-              <div key={code} className="bg-[#0e0e1f] rounded-lg p-3 border border-gray-700">
+              <div key={code} className="bg-[#eeeeff] rounded-lg p-3 border border-gray-700">
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="font-semibold">Currency:</div>
-                  <div>{code} {symbol || ''}</div> {/* Display symbol if available */}
-                  <div className="font-semibold">Rate (USD):</div>
-                  <div>{exchangeData.rates[code]?.toFixed(2) || 'N/A'}</div>
-                  <div className="font-semibold">Country:</div>
-                  <div>{country}</div>
-                  <div className="font-semibold">1D %:</div>
-                  <div>—</div>
-                  <div className="font-semibold">7D %:</div>
-                  <div>—</div>
-                  <div className="font-semibold">1M %:</div>
-                  <div>—</div>
+                  <div className="font-semibold text-black">Currency:</div>
+                  <div className='text-black'>{code} {symbol || ''}</div> {/* Display symbol if available */}
+                  <div className="font-semibold text-black">Rate (USD):</div>
+                  <div className='text-black'>{exchangeData.rates[code]?.toFixed(2) || 'N/A'}</div>
+                  <div className="font-semibold text-black">Country:</div>
+                  <div className='text-black'>{country}</div>
+                  <div className="font-semibold text-black">1D %:</div>
+                  <div className='text-black'>—</div>
+                  <div className="font-semibold text-black">7D %:</div>
+                  <div className='text-black'>—</div>
+                  <div className="font-semibold text-black">1M %:</div>
+                  <div className='text-black'>—</div>
                 </div>
               </div>
             ))

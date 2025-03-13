@@ -70,7 +70,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
           onClick={handleEnterClick}
           className="px-8 py-3 bg-[#d3c81a] text-white font-semibold rounded-lg shadow-lg hover:bg-[#0000aa]"
         >
-          Enter
+          Launch App
         </button>
       )}
       </main>
