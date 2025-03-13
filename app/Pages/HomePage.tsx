@@ -13,7 +13,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
   
   const text = "Trade Foreign Currencies & Crypto—All in One!";
   const [displayText, setDisplayText] = useState("");
-  const typingSpeed = 75; // Speed in milliseconds
+  const typingSpeed = 50; // Speed in milliseconds
 
   useEffect(() => {
     let index = 0;
@@ -35,7 +35,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowButton(true);
-    }, 3900); // 4 seconds delay
+    }, 3000); // 4 seconds delay
 
     return () => clearTimeout(timer);
   }, []);
@@ -49,9 +49,9 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
       {/* Header */}
       <header className="flex justify-center items-center">
         
-      <span className=" font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
-  <span className="text-6xl">🦅</span>
-</span>
+      <span className="text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
+            Golden<span className="text-[#f3f3f3]">Eagle</span><span>🦅</span>
+          </span>
 
         
         
@@ -59,7 +59,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
 
       {/* Hero Section */}
       <main className="flex flex-col items-center justify-center px-4 py-8 text-center">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-[#ffffff] mb-4">
+        <h2 className="text-2xl md:text-2xl font-extrabold text-[#ffffff] mb-4">
         {displayText}
         </h2>
         <p className="max-w-xl text-lg text-[#080330] mb-10">
