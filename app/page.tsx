@@ -169,7 +169,11 @@ export default function App() {
               </Swap>
               <LiveCryptoPrices/>
               {address && points !== null && (
-                <div className="mt-4 text-[#d3c81a] text-center">Swap points: {points}</div>
+                <div className="mt-6 text-black text-center font-serif tracking-wide">
+                <span className="bg-gradient-to-r from-gray-100 to-gray-200 px-6 py-2 rounded-full shadow-md inline-block">
+                  Swap points: <span className="font-semibold">{points}</span>
+                </span>
+              </div>
               )}
               <div className="mt-2 text-red-500 text-center">
                 Please ensure your wallet is connected and set to the Base network (chainId: 8453).

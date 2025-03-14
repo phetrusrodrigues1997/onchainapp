@@ -58,7 +58,7 @@ export default function LiveCryptoPrices() {
 
   return (
     <div>
-      <div className='max-w-sm mx-auto'>
+      <div className="max-w-md mx-auto bg-transparent rounded-xl border border-gray-700 shadow-md overflow-hidden p-4 ">
         <div className="flex items-center justify-between space-y-4">
           <div className="flex flex-wrap">
             {tokenList.map((token) => (
@@ -75,7 +75,7 @@ export default function LiveCryptoPrices() {
                 />
                 <div>
                   <p className="font-semibold text-white text-sm">{token.symbol}</p>
-                  <p className="text-gray-300 text-xs">
+                  <p className="text-gray-200 text-xs">
                     {token.price ? `$${token.price >= 1 ? token.price.toFixed(2) : token.price.toFixed(4)}` : 'Fetching...'}
                   </p>
                 </div>
