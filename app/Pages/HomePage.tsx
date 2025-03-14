@@ -2,10 +2,12 @@ import React from 'react';
 import { useState, useEffect } from "react";
 
 const images = [
-  "https://agnautacouture.com/wp-content/uploads/2012/12/jean-shrimpton-in-ny-by-david-bailey-2.jpg",
+  "https://images.pexels.com/photos/14751274/pexels-photo-14751274.jpeg?cs=srgb&dl=pexels-anntarazevich-14751274.jpg&fm=jpg",
   "https://plus.unsplash.com/premium_photo-1722018576685-45a415a4ff67?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c3BhY2V8ZW58MHx8MHx8fDA%3D",
-  "https://wallpapershome.com/images/pages/ico_h/27177.jpg",
-  "https://media.cnn.com/api/v1/images/stellar/prod/140121185821-first-apple-computer.jpg?q=w_3490,h_2205,x_0,y_0,c_fill"
+  "https://agnautacouture.com/wp-content/uploads/2012/12/jean-shrimpton-in-ny-by-david-bailey-2.jpg"
+  
+  
+
 ];
 
 const FullScreenCarousel = () => {
