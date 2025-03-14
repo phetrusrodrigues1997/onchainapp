@@ -81,7 +81,7 @@ const WelcomePage: React.FC<WelcomePageProps> = ({ activeSection, setActiveSecti
     </div>
     
     {/* Main content area */}
-    <div className="flex-grow flex flex-col justify-center items-center max-w-lg mx-auto text-center mt-[100%]">
+    <div className="flex-grow flex flex-col justify-center items-center max-w-lg mx-auto text-center mt-[128%]">
     <h2 className="text-2xl font-extrabold text-white leading-tight font-sans">
   Trade Foreign Currencies <br /> & Crypto—All in One!
 </h2>
