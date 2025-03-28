@@ -4,7 +4,7 @@
 
 /* #182848 */
 :root {
-  --background: #080330;
+  --background: #100420;
  
 }
 
@@ -14,7 +14,7 @@
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#080330 !important;
+  background:#100420 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -211,7 +211,7 @@ button[aria-label="Toggle swap settings"] {
 
 
 [data-testid="ockBuyButton_Button"] {
-  background: #0000aa !important; /* green-600 */
+  background: #d3c81a !important; /* green-600 */
 }
 /* .flex.h-12.items-center.px-2.pl-4.ock-bg-default.ock-border-radius.ock-border-line-default.border {
   
@@ -219,7 +219,7 @@ button[aria-label="Toggle swap settings"] {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockBuyButton_Button"] {
-    background: #0000aa !important; /* from-gray-700 to-gray-800 */
+    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
     color: white !important;
   }
 }
@@ -246,7 +246,7 @@ body {
 }
 
 button[aria-label="Toggle menu"] {
-  background-color: #080330 !important;
+  background-color: #100420 !important;
 }
 
 button[aria-label="Toggle menu"] svg {
@@ -255,8 +255,11 @@ button[aria-label="Toggle menu"] svg {
 
 svg[aria-label="ock-swapSettingsSvg"] path {
   fill: white !important;
+  
 }
-
+[data-testid="ockSwapSettings_Settings"] {
+background-color: #100420 !important;
+}
 
 [data-testid="ockConnectButton"] {
   background: #d3c81a !important; /* green-500 */

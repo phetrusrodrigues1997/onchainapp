@@ -19,7 +19,7 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
     <div className="relative inline-block text-xs text-left ml-16 transform translate-y-10">
       <button
         type="button"
-        className="bg-[#080330] text-white px-4 py-2 rounded-md shadow-sm border border-gray-700"
+        className="bg-[#100420] text-white px-4 py-2 rounded-md shadow-sm border border-gray-700"
         onClick={() => setIsOpen(!isOpen)}
       >
      ▼

@@ -79,7 +79,7 @@ const CurrencyDisplay: React.FC = () => {
   );
 
   return (
-    <div className="bg-[#080330] text-white p-4 max-w-full mx-auto">
+    <div className="bg-[#100420] text-white p-4 max-w-full mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center">Currency Exchange Rates (USD)</h2>
       <p className="mb-6 text-center">Last updated: {lastUpdated}</p>
       

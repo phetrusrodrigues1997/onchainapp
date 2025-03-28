@@ -68,14 +68,14 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-  if (activeSection === "swap") {
-    const titleElement = document.querySelector('[data-testid="ockSwap_Title"]');
-    if (titleElement) {
-      titleElement.textContent = selectedOption || "Stablecoins"; // Default to "Stablecoins" if selectedOption is falsy
-    }
-  }
-}, [selectedOption, activeSection]);
+//   useEffect(() => {
+//   if (activeSection === "swap") {
+//     const titleElement = document.querySelector('[data-testid="ockSwap_Title"]');
+//     if (titleElement) {
+//       titleElement.textContent = selectedOption || "Stablecoins"; // Default to "Stablecoins" if selectedOption is falsy
+//     }
+//   }
+// }, [selectedOption, activeSection]);
 
   if (!isMounted) return <div>Loading...</div>;
 
@@ -139,7 +139,7 @@ export default function App() {
 />
               <Swap
                 experimental={{ useAggregator: true }}
-                className="bg-[#080330] p-1 max-w-sm mx-auto"
+                className="bg-[#100420] p-1 max-w-sm mx-auto"
                 onSuccess={async () => {
                   if (address) {
                     await recordSwapPoints(address);
@@ -162,7 +162,7 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? ETHToken : USDCToken}
   type="from"
-  className="mb-1 bg-gray-900 text-white rounded-2xl shadow-sm border border-gray-700"
+  className="mb-1 bg-[#100420] text-white rounded-2xl shadow-sm border border-gray-500"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -170,9 +170,9 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? CbBTCToken : CADCToken}
   type="to"
-  className="mb-1 bg-gray-800 text-white rounded-2xl shadow-sm border border-gray-900"
+  className="mb-1 bg-[#100420] text-white rounded-2xl shadow-sm border border-gray-400"
 />
-                <SwapButton className="w-full bg-[#0000aa] rounded-full py-2 transition-colors" />
+                <SwapButton className="w-full bg-[#d3c81a] rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>

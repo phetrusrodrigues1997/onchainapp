@@ -275,7 +275,7 @@ const SendSection: React.FC<SendProps> = ({ className = '' }) => {
       <button
         onClick={handleSend}
         disabled={isPending || !isSentenceValid || !address || (!!chainId && chainId !== base.id)}
-        className="w-full bg-[#0000aa] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#0000aa]"
+        className="w-full bg-[#d3c81a] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#d3c81a]"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>
