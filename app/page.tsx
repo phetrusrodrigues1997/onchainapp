@@ -26,7 +26,7 @@ import HomePage from './Pages/HomePage';
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState('swap');
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
@@ -67,6 +67,15 @@ export default function App() {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+  if (activeSection === "swap") {
+    const titleElement = document.querySelector('[data-testid="ockSwap_Title"]');
+    if (titleElement) {
+      titleElement.textContent = selectedOption || "Stablecoins"; // Default to "Stablecoins" if selectedOption is falsy
+    }
+  }
+}, [selectedOption, activeSection]);
 
   if (!isMounted) return <div>Loading...</div>;
 
@@ -186,7 +195,7 @@ export default function App() {
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay />}
           {activeSection === "discord" && <DiscordXSection />}
-          {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {/* {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />} */}
           
         </div>
       </main>
