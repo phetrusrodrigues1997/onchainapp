@@ -92,7 +92,7 @@ export default function App() {
           </div>
           <div className="wallet-container">
             <Wallet>
-              <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full">
+              <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full mr-4">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
@@ -126,6 +126,17 @@ export default function App() {
           {activeSection === "swap" && (
             
             <div>
+              <h1
+  className="text-4xl md:text-4xl font-bold text-center mt-10 leading-tight"
+  style={{
+    fontFamily: "'Montserrat', sans-serif",
+    color: "#ffffff",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
+  }}
+>
+  Trade stablecoins &<br /> crypto.
+  <span className="currency-animation ml-2">💸</span>
+</h1>
               {/* Pass the selection change callback */}
           <SwapDropdown
   onSelectionChange={(option) => {
