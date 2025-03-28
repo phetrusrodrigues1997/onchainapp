@@ -170,7 +170,7 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? CbBTCToken : CADCToken}
   type="to"
-  className="mb-1 bg-[#100420] text-white rounded-2xl shadow-sm border border-gray-400"
+  className="mb-1 bg-[#100420] text-white rounded-2xl shadow-sm border border-gray-500"
 />
                 <SwapButton className="w-full bg-[#d3c81a] rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
