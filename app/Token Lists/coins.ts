@@ -45,7 +45,7 @@ export const CbBTCToken: Token = {
   chainId: 8453,
   decimals: 8,
   name: "Coinbase BTC",
-  symbol: "cbBTC",
+  symbol: "BTC",
   image: "https://basescan.org/token/images/cbbtc_32.png",
 };
 
@@ -130,6 +130,7 @@ export const stablecoinTokens: Token[] = [
     BRZToken,
     MEXPeso,
     LiraToken,
+    ETHToken, CbBTCToken
   ];
 
 

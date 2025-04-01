@@ -171,7 +171,7 @@ FX trading & remittances <br />redefined.
                 <SwapAmountInput
   label="Sell"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? ETHToken : USDCToken}
+  token={selectedOption === "Crypto" ? ETHToken : ETHToken}
   type="from"
   className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-gray-500"
 />
@@ -179,7 +179,7 @@ FX trading & remittances <br />redefined.
 <SwapAmountInput
   label="Buy"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? CbBTCToken : CADCToken}
+  token={selectedOption === "Crypto" ? CbBTCToken : CbBTCToken}
   type="to"
   className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-gray-500"
 />
