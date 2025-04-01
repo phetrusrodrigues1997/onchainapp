@@ -19,7 +19,7 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
-import LiveCryptoPrices from './Pages/LiveCryptoPrices';
+import LiveCryptoPrices from './Sections/LiveCryptoPrices';
 import HomePage from './Pages/HomePage';
 
 
@@ -127,18 +127,18 @@ export default function App() {
             
             <div>
               <h1
-  className="text-4xl md:text-4xl font-bold text-center mt-10 leading-tight"
+  className="text-3xl md:text-3xl font-bold text-center mt-10 leading-tight"
   style={{
     fontFamily: "'Montserrat', sans-serif",
     color: "#ffffff",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
   }}
 >
-  Trade stablecoins &<br /> crypto.
-  <span className="currency-animation ml-2">💸</span>
+FX trading & remittances <br />redefined.
+  {/* <span className="currency-animation ml-2">💸</span> */}
 </h1>
               {/* Pass the selection change callback */}
-          <SwapDropdown
+          {/* <SwapDropdown
   onSelectionChange={(option) => {
     setSelectedOption(option);
     if (option === "Crypto") {
@@ -147,10 +147,10 @@ export default function App() {
       setSwappableTokensList(stablecoinTokens);
     }
   }}
-/>
+/> */}
               <Swap
                 experimental={{ useAggregator: true }}
-                className="bg-[#100420] p-1 max-w-sm mx-auto"
+                className="bg-[#100420] p-1 max-w-sm mx-auto mt-8"
                 onSuccess={async () => {
                   if (address) {
                     await recordSwapPoints(address);
