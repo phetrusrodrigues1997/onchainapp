@@ -30,7 +30,7 @@ export default function App() {
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
-  const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
+  const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto(BASE)">("Stablecoins");
   const { address } = useAccount();
 
   
@@ -141,7 +141,7 @@ FX trading & remittances <br />redefined.
           <SwapDropdown
   onSelectionChange={(option) => {
     setSelectedOption(option);
-    if (option === "Crypto") {
+    if (option === "Crypto(BASE)") {
       setSwappableTokensList(cryptoTokens);
     } else {
       setSwappableTokensList(stablecoinTokens);
@@ -171,7 +171,7 @@ FX trading & remittances <br />redefined.
                 <SwapAmountInput
   label="Sell"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? ETHToken : CADCToken}
+  token={selectedOption === "Crypto(BASE)" ? ETHToken : CADCToken}
   type="from"
   className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-gray-500"
 />
@@ -179,7 +179,7 @@ FX trading & remittances <br />redefined.
 <SwapAmountInput
   label="Buy"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? CbBTCToken : USDCToken}
+  token={selectedOption === "Crypto(BASE)" ? CbBTCToken : USDCToken}
   type="to"
   className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-gray-500"
 />

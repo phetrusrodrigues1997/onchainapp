@@ -2,14 +2,14 @@
 import React, { useState } from "react";
 
 interface SwapDropdownProps {
-  onSelectionChange: (option: "Stablecoins" | "Crypto") => void;
+  onSelectionChange: (option: "Stablecoins" | "Crypto(BASE)") => void;
 }
 
 const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
-  const [selected, setSelected] = useState<"Stablecoins" | "Crypto">("Stablecoins");
+  const [selected, setSelected] = useState<"Stablecoins" | "Crypto(BASE)">("Stablecoins");
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelection = (option: "Stablecoins" | "Crypto") => {
+  const handleSelection = (option: "Stablecoins" | "Crypto(BASE)") => {
     setSelected(option);
     setIsOpen(false);
     onSelectionChange(option);
@@ -22,7 +22,7 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
     >
       <button
         type="button"
-        className="bg-[#012110] text-white px-4 py-2 rounded-md shadow-sm border border-gray-700"
+        className="bg-[#012110] text-white font-bold px-4 py-2 rounded-md shadow-sm border border-gray-700"
         onClick={() => setIsOpen(!isOpen)}
       >
         {selected} ▼
@@ -38,7 +38,7 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
             </li>
             <li
               className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
-              onClick={() => handleSelection("Crypto")}
+              onClick={() => handleSelection("Crypto(BASE)")}
             >
               Crypto
             </li>
