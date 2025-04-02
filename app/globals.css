@@ -145,7 +145,7 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ockTransactionButton_Button"] {
-  background:#0000aa !important; /* green-500 */
+  background:#d3c81a !important; /* green-500 */
   color: white !important;
   font-weight: 500 !important; /* Tailwind's font-semibold */
   border-radius: 0.75rem !important; /* Tailwind's rounded-sm */

@@ -66,7 +66,7 @@ export default function LiveCryptoPrices() {
 
   return (
     <div>
-      <div className="max-w-md mx-auto bg-transparent rounded-xl border border-gray-700 shadow-md overflow-hidden p-4 mt-12">
+      <div className="max-w-md mx-auto bg-transparent rounded-xl border border-[#bfbfbf] shadow-md overflow-hidden p-4 mt-12">
         <div className="flex items-center justify-between space-y-4">
           <div className="flex flex-wrap">
             {tokenList.map((token) => (

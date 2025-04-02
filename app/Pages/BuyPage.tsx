@@ -102,7 +102,7 @@ const BuySection: React.FC = () => {
 
   return (
     <div>
-      <div className="w-full max-w-sm mx-auto p-4">
+      <div className="w-full max-w-sm mx-auto p-4 ">
       <p className="text-xl sm:text-xl font-bold text-white text-center mb-4 sm:mb-6">
           Buy USDC, swap it for the{' '}
           
