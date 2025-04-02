@@ -16,13 +16,16 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
   };
 
   return (
-    <div className="relative inline-block text-xs text-left ml-16 transform translate-y-10">
+    <div
+      style={{ zIndex: 1000 }} // Elevate the stacking context
+      className="relative inline-block text-xs text-left ml-56 transform translate-y-[70px]"
+    >
       <button
         type="button"
-        className="bg-[#100420] text-white px-4 py-2 rounded-md shadow-sm border border-gray-700"
+        className="bg-[#012110] text-white px-4 py-2 rounded-md shadow-sm border border-gray-700"
         onClick={() => setIsOpen(!isOpen)}
       >
-     ▼
+        {selected} ▼
       </button>
       {isOpen && (
         <div className="absolute left-0 mt-2 w-36 bg-gray-900 border border-gray-700 rounded-md shadow-lg">

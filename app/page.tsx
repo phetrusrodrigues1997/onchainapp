@@ -138,7 +138,7 @@ FX trading & remittances <br />redefined.
   {/* <span className="currency-animation ml-2">💸</span> */}
 </h1>
               {/* Pass the selection change callback */}
-          {/* <SwapDropdown
+          <SwapDropdown
   onSelectionChange={(option) => {
     setSelectedOption(option);
     if (option === "Crypto") {
@@ -147,7 +147,7 @@ FX trading & remittances <br />redefined.
       setSwappableTokensList(stablecoinTokens);
     }
   }}
-/> */}
+/>
               <Swap
                 experimental={{ useAggregator: true }}
                 className="bg-[#012110] p-1 max-w-sm mx-auto mt-8"
@@ -171,7 +171,7 @@ FX trading & remittances <br />redefined.
                 <SwapAmountInput
   label="Sell"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? ETHToken : ETHToken}
+  token={selectedOption === "Crypto" ? ETHToken : CADCToken}
   type="from"
   className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-gray-500"
 />
@@ -179,7 +179,7 @@ FX trading & remittances <br />redefined.
 <SwapAmountInput
   label="Buy"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? CbBTCToken : CbBTCToken}
+  token={selectedOption === "Crypto" ? CbBTCToken : USDCToken}
   type="to"
   className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-gray-500"
 />
