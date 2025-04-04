@@ -146,61 +146,70 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
         <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
           Receive
         </button>
-        <button onClick={() => setActiveSection("swap")}
-        className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+        <button
+          onClick={() => setActiveSection("swap")}
+          className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full"
+        >
           Swap
         </button>
       </div>
 
-      <div className="space-y-4 transform translate-y-20">
-        {/* Display native ETH balance if > 0 */}
-        {nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-          <div className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#555555]">
-            <img
-              src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
-              alt={nativeToken?.symbol || 'unknown'}
-              className="w-6 h-6 mr-2"
-            />
-            <div className="flex-1 flex justify-center items-center">
-              <div className="text-center">
-                <span>{nativeToken?.name}</span>
-                <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(2)}</span>
-              </div>
-            </div>
-            <span className="ml-auto">
-              ${(parseFloat(nativeBalance.data.formatted) * (prices[tokenToCoingeckoId[nativeToken?.symbol ?? '']] || 0)).toFixed(2)}
-            </span>
-          </div>
-        )}
-        {/* Display ERC20 token balances if > 0 */}
-        {tokenBalances.map((balance, index) => {
-          const token = erc20Tokens[index];
-          if (balance.data && parseFloat(balance.data.formatted) > 0) {
-            const price = prices[tokenToCoingeckoId[token.symbol]] || 0;
-            const value = parseFloat(balance.data.formatted) * price;
-            return (
-              <div
-                key={token.address}
-                className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#555555]"
-              >
-                <img
-                  src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
-                  alt={token.symbol}
-                  className="w-6 h-6 mr-2"
-                />
-                <div className="flex-1 flex justify-center items-center">
-                  <div className="text-center">
-                    <span>{token.name}</span>
-                    <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
-                  </div>
+      {/* If the total balance is zero, show a fun message */}
+      {totalUSD === 0 ? (
+        <div className="mt-8 text-lg font-semibold text-gray-300">
+          Oh oh... Looks like you don't have any money in your wallet, you can purchase USDC or deposit.
+        </div>
+      ) : (
+        <div className="space-y-4 transform translate-y-20">
+          {/* Display native ETH balance if > 0 */}
+          {nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
+            <div className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#555555]">
+              <img
+                src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
+                alt={nativeToken?.symbol || 'unknown'}
+                className="w-6 h-6 mr-2"
+              />
+              <div className="flex-1 flex justify-center items-center">
+                <div className="text-center">
+                  <span>{nativeToken?.name}</span>
+                  <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(2)}</span>
                 </div>
-                <span className="ml-auto">${value.toFixed(2)}</span>
               </div>
-            );
-          }
-          return null;
-        })}
-      </div>
+              <span className="ml-auto">
+                ${(parseFloat(nativeBalance.data.formatted) * (prices[tokenToCoingeckoId[nativeToken?.symbol ?? '']] || 0)).toFixed(2)}
+              </span>
+            </div>
+          )}
+          {/* Display ERC20 token balances if > 0 */}
+          {tokenBalances.map((balance, index) => {
+            const token = erc20Tokens[index];
+            if (balance.data && parseFloat(balance.data.formatted) > 0) {
+              const price = prices[tokenToCoingeckoId[token.symbol]] || 0;
+              const value = parseFloat(balance.data.formatted) * price;
+              return (
+                <div
+                  key={token.address}
+                  className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#555555]"
+                >
+                  <img
+                    src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
+                    alt={token.symbol}
+                    className="w-6 h-6 mr-2"
+                  />
+                  <div className="flex-1 flex justify-center items-center">
+                    <div className="text-center">
+                      <span>{token.name}</span>
+                      <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <span className="ml-auto">${value.toFixed(2)}</span>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+      )}
     </div>
   );
 };
