@@ -27,11 +27,11 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
   // Menu items for reusability
   const menuItems = [
+    { id: 'home', label: 'Home' },
     { id: 'swap', label: 'Swap' },
     { id: 'buy', label: 'Purchase' },
     { id: 'earn', label: 'Lend' },
     { id: 'market', label: 'Markets' },
-    { id: 'send', label: 'Send' },
     { id: 'liquidity', label: 'Liquidity' },
     { id: 'discord', label: 'Discord' },
   ];

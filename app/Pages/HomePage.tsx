@@ -10,15 +10,15 @@ const tokenToCoingeckoId: { [symbol: string]: string } = {
   'WETH': 'ethereum',
   'AERO': 'aerodrome-finance',
   'VIRTUAL': 'virtual-protocol',
-  'BTC': 'bitcoin', // For CbBTCToken
+  'BTC': 'bitcoin',
   'AAVE': 'aave',
   'MORPHO': 'morpho',
   'USDC': 'usd-coin',
   'EURC': 'euro-coin',
   'CADC': 'cad-coin',
   'BRZ': 'brz',
-  'TRYB': 'bilira', // Correct CoinGecko ID for Turkish Lira token
-  'MXNe': 'mexican-peso-tether', // Assuming this is correct; verify if listed
+  'TRYB': 'bilira',
+  'MXNe': 'mexican-peso-tether',
 };
 
 const tokenImages = {
@@ -37,7 +37,12 @@ const tokenImages = {
   MXP: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
 };
 
-const HomePage = () => {
+interface HomePageProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
   const { address } = useAccount();
   const [prices, setPrices] = useState<{ [id: string]: number }>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -57,15 +62,15 @@ const HomePage = () => {
   // Fetch native balance (ETH) on Base network
   const nativeBalance = useBalance({
     address,
-    chainId: 8453, // Base network
+    chainId: 8453,
   });
 
   // Fetch ERC20 token balances on Base network
   const tokenBalances = erc20Tokens.map(token =>
     useBalance({
       address,
-      token: token.address as `0x${string}`, // Type assertion for wagmi
-      chainId: 8453, // Base network
+      token: token.address as `0x${string}`,
+      chainId: 8453,
     })
   );
 
@@ -96,7 +101,6 @@ const HomePage = () => {
     fetchPrices();
   }, []);
 
-  // Early returns for rendering
   if (!address) {
     return (
       <div className="text-center">
@@ -132,22 +136,26 @@ const HomePage = () => {
   return (
     <div className="text-center mt-20">
       <h2 className="text-3xl font-bold mb-4">Total Balance: ${totalUSD.toFixed(2)}</h2>
-      <div className="flex space-x-4 mt-8">
-        <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+      <div className="flex space-x-4 mt-6">
+        <button
+          onClick={() => setActiveSection("send")}
+          className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full"
+        >
           Send
         </button>
         <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
           Receive
         </button>
-        <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+        <button onClick={() => setActiveSection("swap")}
+        className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
           Swap
         </button>
       </div>
 
-      <div className="space-y-10 transform translate-y-20">
+      <div className="space-y-4 transform translate-y-20">
         {/* Display native ETH balance if > 0 */}
         {nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-          <div className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]">
+          <div className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#555555]">
             <img
               src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
               alt={nativeToken?.symbol || 'unknown'}
@@ -156,7 +164,7 @@ const HomePage = () => {
             <div className="flex-1 flex justify-center items-center">
               <div className="text-center">
                 <span>{nativeToken?.name}</span>
-                <span className="font-bold block">{nativeBalance.data.formatted}</span>
+                <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(2)}</span>
               </div>
             </div>
             <span className="ml-auto">
@@ -173,7 +181,7 @@ const HomePage = () => {
             return (
               <div
                 key={token.address}
-                className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]"
+                className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#555555]"
               >
                 <img
                   src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
@@ -183,7 +191,7 @@ const HomePage = () => {
                 <div className="flex-1 flex justify-center items-center">
                   <div className="text-center">
                     <span>{token.name}</span>
-                    <span className="font-bold block">{balance.data.formatted}</span>
+                    <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
                   </div>
                 </div>
                 <span className="ml-auto">${value.toFixed(2)}</span>

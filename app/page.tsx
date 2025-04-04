@@ -26,7 +26,7 @@ import HomePage from './Pages/HomePage';
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('swap');
+  const [activeSection, setActiveSection] = useState('home');
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
@@ -83,7 +83,7 @@ export default function App() {
     
     <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
       <header className="pt-0.1 pr-4 pl-4 relative w-screen">
-      {activeSection !== "home" && 
+      
         <div className="flex justify-between items-center py-2">
           <div className="flex md:gap-10 gap-2 items-center w-full">
           
@@ -117,7 +117,7 @@ export default function App() {
           
           </div>
         </div>
-}
+
       </header>
 
       <main className="flex-grow flex items-center justify-center mt-2">
@@ -204,9 +204,9 @@ FX trading & remittances <br />redefined.
           {activeSection === "send" && <Send />}
           {activeSection === "liquidity" && <CurrencySelection />}
           {activeSection === "buy" && <BuySection />}
-          {activeSection === "market" && <HomePage/>}
+          {activeSection === "market" && <CurrencyDisplay/>}
           {activeSection === "discord" && <DiscordXSection />}
-          {/* {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />} */}
+          {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           
         </div>
       </main>
