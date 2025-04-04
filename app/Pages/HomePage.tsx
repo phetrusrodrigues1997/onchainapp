@@ -132,31 +132,33 @@ const HomePage = () => {
   return (
     <div className="text-center mt-20">
       <h2 className="text-3xl font-bold mb-4">Total Balance: ${totalUSD.toFixed(2)}</h2>
-      <div className="flex space-x-4">
-  <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
-    Send
-  </button>
-  <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
-    Receive
-  </button>
-  <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
-    Purchase
-  </button>
-</div>
-
+      <div className="flex space-x-4 mt-8">
+        <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+          Send
+        </button>
+        <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+          Receive
+        </button>
+        <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+          Swap
+        </button>
+      </div>
 
       <div className="space-y-10 transform translate-y-20">
         {/* Display native ETH balance if > 0 */}
         {nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-          <div className="bg-[#012110] p-2 rounded flex items-center border border-[#bfbfbf]">
+          <div className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]">
             <img
               src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
               alt={nativeToken?.symbol || 'unknown'}
               className="w-6 h-6 mr-2"
             />
-            <span>
-              {nativeToken?.name}: {nativeBalance.data.formatted}
-            </span>
+            <div className="flex-1 flex justify-center items-center">
+              <div className="text-center">
+                <span>{nativeToken?.name}</span>
+                <span className="font-bold block">{nativeBalance.data.formatted}</span>
+              </div>
+            </div>
             <span className="ml-auto">
               ${(parseFloat(nativeBalance.data.formatted) * (prices[tokenToCoingeckoId[nativeToken?.symbol ?? '']] || 0)).toFixed(2)}
             </span>
@@ -171,16 +173,19 @@ const HomePage = () => {
             return (
               <div
                 key={token.address}
-                className="bg-[#012110] p-2 rounded flex items-center border border-[#bfbfbf]"
+                className="bg-[#012110] p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]"
               >
                 <img
                   src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
                   alt={token.symbol}
                   className="w-6 h-6 mr-2"
                 />
-                <span>
-                  {token.name}: {balance.data.formatted}
-                </span>
+                <div className="flex-1 flex justify-center items-center">
+                  <div className="text-center">
+                    <span>{token.name}</span>
+                    <span className="font-bold block">{balance.data.formatted}</span>
+                  </div>
+                </div>
                 <span className="ml-auto">${value.toFixed(2)}</span>
               </div>
             );
@@ -188,7 +193,6 @@ const HomePage = () => {
           return null;
         })}
       </div>
-      
     </div>
   );
 };
