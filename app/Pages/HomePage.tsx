@@ -134,7 +134,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
   });
 
   return (
-    <div className="text-center mt-20">
+    <div className="text-center mt-20 sm:mb-20">
       <h2 className="text-3xl font-bold mb-4">Total Balance: ${totalUSD.toFixed(2)}</h2>
       <div className="flex space-x-4 mt-6">
         <button
@@ -156,9 +156,11 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
 
       {/* If the total balance is zero, show a fun message */}
       {totalUSD === 0 ? (
-        <div className="mt-8 text-lg font-semibold text-gray-300">
-          Oh oh... Looks like you don't have any money in your wallet, you can purchase USDC or deposit.
-        </div>
+        <div className="mt-8 text-lg font-semibold text-gray-300 flex items-center justify-center">
+        <span className="animate-bounce mr-2">👻</span>
+        <span>Looks like you don't have any money in your wallet, you can purchase USDC or deposit.</span>
+      </div>
+      
       ) : (
         <div className="space-y-4 transform translate-y-20">
           {/* Display native ETH balance if > 0 */}
