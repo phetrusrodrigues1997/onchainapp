@@ -134,9 +134,9 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
   });
 
   return (
-    <div className="text-center mt-26 sm:mb-20">
+    <div className="text-center lg:transform lg:translate-y-2">
       <h2 className="text-5xl font-bold mb-4">${totalUSD.toFixed(2)}</h2>
-      <div className="flex space-x-4 mt-6">
+      <div className="flex space-x-4 mt-6 ">
         <button
           onClick={() => setActiveSection("send")}
           className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full"
