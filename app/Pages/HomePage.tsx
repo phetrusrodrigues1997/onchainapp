@@ -65,6 +65,17 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
     chainId: 8453,
   });
 
+ // Add state for the toast notification
+const [showToast, setShowToast] = useState(false);
+
+const copyAddressToClipboard = () => {
+  if (address) {
+    navigator.clipboard.writeText(address);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000); // Hide after 3 seconds
+  }
+};
+
   // Fetch ERC20 token balances on Base network
   const tokenBalances = erc20Tokens.map(token =>
     useBalance({
@@ -143,9 +154,20 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
         >
           Send
         </button>
-        <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
-          Receive
-        </button>
+        <div className="relative">
+  <button 
+    onClick={copyAddressToClipboard}
+    className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full"
+  >
+    Receive
+  </button>
+  
+  {showToast && (
+    <div className="absolute left-1/2 transform translate-x-1/2 -bottom-12 bg-[#d3c81a] text-black px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
+      Address copied! ✓
+    </div>
+  )}
+</div>
         <button
           onClick={() => setActiveSection("swap")}
           className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full"
@@ -170,7 +192,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
-                className="w-6 h-6 mr-2"
+                className="w-10 h-10 mr-2"
               />
               <div className="flex-1 flex justify-center items-center">
                 <div className="text-center">
@@ -197,7 +219,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
                     alt={token.symbol}
-                    className="w-6 h-6 mr-2"
+                    className="w-9 h-9 mr-2"
                   />
                   <div className="flex-1 flex justify-center items-center">
                     <div className="text-center">
