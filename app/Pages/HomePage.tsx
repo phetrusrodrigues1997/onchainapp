@@ -17,8 +17,24 @@ const tokenToCoingeckoId: { [symbol: string]: string } = {
   'EURC': 'euro-coin',
   'CADC': 'cad-coin',
   'BRZ': 'brz',
-  'TRYB': 'tryb', // Correct CoinGecko ID for Turkish Lira token
-  'MXNe': 'mexican-peso', // Assuming this is correct; verify if listed
+  'TRYB': 'bilira', // Correct CoinGecko ID for Turkish Lira token
+  'MXNe': 'mexican-peso-tether', // Assuming this is correct; verify if listed
+};
+
+const tokenImages = {
+  ETH: "https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
+  WETH: "https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282",
+  AERO: "https://basescan.org/token/images/aerodrome_32.png",
+  VIRTUAL: "https://basescan.org/token/images/virtualprotocol_32.png",
+  BTC: "https://basescan.org/token/images/cbbtc_32.png",
+  AAVE: "https://basescan.org/token/images/aave_32.svg",
+  MORPHO: "https://basescan.org/token/images/morphoorg_new_32.png",
+  USDC: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
+  EURC: "https://coin-images.coingecko.com/coins/images/26045/large/euro.png?1696525125",
+  CADC: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
+  BRZ: "https://www.svgrepo.com/show/401552/flag-for-brazil.svg",
+  LIRA: "https://www.svgrepo.com/show/242355/turkey.svg",
+  MXP: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
 };
 
 const HomePage = () => {
@@ -114,15 +130,37 @@ const HomePage = () => {
   });
 
   return (
-    <div className="text-center">
-      <h2 className="text-2xl font-bold mb-4">Your Balances</h2>
-      <ul className="list-disc list-inside">
+    <div className="text-center mt-20">
+      <h2 className="text-3xl font-bold mb-4">Total Balance: ${totalUSD.toFixed(2)}</h2>
+      <div className="flex space-x-4">
+  <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+    Send
+  </button>
+  <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+    Receive
+  </button>
+  <button className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full">
+    Purchase
+  </button>
+</div>
+
+
+      <div className="space-y-10 transform translate-y-20">
         {/* Display native ETH balance if > 0 */}
         {nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-          <li>
-            {nativeToken && nativeToken.name} ({nativeToken && nativeToken.symbol}): {nativeBalance.data.formatted} {nativeToken && nativeToken.symbol} ($
-            {nativeToken && (parseFloat(nativeBalance.data.formatted) * (prices[tokenToCoingeckoId[nativeToken.symbol]] || 0)).toFixed(2)})
-          </li>
+          <div className="bg-[#012110] p-2 rounded flex items-center border border-[#bfbfbf]">
+            <img
+              src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
+              alt={nativeToken?.symbol || 'unknown'}
+              className="w-6 h-6 mr-2"
+            />
+            <span>
+              {nativeToken?.name}: {nativeBalance.data.formatted}
+            </span>
+            <span className="ml-auto">
+              ${(parseFloat(nativeBalance.data.formatted) * (prices[tokenToCoingeckoId[nativeToken?.symbol ?? '']] || 0)).toFixed(2)}
+            </span>
+          </div>
         )}
         {/* Display ERC20 token balances if > 0 */}
         {tokenBalances.map((balance, index) => {
@@ -131,15 +169,26 @@ const HomePage = () => {
             const price = prices[tokenToCoingeckoId[token.symbol]] || 0;
             const value = parseFloat(balance.data.formatted) * price;
             return (
-              <li key={token.address}>
-                {token.name} ({token.symbol}): {balance.data.formatted} {token.symbol} (${value.toFixed(2)})
-              </li>
+              <div
+                key={token.address}
+                className="bg-[#012110] p-2 rounded flex items-center border border-[#bfbfbf]"
+              >
+                <img
+                  src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
+                  alt={token.symbol}
+                  className="w-6 h-6 mr-2"
+                />
+                <span>
+                  {token.name}: {balance.data.formatted}
+                </span>
+                <span className="ml-auto">${value.toFixed(2)}</span>
+              </div>
             );
           }
           return null;
         })}
-      </ul>
-      <p className="mt-4">Total Balance: ${totalUSD.toFixed(2)}</p>
+      </div>
+      
     </div>
   );
 };
