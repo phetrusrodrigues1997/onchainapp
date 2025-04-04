@@ -2,14 +2,14 @@
 import React, { useState } from "react";
 
 interface SwapDropdownProps {
-  onSelectionChange: (option: "Stablecoins" | "Crypto(BASE)") => void;
+  onSelectionChange: (option: "Stablecoins" | "Crypto") => void;
 }
 
 const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
-  const [selected, setSelected] = useState<"Stablecoins" | "Crypto(BASE)">("Stablecoins");
+  const [selected, setSelected] = useState<"Stablecoins" | "Crypto">("Stablecoins");
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelection = (option: "Stablecoins" | "Crypto(BASE)") => {
+  const handleSelection = (option: "Stablecoins" | "Crypto") => {
     setSelected(option);
     setIsOpen(false);
     onSelectionChange(option);
@@ -17,8 +17,8 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
 
   return (
     <div
-      style={{ zIndex: 1000 }} // Elevate the stacking context
-      className="relative inline-block text-xs text-left ml-56 transform translate-y-[70px]"
+      style={{ zIndex: 1000 }}
+      className={`relative inline-block text-xs text-left ml-56 transform translate-y-[70px] ${selected === "Crypto" ? "translate-x-7" : ""}`}
     >
       <button
         type="button"
@@ -38,7 +38,7 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
             </li>
             <li
               className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
-              onClick={() => handleSelection("Crypto(BASE)")}
+              onClick={() => handleSelection("Crypto")}
             >
               Crypto
             </li>
