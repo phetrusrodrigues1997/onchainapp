@@ -134,7 +134,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
   });
 
   return (
-    <div className="text-center lg:transform lg:translate-y-2">
+    <div className="text-center mb-72 lg:transform lg:translate-y-20">
       <h2 className="text-5xl font-bold mb-4">${totalUSD.toFixed(2)}</h2>
       <div className="flex space-x-4 mt-6 ">
         <button
