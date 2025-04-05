@@ -301,7 +301,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
       </div>
 
       {/* Display Recipient Status and Balance */}
-      <div className="mb-4 text-gray-400 text-sm">
+      <div className="mb-4 text-[#d3c81a] text-sm">
         {isResolving && <p>Resolving username...</p>}
         {resolvedRecipient && !recipientError && (
           <p>Sending to {resolvedRecipient} {inputRecipient !== resolvedRecipient ? `` : ''}</p>
