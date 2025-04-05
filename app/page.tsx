@@ -27,7 +27,7 @@ import UsernameSetup from './Pages/UsernameSetup';
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState('swap');
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
@@ -151,7 +151,7 @@ FX trading & remittances <br />redefined.
 />
               <Swap
                 experimental={{ useAggregator: true }}
-                className="bg-[#012110] p-1 max-w-sm mx-auto mt-8"
+                className="bg-[#012512] p-1 max-w-sm mx-auto mt-8"
                 onSuccess={async () => {
                   if (address) {
                     await recordSwapPoints(address);
@@ -174,7 +174,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? ETHToken : CADCToken}
   type="from"
-  className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
+  className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -182,7 +182,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={selectedOption === "Crypto" ? CbBTCToken : USDCToken}
   type="to"
-  className="mb-1 bg-[#012110] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
+  className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
                 <SwapButton className="w-full bg-[#d3c81a] rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />

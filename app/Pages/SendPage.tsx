@@ -3,6 +3,7 @@ import { useAccount, useWriteContract, useSendTransaction, useSwitchChain, useRe
 import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
 import { base } from 'wagmi/chains';
+import { getWalletAddress } from '../Database/actions';
 
 // Token definitions (unchanged from the original)
 const ETHToken: Token = {
@@ -111,7 +112,7 @@ const ERC20_ABI = [
 
 interface SendPageProps {
   setActiveSection: (section: string) => void;
-  className?: string; // Add className as an optional prop
+  className?: string;
 }
 
 const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
@@ -120,54 +121,82 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
 
   const [sentence, setSentence] = useState<string>('');
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
-  const [recipientAddress, setRecipientAddress] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
+  const [inputRecipient, setInputRecipient] = useState<string>('');
+  const [resolvedRecipient, setResolvedRecipient] = useState<string | null>(null);
+  const [isResolving, setIsResolving] = useState<boolean>(false);
   const [isSentenceValid, setIsSentenceValid] = useState<boolean>(false);
   const [transactionStatus, setTransactionStatus] = useState<string>('');
-  const [addressError, setAddressError] = useState<string>('');
-  const [tokenError, setTokenError] = useState<string>(''); // New state for token error
+  const [recipientError, setRecipientError] = useState<string>('');
+  const [tokenError, setTokenError] = useState<string>('');
   const [balance, setBalance] = useState<string | null>(null);
 
-  // Parse sentence and validate address and token
+  // Parse sentence and validate token
   useEffect(() => {
-    const regex = /^\s*send\s+(\d+(?:\.\d+)?)\s+(\w+)\s+to\s+(0x[a-fA-F0-9]{40})\s*$/i;
+    const regex = /^\s*send\s+(\d+(?:\.\d+)?)\s+(\w+)\s+to\s+(.+)\s*$/i;
     const match = sentence.match(regex);
     if (match) {
-      const [, amountStr, tokenSymbol, addr] = match;
+      const [, amountStr, tokenSymbol, recipient] = match;
       const token = availableTokens.find(t => t.symbol.toLowerCase() === tokenSymbol.toLowerCase());
       if (token) {
         setAmount(amountStr);
         setSelectedToken(token);
-        setRecipientAddress(addr);
+        setInputRecipient(recipient.trim());
         setIsSentenceValid(true);
-        setAddressError('');
-        setTokenError(''); // Clear token error if valid
+        setTokenError('');
       } else {
         setIsSentenceValid(false);
         setSelectedToken(null);
-        setRecipientAddress('');
+        setInputRecipient('');
         setAmount('');
-        setTokenError(`Invalid token symbol: ${tokenSymbol}`); // Set error for invalid token
+        setTokenError(`Invalid token symbol: ${tokenSymbol}`);
       }
     } else {
       setIsSentenceValid(false);
       setSelectedToken(null);
-      setRecipientAddress('');
+      setInputRecipient('');
       setAmount('');
-      setTokenError(''); // Clear token error if sentence format is invalid
-      const toIndex = sentence.toLowerCase().indexOf('to');
-      if (toIndex !== -1) {
-        const afterTo = sentence.slice(toIndex + 2).trim();
-        if (afterTo && !/^0x[a-fA-F0-9]{40}$/.test(afterTo)) {
-          setAddressError('Please enter a valid address');
-        } else {
-          setAddressError('');
-        }
-      } else {
-        setAddressError('');
-      }
+      setTokenError('');
     }
   }, [sentence]);
+
+  // Resolve recipient (wallet address or username)
+  useEffect(() => {
+    const resolveRecipient = async () => {
+      if (!inputRecipient) {
+        setResolvedRecipient(null);
+        setRecipientError('');
+        return;
+      }
+      if (inputRecipient.startsWith('0x')) {
+        if (/^0x[a-fA-F0-9]{40}$/.test(inputRecipient)) {
+          setResolvedRecipient(inputRecipient);
+          setRecipientError('');
+        } else {
+          setResolvedRecipient(null);
+          setRecipientError('Invalid wallet address');
+        }
+      } else {
+        setIsResolving(true);
+        try {
+          const walletAddress = await getWalletAddress(inputRecipient);
+          if (walletAddress) {
+            setResolvedRecipient(walletAddress);
+            setRecipientError('');
+          } else {
+            setResolvedRecipient(null);
+            setRecipientError('Username not found');
+          }
+        } catch (err) {
+          setResolvedRecipient(null);
+          setRecipientError('Error resolving username');
+        } finally {
+          setIsResolving(false);
+        }
+      }
+    };
+    resolveRecipient();
+  }, [inputRecipient]);
 
   // Fetch balances (unchanged from the original)
   const { data: erc20BalanceData } = useReadContract({
@@ -202,14 +231,14 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const { sendTransaction, isPending: isSendPending } = useSendTransaction();
 
   const handleSend = () => {
-    if (!isSentenceValid || !selectedToken || !recipientAddress || !amount || !address) {
-      setTransactionStatus('Invalid sentence or wallet not connected');
+    if (!isSentenceValid || !selectedToken || !resolvedRecipient || !amount || !address) {
+      setTransactionStatus('Invalid input or wallet not connected');
       return;
     }
     try {
       if (selectedToken.address === '') {
         sendTransaction({
-          to: recipientAddress as `0x${string}`,
+          to: resolvedRecipient as `0x${string}`,
           value: parseUnits(amount, selectedToken.decimals),
         });
       } else {
@@ -217,7 +246,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
           address: selectedToken.address as `0x${string}`,
           abi: ERC20_ABI,
           functionName: 'transfer',
-          args: [recipientAddress, parseUnits(amount, selectedToken.decimals)],
+          args: [resolvedRecipient, parseUnits(amount, selectedToken.decimals)],
         });
       }
       setTransactionStatus('Transaction submitted.');
@@ -240,63 +269,65 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
 
   return (
     <div className={`bg-[#010101] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700 relative`}>
-  {/* Manage Username Button */}
-  <button
-    className="absolute top-4 right-4 text-black font-bold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] hover:text-white transition-colors"
-    onClick={() => setActiveSection("usernamePage")}  // Replace with actual functionality
-    aria-label="Manage your username"
-  >
-    Manage Username
-  </button>
+      {/* Manage Username Button */}
+      <button
+        className="absolute top-4 right-4 text-black font-bold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] hover:text-white transition-colors"
+        onClick={() => setActiveSection("usernamePage")}
+        aria-label="Manage your username"
+      >
+        Manage Username
+      </button>
 
-  <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
+      <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
 
-  {/* Input with error display */}
-  <div className="mb-4">
-    <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
-      Enter Command
-    </label>
-    <input
-      id="sentence"
-      type="text"
-      value={sentence}
-      onChange={(e) => setSentence(e.target.value)}
-      placeholder="Send 10 USDC to 0x1234abc..."
-      className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
-        addressError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
-      }`}
-    />
-    {addressError && (
-      <p className="text-red-400 text-xs mt-1">{addressError}</p>
-    )}
-    {tokenError && (
-      <p className="text-red-400 text-xs mt-1">{tokenError}</p>
-    )}
-  </div>
+      {/* Input with error display */}
+      <div className="mb-4">
+        <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
+          Enter Command
+        </label>
+        <input
+          id="sentence"
+          type="text"
+          value={sentence}
+          onChange={(e) => setSentence(e.target.value)}
+          placeholder="Send 10 USDC to 0x1234abc... or username"
+          className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
+            recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
+          }`}
+        />
+        {tokenError && (
+          <p className="text-red-400 text-xs mt-1">{tokenError}</p>
+        )}
+      </div>
 
-  {/* Display Parsed Info */}
-  <div className="mb-4 text-gray-400 text-sm">
-    {balance !== null && selectedToken && (
-      <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
-    )}
-  </div>
+      {/* Display Recipient Status and Balance */}
+      <div className="mb-4 text-gray-400 text-sm">
+        {isResolving && <p>Resolving username...</p>}
+        {resolvedRecipient && !recipientError && (
+          <p>Sending to {resolvedRecipient} {inputRecipient !== resolvedRecipient ? `` : ''}</p>
+        )}
+        {recipientError && <p className="text-red-400">{recipientError}</p>}
+        {balance !== null && selectedToken && (
+          <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
+        )}
+      </div>
 
-  {/* Send Button */}
-  <button
-    onClick={handleSend}
-    disabled={isPending || !isSentenceValid || !address || (!!chainId && chainId !== base.id)}
-    className="w-full bg-[#d3c81a] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#d3c81a]"
-  >
-    {isPending ? 'Sending...' : 'Send Tokens'}
-  </button>
+      {/* Send Button */}
+      <button
+        onClick={handleSend}
+        disabled={isPending || !isSentenceValid || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
+        className="w-full bg-[#d3c81a] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#d3c81a]"
+      >
+        {isPending ? 'Sending...' : 'Send Tokens'}
+      </button>
 
-  {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
-  {!address && (
-    <div className="mt-4 text-red-400 text-center text-sm">
-      Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
+      {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
+      {!address && (
+        <div className="mt-4 text-red-400 text-center text-sm">
+          Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
+        </div>
+      )}
     </div>
-  )}
-</div>
   );
 };
 

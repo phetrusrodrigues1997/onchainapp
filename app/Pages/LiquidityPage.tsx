@@ -78,7 +78,7 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
   };
 
   return (
-    <div className={`min-h-screen bg-[#012110] py-8 px-4 flex items-center justify-center ${className}`}>
+    <div className={`min-h-screen bg-[#012512] py-8 px-4 flex items-center justify-center ${className}`}>
       <div className="max-w-4xl w-full bg-[#010101] rounded-lg shadow-md p-6 border border-gray-700">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white text-center sm:text-left mb-4 sm:mb-0">
