@@ -112,14 +112,14 @@ const BuySection: React.FC = () => {
         </p>
       </div>
 
-      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#012110] rounded-lg shadow-md`}>
+      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#012110] rounded-lg`}>
 
         {filteredTokens.length > 0 ? (
           <div className="space-y-3 sm:space-y-4">
             {filteredTokens.map((item) => (
               <div
                 key={item.token.symbol}
-                className="flex items-center justify-between p-3 sm:p-4 rounded-lg shadow-md"
+                className="flex items-center justify-between p-3 sm:p-4 rounded-lg"
               >
                 <Buy toToken={item.token} />
               </div>

@@ -21,6 +21,7 @@ import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 import LiveCryptoPrices from './Sections/LiveCryptoPrices';
 import HomePage from './Pages/HomePage';
+import UsernameSetup from './Pages/UsernameSetup';
 
 
 
@@ -201,7 +202,8 @@ FX trading & remittances <br />redefined.
             </div>
           )}
           {activeSection === "earn" && <EarnSection />}
-          {activeSection === "send" && <Send />}
+          {activeSection === "usernamePage" && <UsernameSetup />}
+          {activeSection === "send" && <Send setActiveSection={setActiveSection} />}
           {activeSection === "liquidity" && <CurrencySelection />}
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay/>}

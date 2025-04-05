@@ -1,4 +1,3 @@
-// app/actions.ts
 "use server";
 
 import { neon } from "@neondatabase/serverless";
@@ -45,5 +44,29 @@ export async function getUserPoints(walletAddress: string): Promise<number> {
   } catch (error) {
     console.error("Error fetching user points:", error);
     throw new Error("Failed to fetch user points");
+  }
+}
+
+/**
+ * Sets a unique username for a given wallet address.
+ * If the wallet address doesn't exist, creates a new entry with the username.
+ * If the username is already taken, throws an error.
+ */
+export async function setUsername(walletAddress: string, newUsername: string) {
+  try {
+    await db
+      .insert(userPoints)
+      .values({ walletAddress, username: newUsername })
+      .onConflictDoUpdate({
+        target: userPoints.walletAddress,
+        set: { username: newUsername },
+      });
+  } catch (error: any) {
+    if (error.code === '23505' && error.constraint === 'user_points_username_key') {
+      throw new Error('Username is already taken');
+    } else {
+      console.error("Error setting username:", error);
+      throw new Error('Failed to set username');
+    }
   }
 }
