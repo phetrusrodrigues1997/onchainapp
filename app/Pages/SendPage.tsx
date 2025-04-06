@@ -316,7 +316,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
       <button
         onClick={handleSend}
         disabled={isPending || !isSentenceValid || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
-        className="w-full bg-white text-black font-bold rounded-full py-3 transition-colors hover:bg-[#d3c81a] cursor-pointer"
+        className="w-full bg-[#d3c81a] text-white font-bold rounded-full py-3 transition-colors hover:bg-[#d3c81a] cursor-pointer"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>
