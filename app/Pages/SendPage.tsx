@@ -271,7 +271,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     <div className={`bg-[#010101] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700 relative`}>
       {/* Manage Username Button */}
       <button
-        className="absolute top-4 right-4 text-black font-bold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] hover:text-white transition-colors"
+        className="absolute top-4 right-4 text-black font-bold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors"
         onClick={() => setActiveSection("usernamePage")}
         aria-label="Manage your username"
       >
@@ -316,7 +316,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
       <button
         onClick={handleSend}
         disabled={isPending || !isSentenceValid || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
-        className="w-full bg-[#d3c81a] text-white rounded-full py-3 transition-colors hover:bg-[#0000ff] disabled:bg-[#d3c81a]"
+        className="w-full bg-white text-black font-bold rounded-full py-3 transition-colors hover:bg-[#d3c81a] cursor-pointer"
       >
         {isPending ? 'Sending...' : 'Send Tokens'}
       </button>
