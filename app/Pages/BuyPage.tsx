@@ -51,6 +51,57 @@ const BuySection: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+
+
+  useEffect(() => {
+    const styleId = 'custom-button-style';
+
+    const injectStyle = () => {
+      let styleTag = document.getElementById(styleId);
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = styleId;
+        document.head.appendChild(styleTag);
+      }
+
+      // Always re-set the CSS content (in case it was removed or overwritten)
+      styleTag.innerHTML = `
+        [data-testid="ockBuyButton_Button"],
+        [data-testid="ockSwapButton_Button"] {
+          background-color: white !important;
+        }
+
+        [data-testid="ockBuyButton_Button"] span,
+        [data-testid="ockSwapButton_Button"] span {
+          color: black !important;
+        }
+      `;
+    };
+
+    // Inject immediately
+    injectStyle();
+
+    // Re-apply styles after a delay in case components are rendered late
+    const timeout = setTimeout(() => {
+      injectStyle();
+    }, 1000); // 1 second delay just to be safe
+
+    // Optional: Observe DOM changes too
+    const observer = new MutationObserver(() => {
+      injectStyle();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      clearTimeout(timeout);
+      observer.disconnect();
+    };
+  }, []);
+
   useEffect(() => {
     const setInputStyles = () => {
       const inputField = document.querySelector('input[data-testid="ockTextInput_Input"]') as HTMLInputElement | null;
@@ -83,6 +134,9 @@ const BuySection: React.FC = () => {
       observer.disconnect();
     };
   }, []);
+
+
+  
   
   
 

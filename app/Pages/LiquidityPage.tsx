@@ -79,7 +79,7 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
 
   return (
     <div className={`min-h-screen bg-[#012512] py-8 px-4 flex items-center justify-center ${className}`}>
-      <div className="max-w-4xl w-full bg-[#010101] rounded-lg shadow-md p-6 border border-gray-700">
+      <div className="max-w-4xl w-full bg-[#1A3300] rounded-lg shadow-md p-6 border border-gray-700">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white text-center sm:text-left mb-4 sm:mb-0">
             Provide Liquidity on Aerodrome
@@ -87,10 +87,10 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
           <div className="flex space-x-2 self-center sm:self-auto">
             <button
               onClick={scrollLeft}
-              className="bg-[#d3c81a] rounded-full p-2 hover:bg-[#2563EB] transition-colors"
+              className="bg-white rounded-full p-2 hover:bg-[#2563EB] transition-colors"
             >
               <svg
-                className="w-4 h-4 text-white"
+                className="w-4 h-4 text-black"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -106,10 +106,10 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
             </button>
             <button
               onClick={scrollRight}
-              className="bg-[#d3c81a] rounded-full p-2 hover:bg-[#2563EB] transition-colors"
+              className="bg-white rounded-full p-2 hover:bg-[#2563EB] transition-colors"
             >
               <svg
-                className="w-4 h-4 text-white"
+                className="w-4 h-4 text-black"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

@@ -190,7 +190,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
         <div className="space-y-4 transform translate-y-12">
           {/* Display native ETH balance if > 0 and showCrypto is true */}
           {showCrypto && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="bg-[#222222] p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]">
+            <div className="bg-[#1A3300] p-2 rounded-2xl shadow-sm flex items-center border border-gray-600">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -221,7 +221,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
               return (
                 <div
                   key={token.address}
-                  className="bg-[#222222] p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]"
+                  className="bg-[#1A3300] p-2 rounded-2xl shadow-sm flex items-center border border-gray-600"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
