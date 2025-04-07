@@ -85,7 +85,7 @@ const EarnSection: React.FC = () => {
           className={`rounded-md flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
             activeButton === "deposit"
               ? "bg-white text-black font-semibold"
-              : "bg-[#1A3300] text-white font-semibold"
+              : "bg-[#010101] text-white font-semibold"
           }`}
         >
           Deposit
@@ -98,7 +98,7 @@ const EarnSection: React.FC = () => {
           className={`rounded-md flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
             activeButton === "withdraw"
               ? "bg-white text-black font-semibold"
-              : "bg-[#1A3300] text-white font-semibold"
+              : "bg-[#010101] text-white font-semibold"
           }`}
         >
           Withdraw
@@ -108,20 +108,20 @@ const EarnSection: React.FC = () => {
       {/* Earn Component */}
       <Earn vaultAddress={selectedToken.vaultAddress as `0x${string}`}>
         {earnSection === "deposit" && (
-          <EarnDeposit className="bg-[#1A3300] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
+          <EarnDeposit className="bg-[#010101] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
             {/* <TokenSelect/> */}
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
-            <DepositBalance className="bg-[#131313]"/>
-            <DepositAmountInput className="mb-4 bg-[#131313] text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
+            <DepositBalance className="bg-gray-800"/>
+            <DepositAmountInput className="mb-4 bg-gray-800 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
             <DepositButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
           </EarnDeposit>
         )}
         {earnSection === "withdraw" && (
-          <EarnWithdraw className="bg-[#1A3300] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
+          <EarnWithdraw className="bg-[#010101] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
             {/* <TokenSelect /> */}
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
-             <WithdrawBalance className="bg-[#131313]"/>
-            <WithdrawAmountInput className="mb-4 bg-[#131313] text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />            <WithdrawButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
+             <WithdrawBalance className="bg-gray-800"/>
+            <WithdrawAmountInput className="mb-4 bg-gray-800 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />            <WithdrawButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
           </EarnWithdraw>
         )}
       </Earn>
