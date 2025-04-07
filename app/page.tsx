@@ -45,22 +45,6 @@ export default function App() {
     }
   }, [address]);
 
- 
-    useEffect(() => {
-      const styleId = 'custom-button-style';
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.innerHTML = `
-  
-          [data-testid="ockSwapButton_Button"] span {
-            color: black !important;
-          }
-        `;
-        document.head.appendChild(style);
-      }
-    }, []);
-
   // Mounting and MutationObserver for styling
   useEffect(() => {
     setIsMounted(true);
@@ -200,7 +184,7 @@ FX trading & remittances <br />redefined.
   type="to"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
-                <SwapButton className="w-full bg-white text-black font-semibold rounded-full py-2 transition-colors" />
+                <SwapButton className="w-full bg-[#d3c81a] rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>
