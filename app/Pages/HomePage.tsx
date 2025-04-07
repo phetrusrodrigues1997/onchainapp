@@ -4,7 +4,7 @@ import { Token } from '@coinbase/onchainkit/token';
 import { cryptoTokens, stablecoinTokens } from '../Token Lists/coins';
 
 // Mapping of token symbols to CoinGecko IDs for price fetching
-const tokenToCoingeckoId: { [symbol: string]: string } = {
+const tokenToCoingeckoId = {
   'ETH': 'ethereum',
   'WETH': 'ethereum',
   'AERO': 'aerodrome-finance',
@@ -41,16 +41,14 @@ interface HomePageProps {
   setActiveSection: (section: string) => void;
 }
 
-const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
+const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) => {
   const { address } = useAccount();
-  const [prices, setPrices] = useState<{ [id: string]: number }>({});
+  const [prices, setPrices] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
-  const [showCrypto, setShowCrypto] = useState(true);
-  const [showStablecoins, setShowStablecoins] = useState(true);
+  const [selectedTab, setSelectedTab] = useState('stablecoins'); // State for selected tab
 
-  // Combine token lists, removing duplicates based on address
-  const allTokens = [...cryptoTokens, ...stablecoinTokens].reduce((acc, token) => {
+  const allTokens = [...cryptoTokens, ...stablecoinTokens].reduce((acc: Token[], token) => {
     const key = token.address || 'native';
     if (!acc.some(t => t.address === token.address)) {
       acc.push(token);
@@ -58,39 +56,27 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
     return acc;
   }, [] as Token[]);
 
-  const nativeToken = allTokens.find(token => !token.address); // ETH
+  const nativeToken = allTokens.find(token => !token.address);
   const erc20Tokens = allTokens.filter(token => token.address);
 
-  // Fetch native balance (ETH) on Base network
-  const nativeBalance = useBalance({
-    address,
-    chainId: 8453,
-  });
-
-  // Fetch ERC20 token balances on Base network
+  const nativeBalance = useBalance({ address, chainId: 8453 });
   const tokenBalances = erc20Tokens.map(token =>
-    useBalance({
-      address,
-      token: token.address as `0x${string}`,
-      chainId: 8453,
-    })
+    useBalance({ address, token: token.address || undefined, chainId: 8453 })
   );
 
-  // Copy address to clipboard
   const copyAddressToClipboard = () => {
     if (address) {
       navigator.clipboard.writeText(address);
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000); // Hide after 3 seconds
+      setTimeout(() => setShowToast(false), 3000);
     }
   };
 
-  // Fetch prices from CoinGecko
   useEffect(() => {
     const fetchPrices = async () => {
       setIsLoading(true);
       const ids = allTokens
-        .map(token => tokenToCoingeckoId[token.symbol])
+        .map(token => tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId])
         .filter(Boolean);
       if (ids.length > 0) {
         try {
@@ -98,7 +84,7 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
             `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd`
           );
           const data = await response.json();
-          const priceMap: { [id: string]: number } = {};
+          const priceMap: Record<string, number> = {};
           ids.forEach(id => {
             priceMap[id] = data[id]?.usd || 0;
           });
@@ -113,46 +99,42 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
   }, []);
 
   if (!address) {
-    return (
-      <div className="text-center">
-        Please connect your wallet to see your balance.
-      </div>
-    );
+    return <div className="text-center">Please connect your wallet to see your balance.</div>;
   }
 
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
   }
 
-  // Define stablecoin symbols
   const stablecoinSymbols = new Set(['USDC', 'EURC', 'CADC', 'BRZ', 'TRYB', 'MXNe']);
 
-  // Calculate total balance in USD based on visible tokens
+  // Calculate total USD based on selected tab
   let totalUSD = 0;
-
-  if (showCrypto && nativeToken && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0) {
-    const nativeId = tokenToCoingeckoId[nativeToken.symbol];
+  if (selectedTab === 'crypto' && nativeToken && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0) {
+    const nativeId = tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId];
     const nativePrice = prices[nativeId] || 0;
     const nativeValue = parseFloat(nativeBalance.data.formatted) * nativePrice;
     totalUSD += nativeValue;
   }
-
   tokenBalances.forEach((balance, index) => {
-    if (balance.data && parseFloat(balance.data.formatted) > 0) {
-      const token = erc20Tokens[index];
-      const isStablecoin = stablecoinSymbols.has(token.symbol);
-      if ((isStablecoin && showStablecoins) || (!isStablecoin && showCrypto)) {
-        const id = tokenToCoingeckoId[token.symbol];
-        const price = prices[id] || 0;
-        const value = parseFloat(balance.data.formatted) * price;
-        totalUSD += value;
-      }
+    const token = erc20Tokens[index];
+    const isStablecoin = stablecoinSymbols.has(token.symbol);
+    if (
+      balance.data &&
+      parseFloat(balance.data.formatted) > 0 &&
+      ((selectedTab === 'crypto' && !isStablecoin) || (selectedTab === 'stablecoins' && isStablecoin))
+    ) {
+      const id = tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId];
+      const price = prices[id] || 0;
+      const value = parseFloat(balance.data.formatted) * price;
+      totalUSD += value;
     }
   });
 
   return (
     <div className="text-center mb-72 lg:transform lg:translate-y-24">
-      <h2 className="text-5xl font-bold mb-4">${totalUSD.toFixed(2)}</h2>
+      <h1 className="text-3xl font-bold mb-4">Wallet Balance</h1>
+      <h2 className="text-4xl font-bold mb-4">${totalUSD.toFixed(2)}</h2>
       <div className="flex space-x-4 mt-6">
         <button
           onClick={() => setActiveSection("send")}
@@ -180,17 +162,56 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
           Swap
         </button>
       </div>
+{/* Updated Tab Navigation */}
+<div className="flex justify-start space-x-10 mt-6">
+<button
+    onClick={() => setSelectedTab('stablecoins')}
+    className={`px-4 py-2 font-bold border-b-2 ${
+      selectedTab === 'stablecoins'
+        ? 'border-[#d3c81a] text-[#d3c81a]'
+        : 'border-transparent text-white font-bold'
+    }`}
+  >
+    Stablecoins
+  </button>
+
+  <button
+    onClick={() => setSelectedTab('crypto')}
+    className={`px-4 py-2 font-bold border-b-2 ${
+      selectedTab === 'crypto'
+        ? 'border-[#d3c81a] text-[#d3c81a]'
+        : 'border-transparent text-white font-bold'
+    }`}
+  >
+    Crypto
+  </button>
+  
+  <button
+    onClick={() => setSelectedTab('stocks')}
+    className={`px-4 py-2 font-bold border-b-2 ${
+      selectedTab === 'stocks'
+        ? 'border-[#d3c81a] text-[#d3c81a]'
+        : 'border-transparent text-white font-bold'
+    }`}
+  >
+    Stocks
+  </button>
+</div>
+
 
       {totalUSD === 0 ? (
         <div className="mt-8 text-lg font-semibold text-gray-300 flex flex-col items-center justify-center">
           <span className="animate-bounce text-5xl mt-16">👻</span>
-          <span>Uh oh... Looks like you don't have any money in your wallet, you can purchase USDC or deposit.</span>
+          <span>
+            {selectedTab === 'crypto'
+              ? "Please purchase some first."
+              : "Please purchase some first."}
+          </span>
         </div>
       ) : (
         <div className="space-y-4 transform translate-y-12">
-          {/* Display native ETH balance if > 0 and showCrypto is true */}
-          {showCrypto && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="bg-[#131313] p-2 rounded-2xl shadow-sm flex items-center border border-gray-600">
+          {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
+            <div className="p-2 rounded-2xl shadow-sm flex items-center border border-gray-600">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -203,25 +224,27 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
                 </div>
               </div>
               <span className="ml-auto">
-                ${(parseFloat(nativeBalance.data.formatted) * (prices[tokenToCoingeckoId[nativeToken?.symbol ?? '']] || 0)).toFixed(2)}
+                ${(nativeToken?.symbol && prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]] 
+                  ? (parseFloat(nativeBalance.data.formatted) * prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]).toFixed(2) 
+                  : '0.00')}
               </span>
             </div>
           )}
-          {/* Display ERC20 token balances if > 0 and according to toggles */}
           {tokenBalances.map((balance, index) => {
             const token = erc20Tokens[index];
             const isStablecoin = stablecoinSymbols.has(token.symbol);
             if (
               balance.data &&
               parseFloat(balance.data.formatted) > 0 &&
-              ((isStablecoin && showStablecoins) || (!isStablecoin && showCrypto))
+              ((selectedTab === 'crypto' && !isStablecoin) || (selectedTab === 'stablecoins' && isStablecoin))
             ) {
-              const price = prices[tokenToCoingeckoId[token.symbol]] || 0;
+              const coingeckoId = tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId];
+              const price = coingeckoId ? prices[coingeckoId] || 0 : 0;
               const value = parseFloat(balance.data.formatted) * price;
               return (
                 <div
                   key={token.address}
-                  className="bg-[#131313] p-2 rounded-2xl shadow-sm flex items-center border border-gray-600"
+                  className="p-2 rounded-2xl shadow-sm flex items-center border border-gray-600"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
@@ -242,49 +265,6 @@ const HomePage = ({ activeSection, setActiveSection }: HomePageProps) => {
           })}
         </div>
       )}
-
-      {/* Toggle buttons at bottom left and right */}
-      <div className="mt-20">
-  {/* Crypto Toggle */}
-  <div className="fixed left-4 flex items-center">
-    <label className="relative inline-flex items-center cursor-pointer">
-      {/* Hidden checkbox controlling the toggle state */}
-      <input
-        type="checkbox"
-        checked={showCrypto}
-        onChange={() => setShowCrypto(!showCrypto)}
-        className="sr-only peer"
-      />
-      {/* The track (gray by default, green when checked) */}
-      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:bg-green-500 peer-checked:after:translate-x-full peer-checked:after:border-white relative after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:w-5 after:h-5 after:bg-white after:border after:border-gray-300 after:rounded-full after:transition-all" />
-      {/* Label text to the right */}
-      <span className="ml-3 text-sm text-white font-medium text-gray-900">
-        Crypto 
-      </span>
-    </label>
-  </div>
-
-  {/* Stablecoins Toggle */}
-  <div className="fixed right-2 flex items-center">
-  <span className="mr-3 text-sm text-white font-medium text-gray-900">
-        Stablecoins 
-      </span>
-    <label className="relative inline-flex items-center cursor-pointer">
-      {/* Hidden checkbox controlling the toggle state */}
-      <input
-        type="checkbox"
-        checked={showStablecoins}
-        onChange={() => setShowStablecoins(!showStablecoins)}
-        className="sr-only peer"
-      />
-      {/* The track (gray by default, green when checked) */}
-      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:bg-green-500 peer-checked:after:translate-x-full peer-checked:after:border-white relative after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:w-5 after:h-5 after:bg-white after:border after:border-gray-300 after:rounded-full after:transition-all" />
-      {/* Label text to the right */}
-      
-    </label>
-  </div>
-</div>
-
     </div>
   );
 };
