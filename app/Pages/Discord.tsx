@@ -3,8 +3,8 @@ import { FaDiscord, FaTwitter as FaXTwitter } from "react-icons/fa";
 
 const DiscordXSection: React.FC = () => {
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-[#012110] rounded-lg shadow-md border border-[#bfbfbf]">
-      <p className="text-sm sm:text-base text-gray-400 text-center mb-4 sm:mb-6">
+    <div className="w-full max-w-sm mx-auto p-4 bg-[#1A3300] rounded-lg shadow-md border border-gray-600">
+      <p className="text-sm sm:text-base text-white font-semibold text-center mb-4 sm:mb-6">
         Connect with us on Discord and X.
       </p>
       <div className="flex items-center justify-center space-x-6">
