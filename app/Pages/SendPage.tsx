@@ -268,7 +268,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const isPending = isWritePending || isSendPending;
 
   return (
-    <div className={`bg-[#1A3300] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-600 relative`}>
+    <div className={`bg-[#010101] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700 relative`}>
       {/* Manage Username Button */}
       <button
         className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-[#d3c81a] hover:bg-[#d3c81a] transition-colors"
@@ -290,8 +290,8 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
           type="text"
           value={sentence}
           onChange={(e) => setSentence(e.target.value)}
-          placeholder="Send 1 USDC to address (0x) or username"
-          className={`w-full p-3 bg-[#131313] border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
+          placeholder="Send 10 USDC to 0x1234abc... or username"
+          className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
             recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
           }`}
         />
