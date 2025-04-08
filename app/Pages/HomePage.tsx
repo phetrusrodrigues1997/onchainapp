@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { Token } from '@coinbase/onchainkit/token';
 import { cryptoTokens, stablecoinTokens } from '../Token Lists/coins';
+import { getUsername } from '../Database/actions';
 
 // Mapping of token symbols to CoinGecko IDs for price fetching
 const tokenToCoingeckoId = {
@@ -47,6 +48,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   const [isLoading, setIsLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [selectedTab, setSelectedTab] = useState('stablecoins'); // State for selected tab
+  const [showTransactions, setShowTransactions] = useState(false); // State for transaction history
+  const [notifications, setNotifications] = useState<string[]>([]); // State for notifications
 
   const allTokens = [...cryptoTokens, ...stablecoinTokens].reduce((acc: Token[], token) => {
     const key = token.address || 'native';
@@ -96,7 +99,28 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       setIsLoading(false);
     };
     fetchPrices();
+
+    // Mock notifications for demonstration
+    // setNotifications(['USDC price increased by 1%', 'Transaction confirmed']);
   }, []);
+
+  const [username, setUsername] = useState<string | null | undefined>(undefined);
+
+  // Fetch username when address is available or changes
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const result = address ? await getUsername(address) : null;
+        setUsername(result);
+      } catch (error) {
+        console.error("Error fetching username:", error);
+        setUsername(null);
+      }
+    };
+    if (address) {
+      fetchUsername();
+    }
+  }, [address]);
 
   if (!address) {
     return <div className="text-center">Please connect your wallet to see your balance.</div>;
@@ -131,8 +155,105 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
     }
   });
 
+  
+
   return (
-    <div className="text-center mb-72 lg:transform lg:translate-y-24">
+    <div className="shadow-sm text-center mb-72 lg:transform lg:translate-y-24">
+      {/* Header Icons for Notifications and Settings */}
+      <div className="flex justify-between items-center transform -translate-y-10 ">
+  {/* Left side: The username will go here in place of this button */}
+  
+        <div className="flex items-center">
+          {username === undefined ? (
+            <span className="text-white">Loading...</span>
+          ) : username ? (
+            <span className="text-white font-bold">{username}</span>
+          ) : (
+            <button
+              className="text-white hover:text-[#d3c81a] font-bold border border-[#bfbfbf] rounded-md"
+              onClick={() => setActiveSection('usernamePage')}
+            >
+              Set Username
+            </button>
+          )}
+        </div>
+
+  {/* Right side: Existing buttons */}
+  <div className="flex justify-end space-x-4">
+  <button className="text-white hover:text-[#d3c81a]">
+    <svg
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Heroicons “Clock” example path */}
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  </button>
+    <button className="text-white hover:text-[#d3c81a]">
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 
+             14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 
+             1.055-.595 1.436L4 17h5m6 0v1a3 3 0 
+             01-6 0v-1m6 0H9"
+        />
+      </svg>
+    </button>
+
+    <button className="text-white hover:text-[#d3c81a]">
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 
+             3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 
+             3.31.826 2.37 2.37a1.724 1.724 0 001.065 
+             2.572c1.756.426 1.756 2.924 0 3.35a1.724 
+             1.724 0 00-1.066 2.573c.94 1.543-.826 
+             3.31-2.37 2.37a1.724 1.724 0 00-2.572 
+             1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 
+             1.724 0 00-2.573-1.066c-1.543.94-3.31-.826 
+             -2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756
+             -.426-1.756-2.924 0-3.35a1.724 1.724 0 
+             001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996
+             .608 2.296.07 2.572-1.065z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+
+
       <h1 className="text-3xl font-bold mb-4">Wallet Balance</h1>
       <h2 className="text-4xl font-bold mb-4">${totalUSD.toFixed(2)}</h2>
       <div className="flex space-x-4 mt-6">
@@ -162,42 +283,41 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           Swap
         </button>
       </div>
-{/* Updated Tab Navigation */}
-<div className="flex justify-start space-x-10 mt-6">
-<button
-    onClick={() => setSelectedTab('stablecoins')}
-    className={`px-4 py-2 font-bold border-b-2 ${
-      selectedTab === 'stablecoins'
-        ? 'border-[#d3c81a] text-[#d3c81a]'
-        : 'border-transparent text-white font-bold'
-    }`}
-  >
-    Stablecoins
-  </button>
 
-  <button
-    onClick={() => setSelectedTab('crypto')}
-    className={`px-4 py-2 font-bold border-b-2 ${
-      selectedTab === 'crypto'
-        ? 'border-[#d3c81a] text-[#d3c81a]'
-        : 'border-transparent text-white font-bold'
-    }`}
-  >
-    Crypto
-  </button>
-  
-  <button
-    onClick={() => setSelectedTab('stocks')}
-    className={`px-4 py-2 font-bold border-b-2 ${
-      selectedTab === 'stocks'
-        ? 'border-[#d3c81a] text-[#d3c81a]'
-        : 'border-transparent text-white font-bold'
-    }`}
-  >
-    Stocks
-  </button>
-</div>
+      
 
+      <div className="flex justify-start space-x-10 mt-6">
+        <button
+          onClick={() => setSelectedTab('stablecoins')}
+          className={`px-4 py-2 font-bold border-b-2 ${
+            selectedTab === 'stablecoins'
+              ? 'border-[#d3c81a] text-[#d3c81a]'
+              : 'border-transparent text-white font-bold'
+          }`}
+        >
+          Stablecoins
+        </button>
+        <button
+          onClick={() => setSelectedTab('crypto')}
+          className={`px-4 py-2 font-bold border-b-2 ${
+            selectedTab === 'crypto'
+              ? 'border-[#d3c81a] text-[#d3c81a]'
+              : 'border-transparent text-white font-bold'
+          }`}
+        >
+          Crypto
+        </button>
+        <button
+          onClick={() => setSelectedTab('stocks')}
+          className={`px-4 py-2 font-bold border-b-2 ${
+            selectedTab === 'stocks'
+              ? 'border-[#d3c81a] text-[#d3c81a]'
+              : 'border-transparent text-white font-bold'
+          }`}
+        >
+          Stocks
+        </button>
+      </div>
 
       {totalUSD === 0 ? (
         <div className="mt-8 text-lg font-semibold text-gray-300 flex flex-col items-center justify-center">
@@ -265,6 +385,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           })}
         </div>
       )}
+
+     
     </div>
   );
 };
