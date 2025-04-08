@@ -169,12 +169,13 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           ) : username ? (
             <span className="text-white font-bold">{username}</span>
           ) : (
-            <button
-              className="text-white hover:text-[#d3c81a] font-bold border border-[#bfbfbf] rounded-md"
-              onClick={() => setActiveSection('usernamePage')}
-            >
-              Set Username
-            </button>
+            <button 
+  className="text-white hover:text-[#d3c81a] font-bold"
+  onClick={() => setActiveSection('usernamePage')}
+>
+  Set Username <span className="text-[#d3c81a]">&gt;</span>
+</button>
+
           )}
         </div>
 
