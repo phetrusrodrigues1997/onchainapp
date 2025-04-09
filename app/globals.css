@@ -181,12 +181,7 @@ button[aria-label="Toggle swap settings"] {
 [data-testid="ockAvatar_ImageContainer"] {
   display: none !important; /* green-600 */
 }
-[data-testid="ockTextInput_Input"] {
-  background: white !important; /* Tailwind's green-500 */
-}
-[data-testid="ockTokenChip_Button"] {
-  background: white !important; /* Tailwind's green-500 */
-}
+
 }
 [data-testid="ockAvatar_ImageContainer"] {
   display: none !important; /* green-600 */
