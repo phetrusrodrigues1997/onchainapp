@@ -106,11 +106,11 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ock-vaultDetails"] {
-  background:#131313 !important;
+  background:#1F2937 !important;
 }
 
 [data-testid="ock-yieldDetails"] {
-  background:#131313 !important;
+  background:#1F2937 !important;
 }
 
 
@@ -172,14 +172,20 @@ button[aria-label="Toggle swap settings"] {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTransactionButton_Button"] {
-    background: #0000aa !important;
-    color: white; /* from-gray-700 to-gray-800 */
+    background: white !important;
+    color: black !important; /* from-gray-700 to-gray-800 */
   }
 }
 
 @media (prefers-color-scheme: dark) {
 [data-testid="ockAvatar_ImageContainer"] {
   display: none !important; /* green-600 */
+}
+[data-testid="ockTextInput_Input"] {
+  background: white !important; /* Tailwind's green-500 */
+}
+[data-testid="ockTokenChip_Button"] {
+  background: white !important; /* Tailwind's green-500 */
 }
 }
 [data-testid="ockAvatar_ImageContainer"] {

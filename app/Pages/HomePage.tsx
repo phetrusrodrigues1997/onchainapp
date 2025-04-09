@@ -321,7 +321,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       </div>
 
       {totalUSD === 0 ? (
-        <div className="mt-16 text-lg font-semibold text-gray-300 flex flex-col items-center justify-center">
+        <div className="mt-8 text-lg font-semibold text-gray-300 flex flex-col items-center justify-center">
           <span className="animate-bounce text-5xl mt-16">👻</span>
           <span>
             {selectedTab === 'crypto'
