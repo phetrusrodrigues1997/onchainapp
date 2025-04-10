@@ -181,7 +181,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
 
   {/* Right side: Existing buttons */}
   <div className="flex justify-end space-x-4">
-  <button className="text-white hover:text-[#d3c81a]">
+    {/* Activity button */}
+  <button className="text-white hover:text-[#d3c81a]" onClick={() => setActiveSection('activity')}>
     <svg
       className="w-6 h-6"
       fill="none"
@@ -198,6 +199,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       />
     </svg>
   </button>
+  {/* Notification button */}
     <button className="text-white hover:text-[#d3c81a]">
       <svg
         className="w-6 h-6"
@@ -217,7 +219,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         />
       </svg>
     </button>
-
+          {/* Settings button */}
     <button className="text-white hover:text-[#d3c81a]">
       <svg
         className="w-6 h-6"

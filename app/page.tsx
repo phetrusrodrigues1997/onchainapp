@@ -8,7 +8,7 @@ import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZTok
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/LiveCurrencies';
-
+import Activity from './Pages/Activity';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
 import CurrencySelection from './Pages/LiquidityPage';
@@ -209,7 +209,7 @@ FX trading & remittances <br />redefined.
           {activeSection === "market" && <CurrencyDisplay/>}
           {activeSection === "discord" && <DiscordXSection />}
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
-          
+          {activeSection === "activity" && <Activity />}
         </div>
       </main>
     </div>
