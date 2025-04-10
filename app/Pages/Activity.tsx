@@ -99,6 +99,10 @@ const Activity: React.FC = () => {
     return parseFloat(formatUnits(amount, dec)).toFixed(displayDecimals).replace(/\.?0+$/, '');
   };
 
+  const shortenAddress = (addr: string) =>
+    addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '';
+  
+
   useEffect(() => {
     if (!address) {
       setLoading(false);
@@ -230,9 +234,10 @@ const Activity: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: '#1c1c1c',
+                background: '#101010',
                 padding: '15px 20px',
                 borderRadius: '10px',
+                // border: '1px solid #bfbfbf',
                 marginBottom: '15px',
                 boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
               }}
@@ -249,6 +254,7 @@ const Activity: React.FC = () => {
                     />
                     <span style={{ fontSize: '16px' }}>
                       Sent {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset}
+                      <br />To: {shortenAddress(tx.to)}
                     </span>
                   </>
                 )}
@@ -261,9 +267,19 @@ const Activity: React.FC = () => {
                       alt={tx.receivedAsset}
                       style={{ width: '24px', height: '24px', borderRadius: '50%', marginBottom: '4px' }}
                     />
-                    <span style={{ fontSize: '16px' }}>
-                      Received {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
-                    </span>
+                    {/* <span style={{ fontSize: '16px' }}>
+  Received {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
+  <br />
+  <span style={{ paddingLeft: '20px' }}>from</span>
+  <br />
+  {shortenAddress(tx.from)}
+</span> */}
+<span style={{ fontSize: '16px' }}>
+  Received {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
+  <br />From: {shortenAddress(tx.from)}
+</span>
+
+
                   </>
                 )}
 
@@ -290,7 +306,7 @@ const Activity: React.FC = () => {
                         />
                       </div>
                       <span style={{ fontSize: '16px' }}>
-                        Swapped {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset} for{' '}
+                        Swap: {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset} for{' '}
                         {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
                       </span>
                     </>

@@ -158,9 +158,9 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   
 
   return (
-    <div className="shadow-sm text-center mb-72 lg:transform lg:translate-y-24">
+    <div className=" text-center mb-72 lg:transform lg:translate-y-24 ">
       {/* Header Icons for Notifications and Settings */}
-      <div className="flex justify-between items-center transform -translate-y-6 ">
+      <div className="flex justify-between items-center transform -translate-y-4 ">
   {/* Left side: The username will go here in place of this button */}
   
         <div className="flex items-center">
@@ -181,24 +181,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
 
   {/* Right side: Existing buttons */}
   <div className="flex justify-end space-x-4">
-    {/* Activity button */}
-  <button className="text-white hover:text-[#d3c81a]" onClick={() => setActiveSection('activity')}>
-    <svg
-      className="w-6 h-6"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Heroicons “Clock” example path */}
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  </button>
+   
   {/* Notification button */}
     <button className="text-white hover:text-[#d3c81a]">
       <svg
@@ -257,7 +240,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
 </div>
 
 
-      <h1 className="text-3xl font-bold mb-4">Wallet Balance</h1>
+      <h1 className="text-3xl font-bold mb-4 mt-6">Wallet Balance</h1>
       <h2 className="text-4xl font-bold mb-4">${totalUSD.toFixed(2)}</h2>
       <div className="flex space-x-4 mt-6">
         <button
@@ -295,7 +278,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           className={`px-4 py-2 font-bold border-b-2 ${
             selectedTab === 'stablecoins'
               ? 'border-[#d3c81a] text-[#d3c81a]'
-              : 'border-transparent text-white font-bold'
+              : 'border-transparent text-white font-bold hover:text-[#d3c81a]'
           }`}
         >
           Stablecoins
@@ -305,7 +288,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           className={`px-4 py-2 font-bold border-b-2 ${
             selectedTab === 'crypto'
               ? 'border-[#d3c81a] text-[#d3c81a]'
-              : 'border-transparent text-white font-bold'
+              : 'border-transparent text-white font-bold hover:text-[#d3c81a]'
           }`}
         >
           Crypto
@@ -315,7 +298,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           className={`px-4 py-2 font-bold border-b-2 ${
             selectedTab === 'stocks'
               ? 'border-[#d3c81a] text-[#d3c81a]'
-              : 'border-transparent text-white font-bold'
+              : 'border-transparent text-white font-bold hover:text-[#d3c81a]'
           }`}
         >
           Stocks
@@ -327,61 +310,89 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           
         </div>
       ) : (
-        <div className="space-y-4 transform translate-y-12">
-          {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]">
-              <img
-                src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
-                alt={nativeToken?.symbol || 'unknown'}
-                className="w-10 h-10 mr-2"
-              />
-              <div className="flex-1 flex justify-center items-center">
-                <div className="text-center">
-                  <span>{nativeToken?.name}</span>
-                  <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(2)}</span>
-                </div>
-              </div>
-              <span className="ml-auto">
-                ${(nativeToken?.symbol && prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]] 
-                  ? (parseFloat(nativeBalance.data.formatted) * prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]).toFixed(2) 
-                  : '0.00')}
-              </span>
-            </div>
-          )}
-          {tokenBalances.map((balance, index) => {
-            const token = erc20Tokens[index];
-            const isStablecoin = stablecoinSymbols.has(token.symbol);
-            if (
-              balance.data &&
-              parseFloat(balance.data.formatted) > 0 &&
-              ((selectedTab === 'crypto' && !isStablecoin) || (selectedTab === 'stablecoins' && isStablecoin))
-            ) {
-              const coingeckoId = tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId];
-              const price = coingeckoId ? prices[coingeckoId] || 0 : 0;
-              const value = parseFloat(balance.data.formatted) * price;
-              return (
-                <div
-                  key={token.address}
-                  className="p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]"
-                >
-                  <img
-                    src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
-                    alt={token.symbol}
-                    className="w-9 h-9 mr-2"
-                  />
-                  <div className="flex-1 flex justify-center items-center">
-                    <div className="text-center">
-                      <span>{token.name}</span>
-                      <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <span className="ml-auto">${value.toFixed(2)}</span>
-                </div>
-              );
-            }
-            return null;
-          })}
+        
+        <div className="space-y-4 transform translate-y-14">
+  {/* Activity button placed above all balances */}
+  <div className="relative -translate-y-11">
+  <button
+  className="text-black font-bold bg-white rounded-full py-1 px-3 hover:bg-[#d3c81a] absolute top-0 right-0 flex items-center space-x-1"
+  onClick={() => setActiveSection('activity')}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-4 h-4"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+    />
+  </svg>
+  <span className="text-sm">Transactions</span>
+</button>
+
+  </div>
+
+  {/* Coin Balances */}
+  {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
+    <div className="p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]">
+      <img
+        src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
+        alt={nativeToken?.symbol || 'unknown'}
+        className="w-10 h-10 mr-2"
+      />
+      <div className="flex-1 flex justify-center items-center">
+        <div className="text-center">
+          <span>{nativeToken?.name}</span>
+          <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(2)}</span>
         </div>
+      </div>
+      <span className="ml-auto">
+        ${(nativeToken?.symbol && prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]] 
+          ? (parseFloat(nativeBalance.data.formatted) * prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]).toFixed(2) 
+          : '0.00')}
+      </span>
+    </div>
+  )}
+  {tokenBalances.map((balance, index) => {
+    const token = erc20Tokens[index];
+    const isStablecoin = stablecoinSymbols.has(token.symbol);
+    if (
+      balance.data &&
+      parseFloat(balance.data.formatted) > 0 &&
+      ((selectedTab === 'crypto' && !isStablecoin) || (selectedTab === 'stablecoins' && isStablecoin))
+    ) {
+      const coingeckoId = tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId];
+      const price = coingeckoId ? prices[coingeckoId] || 0 : 0;
+      const value = parseFloat(balance.data.formatted) * price;
+      return (
+        <div
+          key={token.address}
+          className="p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]"
+        >
+          <img
+            src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
+            alt={token.symbol}
+            className="w-9 h-9 mr-2"
+          />
+          <div className="flex-1 flex justify-center items-center">
+            <div className="text-center">
+              <span>{token.name}</span>
+              <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
+            </div>
+          </div>
+          <span className="ml-auto">${value.toFixed(2)}</span>
+        </div>
+      );
+    }
+    return null;
+  })}
+</div>
+
       )}
 
      
