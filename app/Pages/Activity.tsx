@@ -37,6 +37,23 @@ const Activity: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Define the tokenList
+  const tokenList = [
+    "ETH",
+    "WETH",
+    "AERO",
+    "VIRTUAL",
+    "BTC",
+    "AAVE",
+    "MORPHO",
+    "USDC",
+    "EURC",
+    "CADC",
+    "BRZ",
+    "LIRA",
+    "MXP"
+  ];
+
   const tokenImages = {
     ETH: "https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
     WETH: "https://directus.messari.io/assets/12912b0f-3bae-4969-8ddd-99e654af2282",
@@ -74,7 +91,7 @@ const Activity: React.FC = () => {
     return tokenImages[asset as keyof typeof tokenImages] || 'default_icon.png';
   };
 
-  const formatAmount = (amount: string, decimals: string, displayDecimals: number = 4): string => {
+  const formatAmount = (amount: string, decimals: string, displayDecimals: number = 3): string => {
     const dec = parseInt(decimals, 10);
     if (isNaN(dec)) {
       return amount;
@@ -167,8 +184,22 @@ const Activity: React.FC = () => {
           };
         });
 
-        merged.sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
-        setMergedTxs(merged);
+        // Filter transactions based on tokenList
+        const filteredTxs = merged.filter((tx) => {
+          if (tx.txType === 'Send') {
+            return tx.sentAsset && tokenList.includes(tx.sentAsset);
+          } else if (tx.txType === 'Receive') {
+            return tx.receivedAsset && tokenList.includes(tx.receivedAsset);
+          } else if (tx.txType === 'Swap') {
+            return tx.sentAsset && tx.receivedAsset && 
+                   tokenList.includes(tx.sentAsset) && tokenList.includes(tx.receivedAsset);
+          }
+          return false;
+        });
+
+        // Sort filtered transactions by timestamp (descending)
+        filteredTxs.sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
+        setMergedTxs(filteredTxs);
       } catch (err: any) {
         setError(err.message || 'Error fetching transactions');
       } finally {
@@ -187,7 +218,7 @@ const Activity: React.FC = () => {
         fontFamily: 'Arial, sans-serif',
       }}
     >
-      <h1>Recent Transactions</h1>
+      {/* <h1>Recent Transactions</h1> */}
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error}</p>}
       {!loading && !error && mergedTxs.length > 0 && (
@@ -221,7 +252,7 @@ const Activity: React.FC = () => {
                     </span>
                   </>
                 )}
-  
+
                 {/* Receive */}
                 {tx.txType === 'Receive' && tx.receivedAsset && tx.receivedAmount && tx.receivedDecimals && (
                   <>
@@ -235,7 +266,7 @@ const Activity: React.FC = () => {
                     </span>
                   </>
                 )}
-  
+
                 {/* Swap */}
                 {tx.txType === 'Swap' &&
                   tx.sentAsset &&
@@ -265,7 +296,7 @@ const Activity: React.FC = () => {
                     </>
                   )}
               </div>
-  
+
               {/* Right-aligned date */}
               <div style={{ textAlign: 'right', fontSize: '14px', color: '#ccc' }}>
                 {new Date(Number(tx.timeStamp) * 1000).toLocaleDateString(undefined, {
@@ -280,9 +311,6 @@ const Activity: React.FC = () => {
       {!loading && !error && mergedTxs.length === 0 && <p>No transactions found.</p>}
     </div>
   );
-  
-  
-  
 };
 
 export default Activity;
