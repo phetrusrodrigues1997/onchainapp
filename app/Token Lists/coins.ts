@@ -95,6 +95,32 @@ export const CADCToken: Token = {
   symbol: "CADC",
   image: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
 };
+export const cNGNToken: Token = {
+  address: "0x46C85152bFe9f96829aA94755D9f915F9B10EF5F",
+  chainId: 8453,
+  decimals: 18,
+  name: "Nigerian Naira",
+  symbol: "cNGN",
+  image: "https://flagsireland.com/cdn/shop/files/NigeriaFlag.png?v=1694521063",
+};
+export const ZARPToken: Token = {
+  address: "0xb755506531786C8aC63B756BaB1ac387bACB0C04",
+  chainId: 8453,
+  decimals: 18,
+  name: "ZA Rand",
+  symbol: "ZARP",
+  image: "https://cdn.britannica.com/27/4227-004-32423B42/Flag-South-Africa.jpg",
+};
+
+export const NZDDToken: Token = {
+  address: "0x2dD087589ce9C5b2D1b42e20d2519B3c8cF022b7",
+  chainId: 8453,
+  decimals: 18,
+  name: "NZ Dollar",
+  symbol: "NZDD",
+  image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Flag_of_New_Zealand.svg/960px-Flag_of_New_Zealand.svg.png",
+};
+
 
 export const BRZToken: Token = {
   address: "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4",
@@ -129,8 +155,8 @@ export const stablecoinTokens: Token[] = [
     CADCToken,
     BRZToken,
     MEXPeso,
-    LiraToken,
-    ETHToken, CbBTCToken
+    LiraToken
+    ,cNGNToken,ZARPToken,NZDDToken
   ];
 
 

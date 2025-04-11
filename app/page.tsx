@@ -69,6 +69,26 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      [data-testid="ockSwapButton_Button"] {
+        background-color: white !important;
+        color: black !important;
+      }
+  
+      [data-testid="ockSwapButton_Button"] span {
+        color: black !important;
+      }
+    `;
+    document.head.appendChild(style);
+  
+    // Cleanup on unmount
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
 //   useEffect(() => {
 //   if (activeSection === "swap") {
 //     const titleElement = document.querySelector('[data-testid="ockSwap_Title"]');
@@ -184,7 +204,7 @@ FX trading & remittances <br />redefined.
   type="to"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
-                <SwapButton className="w-full bg-[#00cc00] rounded-full py-2 transition-colors" />
+                <SwapButton className="w-full font-bold rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>

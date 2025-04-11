@@ -4,69 +4,49 @@ import ReactECharts from 'echarts-for-react';
 // Replace with your actual Alpha Vantage API key.
 const ALPHA_API_KEY = 'QTISQI4HWA4IXQ31';
 
-// Define 15 major currencies along with possible search terms.
-const currencyList = [
-  { code: 'EUR', names: ['euro', 'eur'] },
-  { code: 'GBP', names: ['pound', 'gbp', 'british', 'sterling'] },
-  { code: 'JPY', names: ['yen', 'jpy', 'japanese'] },
-  { code: 'AUD', names: ['australian', 'aud', 'dollar'] },
-  { code: 'CAD', names: ['canadian', 'cad', 'dollar'] },
-  { code: 'CHF', names: ['swiss', 'chf', 'franc'] },
-  { code: 'BRL', names: ['brazil', 'brl', 'real'] },
-  { code: 'CNY', names: ['chinese', 'cny', 'yuan', 'renminbi'] },
-  { code: 'INR', names: ['indian', 'inr', 'rupee'] },
-  { code: 'RUB', names: ['ruble', 'rub', 'russian'] },
-  { code: 'ZAR', names: ['south african', 'zar', 'rand'] },
-  { code: 'SEK', names: ['swedish', 'sek', 'krona'] },
-  { code: 'NOK', names: ['norwegian', 'nok', 'krone'] },
-  { code: 'DKK', names: ['danish', 'dkk', 'krone'] },
-  { code: 'SGD', names: ['singapore', 'sgd', 'dollar'] },
-];
-
 const LiveCurrencies: React.FC = () => {
-  // Chart state
+  // State for dates (categories) and candlestick data values.
   const [dates, setDates] = useState<string[]>([]);
-  // Each data point: [open, close, low, high]
+  // Each data point is an array: [open, close, low, high]
   const [candlestickData, setCandlestickData] = useState<number[][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  // Time range state ("1d", "1w", "1m")
+  // State to track selected time range ("1d", "1w", "1m")
   const [timeRange, setTimeRange] = useState<string>('1m');
-  // Search bar state and the active base currency (from_symbol). Defaults to EUR.
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [baseCurrency, setBaseCurrency] = useState<string>('EUR');
 
-  // Fetch data whenever timeRange or baseCurrency changes.
   useEffect(() => {
+    // Fetch data based on the selected time range.
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
+        // Determine date range.
         const endDateObj = new Date();
         let startDateObj = new Date();
-
         // For daily data ("1w" and "1m"), set start date based on days difference.
         if (timeRange === '1w') {
           startDateObj.setDate(endDateObj.getDate() - 7);
         } else if (timeRange === '1m') {
           startDateObj.setDate(endDateObj.getDate() - 30);
         }
-        // For intraday (1d), we'll use the full available intraday data.
-
+        // For intraday (1d) we will use the full available intraday data.
+        
+        // Function to format date as YYYY-MM-DD
         const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
         let url = '';
         let timeSeriesKey = '';
         let filteredDates: string[] = [];
 
         if (timeRange === '1d') {
           // For 1d, use FX_INTRADAY with a 15min interval.
-          url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${baseCurrency}&to_symbol=USD&interval=15min&apikey=${ALPHA_API_KEY}`;
-          // In many cases, intraday data is keyed as "Time Series FX (15min)"
+          url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=EUR&to_symbol=USD&interval=15min&apikey=${ALPHA_API_KEY}`;
+          // The returned JSON key for intraday data is usually "Time Series FX (15min)"
           timeSeriesKey = 'Time Series FX (15min)';
         } else {
           // For 1w and 1m, use FX_DAILY.
-          url = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=${baseCurrency}&to_symbol=USD&apikey=${ALPHA_API_KEY}`;
+          url = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=EUR&to_symbol=USD&apikey=${ALPHA_API_KEY}`;
           timeSeriesKey = 'Time Series FX (Daily)';
         }
 
@@ -82,13 +62,16 @@ const LiveCurrencies: React.FC = () => {
 
         const timeSeries = json[timeSeriesKey];
 
+        // For FX_INTRADAY, we usually have many data points for one day.
+        // For FX_DAILY, we filter the dates based on the selected range.
         if (timeRange === '1d') {
-          // Intraday: sort by date+time.
+          // Get all dates available (intraday data is keyed by date+time, e.g. "2025-04-11 15:45:00")
+          // We'll extract just the date portion for sorting and display.
           filteredDates = Object.keys(timeSeries).sort((a, b) =>
             new Date(a).getTime() - new Date(b).getTime()
           );
         } else {
-          // Daily: filter dates between start and end.
+          // For FX_DAILY, filter dates between start and end.
           const allDates = Object.keys(timeSeries);
           const startDate = formatDate(startDateObj);
           const endDate = formatDate(endDateObj);
@@ -97,7 +80,7 @@ const LiveCurrencies: React.FC = () => {
             .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         }
 
-        // Transform data: [open, close, low, high]
+        // Transform the filtered data into the candlestick format: [open, close, low, high]
         const transformedData = filteredDates.map((date) => {
           const dayData = timeSeries[date];
           const open = parseFloat(dayData['1. open']);
@@ -116,31 +99,12 @@ const LiveCurrencies: React.FC = () => {
     };
 
     fetchData();
-  }, [timeRange, baseCurrency]);
+  }, [timeRange]);
 
-  // Handle search: when user submits the search, attempt to match to a currency.
-  const handleSearch = () => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return;
-
-    // Find a matching currency from the list.
-    const match = currencyList.find(currency =>
-      currency.names.some(name => name.includes(term))
-    );
-
-    if (match) {
-      setBaseCurrency(match.code);
-    } else {
-      // If no match found, optionally you can set an error.
-      setError('No matching currency found.');
-    }
-    setSearchTerm('');
-  };
-
-  // ECharts option for candlestick chart.
+  // Build ECharts option for a candlestick chart.
   const options = {
     title: {
-      text: `${baseCurrency}/USD Candlestick Chart`,
+      text: 'EUR/USD Candlestick Chart',
       subtext: timeRange === '1d' ? 'Intraday (15min intervals)' : timeRange === '1w' ? 'Weekly Range (Daily Candles)' : 'Monthly Range (Daily Candles)',
       textStyle: { color: '#fff' },
     },
@@ -155,8 +119,8 @@ const LiveCurrencies: React.FC = () => {
       axisLine: { lineStyle: { color: '#fff' } },
       boundaryGap: false,
       splitLine: { show: false },
-      axisLabel: { 
-        formatter: (value: string) => {
+      axisLabel: { formatter: function (value: string) {
+          // For intraday data, you might want to show time only.
           if (timeRange === '1d') return value.split(' ')[1];
           return value;
         }
@@ -169,12 +133,12 @@ const LiveCurrencies: React.FC = () => {
     },
     series: [
       {
-        name: `${baseCurrency}/USD`,
+        name: 'EUR/USD',
         type: 'candlestick',
         data: candlestickData,
         itemStyle: {
-          color: '#06B800',    // Bullish candle color
-          color0: '#FA0000',   // Bearish candle color
+          color: '#06B800',    // Bullish (up) candle color
+          color0: '#FA0000',   // Bearish (down) candle color
           borderColor: '#06B800',
           borderColor0: '#FA0000'
         },
@@ -204,38 +168,8 @@ const LiveCurrencies: React.FC = () => {
 
   return (
     <div style={{ backgroundColor: '#222', padding: '1rem', minHeight: '100vh' }}>
-      <h1 style={{ color: '#fff' }}>{baseCurrency}/USD Candlestick Chart</h1>
-      {/* Search Bar */}
-      <div style={{ marginBottom: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Search (e.g., euro, pound, yen, gbp, eur)..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            padding: '0.5rem',
-            width: '300px',
-            marginRight: '0.5rem',
-            borderRadius: '4px',
-            border: '1px solid #ccc'
-          }}
-        />
-        <button
-          onClick={handleSearch}
-          style={{
-            padding: '0.5rem 1rem',
-            borderRadius: '4px',
-            border: 'none',
-            backgroundColor: '#06B800',
-            color: '#fff',
-            cursor: 'pointer'
-          }}
-        >
-          Search
-        </button>
-      </div>
-
-      {/* Time Range Selector */}
+      <h1 style={{ color: '#fff' }}>EUR/USD Candlestick Chart</h1>
+      {/* Time Range Selector as buttons */}
       <div style={{ marginBottom: '1rem' }}>
         {['1d', '1w', '1m'].map((range) => (
           <button
