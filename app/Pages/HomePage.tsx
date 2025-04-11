@@ -158,7 +158,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   
 
   return (
-    <div className=" text-center mb-70 lg:transform lg:translate-y-12 ">
+    <div className=" text-center mb-70 lg:transform lg:translate-y-20 ">
       {/* Header Icons for Notifications and Settings */}
       <div className="flex justify-between items-center  ">
   {/* Left side: The username will go here in place of this button */}
