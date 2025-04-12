@@ -73,7 +73,6 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
-        background-color: white !important;
         color: black !important;
       }
   
@@ -204,7 +203,7 @@ FX trading & remittances <br />redefined.
   type="to"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
-                <SwapButton className="w-full font-bold rounded-full py-2 transition-colors" />
+                <SwapButton className="w-full font-bold bg-white text-black rounded-full py-2 transition-colors" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>
