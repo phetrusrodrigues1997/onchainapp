@@ -203,7 +203,7 @@ FX trading & remittances <br />redefined.
   type="to"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
-                <SwapButton className="w-full font-bold bg-white text-black rounded-full py-2 transition-colors" />
+                <SwapButton className="w-full font-bold bg-white text-black rounded-full py-2 transition-colors disabled:opacity-85" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>

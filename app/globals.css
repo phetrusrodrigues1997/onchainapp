@@ -56,6 +56,9 @@ button[aria-label="Toggle swap settings"] {
   [data-testid="ockSwapButton_Button"] {
     background-color: #000000 !important; /* from-gray-700 to-gray-800 */
   }
+  [data-testid="ockSwapButton_Button"]:disabled {
+    opacity: 0.85 !important; /* Ensures full opacity when disabled */
+  }
 }
 
 @media (prefers-color-scheme: dark) {
