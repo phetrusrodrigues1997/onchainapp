@@ -14,7 +14,6 @@ const currencyMapping: Record<string, string> = {
   euro: 'EUR',
   eur: 'EUR',
   cad: 'CAD',
-  canadian: 'CAD',
   aud: 'AUD',
   australian: 'AUD',
   chf: 'CHF',
@@ -23,8 +22,38 @@ const currencyMapping: Record<string, string> = {
   newzealand: 'NZD',
   inr: 'INR',
   indian: 'INR',
+  real: 'BRL',
   brl: 'BRL',
-  brazilian: 'BRL',
+  ruble: 'RUB',
+  rub: 'RUB',
+  peso: 'MXN',
+  mxn: 'MXN',
+  dirham: 'AED',
+  aed: 'AED',
+  hkd: 'HKD',
+  hongkong: 'HKD',
+  krw: 'KRW',
+  won: 'KRW',
+  sek: 'SEK',
+  nok: 'NOK',
+  brazil: 'BRL',
+  europe: 'EUR',
+  unitedstates: 'USD',
+  japan: 'JPY',
+  unitedkingdom: 'GBP',
+  canada: 'CAD',
+  australia: 'AUD',
+  switzerland: 'CHF',
+  india: 'INR',
+  china: 'CNY',
+  southkorea: 'KRW',
+  southafrica: 'ZAR',
+  mexico: 'MXN',
+  russia: 'RUB',
+  singapore: 'SGD',
+  
+
+  
 };
 
 const LiveCurrencies: React.FC = () => {
@@ -181,7 +210,8 @@ const LiveCurrencies: React.FC = () => {
 
   return (
     <div style={{ padding: '1rem', minHeight: '100vh' }}>
-      <h1 style={{ color: '#fff', fontSize:'30px',paddingBottom:'2rem', marginLeft:'0.42rem' }}>1-Month Forex Charts</h1>
+      <h1 style={{ color: '#fff', fontSize:'30px',paddingBottom:'2rem', marginLeft:'0.42rem', fontFamily: "'Montserrat', sans-serif",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)" }}>1-Month Forex Charts</h1>
       <div style={{ marginBottom: '1rem' }}>
       <input
   type="text"
