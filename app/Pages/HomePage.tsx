@@ -167,11 +167,20 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           {username === undefined ? (
             <span className="text-white">Loading...</span>
           ) : username ? (
-            <span className="text-white font-bold">{username}</span>
+            <span className="text-white font-bold" style={{
+              fontFamily: "'Montserrat', sans-serif",
+              color: "#ffffff",
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
+            }}>{username}</span>
           ) : (
             <button 
   className="text-white hover:text-[#d3c81a] font-bold"
   onClick={() => setActiveSection('usernamePage')}
+  style={{
+    fontFamily: "'Montserrat', sans-serif",
+    color: "#ffffff",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
+  }}
 >
   Set Username <span className="text-[#d3c81a]">&gt;</span>
 </button>

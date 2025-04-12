@@ -85,7 +85,7 @@ export default function UsernameSetup() {
           )}
           <button
             onClick={handleSubmit}
-            className="w-full bg-[#d3c81a] text-white py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
+            className="w-full bg-white text-black font-bold py-3 rounded-lg font-semibold shadow-lg hover:bg-[#d3c81a] hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             {existingUsername ? 'Update Username' : 'Set Username'}
           </button>
@@ -97,7 +97,7 @@ export default function UsernameSetup() {
                 setError(null);
                 setSuccess(false);
               }}
-              className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-500 transition-all duration-300"
+              className="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-[#d3c81a] transition-all duration-300"
             >
               Cancel
             </button>
@@ -111,7 +111,7 @@ export default function UsernameSetup() {
               setIsEditing(true);
               setUsernameState(existingUsername);
             }}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-all duration-300"
+            className="bg-white text-black font-bold px-4 py-2 rounded-lg hover:bg-[#d3c81a] transition-all duration-300"
           >
             Change
           </button>

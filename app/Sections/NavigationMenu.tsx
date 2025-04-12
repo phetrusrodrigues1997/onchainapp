@@ -31,7 +31,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     { id: 'swap', label: 'Swap' },
     { id: 'buy', label: 'Purchase' },
     { id: 'earn', label: 'Lend' },
-    { id: 'market', label: 'Markets' },
+    { id: 'market', label: 'Charts' },
     { id: 'liquidity', label: 'Liquidity' },
     { id: 'discord', label: 'Discord' },
   ];
