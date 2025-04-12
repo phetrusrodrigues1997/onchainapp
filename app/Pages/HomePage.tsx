@@ -3,6 +3,8 @@ import { useAccount, useBalance } from 'wagmi';
 import { Token } from '@coinbase/onchainkit/token';
 import { cryptoTokens, stablecoinTokens } from '../Token Lists/coins';
 import { getUsername } from '../Database/actions';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 // Mapping of token symbols to CoinGecko IDs for price fetching
 const tokenToCoingeckoId = {
@@ -171,19 +173,36 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               fontFamily: "'Montserrat', sans-serif",
               color: "#ffffff",
               textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
-            }}>{username}</span>
+            }}><FontAwesomeIcon icon={faUser} className="mr-2" />{username}</span>
           ) : (
-            <button 
-  className="text-white hover:text-[#d3c81a] font-bold"
-  onClick={() => setActiveSection('usernamePage')}
-  style={{
-    fontFamily: "'Montserrat', sans-serif",
-    color: "#ffffff",
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
-  }}
->
-  Set Username <span className="text-[#d3c81a]">&gt;</span>
-</button>
+            
+
+<button
+      onClick={() => setActiveSection('usernamePage')}
+      className="
+        flex items-center justify-center gap-2
+        px-4 py-2
+        rounded-full
+        bg-white
+        text-black
+        text-xs
+        font-bold
+        shadow-md
+        transition-all
+        duration-200
+        hover:bg-[#4d4d4d]
+        hover:text-[#d3c81a]
+        hover:scale-105
+      "
+      style={{
+        fontFamily: "'Montserrat', sans-serif",
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+      }}
+    >
+      <span>Set Username</span>
+      <FontAwesomeIcon icon={faArrowRight} />
+    </button>
+
 
           )}
         </div>
@@ -254,14 +273,14 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       <div className="flex space-x-4 mt-6">
         <button
           onClick={() => setActiveSection("send")}
-          className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
+          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
         >
           Send
         </button>
         <div className="relative">
           <button
             onClick={copyAddressToClipboard}
-            className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
+            className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
           >
             Receive
           </button>
@@ -273,7 +292,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         </div>
         <button
           onClick={() => setActiveSection("swap")}
-          className="flex-1 bg-white text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
+          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
         >
           Swap
         </button>

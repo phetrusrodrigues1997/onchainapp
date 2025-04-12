@@ -58,7 +58,12 @@ button[aria-label="Toggle swap settings"] {
   }
 }
 
-
+@media (prefers-color-scheme: dark) {
+  .flex.h-12.items-center.px-2.pl-4.ock-bg-default.ock-border-radius.ock-border-line-default {
+    background: white !important; /* from-gray-700 to-gray-800 */
+    
+  }
+}
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenSelectButton_Button"] {
     background: #FAFAFA !important;
