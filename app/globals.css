@@ -54,8 +54,7 @@ button[aria-label="Toggle swap settings"] {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockSwapButton_Button"] {
-    color: #000000 !important;
-    font-style: bold !important; /* Tailwind's font-semibold */
+    background-color: #000000 !important; /* from-gray-700 to-gray-800 */
   }
 }
 
