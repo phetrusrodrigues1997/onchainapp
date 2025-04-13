@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import SwapDropdown from './Sections/TokenTypeDropdown'; // Adjust the path if needed
-import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken } from './Token Lists/coins';
+import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/LiveCurrencies';
@@ -191,7 +191,7 @@ FX trading & remittances <br />redefined.
                 <SwapAmountInput
   label="Sell"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? ETHToken : CADCToken}
+  token={selectedOption === "Crypto" ? ETHToken : USDCToken}
   type="from"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
@@ -199,7 +199,7 @@ FX trading & remittances <br />redefined.
 <SwapAmountInput
   label="Buy"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? CbBTCToken : USDCToken}
+  token={selectedOption === "Crypto" ? CbBTCToken : EURCToken}
   type="to"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />

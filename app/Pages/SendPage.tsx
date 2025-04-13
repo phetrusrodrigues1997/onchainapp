@@ -4,6 +4,7 @@ import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
 import { base } from 'wagmi/chains';
 import { getWalletAddress } from '../Database/actions';
+import SendPageAnimation from '../Sections/SendPageAnimation'; 
 
 // Token definitions (unchanged from the original)
 const ETHToken: Token = {
@@ -268,67 +269,77 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const isPending = isWritePending || isSendPending;
 
   return (
-    <div className={`bg-[#101010] p-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-700 relative`}>
-      {/* Manage Username Button */}
-      <button
-        className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors"
-        onClick={() => setActiveSection("usernamePage")}
-        aria-label="Manage your username"
-      >
-        Manage Username
-      </button>
+    <>
+      <div className={`bg-[#101010] p-4 mt-20 rounded-lg max-w-sm mx-auto ${className} border border-gray-700 relative`}>
+       {/* Animation placed above the main content */}
 
-      <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
-
-      {/* Input with error display */}
-      <div className="mb-4">
-        <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
-          Enter Command
-        </label>
-        <input
-          id="sentence"
-          type="text"
-          value={sentence}
-          onChange={(e) => setSentence(e.target.value)}
-          placeholder="Send 10 USDC to 0x1234abc... or username"
-          className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
-            recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
-          }`}
-        />
-        {tokenError && (
-          <p className="text-red-400 text-xs mt-1">{tokenError}</p>
-        )}
-      </div>
-
-      {/* Display Recipient Status and Balance */}
-      <div className="mb-4 text-[#d3c81a] text-sm">
-        {isResolving && <p>Resolving username...</p>}
-        {resolvedRecipient && !recipientError && (
-          <p>Sending to {resolvedRecipient} {inputRecipient !== resolvedRecipient ? `` : ''}</p>
-        )}
-        {recipientError && <p className="text-red-400">{recipientError}</p>}
-        {balance !== null && selectedToken && (
-          <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
-        )}
-      </div>
-
-      {/* Send Button */}
-      <button
-        onClick={handleSend}
-        disabled={isPending || !isSentenceValid || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
-        className="w-full bg-white text-black font-bold rounded-full py-3 transition-colors hover:bg-[#d3c81a] cursor-pointer"
-      >
-        {isPending ? 'Sending...' : 'Send Tokens'}
-      </button>
-
-      {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
-      {!address && (
-        <div className="mt-4 text-red-400 text-center text-sm">
-          Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
+        {/* Manage Username Button */}
+        <button
+          className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors"
+          onClick={() => setActiveSection("usernamePage")}
+          aria-label="Manage your username"
+        >
+          Manage Username
+        </button>
+  
+        <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
+  
+        {/* Input with error display */}
+        <div className="mb-4">
+          <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
+            Enter Command
+          </label>
+          <input
+            id="sentence"
+            type="text"
+            value={sentence}
+            onChange={(e) => setSentence(e.target.value)}
+            placeholder="Send 5 USDC to 0x123abc... or username"
+            className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
+              recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
+            }`}
+          />
+          {tokenError && (
+            <p className="text-red-400 text-xs mt-1">{tokenError}</p>
+          )}
         </div>
-      )}
-    </div>
+  
+        {/* Display Recipient Status and Balance */}
+        <div className="mb-4 text-[#d3c81a] text-sm">
+          {isResolving && <p>Resolving username...</p>}
+          {resolvedRecipient && !recipientError && (
+            <p>Sending to {resolvedRecipient} {inputRecipient !== resolvedRecipient ? `` : ''}</p>
+          )}
+          {recipientError && <p className="text-red-400">{recipientError}</p>}
+          {balance !== null && selectedToken && (
+            <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
+          )}
+        </div>
+  
+        {/* Send Button */}
+        <button
+          onClick={handleSend}
+          disabled={isPending || !isSentenceValid || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
+          className="w-full bg-white text-black font-bold rounded-full py-3 transition-colors hover:bg-[#d3c81a] cursor-pointer"
+        >
+          {isPending ? 'Sending...' : 'Send Tokens'}
+        </button>
+  
+        {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
+        {!address && (
+          <div className="mt-4 text-red-400 text-center text-sm">
+            Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
+          </div>
+        )}
+        
+      </div>
+      <div className="relative mb-4">
+        <SendPageAnimation />
+      </div>
+      
+    </>
   );
+  
 };
 
 export default SendSection;
