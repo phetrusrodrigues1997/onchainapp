@@ -348,6 +348,30 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         </div>
       ) : (
         <div className="space-y-4 transform translate-y-14">
+          {/* Activity button placed above all balances */}
+  <div className="relative -translate-y-11">
+  <button
+  className="text-black font-bold bg-white rounded-full py-1 px-3 hover:bg-[#d3c81a] absolute top-0 right-0 flex items-center space-x-1"
+  onClick={() => setActiveSection('activity')}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="w-4 h-4"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+    />
+  </svg>
+  <span className="text-sm">Transactions</span>
+</button>
+
+  </div>
           {/* ... (existing token list and activity button code remains unchanged) */}
           {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
             <div className="p-2 rounded-2xl shadow-sm flex items-center border border-[#bfbfbf]">
