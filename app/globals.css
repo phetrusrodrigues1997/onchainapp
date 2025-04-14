@@ -43,6 +43,11 @@ button[aria-label="Toggle swap settings"] {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockTokenChip_Button"] {
+    background-color: #D3D3D3 !important; /* from-gray-700 to-gray-800 */
+  }}
+
 [data-testid="ockSwapMessage_Message"] {
   color: #012512  !important;
 }
