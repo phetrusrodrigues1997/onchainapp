@@ -4,7 +4,6 @@ import { parseUnits, formatUnits } from 'viem';
 import type { Token } from '@coinbase/onchainkit/token';
 import { base } from 'wagmi/chains';
 import { getWalletAddress } from '../Database/actions';
-import SendPageAnimation from '../Sections/SendPageAnimation'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
