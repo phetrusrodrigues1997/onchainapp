@@ -8,7 +8,7 @@ import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZTok
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/LiveCurrencies';
-import Activity from './Pages/Activity';
+import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
 import CurrencySelection from './Pages/LiquidityPage';

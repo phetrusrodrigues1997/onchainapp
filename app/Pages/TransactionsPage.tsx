@@ -253,7 +253,7 @@ const Activity: React.FC = () => {
                       style={{ width: '24px', height: '24px', borderRadius: '50%', marginBottom: '4px' }}
                     />
                     <span style={{ fontSize: '16px' }}>
-                      Sent {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset}
+                    <span style={{ color: 'red' }}>Sent</span> {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset}
                       <br />To: {shortenAddress(tx.to)}
                     </span>
                   </>
@@ -275,7 +275,7 @@ const Activity: React.FC = () => {
   {shortenAddress(tx.from)}
 </span> */}
 <span style={{ fontSize: '16px' }}>
-  Received {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
+<span style={{ color: 'green' }}>Received</span> {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
   <br />From: {shortenAddress(tx.from)}
 </span>
 
@@ -306,7 +306,7 @@ const Activity: React.FC = () => {
                         />
                       </div>
                       <span style={{ fontSize: '16px' }}>
-                        Swap: {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset} for{' '}
+                      <span style={{ color: 'blue' }}>Swap:</span> {formatAmount(tx.sentAmount, tx.sentDecimals)} {tx.sentAsset} for{' '}
                         {formatAmount(tx.receivedAmount, tx.receivedDecimals)} {tx.receivedAsset}
                       </span>
                     </>
