@@ -5,6 +5,8 @@ import type { Token } from '@coinbase/onchainkit/token';
 import { base } from 'wagmi/chains';
 import { getWalletAddress } from '../Database/actions';
 import SendPageAnimation from '../Sections/SendPageAnimation'; 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 // Token definitions (unchanged from the original)
 const ETHToken: Token = {
@@ -333,8 +335,12 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
         )}
         
       </div>
-      <div className="relative mb-4">
-        <SendPageAnimation />
+      <div className="relative mt-6">
+      <div className="text-center mb-6">
+  <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
+  <h2 className="text-2xl font-bold text-white">Transfer crypto to anyone, anywhere.</h2>
+  {/* <p className="text-gray-300">Transfer crypto to anyone, anywhere.</p> */}
+</div>
       </div>
       
     </>
