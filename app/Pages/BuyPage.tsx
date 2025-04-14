@@ -103,6 +103,14 @@ const BuySection: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const spanElement = document.querySelector('span.ock-font-family.font-semibold') as HTMLElement | null;
+    if (spanElement) {
+      spanElement.style.color = 'black';
+      spanElement.style.fontWeight = 'bold';
+    }
+  }, []);
+
+  useEffect(() => {
     const setInputStyles = () => {
       const inputField = document.querySelector('input[data-testid="ockTextInput_Input"]') as HTMLInputElement | null;
       if (inputField) {
