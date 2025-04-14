@@ -20,7 +20,7 @@ import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainki
 import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 import LiveCryptoPrices from './Sections/LiveCryptoPrices';
-import HomePage from './Pages/HomePage';
+import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 
 
@@ -34,7 +34,12 @@ export default function App() {
   const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
   const { address } = useAccount();
 
-  
+  useEffect(() => {
+    if (activeSection === "swap") {
+      setSelectedOption("Stablecoins");
+      setSwappableTokensList(stablecoinTokens);
+    }
+  }, [activeSection]);
 
   // Update user points when wallet address changes
   useEffect(() => {
@@ -189,17 +194,19 @@ FX trading & remittances <br />redefined.
                   <SwapSettingsSlippageInput />
                 </SwapSettings>
                 <SwapAmountInput
+  key={`sell-${activeSection}-${selectedOption}`} // Unique key based on section and option
   label="Sell"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? ETHToken : USDCToken}
+  token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
   type="from"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
+  key={`buy-${activeSection}-${selectedOption}`} // Unique key based on section and option
   label="Buy"
   swappableTokens={swappableTokensList}
-  token={selectedOption === "Crypto" ? CbBTCToken : EURCToken}
+  token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
   type="to"
   className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
 />
