@@ -296,7 +296,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
             type="text"
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
-            placeholder="Send 5 USDC to 0x123abc... or username"
+            placeholder="Send 5 USDC to address or username"
             className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
               recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
             }`}
