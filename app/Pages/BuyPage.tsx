@@ -174,7 +174,7 @@ const BuySection: React.FC = () => {
         </p>
       </div>
 
-      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#012512] rounded-lg rounded-2xl shadow-sm`}>
+      <div className={`${getContainerWidth()} mx-auto p-4 bg-[#002200] rounded-lg rounded-2xl shadow-sm`}>
 
         {filteredTokens.length > 0 ? (
           <div className="space-y-3 sm:space-y-4">
