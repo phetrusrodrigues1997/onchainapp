@@ -271,7 +271,14 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
 
   return (
     <>
-      <div className={`bg-[#101010] p-4 mt-20 rounded-lg max-w-sm mx-auto ${className} border border-gray-700 relative`}>
+    <div className="relative mt-6">
+      <div className="text-center mb-6">
+  <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
+  <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
+  {/* <p className="text-gray-300">Transfer crypto to anyone, anywhere.</p> */}
+</div>
+      </div>
+      <div className={`bg-[#002200] p-4 mt-2 rounded-lg max-w-sm mx-auto ${className} border border-gray-400 relative`}>
        {/* Animation placed above the main content */}
 
         {/* Manage Username Button */}
@@ -334,13 +341,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
         )}
         
       </div>
-      <div className="relative mt-6">
-      <div className="text-center mb-6">
-  <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
-  <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
-  {/* <p className="text-gray-300">Transfer crypto to anyone, anywhere.</p> */}
-</div>
-      </div>
+      
       
     </>
   );

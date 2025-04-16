@@ -374,7 +374,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   </div>
           {/* ... (existing token list and activity button code remains unchanged) */}
           {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="bg-[#002200] p-2 rounded-2xl shadow-sm flex items-center border border-[#c0c0c0]">
+            <div className="bg-[#002800] p-2 rounded-2xl shadow-sm flex items-center border border-gray-400">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -407,12 +407,12 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               return (
                 <div
                   key={token.address}
-                  className="bg-[#002200] p-2 rounded-2xl shadow-sm flex items-center border border-[#c0c0c0]"
+                  className="bg-[#002800] p-2 rounded-2xl shadow-sm flex items-center border border-gray-400"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
                     alt={token.symbol}
-                    className="w-9 h-9 mr-2"
+                    className="w-10 h-10 mr-2"
                   />
                   <div className="flex-1 flex justify-center items-center">
                     <div className="text-center">
