@@ -119,11 +119,15 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ock-vaultDetails"] {
-  background:#1F2937 !important;
+  background:#002200 !important;
+  border: 1px solid #6b7280 !important; /* gray-500 */
+  color: white !important;
 }
 
 [data-testid="ock-yieldDetails"] {
-  background:#1F2937 !important;
+  background:#002200 !important;
+  border: 1px solid #6b7280 !important; /* gray-500 */
+  color: white !important;
 }
 
 
