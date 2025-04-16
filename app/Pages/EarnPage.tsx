@@ -4,6 +4,11 @@ import { Earn, EarnDeposit, EarnDetails, DepositBalance, DepositAmountInput, Dep
 import Select from 'react-select';
 import { tokens } from '../Token Lists/earnTokens';
 
+import { useEffect } from 'react';
+
+
+
+
 // Define custom styles for react-select to match the dark theme
 const customStyles = {
   control: (provided: any) => ({
@@ -40,6 +45,15 @@ const EarnSection: React.FC = () => {
   const [earnSection, setEarnSection] = useState<"deposit" | "withdraw">("deposit");
   const [activeButton, setActiveButton] = useState<"deposit" | "withdraw">("deposit");
   const [selectedToken, setSelectedToken] = useState(tokens[0]);
+
+  useEffect(() => {
+    const el = document.querySelector('[data-testid="ock-yieldDetails"]');
+    if (el) {
+      // Override both the actual color and the CSS variable if used
+      (el as HTMLElement).style.setProperty('color', 'white', 'important');
+      (el as HTMLElement).style.setProperty('--ock-text-foreground-muted', 'white', 'important');
+    }
+  }, []);
 
   // // Use useEffect to change the text color after the component mounts
   // useEffect(() => {
@@ -110,18 +124,18 @@ const EarnSection: React.FC = () => {
         {earnSection === "deposit" && (
           <EarnDeposit className="bg-[#002200] p-4 sm:p-6 rounded-md border border-gray-500 shadow-md w-full max-w-sm mx-auto rounded">
             {/* <TokenSelect/> */}
-            <EarnDetails className="bg-[#002200] text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
+            <EarnDetails className="bg-[#002200] text-white font-semibold text-lg sm:text-xl mb-4" />
             <DepositBalance className="bg-[#002200] border border-gray-500"/>
-            <DepositAmountInput className="mb-4 bg-[#002200] border border-gray-500 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
+            <DepositAmountInput className="mb-4 bg-[#002200] border border-gray-500 text-white rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />
             <DepositButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
           </EarnDeposit>
         )}
         {earnSection === "withdraw" && (
           <EarnWithdraw className="bg-[#002200] p-4 sm:p-6 rounded-md border border-gray-500 shadow-md w-full max-w-sm mx-auto rounded">
             {/* <TokenSelect /> */}
-            <EarnDetails className="bg-[#002200] text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
+            <EarnDetails className="bg-[#002200] text-white font-semibold text-lg sm:text-xl mb-4" />
              <WithdrawBalance className="bg-[#002200] border border-gray-500"/>
-            <WithdrawAmountInput className="mb-4 bg-[#002200] border border-gray-500 text-gray-900 rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />            <WithdrawButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
+            <WithdrawAmountInput className="mb-4 bg-[#002200] border border-gray-500 text-white rounded-xl px-3 py-1 sm:px-4 sm:py-2 text-base sm:text-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200" />            <WithdrawButton className=" w-full py-2 sm:py-3 text-sm sm:text-base" />
           </EarnWithdraw>
         )}
       </Earn>
