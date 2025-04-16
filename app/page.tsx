@@ -199,7 +199,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
   type="from"
-  className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
+  className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -208,7 +208,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
   type="to"
-  className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#bfbfbf]"
+  className="mb-1 bg-[#002000] text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
 />
                 <SwapButton className="w-full font-bold bg-white text-black rounded-full py-2 transition-colors disabled:opacity-85" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
