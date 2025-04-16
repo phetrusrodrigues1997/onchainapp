@@ -6,7 +6,7 @@
 :root {
   /* --background: #012110; */
   
-  --background: #012512 ;
+  --background: #002200 ;
  
 }
 
@@ -34,7 +34,7 @@
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#012512  !important;
+  background:#002200  !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,7 +49,7 @@ button[aria-label="Toggle swap settings"] {
   }}
 
 [data-testid="ockSwapMessage_Message"] {
-  color: #012512  !important;
+  color: #002200   !important;
 }
 
 
@@ -283,7 +283,7 @@ body {
 }
 
 button[aria-label="Toggle menu"] {
-  background-color: #012512  !important;
+  background-color: #002200  !important;
 }
 
 button[aria-label="Toggle menu"] svg {
@@ -295,7 +295,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
   
 }
 [data-testid="ockSwapSettings_Settings"] {
-background-color: #012512  !important;
+background-color: #002200   !important;
 }
 
 [data-testid="ockConnectButton"] {

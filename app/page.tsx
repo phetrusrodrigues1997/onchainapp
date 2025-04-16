@@ -175,7 +175,7 @@ FX trading & remittances <br />redefined.
 />
               <Swap
                 experimental={{ useAggregator: true }}
-                className="bg-[#012512] p-1 max-w-sm mx-auto mt-8"
+                className="bg-[#002200] p-1 max-w-sm mx-auto mt-8"
                 onSuccess={async () => {
                   if (address) {
                     await recordSwapPoints(address);
@@ -199,7 +199,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
   type="from"
-  className="mb-1 bg-[#012512] text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
+  className="mb-1 bg-[#002200] text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -208,7 +208,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
   type="to"
-  className="bg-[#012512] mb-1 text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
+  className="bg-[#002200] mb-1 text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
 />
                 <SwapButton className="w-full font-bold bg-white text-black rounded-full py-2 transition-colors disabled:opacity-85" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />

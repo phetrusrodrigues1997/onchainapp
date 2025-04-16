@@ -165,7 +165,7 @@ const LiveCurrencies: React.FC = () => {
       sape: '10px',
       textStyle: { color: '#fff' },
     },
-    backgroundColor: '#012512',
+    backgroundColor: '#002200',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'line' },

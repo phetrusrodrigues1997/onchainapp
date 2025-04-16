@@ -73,7 +73,7 @@ export default function LiveCryptoPrices() {
               <div
                 key={token.symbol}
                 className="p-2 rounded-lg flex items-center space-x-2 space-y-4 w-28"
-                style={{ backgroundColor: '#012512' }}
+                style={{ backgroundColor: '#002200' }}
               >
                 <img
                   src={token.image || 'https://via.placeholder.com/32'}
