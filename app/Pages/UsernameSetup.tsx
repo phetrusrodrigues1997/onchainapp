@@ -60,7 +60,7 @@ export default function UsernameSetup() {
   }
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-[#002000] rounded-xl shadow-2xl border border-gray-400">
+    <div className="p-6 max-w-md mx-auto bg-[#012512] rounded-xl shadow-2xl border border-gray-400">
       <h2 className="text-2xl font-extrabold text-white mb-4 tracking-wide">
         {existingUsername ? 'Your Username' : 'Choose Your Username'}
       </h2>

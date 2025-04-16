@@ -272,13 +272,13 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   return (
     <>
     <div className="relative mb-6">
-      <div className="text-center mb-12">
+      <div className="text-center">
   <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
   <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
   {/* <p className="text-gray-300">Transfer crypto to anyone, anywhere.</p> */}
 </div>
       </div>
-      <div className={` p-4 mb-4 rounded-lg max-w-sm mx-auto ${className} border border-gray-400 relative`}>
+      <div className={` p-4 mb-12 rounded-lg max-w-sm mx-auto ${className} border border-gray-400 relative`}>
        {/* Animation placed above the main content */}
 
         {/* Manage Username Button */}
@@ -303,7 +303,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
             placeholder="Send 5 USDC to address or username"
-            className={`w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
+            className={`w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
               recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
             }`}
           />
