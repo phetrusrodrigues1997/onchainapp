@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CADCToken, BRZToken, EURCToken } from '../Token Lists/coins';
-import { symlink } from 'fs';
+
 
 // Define MXNT locally since it’s not in your original token list
 const MXNTToken = {

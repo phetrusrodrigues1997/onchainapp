@@ -119,20 +119,13 @@ button[aria-label="Toggle swap settings"] {
 }
 
 [data-testid="ock-vaultDetails"] {
-  background: #002200 ;
-  border: 1px solid #6b7280 !important; /* gray-500 */
-  color: white !important;
+  background:#1F2937 !important;
 }
 
 [data-testid="ock-yieldDetails"] {
-  background: #002200 ;
-  border: 1px solid #6b7280 !important; /* gray-500 */
-  color: white !important;
+  background:#1F2937 !important;
 }
 
-.max-w-24.truncate {
-  color: white !important; /* Tailwind's text-gray-500 */
-}
 
 
 .mt-2.text-red-500.text-center {
