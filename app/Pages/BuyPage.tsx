@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Buy } from '@coinbase/onchainkit/buy'; 
 import type { Token } from '@coinbase/onchainkit/token';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCreditCard } from '@fortawesome/free-solid-svg-icons'
 
 const USDCToken: Token = {
   address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -164,15 +166,19 @@ const BuySection: React.FC = () => {
 
   return (
     <div>
-      <div className="w-full max-w-sm mx-auto p-4 ">
-      <p className="text-xl sm:text-xl font-bold text-white text-center mb-4 sm:mb-6">
-          Buy USDC, swap it for the{' '}
-          
-          <span className="inline-block transition-all duration-300 ease-in-out">
-            {currencies[currencyIndex].symbol} {currencies[currencyIndex].name}
-          </span>
-        </p>
-      </div>
+      <div className="w-full max-w-sm mx-auto p-4">
+  {/* Icon row */}
+  <div className="flex justify-center mb-8">
+    <FontAwesomeIcon icon={faCreditCard} className="text-[#d3c81a] text-8xl" />
+  </div>
+
+  <p className="text-xl sm:text-xl font-bold text-white text-center mb-4 sm:mb-6">
+    Buy USDC, swap it for the{' '}
+    <span className="inline-block transition-all duration-300 ease-in-out">
+      {currencies[currencyIndex].symbol} {currencies[currencyIndex].name}.
+    </span>
+  </p>
+</div>
 
       <div className={`${getContainerWidth()} mx-auto p-4 bg-[#002200] rounded-lg rounded-2xl shadow-sm`}>
 

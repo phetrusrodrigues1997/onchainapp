@@ -339,11 +339,11 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     <>
       <div className="relative mt-12">
         <div className="text-center">
-          <FontAwesomeIcon icon={faPaperPlane} size="6x" className="text-white mb-4" />
+          <FontAwesomeIcon icon={faPaperPlane} size="6x" className="text-[#d3c81a] mb-4" />
           <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
         </div>
       </div>
-      <div className={` p-4 mt-20 rounded-lg max-w-sm mx-auto ${className} border border-gray-400 relative`}>
+      <div className={` p-4 mt-6 rounded-lg max-w-sm mx-auto ${className} relative`}>
         {/* Manage Username Button
         <button className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors" onClick={() => setActiveSection("usernamePage")}>Manage Username</button> */}
 
@@ -392,7 +392,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
 
 
         {/* Amount Input */}
-        <div className="mb-4">
+        <div className="mt-2">
           <label htmlFor="amount" className="block text-sm font-medium text-gray-400 mb-1">Amount</label>
           <input
             id="amount"
@@ -405,7 +405,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
         </div>
 
         {/* Recipient Input */}
-        <div className="mb-4">
+        <div className="mt-3">
           <label htmlFor="recipient" className="block text-sm font-medium text-gray-400 mb-1">Recipient (address or username)</label>
           <input
             id="recipient"
