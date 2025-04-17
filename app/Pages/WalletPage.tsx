@@ -174,7 +174,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       <div className="flex justify-between items-center transform -translate-y-1 ">
   {/* Left side: The username will go here in place of this button */}
   
-        <div className="flex items-center">
+        <div className="flex items-center hover:cursor-pointer" onClick={() => setActiveSection('usernamePage')}>
+          
           {username === undefined ? (
             <span className="text-white">Loading...</span>
           ) : username ? (
@@ -182,6 +183,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               fontFamily: "'Montserrat', sans-serif",
               color: "#ffffff",
               textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
+              
             }}><FontAwesomeIcon icon={faUser} className="mr-2" />{username}</span>
           ) : (
             
@@ -240,7 +242,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       </svg>
     </button>
           {/* Settings button */}
-    <button className="text-white hover:text-[#d3c81a]">
+    <button className="text-white hover:text-[#d3c81a]" onClick={() => setActiveSection('usernamePage')}>
       <svg
         className="w-6 h-6"
         fill="none"
@@ -351,7 +353,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           {/* Activity button placed above all balances */}
   <div className="relative -translate-y-11">
   <button
-  className="text-black font-bold bg-white rounded-full py-1 px-3 hover:bg-[#d3c81a] absolute top-0 right-0 flex items-center space-x-1"
+  className="text-white font-bold bg-[#002200] border border-white rounded-full py-1 px-3 hover:bg-[#d3c81a] hover:text-black absolute top-0 right-0 flex items-center space-x-1"
   onClick={() => setActiveSection('activity')}
 >
   <svg
@@ -374,7 +376,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   </div>
           {/* ... (existing token list and activity button code remains unchanged) */}
           {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="p-2 rounded-2xl shadow-sm flex items-center border border-gray-400">
+            <div className="p-2 rounded-2xl shadow-sm flex items-center text-white font-bold bg-gray-800">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -407,7 +409,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               return (
                 <div
                   key={token.address}
-                  className=" p-2 rounded-2xl shadow-sm flex items-center border border-gray-400"
+                  className="p-2 rounded-2xl shadow-sm flex items-center text-white font-bold bg-gray-800"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
