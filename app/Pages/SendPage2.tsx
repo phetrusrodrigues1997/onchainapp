@@ -6,10 +6,6 @@ import { base } from 'wagmi/chains';
 import { getWalletAddress } from '../Database/actions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import ChatbotInterface from './ChatbotInterface';
-import SwapService from './SwapService';
-import CryptoPriceService from './CryptoPriceService';
-import ApiKeyService from './ApiKeyService';
 
 // Token definitions (unchanged from the original)
 const ETHToken: Token = {
@@ -136,26 +132,6 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const [recipientError, setRecipientError] = useState<string>('');
   const [tokenError, setTokenError] = useState<string>('');
   const [balance, setBalance] = useState<string | null>(null);
-
-  // Initialize API key
-  useEffect(() => {
-    // Set the OpenAI API key from the user's provided key
-    ApiKeyService.setOpenAiKey("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");
-    
-    // Validate the API key on component mount
-    const validateKey = async () => {
-      try {
-        const isValid = await ApiKeyService.validateApiKey();
-        if (!isValid) {
-          console.warn("OpenAI API key validation failed. Chatbot will use fallback functionality.");
-        }
-      } catch (error) {
-        console.error("Error validating API key:", error);
-      }
-    };
-    
-    validateKey();
-  }, []);
 
   // Parse sentence and validate token
   useEffect(() => {
@@ -291,112 +267,20 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     }
   }, [chainId, switchChain]);
 
-  // Handle swap request from chatbot
-  const handleSwapRequest = async (fromToken: Token, toToken: Token, amount: string): Promise<boolean> => {
-    if (!address) {
-      setTransactionStatus('Wallet not connected');
-      return false;
-    }
-    
-    try {
-      console.log(`Executing swap: ${amount} ${fromToken.symbol} to ${toToken.symbol}`);
-      
-      // For a real implementation, this would call a swap contract
-      // For now, we'll simulate a swap by sending a transaction
-      if (fromToken.address === '') {
-        // Swapping from ETH
-        sendTransaction({
-          to: toToken.address as `0x${string}`,
-          value: parseUnits(amount, fromToken.decimals),
-        });
-      } else {
-        // Swapping from ERC20
-        writeContract({
-          address: fromToken.address as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: 'transfer',
-          args: [toToken.address as `0x${string}`, parseUnits(amount, fromToken.decimals)],
-        });
-      }
-      setTransactionStatus(`Swap transaction submitted: ${amount} ${fromToken.symbol} to ${toToken.symbol}`);
-      return true;
-    } catch (err) {
-      console.error("Swap execution error:", err);
-      setTransactionStatus(`Swap failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      return false;
-    }
-  };
-  
-  // Handle send request from chatbot
-  const handleSendRequest = async (token: Token, amount: string, recipient: string): Promise<boolean> => {
-    if (!address) {
-      setTransactionStatus('Wallet not connected');
-      return false;
-    }
-    
-    try {
-      console.log(`Executing send: ${amount} ${token.symbol} to ${recipient}`);
-      
-      // Check if recipient is a wallet address or needs to be resolved
-      let resolvedAddress: string;
-      
-      if (recipient.startsWith('0x') && /^0x[a-fA-F0-9]{40}$/.test(recipient)) {
-        // Already a valid Ethereum address
-        resolvedAddress = recipient;
-      } else {
-        // Try to resolve as a username
-        setTransactionStatus('Resolving recipient username...');
-        try {
-          const walletAddress = await getWalletAddress(recipient);
-          if (walletAddress) {
-            resolvedAddress = walletAddress;
-          } else {
-            setTransactionStatus(`Username not found: ${recipient}`);
-            return false;
-          }
-        } catch (error) {
-          setTransactionStatus(`Error resolving username: ${recipient}`);
-          return false;
-        }
-      }
-      
-      // Execute the send transaction
-      if (token.address === '') {
-        // Sending ETH
-        sendTransaction({
-          to: resolvedAddress as `0x${string}`,
-          value: parseUnits(amount, token.decimals),
-        });
-      } else {
-        // Sending ERC20 token
-        writeContract({
-          address: token.address as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: 'transfer',
-          args: [resolvedAddress as `0x${string}`, parseUnits(amount, token.decimals)],
-        });
-      }
-      
-      setTransactionStatus(`Send transaction submitted: ${amount} ${token.symbol} to ${recipient}`);
-      return true;
-    } catch (err) {
-      console.error("Send execution error:", err);
-      setTransactionStatus(`Send failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      return false;
-    }
-  };
-
   const isPending = isWritePending || isSendPending;
 
   return (
     <>
-      <div className="relative mb-6">
-        <div className="text-center">
-          <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
-          <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
-        </div>
+    <div className="relative mb-6">
+      <div className="text-center">
+  <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
+  <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
+  {/* <p className="text-gray-300">Transfer crypto to anyone, anywhere.</p> */}
+</div>
       </div>
       <div className={` p-4 mb-12 rounded-lg max-w-sm mx-auto ${className} border border-gray-400 relative`}>
+       {/* Animation placed above the main content */}
+
         {/* Manage Username Button */}
         <button
           className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors"
@@ -455,18 +339,13 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
             Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
           </div>
         )}
+        
       </div>
       
-      {/* AI Chatbot Integration */}
-      <ChatbotInterface 
-        onSwapRequest={handleSwapRequest}
-        onSendRequest={handleSendRequest}
-        availableTokens={availableTokens}
-        userAddress={address}
-        apiKey={ApiKeyService.getOpenAiKey() || ""}
-      />
+      
     </>
   );
+  
 };
 
 export default SendSection;
