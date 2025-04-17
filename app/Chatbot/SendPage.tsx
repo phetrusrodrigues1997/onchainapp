@@ -125,68 +125,17 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const { address, chainId } = useAccount();
   const { switchChain } = useSwitchChain();
 
-  const [sentence, setSentence] = useState<string>('');
+  // New input states
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState<string>('');
   const [inputRecipient, setInputRecipient] = useState<string>('');
   const [resolvedRecipient, setResolvedRecipient] = useState<string | null>(null);
   const [isResolving, setIsResolving] = useState<boolean>(false);
-  const [isSentenceValid, setIsSentenceValid] = useState<boolean>(false);
-  const [transactionStatus, setTransactionStatus] = useState<string>('');
   const [recipientError, setRecipientError] = useState<string>('');
-  const [tokenError, setTokenError] = useState<string>('');
+  const [transactionStatus, setTransactionStatus] = useState<string>('');
   const [balance, setBalance] = useState<string | null>(null);
 
-  // Initialize API key
-  useEffect(() => {
-    // Set the OpenAI API key from the user's provided key
-    ApiKeyService.setOpenAiKey(process.env.NEXT_PUBLIC_OPENAI_API_KEY || '');
-    
-    // Validate the API key on component mount
-    const validateKey = async () => {
-      try {
-        const isValid = await ApiKeyService.validateApiKey();
-        if (!isValid) {
-          console.warn("OpenAI API key validation failed. Chatbot will use fallback functionality.");
-        }
-      } catch (error) {
-        console.error("Error validating API key:", error);
-      }
-    };
-    
-    validateKey();
-  }, []);
-
-  // Parse sentence and validate token
-  useEffect(() => {
-    const regex = /^\s*send\s+(\d+(?:\.\d+)?)\s+(\w+)\s+to\s+(.+)\s*$/i;
-    const match = sentence.match(regex);
-    if (match) {
-      const [, amountStr, tokenSymbol, recipient] = match;
-      const token = availableTokens.find(t => t.symbol.toLowerCase() === tokenSymbol.toLowerCase());
-      if (token) {
-        setAmount(amountStr);
-        setSelectedToken(token);
-        setInputRecipient(recipient.trim());
-        setIsSentenceValid(true);
-        setTokenError('');
-      } else {
-        setIsSentenceValid(false);
-        setSelectedToken(null);
-        setInputRecipient('');
-        setAmount('');
-        setTokenError(`Invalid token symbol: ${tokenSymbol}`);
-      }
-    } else {
-      setIsSentenceValid(false);
-      setSelectedToken(null);
-      setInputRecipient('');
-      setAmount('');
-      setTokenError('');
-    }
-  }, [sentence]);
-
-  // Resolve recipient (wallet address or username)
+  // Resolve recipient
   useEffect(() => {
     const resolveRecipient = async () => {
       if (!inputRecipient) {
@@ -213,7 +162,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
             setResolvedRecipient(null);
             setRecipientError('Username not found');
           }
-        } catch (err) {
+        } catch {
           setResolvedRecipient(null);
           setRecipientError('Error resolving username');
         } finally {
@@ -224,7 +173,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     resolveRecipient();
   }, [inputRecipient]);
 
-  // Fetch balances (unchanged from the original)
+  // Fetch balances
   const { data: erc20BalanceData } = useReadContract({
     address: selectedToken?.address as `0x${string}`,
     abi: ERC20_ABI,
@@ -232,22 +181,18 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     args: [address as `0x${string}`],
     query: { enabled: !!address && !!selectedToken?.address },
   });
-
   const { data: ethBalanceData } = useBalance({
     address: address as `0x${string}`,
     query: { enabled: !!address && selectedToken?.address === '' },
   });
 
-  // Update balance state (unchanged from the original)
   useEffect(() => {
     if (!address || !selectedToken) {
       setBalance(null);
       return;
     }
     if (selectedToken.address === '') {
-      if (ethBalanceData) {
-        setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
-      }
+      if (ethBalanceData) setBalance(formatUnits(ethBalanceData.value, selectedToken.decimals));
     } else if (erc20BalanceData) {
       setBalance(formatUnits(erc20BalanceData as bigint, selectedToken.decimals));
     }
@@ -255,9 +200,11 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
 
   const { writeContract, isPending: isWritePending } = useWriteContract();
   const { sendTransaction, isPending: isSendPending } = useSendTransaction();
+  const [showDropdown, setShowDropdown] = useState(false);
 
+  // Send handler
   const handleSend = () => {
-    if (!isSentenceValid || !selectedToken || !resolvedRecipient || !amount || !address) {
+    if (!selectedToken || !resolvedRecipient || !amount || !address) {
       setTransactionStatus('Invalid input or wallet not connected');
       return;
     }
@@ -281,7 +228,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     }
   };
 
-  // Network switch (unchanged from the original)
+  // Network switch
   useEffect(() => {
     if (switchChain && chainId && chainId !== base.id) {
       setTransactionStatus('Please switch to Base network...');
@@ -392,79 +339,114 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     <>
       <div className="relative mb-6">
         <div className="text-center">
-          <FontAwesomeIcon icon={faPaperPlane} size="4x" className="text-white mb-4" />
+          <FontAwesomeIcon icon={faPaperPlane} size="6x" className="text-white mb-4" />
           <h2 className="text-2xl font-bold text-white">Send your money to anyone, anywhere, 24-7.</h2>
         </div>
       </div>
       <div className={` p-4 mb-12 rounded-lg max-w-sm mx-auto ${className} border border-gray-400 relative`}>
-        {/* Manage Username Button */}
-        <button
-          className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors"
-          onClick={() => setActiveSection("usernamePage")}
-          aria-label="Manage your username"
+        {/* Manage Username Button
+        <button className="absolute top-4 right-4 text-black font-semibold rounded-full px-2 py-1 text-sm bg-white hover:bg-[#d3c81a] transition-colors" onClick={() => setActiveSection("usernamePage")}>Manage Username</button> */}
+
+        
+
+        {/* Token Select */}
+        <div className="relative">
+  <button
+    type="button"
+    onClick={() => setShowDropdown(prev => !prev)}
+    className="w-full flex items-center justify-between p-3 bg-[#002200] border border-gray-400 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >
+    <div className="flex items-center space-x-2">
+      {selectedToken ? (
+        <>
+          <img src={selectedToken.image || ''} alt={selectedToken.symbol} className="w-5 h-5 rounded-full" />
+          <span>{selectedToken.symbol}</span>
+        </>
+      ) : (
+        <span>Select a token</span>
+      )}
+    </div>
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  {showDropdown && (
+    <ul className="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-600 rounded-lg max-h-60 overflow-auto">
+      {availableTokens.map(t => (
+        <li
+          key={t.symbol}
+          onClick={() => {
+            setSelectedToken(t);
+            setShowDropdown(false);
+          }}
+          className="flex items-center p-2 hover:bg-gray-700 cursor-pointer"
         >
-          Manage Username
-        </button>
-  
-        <h2 className="text-white text-xl font-bold mb-4">Send Tokens</h2>
-  
-        {/* Input with error display */}
+          <img src={t.image || ''} alt={t.symbol} className="w-5 h-5 rounded-full mr-2" />
+          <span>{t.symbol}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+
+        {/* Amount Input */}
         <div className="mb-4">
-          <label htmlFor="sentence" className="block text-sm font-medium text-gray-400 mb-1">
-            Enter Command
-          </label>
+          <label htmlFor="amount" className="block text-sm font-medium text-gray-400 mb-1">Amount</label>
           <input
-            id="sentence"
+            id="amount"
             type="text"
-            value={sentence}
-            onChange={(e) => setSentence(e.target.value)}
-            placeholder="Send 5 USDC to address or username"
-            className={`w-full p-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out ${
-              recipientError || tokenError ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-[#3B82F6]'
-            }`}
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            placeholder="Enter amount"
+            className="w-full p-3 bg-[#002200] border border-gray-400 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {tokenError && (
-            <p className="text-red-400 text-xs mt-1">{tokenError}</p>
-          )}
         </div>
-  
-        {/* Display Recipient Status and Balance */}
+
+        {/* Recipient Input */}
+        <div className="mb-4">
+          <label htmlFor="recipient" className="block text-sm font-medium text-gray-400 mb-1">Recipient (address or username)</label>
+          <input
+            id="recipient"
+            type="text"
+            value={inputRecipient}
+            onChange={e => setInputRecipient(e.target.value)}
+            placeholder="0x... or username"
+            className={`w-full p-3 bg-[#002200] border border-gray-400 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${recipientError ? 'border-red-400 focus:ring-red-400' : ''}`}
+          />
+          {recipientError && <p className="text-red-400 text-xs mt-1">{recipientError}</p>}
+        </div>
+
+        {/* Status and Balance */}
         <div className="mb-4 text-[#d3c81a] text-sm">
           {isResolving && <p>Resolving username...</p>}
-          {resolvedRecipient && !recipientError && (
-            <p>Sending to {resolvedRecipient} {inputRecipient !== resolvedRecipient ? `` : ''}</p>
-          )}
-          {recipientError && <p className="text-red-400">{recipientError}</p>}
-          {balance !== null && selectedToken && (
-            <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>
-          )}
+          {resolvedRecipient && !recipientError && <p>Sending to {resolvedRecipient}</p>}
+          {balance !== null && selectedToken && <p>Available: {parseFloat(balance).toFixed(6)} {selectedToken.symbol}</p>}
         </div>
-  
+
         {/* Send Button */}
         <button
           onClick={handleSend}
-          disabled={isPending || !isSentenceValid || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
-          className="w-full bg-white text-black font-bold rounded-full py-3 transition-colors hover:bg-[#d3c81a] cursor-pointer"
+          disabled={isPending || !selectedToken || !amount || !resolvedRecipient || !!recipientError || !address || (!!chainId && chainId !== base.id)}
+          className="w-full bg-white text-black font-bold rounded-full py-3 transition-colors hover:bg-[#00aa00] disabled:cursor-not-allowed"
         >
           {isPending ? 'Sending...' : 'Send Tokens'}
         </button>
-        <ChatbotInterface 
+            {/* Chatbot Integration */}
+      <ChatbotInterface
         onSwapRequest={handleSwapRequest}
         onSendRequest={handleSendRequest}
         availableTokens={availableTokens}
         userAddress={address}
         apiKey={ApiKeyService.getOpenAiKey() || ""}
       />
-        {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
-        {!address && (
-          <div className="mt-4 text-red-400 text-center text-sm">
-            Please connect your wallet and ensure it is set to the Base network (chainId: 8453).
-          </div>
-        )}
       </div>
+
       
-      {/* AI Chatbot Integration */}
-      
+
+      {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
+      {!address && <div className="mt-4 text-red-400 text-center text-sm">Please connect your wallet and ensure it is set to the Base network (chainId: 8453).</div>}
     </>
   );
 };
