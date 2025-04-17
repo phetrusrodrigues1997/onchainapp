@@ -14,7 +14,7 @@ import ResponsiveLogo from './Sections/ResponsiveLogo';
 import CurrencySelection from './Pages/LiquidityPage';
 import DiscordXSection from './Pages/Discord';
 import EarnSection from "./Pages/EarnPage";
-import Send from './Pages/SendPage';
+import Send from './Chatbot/SendPage';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';

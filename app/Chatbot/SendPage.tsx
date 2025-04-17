@@ -448,7 +448,13 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
         >
           {isPending ? 'Sending...' : 'Send Tokens'}
         </button>
-  
+        <ChatbotInterface 
+        onSwapRequest={handleSwapRequest}
+        onSendRequest={handleSendRequest}
+        availableTokens={availableTokens}
+        userAddress={address}
+        apiKey={ApiKeyService.getOpenAiKey() || ""}
+      />
         {transactionStatus && <div className="mt-2 text-gray-400 text-sm">{transactionStatus}</div>}
         {!address && (
           <div className="mt-4 text-red-400 text-center text-sm">
@@ -458,13 +464,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
       </div>
       
       {/* AI Chatbot Integration */}
-      <ChatbotInterface 
-        onSwapRequest={handleSwapRequest}
-        onSendRequest={handleSendRequest}
-        availableTokens={availableTokens}
-        userAddress={address}
-        apiKey={ApiKeyService.getOpenAiKey() || ""}
-      />
+      
     </>
   );
 };
