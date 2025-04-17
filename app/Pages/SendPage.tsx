@@ -140,7 +140,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   // Initialize API key
   useEffect(() => {
     // Set the OpenAI API key from the user's provided key
-    ApiKeyService.setOpenAiKey("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");
+    ApiKeyService.setOpenAiKey(process.env.NEXT_PUBLIC_OPENAI_API_KEY || '');
     
     // Validate the API key on component mount
     const validateKey = async () => {
