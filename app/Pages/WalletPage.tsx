@@ -372,9 +372,9 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
 </button>
 
   </div>
-          {/* ... (existing token list and activity button code remains unchanged) */}
+          {/* ... I think this is crypto */}
           {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="p-2 rounded-2xl shadow-sm flex items-center border border-gray-400">
+            <div className="p-2 rounded-2xl shadow-sm flex items-center border border-gray-200">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -383,7 +383,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               <div className="flex-1 flex justify-center items-center">
                 <div className="text-center">
                   <span>{nativeToken?.name}</span>
-                  <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(2)}</span>
+                  <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(4)}</span>
                 </div>
               </div>
               <span className="ml-auto">
@@ -396,6 +396,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           {tokenBalances.map((balance, index) => {
             const token = erc20Tokens[index];
             const isStablecoin = stablecoinSymbols.has(token.symbol);
+            {/* ... I think this is stablecoins */}
             if (
               balance.data &&
               parseFloat(balance.data.formatted) > 0 &&
@@ -407,7 +408,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               return (
                 <div
                   key={token.address}
-                  className=" p-2 rounded-2xl shadow-sm flex items-center border border-gray-400"
+                  className=" p-2 rounded-2xl shadow-sm flex items-center border border-gray-200"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}

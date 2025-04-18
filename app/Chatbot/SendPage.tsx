@@ -439,7 +439,7 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
         onSendRequest={handleSendRequest}
         availableTokens={availableTokens}
         userAddress={address}
-        apiKey={ApiKeyService.getOpenAiKey() || ""}
+        apiKey={process.env.NEXT_PUBLIC_OPENAI_API_KEY || ''}
       />
       </div>
 
