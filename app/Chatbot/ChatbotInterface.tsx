@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import { Token } from '@coinbase/onchainkit/token';
 import SwapService from './SwapService';
 import SendService from "./SendService";
+import { debounce } from 'lodash'; // Add lodash dependency
 
 interface ChatMessage {
   id: string;
@@ -33,7 +34,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello! I can help you send tokens, check crypto prices, or answer any question you have about cryptocurrency and beyond. Try asking me to send 1 ETH, the price of bitcoin, or explain blockchain!',
+      content: 'Hello! I can help you send tokens, swap tokens, check crypto prices, or answer any question you have about cryptocurrency and beyond. Try asking me to send 1 ETH, swap 10 USDC to ETH, or explain blockchain!',
       timestamp: new Date()
     }
   ]);
@@ -49,29 +50,27 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
     }
   }, [messages]);
 
-  // Function to handle sending messages to OpenAI API
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+  // Debounced version of handleSendMessage
+  const debouncedSendMessage = debounce(async (input: string) => {
+    if (!input.trim()) return;
     
     // Add user message to chat
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputMessage,
+      content: input,
       timestamp: new Date()
     };
     
     setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
     setIsLoading(true);
     
     try {
       // Check if this is a price query we can handle locally
-      const priceMatch = inputMessage.toLowerCase().match(/(?:what(?:'s| is) the )?price (?:of |for )?([a-z\s]+)(?:\?)?/i);
+      const priceMatch = input.toLowerCase().match(/(?:what(?:'s| is) the )?price (?:of |for )?([a-z\s]+)(?:\?)?/i);
       if (priceMatch) {
         const cryptoName = priceMatch[1].trim();
         try {
-          // Import CryptoPriceService dynamically to avoid circular dependencies
           const CryptoPriceService = await import('./CryptoPriceService').then(module => module.default);
           const priceData = await CryptoPriceService.getPrice(cryptoName);
           
@@ -89,12 +88,11 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
           }
         } catch (error) {
           console.error("Error fetching price data:", error);
-          // Continue with OpenAI if price fetch fails
         }
       }
       
       // Check if this is a send request we can handle locally
-      const sendMatch = SendService.parseSendRequest(inputMessage, availableTokens);
+      const sendMatch = SendService.parseSendRequest(input, availableTokens);
       if (sendMatch) {
         const { token, amount, recipient } = sendMatch;
         
@@ -106,7 +104,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         };
         setMessages(prev => [...prev, assistantMessage]);
         
-        // Add a processing message
         const processingMessage: ChatMessage = {
           id: Date.now().toString() + '-processing',
           role: 'system',
@@ -115,12 +112,10 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         };
         setMessages(prev => [...prev, processingMessage]);
         
-        // Execute the send
         try {
           console.log(`Attempting to send ${amount} ${token.symbol} to ${recipient}`);
           const success = await onSendRequest(token, amount, recipient);
           
-          // Replace the processing message with the result
           const resultMessage: ChatMessage = {
             id: Date.now().toString() + '-result',
             role: 'system',
@@ -130,7 +125,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             timestamp: new Date()
           };
           
-          // Find and replace the processing message
           setMessages(prev => 
             prev.map(msg => 
               msg.id === processingMessage.id ? resultMessage : msg
@@ -139,7 +133,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         } catch (error) {
           console.error("Send execution error:", error);
           
-          // Replace the processing message with the error
           const errorMessage: ChatMessage = {
             id: Date.now().toString() + '-error',
             role: 'system',
@@ -147,7 +140,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             timestamp: new Date()
           };
           
-          // Find and replace the processing message
           setMessages(prev => 
             prev.map(msg => 
               msg.id === processingMessage.id ? errorMessage : msg
@@ -160,7 +152,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
       }
       
       // Check if this is a swap request we can handle locally
-      const swapMatch = SwapService.parseSwapRequest(inputMessage, availableTokens);
+      const swapMatch = SwapService.parseSwapRequest(input, availableTokens);
       if (swapMatch) {
         const { fromToken, toToken, amount } = swapMatch;
         
@@ -172,7 +164,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         };
         setMessages(prev => [...prev, assistantMessage]);
         
-        // Add a processing message
         const processingMessage: ChatMessage = {
           id: Date.now().toString() + '-processing',
           role: 'system',
@@ -181,12 +172,10 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         };
         setMessages(prev => [...prev, processingMessage]);
         
-        // Execute the swap
         try {
           console.log(`Attempting to swap ${amount} ${fromToken.symbol} to ${toToken.symbol}`);
           const success = await onSwapRequest(fromToken, toToken, amount);
           
-          // Replace the processing message with the result
           const resultMessage: ChatMessage = {
             id: Date.now().toString() + '-result',
             role: 'system',
@@ -196,7 +185,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             timestamp: new Date()
           };
           
-          // Find and replace the processing message
           setMessages(prev => 
             prev.map(msg => 
               msg.id === processingMessage.id ? resultMessage : msg
@@ -205,7 +193,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         } catch (error) {
           console.error("Swap execution error:", error);
           
-          // Replace the processing message with the error
           const errorMessage: ChatMessage = {
             id: Date.now().toString() + '-error',
             role: 'system',
@@ -213,7 +200,6 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             timestamp: new Date()
           };
           
-          // Find and replace the processing message
           setMessages(prev => 
             prev.map(msg => 
               msg.id === processingMessage.id ? errorMessage : msg
@@ -232,6 +218,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
           role: 'assistant',
           content: "I'm sorry, I can only perform sends, swaps, and price fetching without an API key. Try using these commands:\n\n" +
             "• For sending: 'send [amount] [token] to [address/username]'. Example: 'send 10 USDC to 0x123...' or 'send 5 ETH to username'\n" +
+            "• For swapping: 'swap [amount] [fromToken] to [toToken]'. Example: 'swap 10 USDC to ETH'\n" +
             "• For price queries: 'What's the price of Bitcoin?'",
           timestamp: new Date()
         };
@@ -243,7 +230,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
       // Prepare context for the AI
       const systemPrompt = `You are GoldenEagle Assistant, a helpful assistant for a cryptocurrency application on the BASE blockchain. 
 You can answer general questions about cryptocurrency, blockchain technology, or anything else the user asks. 
-You can also assist with token sends.
+You can also assist with token swaps and sends.
 
 Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
 
@@ -252,7 +239,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
 - Only use SWAP_REQUEST or SEND_REQUEST formats when the user clearly intends to perform these actions, not when asking for information (e.g., "How do I swap tokens?").
 - If a request is incomplete (e.g., "swap some USDC"), respond with guidance like: "Please specify the amount and destination token, e.g., 'swap 10 USDC to ETH'."
 - For other queries, provide concise, helpful, and informative responses.
-- Note that swaps are not currently working on our website, so let the user know that this is a future feature.
 - Use a friendly and professional tone, and keep responses concise unless the user asks for detailed explanations.`;
       
       // Call OpenAI API
@@ -267,7 +253,7 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
           messages: [
             { role: 'system', content: systemPrompt },
             ...messages.map(msg => ({ role: msg.role, content: msg.content })),
-            { role: 'user', content: inputMessage }
+            { role: 'user', content: input }
           ],
           temperature: 0.7
         })
@@ -289,11 +275,9 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
           const toToken = availableTokens.find(t => t.symbol.toLowerCase() === toTokenSymbol.toLowerCase().trim());
           
           if (fromToken && toToken) {
-            // Remove the SWAP_REQUEST format from the displayed message
             aiResponse = aiResponse.replace(/SWAP_REQUEST:[^:]+:[^:]+:[^:]+/, 
               `I'll help you swap ${amount} ${fromToken.symbol} to ${toToken.symbol}. Please confirm the transaction in your wallet.`);
             
-            // Add the AI response
             const assistantMessage: ChatMessage = {
               id: Date.now().toString(),
               role: 'assistant',
@@ -302,7 +286,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
             };
             setMessages(prev => [...prev, assistantMessage]);
             
-            // Add a processing message
             const processingMessage: ChatMessage = {
               id: Date.now().toString() + '-processing',
               role: 'system',
@@ -311,11 +294,9 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
             };
             setMessages(prev => [...prev, processingMessage]);
             
-            // Execute the swap
             try {
               const success = await onSwapRequest(fromToken, toToken, amount);
               
-              // Replace the processing message with the result
               const resultMessage: ChatMessage = {
                 id: Date.now().toString() + '-result',
                 role: 'system',
@@ -330,7 +311,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
                 )
               );
             } catch (error) {
-              // Replace the processing message with the error
               const errorMessage: ChatMessage = {
                 id: Date.now().toString() + '-error',
                 role: 'system',
@@ -344,7 +324,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
               );
             }
           } else {
-            // Token not found
             const errorMessage: ChatMessage = {
               id: Date.now().toString(),
               role: 'assistant',
@@ -361,11 +340,9 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
           const token = availableTokens.find(t => t.symbol.toLowerCase() === tokenSymbol.toLowerCase().trim());
           
           if (token) {
-            // Remove the SEND_REQUEST format from the displayed message
             aiResponse = aiResponse.replace(/SEND_REQUEST:[^:]+:[^:]+:[^:]+/, 
               `I'll help you send ${amount} ${token.symbol} to ${recipient}. Please confirm the transaction in your wallet.`);
             
-            // Add the AI response
             const assistantMessage: ChatMessage = {
               id: Date.now().toString(),
               role: 'assistant',
@@ -374,7 +351,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
             };
             setMessages(prev => [...prev, assistantMessage]);
             
-            // Add a processing message
             const processingMessage: ChatMessage = {
               id: Date.now().toString() + '-processing',
               role: 'system',
@@ -383,11 +359,9 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
             };
             setMessages(prev => [...prev, processingMessage]);
             
-            // Execute the send
             try {
               const success = await onSendRequest(token, amount, recipient);
               
-              // Replace the processing message with the result
               const resultMessage: ChatMessage = {
                 id: Date.now().toString() + '-result',
                 role: 'system',
@@ -402,7 +376,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
                 )
               );
             } catch (error) {
-              // Replace the processing message with the error
               const errorMessage: ChatMessage = {
                 id: Date.now().toString() + '-error',
                 role: 'system',
@@ -416,7 +389,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
               );
             }
           } else {
-            // Token not found
             const errorMessage: ChatMessage = {
               id: Date.now().toString(),
               role: 'assistant',
@@ -427,7 +399,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
           }
         }
       } else {
-        // Regular response (not a swap or send)
         const assistantMessage: ChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',
@@ -439,7 +410,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
     } catch (error) {
       console.error("API or processing error:", error);
       
-      // Handle API errors with more user-friendly messages
       let errorContent = "I'm having trouble connecting to my services right now.";
       
       if (error instanceof Error) {
@@ -467,6 +437,12 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
     } finally {
       setIsLoading(false);
     }
+  }, 1000);
+
+  // Function to handle sending messages
+  const handleSendMessage = () => {
+    debouncedSendMessage(inputMessage);
+    setInputMessage(''); // Clear input after triggering
   };
 
   // Handle pressing Enter to send message
@@ -479,7 +455,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
 
   return (
     <>
-      {/* Chat toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full bg-[#d3c81a] text-black font-bold rounded-full py-3 mt-4 transition-colors hover:bg-[#00aa00] cursor-pointer"
@@ -487,10 +462,8 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
         Try our AI agent
       </button>
 
-      {/* Chat interface */}
       {isOpen && (
         <div className="fixed bottom-20 right-6 w-80 sm:w-96 h-[500px] bg-gray-900 border border-gray-700 rounded-lg shadow-xl flex flex-col z-40">
-          {/* Chat header */}
           <div className="p-4 border-b border-gray-700 bg-gray-800 rounded-t-lg flex items-center">
             <FontAwesomeIcon icon={faDove} className="text-[#d3c81a] mr-2" />
             <h3 className="text-white font-bold">GoldenEagle Assistant</h3>
@@ -503,7 +476,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
             </button>
           </div>
 
-          {/* Messages container */}
           <div className="flex-1 p-4 overflow-y-auto bg-gray-900">
             {messages.map((message) => (
               <div 
@@ -544,7 +516,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input area */}
           <div className="p-4 border-t border-gray-700 bg-gray-800 rounded-b-lg">
             {!address ? (
               <div className="text-center text-yellow-500 text-sm mb-2">
@@ -574,7 +545,6 @@ Available tokens: ${availableTokens.map(t => t.symbol).join(', ')}
         </div>
       )}
 
-      {/* CSS for typing animation */}
       <style jsx>{`
         .dot-typing {
           position: relative;
