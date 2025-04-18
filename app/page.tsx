@@ -22,6 +22,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
 import LiveCryptoPrices from './Sections/LiveCryptoPrices';
 import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
+import CreateMessage from './Pages/MessagesPage';
 
 
 
@@ -236,6 +237,8 @@ FX trading & remittances <br />redefined.
           {activeSection === "discord" && <DiscordXSection />}
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
+          {activeSection === "notifications" && <CreateMessage />}
+
         </div>
       </main>
     </div>

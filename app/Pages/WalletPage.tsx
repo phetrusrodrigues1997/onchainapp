@@ -220,7 +220,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   <div className="flex justify-end space-x-4">
    
   {/* Notification button */}
-    <button className="text-white hover:text-[#d3c81a]">
+    <button className="text-white hover:text-[#d3c81a]" onClick={() => setActiveSection('notifications')}>
       <svg
         className="w-6 h-6"
         fill="none"

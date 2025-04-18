@@ -3,7 +3,9 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { userPoints } from "./schema"; // Import the schema
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
+import { Messages } from './schema';
+
 
 // Initialize database connection
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -101,4 +103,28 @@ export async function getWalletAddress(username: string): Promise<string | null>
     console.error("Error fetching wallet address:", error);
     throw new Error("Failed to fetch wallet address");
   }
+  
+
+
+}
+
+export async function createMessage(from: string, to: string, message: string, datetime: string) {
+  return db.insert(Messages).values({ from, to, message,datetime }).returning();
+}
+
+// Function to get unread messages for a recipient
+export async function getUnreadMessages(to: string) {
+  return db
+    .select()
+    .from(Messages)
+    .where(and(eq(Messages.to, to)));
+}
+
+// New function to set a message's read status to true
+export async function updateMessageReadStatus(id: number) {
+  return db
+    .update(Messages)
+    .set({ read: true })
+    .where(eq(Messages.id, id))
+    .returning();
 }
