@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { formatUnits } from 'ethers';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClockRotateLeft } from '@fortawesome/free-solid-svg-icons'; // or use another icon if preferred
+
 
 interface Transaction {
   blockNumber: string;
@@ -227,6 +230,13 @@ const Activity: React.FC = () => {
       {error && <p>Error: {error}</p>}
       {!loading && !error && mergedTxs.length > 0 && (
         <div>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+  <FontAwesomeIcon icon={faClockRotateLeft} style={{ fontSize: '24px', marginRight: '10px', color: '#d3c81a' }} />
+  <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>
+    Recent Transactions
+  </h2>
+</div>
+
           {mergedTxs.map((tx, index) => (
             <div
               key={index}
