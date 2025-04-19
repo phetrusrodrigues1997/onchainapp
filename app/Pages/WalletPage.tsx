@@ -280,14 +280,14 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       <div className="flex space-x-4 mt-6">
         <button
           onClick={() => setActiveSection("send")}
-          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
+          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#00aa00]"
         >
           Send
         </button>
         <div className="relative">
           <button
             onClick={copyAddressToClipboard}
-            className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
+            className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#00aa00]"
           >
             Receive
           </button>
@@ -299,7 +299,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         </div>
         <button
           onClick={() => setActiveSection("swap")}
-          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#d3c81a]"
+          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#00aa00]"
         >
           Swap
         </button>
