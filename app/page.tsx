@@ -7,7 +7,7 @@ import SwapDropdown from './Sections/TokenTypeDropdown'; // Adjust the path if n
 import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
-import CurrencyDisplay from './Pages/LiveCurrencies';
+import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
@@ -79,7 +79,7 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
-      background-color: #d3c81a !important;
+      background-color: #00aa00 !important;
         color: black !important;
       }
   
@@ -108,7 +108,7 @@ export default function App() {
 
   return (
     
-    <div className="flex flex-col min-h-screen font-sans bg-background dark:bg-background text-white dark:text-white">
+    <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       <header className="pt-0.1 pr-4 pl-4 relative w-screen">
       
         <div className="flex justify-between items-center py-2">
@@ -177,7 +177,7 @@ FX trading & remittances <br />redefined.
 />
               <Swap
                 experimental={{ useAggregator: true }}
-                className="bg-[#002200] p-1 max-w-sm mx-auto mt-8"
+                className="bg-transparent p-1 max-w-sm mx-auto mt-8"
                 onSuccess={async () => {
                   if (address) {
                     await recordSwapPoints(address);
@@ -201,7 +201,7 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
   type="from"
-  className="mb-1 bg-[#002200] text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
+  className="mb-1 bg-transparent text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -210,9 +210,9 @@ FX trading & remittances <br />redefined.
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
   type="to"
-  className="bg-[#002200] mb-1 text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
+  className="bg-transparent mb-1 text-white rounded-2xl shadow-sm border border-[#c0c0c0]"
 />
-                <SwapButton className="w-full font-bold bg-[#d3c81a] dark:bg-[#d3c81a] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
+                <SwapButton className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
                 <SwapToast />
               </Swap>

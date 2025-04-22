@@ -120,20 +120,121 @@ interface SendPageProps {
   className?: string;
 }
 
-// Example implementation of the actual swap execution function
+// Implementation of the actual swap execution function
 const executeSwapOnChain = async (from: Token, to: Token, amount: string): Promise<boolean> => {
   try {
-    // Actual blockchain interaction code would go here
-    // This is just a placeholder for demonstration
-    console.log(`Executing swap of ${amount} ${from.symbol} to ${to.symbol} on blockchain`);
+    // Import the swap utilities
+    const { prepareSwapTransaction, checkAndApproveTokenAllowance, getSwapQuote } = await import('./SwapUtils');
     
-    // Return true for success or false for failure
+    // Get the user's wallet address from the current connection
+    const { address } = useAccount();
+    const walletAddress = address as string;
+    
+    if (!walletAddress) {
+      console.error('Wallet not connected');
+      return false;
+    }
+    
+    console.log(`Preparing swap of ${amount} ${from.symbol} to ${to.symbol} on blockchain`);
+    
+    // Get a quote first to show the user what they'll receive
+    const { amountOut } = await getSwapQuote(from, to, amount);
+    const formattedAmountOut = formatUnits(amountOut, to.decimals);
+    console.log(`Expected output: ${formattedAmountOut} ${to.symbol}`);
+    
+    // For non-native tokens, check and approve allowance if needed
+    if (from.address !== '') {
+      const amountIn = parseUnits(amount, from.decimals);
+      const approvalData = await checkAndApproveTokenAllowance(
+        from.address,
+        amountIn,
+        walletAddress
+      );
+      
+      if (approvalData) {
+        console.log(`Approving ${from.symbol} for swap...`);
+        
+        // Execute the approval transaction
+        const { writeContract } = useWriteContract();
+        await writeContract({
+          address: from.address as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: 'approve',
+          args: ['0x2626664c2603336E57B271c5C0b26F421741e481' as `0x${string}`, parseUnits(amount, from.decimals)],
+        });
+        
+        // Wait a bit for the approval to be processed
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
+    
+    // Prepare the swap transaction
+    const swapTx = await prepareSwapTransaction(from, to, amount, walletAddress);
+    
+    // Execute the swap transaction
+    const { writeContract } = useWriteContract();
+    const { sendTransaction } = useSendTransaction();
+    
+    if (from.address === '') {
+      // For native ETH swaps
+      await sendTransaction({
+        to: swapTx.to,
+        data: swapTx.data,
+        value: swapTx.value,
+      });
+    } else {
+      // For token swaps
+      await writeContract({
+        address: swapTx.to,
+        abi: UNISWAP_ROUTER_ABI,
+        functionName: 'multicall',
+        args: [[swapTx.data]],
+      });
+    }
+    
+    console.log(`Swap transaction submitted for ${amount} ${from.symbol} to ${to.symbol}`);
     return true;
   } catch (error) {
     console.error('Blockchain swap error:', error);
     return false;
   }
 };
+
+// Uniswap V3 Router ABI (simplified for the functions we need)
+const UNISWAP_ROUTER_ABI = [
+  {
+    inputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'tokenIn', type: 'address' },
+          { internalType: 'address', name: 'tokenOut', type: 'address' },
+          { internalType: 'uint24', name: 'fee', type: 'uint24' },
+          { internalType: 'address', name: 'recipient', type: 'address' },
+          { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+          { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
+          { internalType: 'uint256', name: 'amountOutMinimum', type: 'uint256' },
+          { internalType: 'uint160', name: 'sqrtPriceLimitX96', type: 'uint160' },
+        ],
+        internalType: 'struct ISwapRouter.ExactInputSingleParams',
+        name: 'params',
+        type: 'tuple',
+      },
+    ],
+    name: 'exactInputSingle',
+    outputs: [{ internalType: 'uint256', name: 'amountOut', type: 'uint256' }],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'bytes[]', name: 'data', type: 'bytes[]' }
+    ],
+    name: 'multicall',
+    outputs: [{ internalType: 'bytes[]', name: 'results', type: 'bytes[]' }],
+    stateMutability: 'payable',
+    type: 'function',
+  }
+];
 
 const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const { address, chainId } = useAccount();

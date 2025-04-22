@@ -372,7 +372,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   </div>
           {/* ... I think this is crypto */}
           {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="bg-[#001800] p-2 rounded-2xl shadow-sm flex items-center border border-gray-600">
+            <div className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -406,7 +406,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               return (
                 <div
                   key={token.address}
-                  className="bg-[#001800] p-2 rounded-2xl shadow-sm flex items-center border border-gray-600"
+                  className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
@@ -415,7 +415,13 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                   />
                   <div className="flex-1 flex justify-center items-center">
                     <div className="text-center">
-                      <span>{token.name}</span>
+                    <span>
+                    {token.name === 'USDC'
+                      ? 'US Dollar Coin'
+                      : token.name === 'EURC'
+                      ? 'Euro Coin'
+                      : token.name}
+                  </span>
                       <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
                     </div>
                   </div>

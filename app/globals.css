@@ -3,11 +3,40 @@
 @tailwind utilities;
 
 /* #182848 */
+
+
 :root {
-  /* --background: #012110; */
-  
-  --background: #002200 ;
- 
+  --background-start: #0b1e17; /* Deep cool green-blue */
+  --background-mid: #1a1a2e;   /* Midnight indigo/navy */
+  --background-end: #000800;   /* Clean black */
+}
+
+
+html,
+body {
+  background: linear-gradient(
+    to bottom,
+    var(--background-end) 0%,
+    var(--background-mid) 40%,
+    var(--background-start) 100%
+  ) !important;
+}
+
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 255, 100, 0.05),
+    transparent 70%
+  );
 }
 
 .bouncing-flag {
@@ -34,7 +63,7 @@
 }
 
 button[aria-label="Toggle swap settings"] {
-  background:#002200  !important;
+  background:transparent  !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,7 +78,7 @@ button[aria-label="Toggle swap settings"] {
   }}
 
 [data-testid="ockSwapMessage_Message"] {
-  color: #002200   !important;
+  color: transparent   !important;
 }
 
 
@@ -273,14 +302,11 @@ button[aria-label="Toggle swap settings"] {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; /* shadow-lg */
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+
+
 
 button[aria-label="Toggle menu"] {
-  background-color: #002200  !important;
+  background-color: transparent !important;
 }
 
 button[aria-label="Toggle menu"] svg {
@@ -292,7 +318,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
   
 }
 [data-testid="ockSwapSettings_Settings"] {
-background-color: #002200   !important;
+background-color: transparent  !important;
 }
 
 [data-testid="ockConnectButton"] {

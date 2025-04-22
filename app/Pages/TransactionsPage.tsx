@@ -223,6 +223,7 @@ const Activity: React.FC = () => {
         color: 'white',
         padding: '20px',
         fontFamily: 'Arial, sans-serif',
+        marginBottom: '80px'
       }}
     >
       {/* <h1>Recent Transactions</h1> */}
@@ -244,7 +245,7 @@ const Activity: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: '#001800',
+                background: 'linear-gradient(to right, #0A0A0A, #1A1A1A)',
                 padding: '15px 20px',
                 borderRadius: '10px',
                 border: '1px solid #4B5563',
