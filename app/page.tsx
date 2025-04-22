@@ -78,7 +78,7 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
-        background-color: #00aa00 !important;
+        background-color: white !important;
         color: white !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
@@ -95,7 +95,8 @@ export default function App() {
       }
   
       [data-testid="ockSwapButton_Button"] span {
-        color: white !important;
+        color: black !important;
+        font-family: 'Inter', sans-serif !important;
         font-size: 16px !important;
       }
 
@@ -298,7 +299,7 @@ export default function App() {
                         swappableTokens={swappableTokensList}
                         token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
                         type="from"
-                        className="mb-3 rounded-md shadow-md border border-[#004400] hover:border-[#00aa00] transition-all duration-200"
+                        className="mb-3 bg-[#002200] rounded-md shadow-md border border-[#004400] hover:border-[#00aa00] transition-all duration-200"
                       />
                       
                       <div className="flex justify-center my-2">
@@ -312,10 +313,10 @@ export default function App() {
                         swappableTokens={swappableTokensList}
                         token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
                         type="to"
-                        className="mb-4 rounded-md shadow-md border border-[#004400] hover:border-[#00aa00] transition-all duration-200"
+                        className="mb-4 bg-[#002200] rounded-md shadow-md border border-[#004400] hover:border-[#00aa00] transition-all duration-200"
                       />
                       
-                      <SwapButton className="w-full font-bold rounded-md py-3 transition-all duration-300 transform hover:scale-[1.02]" />
+                      <SwapButton className="w-full font-bold rounded-md text-black py-3 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-85" />
                       <SwapMessage className="mt-3 text-green-300 text-sm" />
                       <SwapToast />
                     </Swap>
@@ -324,7 +325,7 @@ export default function App() {
               </div>
               
               {/* Live Crypto Prices with green styling */}
-              <div className="bg-[#003300] rounded-lg border border-[#004400] p-4 shadow-lg mb-6">
+              {/* <div className="bg-[#003300] rounded-lg border border-[#004400] p-4 shadow-lg mb-6">
                 <h3 className="text-base font-bold text-white mb-2 flex items-center">
                   <svg className="w-4 h-4 mr-2 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
@@ -332,7 +333,7 @@ export default function App() {
                   Live Market Prices
                 </h3>
                 <LiveCryptoPrices />
-              </div>
+              </div> */}
               
               {/* Points Display */}
               {address && points !== null && (
@@ -351,13 +352,7 @@ export default function App() {
                 </div>
               )}
               
-              {/* Network Warning */}
-              <div className="flex items-center justify-center bg-[#332211] border border-[#f39c12]/30 rounded-md p-3 text-sm text-[#f39c12]">
-                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-                <span>Please ensure your wallet is connected and set to the Base network (chainId: 8453).</span>
-              </div>
+            
               
               {/* Trust indicators */}
               <div className="mt-10 grid grid-cols-3 gap-4 text-center">
