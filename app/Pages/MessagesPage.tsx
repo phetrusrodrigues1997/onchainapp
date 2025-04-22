@@ -213,7 +213,7 @@ export default function MessagesPage() {
 
         {/* Form */}
         {showForm && (
-          <div className="bg-[#002200] p-6 rounded-lg shadow-md border border-gray-600 space-y-4">
+          <div className="bg-[#002200] p-6 rounded-lg shadow-md border border-gray-600 space-y-4 mt-8">
             <h3 className="text-xl font-semibold text-white">
               {replyMode ? 'Reply' : 'New Message'}</h3>
             <div>
