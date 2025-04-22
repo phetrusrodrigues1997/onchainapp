@@ -372,7 +372,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   </div>
           {/* ... I think this is crypto */}
           {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70">
+            <div className="bg-#001800 p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70">
               <img
                 src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                 alt={nativeToken?.symbol || 'unknown'}
@@ -406,7 +406,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               return (
                 <div
                   key={token.address}
-                  className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70"
+                  className="bg-#001800 p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70"
                 >
                   <img
                     src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}

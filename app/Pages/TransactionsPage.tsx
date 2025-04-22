@@ -245,7 +245,7 @@ const Activity: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: 'linear-gradient(to right, #0A0A0A, #1A1A1A)',
+                background: '#001800',
                 padding: '15px 20px',
                 borderRadius: '10px',
                 border: '1px solid #4B5563',
