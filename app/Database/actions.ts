@@ -103,13 +103,10 @@ export async function getWalletAddress(username: string): Promise<string | null>
     console.error("Error fetching wallet address:", error);
     throw new Error("Failed to fetch wallet address");
   }
-  
-
-
 }
 
 export async function createMessage(from: string, to: string, message: string, datetime: string) {
-  return db.insert(Messages).values({ from, to, message,datetime }).returning();
+  return db.insert(Messages).values({ from, to, message, datetime }).returning();
 }
 
 // Function to get unread messages for a recipient
@@ -120,11 +117,39 @@ export async function getUnreadMessages(to: string) {
     .where(and(eq(Messages.to, to)));
 }
 
-// New function to set a message's read status to true
+// Function to set a message's read status to true
 export async function updateMessageReadStatus(id: number) {
   return db
     .update(Messages)
     .set({ read: true })
     .where(eq(Messages.id, id))
     .returning();
+}
+
+// New function to delete a message
+export async function deleteMessage(id: number) {
+  try {
+    return db
+      .delete(Messages)
+      .where(eq(Messages.id, id))
+      .returning();
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    throw new Error("Failed to delete message");
+  }
+}
+
+// Function to get all messages for a user (both sent and received)
+export async function getAllMessages(address: string) {
+  try {
+    return db
+      .select()
+      .from(Messages)
+      .where(
+        sql`${Messages.from} = ${address} OR ${Messages.to} = ${address}`
+      );
+  } catch (error) {
+    console.error("Error fetching all messages:", error);
+    throw new Error("Failed to fetch all messages");
+  }
 }
