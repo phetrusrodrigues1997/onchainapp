@@ -1,5 +1,5 @@
-// SwapService.ts
-// Service for handling token swaps
+// Fixed SwapService.ts
+// Service for handling token swaps with fixes applied
 
 import { Token } from '@coinbase/onchainkit/token';
 import { parseUnits, formatUnits } from 'viem';

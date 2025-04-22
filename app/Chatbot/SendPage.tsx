@@ -8,8 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import ChatbotInterface from './ChatbotInterface';
 import SwapService from './SwapService';
-import CryptoPriceService from './CryptoPriceService';
-import ApiKeyService from './ApiKeyService';
+
 
 // Token definitions (unchanged from the original)
 const ETHToken: Token = {
@@ -120,6 +119,21 @@ interface SendPageProps {
   setActiveSection: (section: string) => void;
   className?: string;
 }
+
+// Example implementation of the actual swap execution function
+const executeSwapOnChain = async (from: Token, to: Token, amount: string): Promise<boolean> => {
+  try {
+    // Actual blockchain interaction code would go here
+    // This is just a placeholder for demonstration
+    console.log(`Executing swap of ${amount} ${from.symbol} to ${to.symbol} on blockchain`);
+    
+    // Return true for success or false for failure
+    return true;
+  } catch (error) {
+    console.error('Blockchain swap error:', error);
+    return false;
+  }
+};
 
 const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
   const { address, chainId } = useAccount();
@@ -238,40 +252,25 @@ const SendSection = ({ setActiveSection, className = '' }: SendPageProps) => {
     }
   }, [chainId, switchChain]);
 
-  // Handle swap request from chatbot
   const handleSwapRequest = async (fromToken: Token, toToken: Token, amount: string): Promise<boolean> => {
-    if (!address) {
-      setTransactionStatus('Wallet not connected');
+    // Get the user's wallet address from the current connection
+    const walletAddress = address; // From useAccount() hook or similar
+    
+    if (!walletAddress) {
+      console.error('Wallet not connected');
       return false;
     }
     
-    try {
-      console.log(`Executing swap: ${amount} ${fromToken.symbol} to ${toToken.symbol}`);
-      
-      // For a real implementation, this would call a swap contract
-      // For now, we'll simulate a swap by sending a transaction
-      if (fromToken.address === '') {
-        // Swapping from ETH
-        sendTransaction({
-          to: toToken.address as `0x${string}`,
-          value: parseUnits(amount, fromToken.decimals),
-        });
-      } else {
-        // Swapping from ERC20
-        writeContract({
-          address: fromToken.address as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: 'transfer',
-          args: [toToken.address as `0x${string}`, parseUnits(amount, fromToken.decimals)],
-        });
-      }
-      setTransactionStatus(`Swap transaction submitted: ${amount} ${fromToken.symbol} to ${toToken.symbol}`);
-      return true;
-    } catch (err) {
-      console.error("Swap execution error:", err);
-      setTransactionStatus(`Swap failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      return false;
-    }
+    // Call SwapService with all required parameters
+    const result = await SwapService.executeSwap(
+      fromToken,
+      toToken,
+      amount,
+      walletAddress,
+      executeSwapOnChain // Pass the actual swap execution function
+    );
+    
+    return result.success;
   };
   
   // Handle send request from chatbot

@@ -244,10 +244,10 @@ const Activity: React.FC = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: '#101010',
+                background: '#001800',
                 padding: '15px 20px',
                 borderRadius: '10px',
-                // border: '1px solid #bfbfbf',
+                border: '1px solid #4B5563',
                 marginBottom: '15px',
                 boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
               }}

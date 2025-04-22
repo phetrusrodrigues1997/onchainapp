@@ -82,10 +82,10 @@ const EarnSection: React.FC = () => {
             setEarnSection("deposit");
             setActiveButton("deposit");
           }}
-          className={`rounded-md flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
+          className={`rounded-md flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-600 ${
             activeButton === "deposit"
               ? "bg-white text-black font-semibold"
-              : "bg-[#101010] text-white font-semibold"
+              : "bg-[#001800] text-white font-semibold"
           }`}
         >
           Deposit
@@ -95,10 +95,10 @@ const EarnSection: React.FC = () => {
             setEarnSection("withdraw");
             setActiveButton("withdraw");
           }}
-          className={`rounded-md flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-700 ${
+          className={`rounded-md flex-1 py-2 sm:py-3 text-sm sm:text-base focus:outline-none transition-colors font-medium border border-gray-600 ${
             activeButton === "withdraw"
               ? "bg-white text-black font-semibold"
-              : "bg-[#101010] text-white font-semibold"
+              : "bg-[#001800] text-white font-semibold"
           }`}
         >
           Withdraw
@@ -108,7 +108,7 @@ const EarnSection: React.FC = () => {
       {/* Earn Component */}
       <Earn vaultAddress={selectedToken.vaultAddress as `0x${string}`}>
         {earnSection === "deposit" && (
-          <EarnDeposit className="bg-[#101010] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
+          <EarnDeposit className="bg-[#001800] p-4 sm:p-6 rounded-md border border-gray-600 shadow-md w-full max-w-sm mx-auto rounded border">
             {/* <TokenSelect/> */}
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
             <DepositBalance className="bg-gray-800"/>
@@ -117,7 +117,7 @@ const EarnSection: React.FC = () => {
           </EarnDeposit>
         )}
         {earnSection === "withdraw" && (
-          <EarnWithdraw className="bg-[#101010] p-4 sm:p-6 rounded-md border border-gray-700 shadow-md w-full max-w-sm mx-auto rounded border">
+          <EarnWithdraw className="bg-[#001800] p-4 sm:p-6 rounded-md border border-gray-600 shadow-md w-full max-w-sm mx-auto rounded border">
             {/* <TokenSelect /> */}
             <EarnDetails className="text-gray-900 font-semibold text-lg sm:text-xl mb-4" />
              <WithdrawBalance className="bg-gray-800"/>
