@@ -4,7 +4,7 @@ import { Token } from '@coinbase/onchainkit/token';
 import { cryptoTokens, stablecoinTokens } from '../Token Lists/coins';
 import { getUsername } from '../Database/actions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faArrowRight, faPaperPlane, faExchangeAlt, faQrcode, faChartLine } from '@fortawesome/free-solid-svg-icons';
 
 // Mapping of token symbols to CoinGecko IDs for price fetching
 const tokenToCoingeckoId = {
@@ -100,9 +100,6 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
       setIsLoading(false);
     };
     fetchPrices();
-
-    // Mock notifications for demonstration
-    // setNotifications(['USDC price increased by 1%', 'Transaction confirmed']);
   }, []);
 
   const [username, setUsername] = useState<string | null | undefined>(undefined);
@@ -124,11 +121,37 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   }, [address]);
 
   if (!address) {
-    return <div className="text-center">Please connect your wallet to see your balance.</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-[#121212] to-[#1e1e1e] text-white">
+        <div className="p-8 bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-800 max-w-md w-full">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Connect Wallet</h2>
+            <p className="text-gray-400">Please connect your wallet to access your balance and transactions</p>
+          </div>
+          <div className="animate-pulse opacity-50 flex justify-center">
+            <svg className="w-24 h-24 text-[#d3c81a]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (isLoading) {
-    return <div className="text-center">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-[#121212] to-[#1e1e1e] text-white">
+        <div className="p-8 bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-800 max-w-md w-full">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">Loading Assets</h2>
+            <p className="text-gray-400">Fetching your latest balances and market data</p>
+          </div>
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#d3c81a]"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const stablecoinSymbols = new Set(['USDC', 'EURC', 'CADC', 'BRZ', 'TRYB', 'MXNe']);
@@ -166,275 +189,349 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
     }
   });
 
-  
-
   return (
-    <div className=" text-center mb-72 lg:transform lg:translate-y-24 ">
-      {/* Header Icons for Notifications and Settings */}
-      <div className="flex justify-between items-center transform -translate-y-1 ">
-  {/* Left side: The username will go here in place of this button */}
-  
-        <div className="flex items-center" onClick={() => setActiveSection('usernamePage')}>
-          {username === undefined ? (
-            <span className="text-white">Loading...</span>
-          ) : username ? (
-            <span className="text-white font-bold" style={{
-              fontFamily: "'Montserrat', sans-serif",
-              color: "#ffffff",
-              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
-            }}><FontAwesomeIcon icon={faUser} className="mr-2" />{username}</span>
-          ) : (
-            
-
-<button
-      onClick={() => setActiveSection('usernamePage')}
-      className="
-        flex items-center justify-center gap-2
-        px-4 py-2
-        rounded-full
-        bg-white
-        text-black
-        text-xs
-        font-bold
-        shadow-md
-        transition-all
-        duration-200
-        hover:bg-[#4d4d4d]
-        hover:text-[#d3c81a]
-        hover:scale-105
-      "
-      style={{
-        fontFamily: "'Montserrat', sans-serif",
-        textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-      }}
-    >
-      <span>Set Username</span>
-      <FontAwesomeIcon icon={faArrowRight} />
-    </button>
-
-
-          )}
-        </div>
-
-  {/* Right side: Existing buttons */}
-  <div className="flex justify-end space-x-4">
-   
-  {/* Notification button */}
-  <button className="text-white hover:text-[#d3c81a]" onClick={() => setActiveSection('notifications')}>
-  <svg
-    className="w-6 h-6"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.78 9.78 0 01-4.39-1.02L3 21l1.52-3.67A7.963 7.963 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-    />
-  </svg>
-</button>
-
-          {/* Settings button */}
-    <button className="text-white hover:text-[#d3c81a]" onClick={() => setActiveSection('usernamePage')}>
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M10.325 4.317c.426-1.756 2.924-1.756 
-             3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 
-             3.31.826 2.37 2.37a1.724 1.724 0 001.065 
-             2.572c1.756.426 1.756 2.924 0 3.35a1.724 
-             1.724 0 00-1.066 2.573c.94 1.543-.826 
-             3.31-2.37 2.37a1.724 1.724 0 00-2.572 
-             1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 
-             1.724 0 00-2.573-1.066c-1.543.94-3.31-.826 
-             -2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756
-             -.426-1.756-2.924 0-3.35a1.724 1.724 0 
-             001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996
-             .608 2.296.07 2.572-1.065z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    </button>
-  </div>
-</div>
-
-
-<h1 className="text-3xl font-bold mb-4 mt-6">Wallet Balance</h1>
-<h2 className="text-4xl font-bold mb-4">${overallTotalUSD.toFixed(2)}</h2>
-      <div className="flex space-x-4 mt-6">
-        <button
-          onClick={() => setActiveSection("send")}
-          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#00aa00]"
-        >
-          Send
-        </button>
-        <div className="relative">
-          <button
-            onClick={copyAddressToClipboard}
-            className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#00aa00]"
+    <div className="relative text-center mb-72 lg:transform lg:translate-y-16 px-4 max-w-lg mx-auto">
+      {/* Glass-like header with blur effect */}
+      <div className="top-0 z-10 bg-transparent rounded-b-2xl pb-4 shadow-lg">
+        {/* Header Icons for Notifications and Settings */}
+        <div className="flex justify-between items-center py-4">
+          {/* Left side: Username or Set Username button */}
+          <div 
+            className="flex items-center cursor-pointer transition-transform hover:scale-105" 
+            onClick={() => setActiveSection('usernamePage')}
           >
-            Receive
-          </button>
-          {showToast && (
-            <div className="absolute left-1/2 transform translate-x-1/2 -bottom-12 bg-[#d3c81a] text-black px-4 py-2 rounded-lg shadow-md transition-opacity duration-300">
-              Address copied! ✓
-            </div>
-          )}
+            {username === undefined ? (
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-full bg-gray-700 animate-pulse mr-2"></div>
+                <span className="text-gray-400">Loading...</span>
+              </div>
+            ) : username ? (
+              <div className="flex items-center bg-black/40 px-3 py-1.5 rounded-full">
+                <div className="w-7 h-7 rounded-full bg-[#d3c81a] flex items-center justify-center mr-2">
+                  <FontAwesomeIcon icon={faUser} className="text-black text-sm" />
+                </div>
+                <span className="text-white font-medium" style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                }}>
+                  {username}
+                </span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setActiveSection('usernamePage')}
+                className="
+                  flex items-center justify-center gap-2
+                  px-4 py-2
+                  rounded-full
+                  bg-black/40 border border-gray-700
+                  text-white
+                  text-xs
+                  font-medium
+                  shadow-md
+                  transition-all
+                  duration-300
+                  hover:bg-[#d3c81a]/20
+                  hover:border-[#d3c81a]/50
+                  hover:text-[#d3c81a]
+                "
+                style={{
+                  fontFamily: "'Montserrat', sans-serif",
+                }}
+              >
+                <span>Set Username</span>
+                <FontAwesomeIcon icon={faArrowRight} className="text-xs" />
+              </button>
+            )}
+          </div>
+
+          {/* Right side: Notification and Settings buttons */}
+          <div className="flex justify-end space-x-4">
+            {/* Notification button */}
+            <button 
+              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:text-[#d3c81a] hover:bg-black/60 transition-all duration-300" 
+              onClick={() => setActiveSection('notifications')}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.78 9.78 0 01-4.39-1.02L3 21l1.52-3.67A7.963 7.963 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              {/* Notification indicator dot */}
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#d3c81a] rounded-full"></span>
+            </button>
+
+            {/* Settings button */}
+            <button 
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:text-[#d3c81a] hover:bg-black/60 transition-all duration-300" 
+              onClick={() => setActiveSection('usernamePage')}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 
+                    3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 
+                    3.31.826 2.37 2.37a1.724 1.724 0 001.065 
+                    2.572c1.756.426 1.756 2.924 0 3.35a1.724 
+                    1.724 0 00-1.066 2.573c.94 1.543-.826 
+                    3.31-2.37 2.37a1.724 1.724 0 00-2.572 
+                    1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 
+                    1.724 0 00-2.573-1.066c-1.543.94-3.31-.826 
+                    -2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756
+                    -.426-1.756-2.924 0-3.35a1.724 1.724 0 
+                    001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996
+                    .608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setActiveSection("swap")}
-          className="flex-1 bg-[#d3c81a] text-black font-bold py-3 px-6 rounded-full hover:bg-[#00aa00]"
-        >
-          Swap
-        </button>
+
+        {/* Balance Display with Animated Gradient Border */}
+        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A]  overflow-hidden">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#d3c81a]/20 via-[#d3c81a]/5 to-[#d3c81a]/20 opacity-50 animate-gradient-x"></div>
+          <div className="relative z-10">
+            <h1 className="text-lg font-medium text-gray-400 mb-1">Total Balance</h1>
+            <h2 className="text-5xl font-bold mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              ${overallTotalUSD.toFixed(2)}
+            </h2>
+            <div className="flex items-center justify-center mt-1">
+              <span className="text-xs text-green-400 flex items-center">
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
+                2.4% today
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex space-x-3 mb-6">
+          <button
+            onClick={() => setActiveSection("send")}
+            className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+          >
+            <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
+            Send
+          </button>
+          <div className="relative flex-1">
+            <button
+              onClick={copyAddressToClipboard}
+              className="w-full bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+            >
+              <FontAwesomeIcon icon={faQrcode} className="mr-2" />
+              Receive
+            </button>
+            {showToast && (
+              <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-12 bg-black/80 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300 flex items-center">
+                <svg className="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Address copied!
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setActiveSection("swap")}
+            className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+          >
+            <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />
+            Swap
+          </button>
+        </div>
+
+        {/* Asset Type Tabs */}
+        <div className="flex justify-center space-x-6 mt-2">
+          <button
+            onClick={() => setSelectedTab('stablecoins')}
+            className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
+              selectedTab === 'stablecoins'
+                ? 'text-[#d3c81a] border-b-2 border-[#d3c81a]'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Stablecoins
+          </button>
+          <button
+            onClick={() => setSelectedTab('crypto')}
+            className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
+              selectedTab === 'crypto'
+                ? 'text-[#d3c81a] border-b-2 border-[#d3c81a]'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Crypto
+          </button>
+          <button
+            onClick={() => setSelectedTab('stocks')}
+            className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
+              selectedTab === 'stocks'
+                ? 'text-[#d3c81a] border-b-2 border-[#d3c81a]'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Stocks
+          </button>
+        </div>
+      </div>
+
+      {/* Asset List Section */}
+      <div className="mt-4 pb-20">
+        {/* Transactions Button and Tab Total */}
+        <div className="flex justify-between items-center mb-4 px-1">
+          <div className="text-left">
+            <span className="text-sm text-gray-400">
+              {selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)} Total
+            </span>
+            <h3 className="text-xl font-bold">${selectedTabTotalUSD.toFixed(2)}</h3>
+          </div>
+          
+          <button
+            className="flex items-center space-x-2 bg-black/40 text-white hover:bg-[#d3c81a]/20 hover:text-[#d3c81a] px-3 py-1.5 rounded-full transition-all duration-300 text-sm border border-gray-800"
+            onClick={() => setActiveSection('activity')}
+          >
+            <FontAwesomeIcon icon={faChartLine} className="text-xs" />
+            <span>Transactions</span>
+          </button>
+        </div>
+
+        {selectedTabTotalUSD === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 px-6 bg-black/20 rounded-xl border border-gray-800">
+            <div className="w-16 h-16 rounded-full bg-black/40 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+            </div>
+            <h3 className="text-xl font-medium text-gray-300 mb-2">No {selectedTab} found</h3>
+            <p className="text-gray-500 text-sm max-w-xs text-center">
+              Add some {selectedTab} to your wallet to see them displayed here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Native Token Card */}
+            {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
+              <div className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#d3c81a]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <img
+                    src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
+                    alt={nativeToken?.symbol || 'unknown'}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#d3c81a]/30 transition-all duration-300"
+                  />
+                </div>
+                <div className="flex-1 ml-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-gray-300">{nativeToken?.name}</span>
+                    <span className="text-white font-bold">
+                      ${(nativeToken?.symbol && prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]
+                        ? (parseFloat(nativeBalance.data.formatted) * prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]).toFixed(2)
+                        : '0.00')}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-sm text-gray-500">{nativeToken?.symbol}</span>
+                    <span className="text-sm text-gray-400">{parseFloat(nativeBalance.data.formatted).toFixed(4)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ERC20 Token Cards */}
+            {tokenBalances.map((balance, index) => {
+              const token = erc20Tokens[index];
+              const isStablecoin = stablecoinSymbols.has(token.symbol);
+              
+              if (
+                balance.data &&
+                parseFloat(balance.data.formatted) > 0 &&
+                ((selectedTab === 'crypto' && !isStablecoin) || (selectedTab === 'stablecoins' && isStablecoin))
+              ) {
+                const coingeckoId = tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId];
+                const price = coingeckoId ? prices[coingeckoId] || 0 : 0;
+                const value = parseFloat(balance.data.formatted) * price;
+                
+                return (
+                  <div
+                    key={token.address}
+                    className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group"
+                  >
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#d3c81a]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <img
+                        src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
+                        alt={token.symbol}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#d3c81a]/30 transition-all duration-300"
+                      />
+                    </div>
+                    <div className="flex-1 ml-4">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-gray-300">
+                          {token.name === 'USDC'
+                            ? 'US Dollar Coin'
+                            : token.name === 'EURC'
+                            ? 'Euro Coin'
+                            : token.name}
+                        </span>
+                        <span className="text-white font-bold">${value.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-sm text-gray-500">{token.symbol}</span>
+                        <span className="text-sm text-gray-400">{parseFloat(balance.data.formatted).toFixed(isStablecoin ? 2 : 4)}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })}
+          </div>
+        )}
       </div>
 
       
 
-      <div className="flex justify-start space-x-10 mt-6">
-        <button
-          onClick={() => setSelectedTab('stablecoins')}
-          className={`px-4 py-2 font-bold border-b-2 ${
-            selectedTab === 'stablecoins'
-              ? 'border-[#d3c81a] text-[#d3c81a]'
-              : 'border-transparent text-white font-bold hover:text-[#d3c81a]'
-          }`}
-        >
-          Stablecoins
-        </button>
-        <button
-          onClick={() => setSelectedTab('crypto')}
-          className={`px-4 py-2 font-bold border-b-2 ${
-            selectedTab === 'crypto'
-              ? 'border-[#d3c81a] text-[#d3c81a]'
-              : 'border-transparent text-white font-bold hover:text-[#d3c81a]'
-          }`}
-        >
-          Crypto
-        </button>
-        <button
-          onClick={() => setSelectedTab('stocks')}
-          className={`px-4 py-2 font-bold border-b-2 ${
-            selectedTab === 'stocks'
-              ? 'border-[#d3c81a] text-[#d3c81a]'
-              : 'border-transparent text-white font-bold hover:text-[#d3c81a]'
-          }`}
-        >
-          Stocks
-        </button>
-      </div>
-
-      {selectedTabTotalUSD === 0 ? (
-        <div className="text-center mt-4">
-          No {selectedTab} found.
-        </div>
-      ) : (
-        <div className="space-y-4 transform translate-y-14">
-          {/* Activity button placed above all balances */}
-  <div className="relative -translate-y-11">
-  <button
-  className="text-black font-bold bg-white rounded-full py-1 px-3 hover:bg-[#d3c81a] absolute top-0 right-0 flex items-center space-x-1"
-  onClick={() => setActiveSection('activity')}
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-    className="w-4 h-4"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-    />
-  </svg>
-  <span className="text-sm">Transactions</span>
-</button>
-
-  </div>
-          {/* ... I think this is crypto */}
-          {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-            <div className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70">
-              <img
-                src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
-                alt={nativeToken?.symbol || 'unknown'}
-                className="w-10 h-10 mr-2"
-              />
-              <div className="flex-1 flex justify-center items-center">
-                <div className="text-center">
-                  <span>{nativeToken?.name}</span>
-                  <span className="font-bold block">{parseFloat(nativeBalance.data.formatted).toFixed(4)}</span>
-                </div>
-              </div>
-              <span className="ml-auto">
-                ${(nativeToken?.symbol && prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]
-                  ? (parseFloat(nativeBalance.data.formatted) * prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]).toFixed(2)
-                  : '0.00')}
-              </span>
-            </div>
-          )}
-          {tokenBalances.map((balance, index) => {
-            const token = erc20Tokens[index];
-            const isStablecoin = stablecoinSymbols.has(token.symbol);
-            {/* ... I think this is stablecoins */}
-            if (
-              balance.data &&
-              parseFloat(balance.data.formatted) > 0 &&
-              ((selectedTab === 'crypto' && !isStablecoin) || (selectedTab === 'stablecoins' && isStablecoin))
-            ) {
-              const coingeckoId = tokenToCoingeckoId[token.symbol as keyof typeof tokenToCoingeckoId];
-              const price = coingeckoId ? prices[coingeckoId] || 0 : 0;
-              const value = parseFloat(balance.data.formatted) * price;
-              return (
-                <div
-                  key={token.address}
-                  className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-3 rounded-xl shadow-lg flex items-center border border-gray-700/70"
-                >
-                  <img
-                    src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
-                    alt={token.symbol}
-                    className="w-10 h-10 mr-2"
-                  />
-                  <div className="flex-1 flex justify-center items-center">
-                    <div className="text-center">
-                    <span>
-                    {token.name === 'USDC'
-                      ? 'US Dollar Coin'
-                      : token.name === 'EURC'
-                      ? 'Euro Coin'
-                      : token.name}
-                  </span>
-                      <span className="font-bold block">{parseFloat(balance.data.formatted).toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <span className="ml-auto">${value.toFixed(2)}</span>
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-      )}
-
-     
+      {/* Add custom styles for animations */}
+      <style jsx global>{`
+        @keyframes gradient-x {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 15s ease infinite;
+        }
+      `}</style>
     </div>
   );
 };
