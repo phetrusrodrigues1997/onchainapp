@@ -79,6 +79,7 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
+      background-color: #d3c81a !important;
         color: black !important;
       }
   
