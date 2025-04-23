@@ -22,14 +22,16 @@ const SYNTHETIC_GOLD_ABI = [
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base
 const SYNTHETIC_GOLD_ADDRESS = '0x3F2d6160c04E19e96483A95F2036367687626989'; // SyntheticGold contract address
 
+type ActionType = 'mint' | 'burn';
+
 const GoldTrades: React.FC = () => {
   const { address } = useAccount();
-  const [usdcAmount, setUsdcAmount] = useState('');
-  const [geGoldAmount, setGeGoldAmount] = useState('');
+  const [activeAction, setActiveAction] = useState<ActionType>('mint');
+  const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState('');
-  const [refreshBalances, setRefreshBalances] = useState(0); // Counter to trigger balance refresh
   const [mintInProgress, setMintInProgress] = useState(false);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
 
   // Hooks for writing to contracts
   const { writeContract: approveContract, isPending: isApproving, data: approveHash } = useWriteContract();
@@ -52,6 +54,8 @@ const GoldTrades: React.FC = () => {
     args: address ? [address] : undefined,
     query: {
       enabled: Boolean(address),
+      gcTime: 0,
+      refetchInterval: false,
     },
   });
 
@@ -63,6 +67,8 @@ const GoldTrades: React.FC = () => {
     args: address ? [address] : undefined, 
     query: {
       enabled: Boolean(address),
+      gcTime: 0,
+      refetchInterval: false,
     },
   });
 
@@ -74,6 +80,8 @@ const GoldTrades: React.FC = () => {
     args: address && SYNTHETIC_GOLD_ADDRESS ? [address, SYNTHETIC_GOLD_ADDRESS] : undefined,
     query: {
       enabled: Boolean(address),
+      gcTime: 0,
+      refetchInterval: false,
     },
   });
 
@@ -95,81 +103,122 @@ const GoldTrades: React.FC = () => {
   // Handle transaction success and refresh balances
   useEffect(() => {
     if (isApproveSuccess && mintInProgress) {
-      // If approval was successful and we're in the mint process, proceed to mint
+      console.log('Approval successful, proceeding to mint. Hash:', approveHash);
       handleMintAfterApproval();
     } else if (isApproveSuccess) {
+      console.log('Approval completed standalone. Hash:', approveHash);
       toast.success('USDC approved successfully!');
       setTransactionStatus('');
-      refetchAllowance();
+      setShouldRefresh(true);
     }
     
     if (isMintSuccess) {
-      toast.success('geGOLD minted successfully!');
+      
+
+      console.log('Mint successful. Hash:', mintHash);
+      toast.success('geGOLD minted successfully! Transaction complete.');
       setTransactionStatus('');
-      setUsdcAmount(''); // Clear input field
+      setAmount('');
       setMintInProgress(false);
-      setRefreshBalances(prev => prev + 1); // Trigger balance refresh
+      setShouldRefresh(true);
+      setIsLoading(false);
+      
     }
     
     if (isBurnSuccess) {
+      console.log('Burn successful. Hash:', burnHash);
       toast.success('geGOLD burned successfully!');
       setTransactionStatus('');
-      setGeGoldAmount(''); // Clear input field
-      setRefreshBalances(prev => prev + 1); // Trigger balance refresh
+      setAmount('');
+      setShouldRefresh(true);
     }
-  }, [isApproveSuccess, isMintSuccess, isBurnSuccess, mintInProgress]);
+  }, [isApproveSuccess, isMintSuccess, isBurnSuccess, mintInProgress, approveHash, mintHash, burnHash]);
 
-  // Refresh balances when transactions complete
+  // Refresh balances when needed, with debouncing
   useEffect(() => {
-    if (refreshBalances > 0) {
-      refetchUsdcBalance();
-      refetchGeGoldBalance();
-      refetchAllowance();
+    if (shouldRefresh) {
+      const refreshTimeout = setTimeout(() => {
+        Promise.all([
+          refetchUsdcBalance(),
+          refetchGeGoldBalance(),
+          refetchAllowance(),
+        ])
+          .then(() => {
+            setShouldRefresh(false);
+          })
+          .catch((error) => {
+            console.error('Balance refresh error:', error);
+            setShouldRefresh(false);
+          });
+      }, 500);
+
+      return () => clearTimeout(refreshTimeout);
     }
-  }, [refreshBalances, refetchUsdcBalance, refetchGeGoldBalance, refetchAllowance]);
+  }, [shouldRefresh, refetchUsdcBalance, refetchGeGoldBalance, refetchAllowance]);
+
+  // Clear amount when switching between mint and burn
+  useEffect(() => {
+    setAmount('');
+  }, [activeAction]);
 
   const handleMintWithApprovalIfNeeded = async () => {
-    if (!usdcAmount || !address) return;
+    if (!amount || !address) return;
     
     try {
-      const amount = parseUnits(usdcAmount, 6); // USDC has 6 decimals
+      const amountToUse = parseUnits(amount, 6);
       
-      // Check if we need to approve first
-      if (!allowance || (allowance as bigint) < amount) {
+      if (!allowance || (allowance as bigint) < amountToUse) {
         setTransactionStatus('Approving USDC...');
         setMintInProgress(true);
         
+        console.log('Initiating approval for amount:', amountToUse.toString());
         approveContract({
           address: USDC_ADDRESS,
           abi: USDC_ABI,
           functionName: 'approve',
-          args: [SYNTHETIC_GOLD_ADDRESS, amount],
+          args: [SYNTHETIC_GOLD_ADDRESS, amountToUse],
         });
       } else {
-        // Already approved, proceed directly to mint
         handleMintAfterApproval();
       }
     } catch (error) {
-      console.error('Transaction error:', error);
+      console.error('Approval error:', error);
       setTransactionStatus('');
       setMintInProgress(false);
-      toast.error('Transaction failed. Please try again.');
+      toast.error('Approval failed. Please try again.');
     }
   };
 
   const handleMintAfterApproval = () => {
-    if (!usdcAmount) return;
+    if (!amount) return;
     
     try {
       setTransactionStatus('Minting geGOLD...');
-      const amount = parseUnits(usdcAmount, 6);
+      const amountToUse = parseUnits(amount, 6);
       
+      console.log('Initiating mint for amount:', amountToUse.toString());
       mintContract({
         address: SYNTHETIC_GOLD_ADDRESS,
         abi: SYNTHETIC_GOLD_ABI,
         functionName: 'mint',
-        args: [amount],
+        args: [amountToUse],
       });
+      let refreshTimeout: NodeJS.Timeout;
+      let counter = 0;
+      // Start the counter and set the refresh timeout
+    refreshTimeout = setInterval(() => {
+      counter++;
+      console.log(`Refreshing in ${18 - counter} seconds...`);
+      if (counter >= 18) {
+        window.location.reload();
+        clearInterval(refreshTimeout); // Clear the interval after refreshing
+      }
+    }, 1000);
+
+    // Clean up the interval if the component unmounts or isApproveSuccess changes
+    return () => {
+      clearInterval(refreshTimeout);
+    };
     } catch (error) {
       console.error('Minting error:', error);
       setTransactionStatus('');
@@ -179,17 +228,17 @@ const GoldTrades: React.FC = () => {
   };
 
   const handleBurn = async () => {
-    if (!geGoldAmount) return;
+    if (!amount) return;
     
     try {
       setTransactionStatus('Burning geGOLD...');
-      const amount = parseUnits(geGoldAmount, 18); // geGOLD has 18 decimals
+      const amountToUse = parseUnits(amount, 18);
       
       burnContract({
         address: SYNTHETIC_GOLD_ADDRESS,
         abi: SYNTHETIC_GOLD_ABI,
         functionName: 'burn',
-        args: [amount],
+        args: [amountToUse],
       });
     } catch (error) {
       console.error('Burning error:', error);
@@ -198,22 +247,59 @@ const GoldTrades: React.FC = () => {
     }
   };
 
-  const hasEnoughGeGold = geGoldBalance && geGoldAmount && 
-    (geGoldBalance as bigint) >= parseUnits(geGoldAmount, 18);
+  const handleAction = () => {
+    if (activeAction === 'mint') {
+      handleMintWithApprovalIfNeeded();
+    } else {
+      handleBurn();
+    }
+  };
 
-  // Calculate estimated geGOLD to receive based on USDC amount and price
-  const estimatedGeGold = usdcAmount && goldPrice 
-    ? parseFloat(usdcAmount) / parseFloat(formatUnits(goldPrice as bigint, 8))
+  const hasEnoughGeGold = geGoldBalance && amount && activeAction === 'burn' && 
+    (geGoldBalance as bigint) >= parseUnits(amount, 18);
+
+  const hasEnoughUsdc = usdcBalance && amount && activeAction === 'mint' && 
+    (usdcBalance as bigint) >= parseUnits(amount, 6);
+
+  const estimatedValue = amount && goldPrice 
+    ? activeAction === 'mint'
+      ? parseFloat(amount) / parseFloat(formatUnits(goldPrice as bigint, 8))
+      : parseFloat(amount) * parseFloat(formatUnits(goldPrice as bigint, 8))
     : 0;
 
-  // Calculate estimated USDC to receive based on geGOLD amount and price
-  const estimatedUsdc = geGoldAmount && goldPrice 
-    ? parseFloat(geGoldAmount) * parseFloat(formatUnits(goldPrice as bigint, 8))
-    : 0;
+  const availableBalance = activeAction === 'mint'
+    ? usdcBalance ? formatUnits(usdcBalance as bigint, 6) : '0'
+    : geGoldBalance ? formatUnits(geGoldBalance as bigint, 18) : '0';
+
+  const currencySymbol = activeAction === 'mint' ? 'USDC' : 'geGOLD';
+  
+  const estimatedCurrencySymbol = activeAction === 'mint' ? 'geGOLD' : 'USDC';
+
+  const getButtonText = () => {
+    if (isApproveLoading) return 'Approving USDC...';
+    if (isMintLoading) return 'Minting geGOLD...';
+    if (isBurnLoading) return 'Burning geGOLD...';
+    return activeAction === 'mint' ? 'Mint geGOLD' : 'Burn geGOLD';
+  };
+
+  const isActionDisabled = () => {
+    if (isLoading) return true;
+    if (!amount || amount === '0') return true;
+    if (activeAction === 'mint' && !hasEnoughUsdc) return true;
+    if (activeAction === 'burn' && !hasEnoughGeGold) return true;
+    return false;
+  };
+
+  const handleUseMax = () => {
+    if (activeAction === 'mint' && usdcBalance) {
+      setAmount(formatUnits(usdcBalance as bigint, 6));
+    } else if (activeAction === 'burn' && geGoldBalance) {
+      setAmount(formatUnits(geGoldBalance as bigint, 18));
+    }
+  };
 
   return (
     <div className="bg-gradient-to-b from-[#002200] to-[#001100] p-8 rounded-xl shadow-2xl border border-[#004400] max-w-md mx-auto">
-      {/* Toast Container for notifications */}
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -227,92 +313,99 @@ const GoldTrades: React.FC = () => {
         theme="dark"
       />
       
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-[#00dd00]">geGOLD Trading</h1>
-        <div className="px-4 py-2 bg-[#003300] rounded-lg">
-          <p className="text-sm text-[#00aa00]">
-            Gold Price: {goldPrice ? `$${parseFloat(formatUnits(goldPrice as bigint, 8)).toFixed(2)}` : 'Loading...'}
-          </p>
-        </div>
-      </div>
-
-      {/* Status message */}
-      {transactionStatus && (
-        <div className="mb-6 p-3 bg-[#003300] rounded-lg text-center">
-          <p className="text-[#00cc00]">{transactionStatus}</p>
-          <div className="mt-2 w-full bg-[#004400] rounded-full h-1.5">
-            <div className="bg-[#00aa00] h-1.5 rounded-full animate-pulse w-full"></div>
-          </div>
-        </div>
-      )}
-
-      {/* Mint Section */}
-      <div className="mb-8 bg-[#001800] p-6 rounded-lg border border-[#003300]">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-          <span className="mr-2">🔨</span> Mint geGOLD
-        </h2>
-        <div className="mb-4">
-          <label className="block text-[#00aa00] text-sm mb-1">USDC Amount</label>
-          <div className="relative">
-            <input
-              type="number"
-              value={usdcAmount}
-              onChange={(e) => setUsdcAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full p-3 bg-[#002200] text-white border border-[#004400] rounded-md focus:border-[#00aa00] focus:ring-1 focus:ring-[#00aa00] outline-none"
-            />
-            <span className="absolute right-3 top-3 text-[#00aa00]">USDC</span>
-          </div>
-          {usdcAmount && (
-            <p className="text-sm text-[#00aa00] mt-1">
-              Estimated geGOLD: ~{estimatedGeGold.toFixed(8)}
-            </p>
-          )}
-        </div>
-        
+      <div className="grid grid-cols-2 gap-1 mb-6 bg-[#001800] rounded-lg p-1">
         <button
-          onClick={handleMintWithApprovalIfNeeded}
-          disabled={!usdcAmount || isLoading}
-          className="w-full p-3 bg-gradient-to-r from-[#00aa00] to-[#008800] hover:from-[#00cc00] hover:to-[#00aa00] text-black font-bold rounded-md disabled:opacity-50 transition-all duration-200"
+          onClick={() => setActiveAction('mint')}
+          className={`py-3 px-4 rounded-md font-bold transition-all duration-200 ${
+            activeAction === 'mint'
+              ? 'bg-[#00aa00] text-black'
+              : 'bg-transparent text-[#00aa00] hover:bg-[#002200]'
+          }`}
         >
-          {isApproveLoading ? 'Approving USDC...' : isMintLoading ? 'Minting geGOLD...' : 'Mint geGOLD'}
+          Mint
+        </button>
+        <button
+          onClick={() => setActiveAction('burn')}
+          className={`py-3 px-4 rounded-md font-bold transition-all duration-200 ${
+            activeAction === 'burn'
+              ? 'bg-[#00aa00] text-black'
+              : 'bg-transparent text-[#00aa00] hover:bg-[#002200]'
+          }`}
+        >
+          Burn
         </button>
       </div>
 
-      {/* Burn Section */}
-      <div className="mb-8 bg-[#001800] p-6 rounded-lg border border-[#003300]">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center">
-          <span className="mr-2">🔥</span> Burn geGOLD
-        </h2>
-        <div className="mb-4">
-          <label className="block text-[#00aa00] text-sm mb-1">geGOLD Amount</label>
+      <div className="bg-[#001800] p-6 rounded-lg border border-[#003300] mb-6">
+        {transactionStatus && (
+          <div className="mb-6 p-3 bg-[#003300] rounded-lg text-center">
+            <p className="text-[#00cc00]">{transactionStatus}</p>
+            <div className="mt-2 w-full bg-[#004400] rounded-full h-1.5">
+              <div className="bg-[#00aa00] h-1.5 rounded-full animate-pulse w-full"></div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center bg-[#002200] px-4 py-2 rounded-full">
+            <div className="w-6 h-6 bg-[#00aa00] rounded-full flex items-center justify-center mr-2">
+              <span className="text-black font-bold text-xs">$</span>
+            </div>
+            <span className="text-[#00aa00]">
+              {activeAction === 'mint' ? 'USDC' : 'geGOLD'}
+            </span>
+          </div>
+          <div className="bg-[#002200] px-4 py-2 rounded-full">
+            <p className="text-sm text-[#00aa00]">
+              Gold Price: {goldPrice ? `$${parseFloat(formatUnits(goldPrice as bigint, 8)).toFixed(2)}` : 'Loading...'}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-[#002800] p-4 rounded-lg mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+            <p className="text-xl font-bold text-white">{parseFloat(availableBalance || '0').toFixed(4)} {currencySymbol}</p>
+              <p className="text-sm text-[#00aa00]">Available to {activeAction}</p>
+            </div>
+            <button
+              onClick={handleUseMax}
+              className="text-[#4d7cfe] hover:text-[#6e92ff] transition-colors"
+            >
+              Use max
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-[#002800] p-4 rounded-lg mb-6">
           <div className="relative">
             <input
               type="number"
-              value={geGoldAmount}
-              onChange={(e) => setGeGoldAmount(e.target.value)}
-              placeholder="0.00000000"
-              className="w-full p-3 bg-[#002200] text-white border border-[#004400] rounded-md focus:border-[#00aa00] focus:ring-1 focus:ring-[#00aa00] outline-none"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.0"
+              className="w-full text-3xl bg-transparent text-white border-none focus:outline-none focus:ring-0"
             />
-            <span className="absolute right-3 top-3 text-[#00aa00]">geGOLD</span>
+            <div className="absolute right-0 top-0 text-[#00aa00]">
+              {currencySymbol}
+            </div>
           </div>
-          {geGoldAmount && (
-            <p className="text-sm text-[#00aa00] mt-1">
-              Estimated USDC: ~{estimatedUsdc.toFixed(6)}
+          {amount && (
+            <p className="text-sm text-[#00aa00] mt-2">
+              Estimated {estimatedCurrencySymbol}: ~{estimatedValue.toFixed(activeAction === 'mint' ? 8 : 6)}
             </p>
           )}
         </div>
-        
+
         <button
-          onClick={handleBurn}
-          disabled={!geGoldAmount || !hasEnoughGeGold || isLoading}
-          className="w-full p-3 bg-gradient-to-r from-[#00aa00] to-[#008800] hover:from-[#00cc00] hover:to-[#00aa00] text-black font-bold rounded-md disabled:opacity-50 transition-all duration-200"
+          onClick={handleAction}
+          disabled={isActionDisabled()}
+          className="w-full py-4 bg-white hover:bg-gray-100 text-black font-bold rounded-lg disabled:opacity-50 transition-all duration-200"
         >
-          {isBurnLoading ? 'Burning...' : 'Burn geGOLD'}
+          {getButtonText()}
         </button>
       </div>
 
-      {/* Balances */}
       <div className="bg-[#001800] p-6 rounded-lg border border-[#003300]">
         <h2 className="text-xl font-bold text-white mb-4">Your Balances</h2>
         <div className="flex justify-between items-center mb-2">
