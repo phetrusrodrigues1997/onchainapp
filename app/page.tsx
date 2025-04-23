@@ -23,6 +23,7 @@ import LiveCryptoPrices from './Sections/LiveCryptoPrices';
 import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 import CreateMessage from './Pages/MessagesPage';
+import MintBurn from './Chainlink/rwaTrades';
 
 
 
@@ -112,7 +113,21 @@ export default function App() {
 //   }
 // }, [selectedOption, activeSection]);
 
-  if (!isMounted) return <div>Loading...</div>;
+if (!isMounted) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-[#002200] text-white">
+      <div className="p-8 bg-[#003300] rounded-lg shadow-2xl border border-[#004400] max-w-md w-full">
+        <div className="text-center mb-6">
+          <h2 className="text-xl font-medium mb-2">Loading Application</h2>
+          <p className="text-green-300">Please wait while we initialize the interface</p>
+        </div>
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00aa00]"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
   return (
     
@@ -178,6 +193,15 @@ export default function App() {
                   FX trading & remittances <br />redefined.
                     {/* <span className="currency-animation ml-2">💸</span> */}
                   </h1>
+                  <p
+  className="mt-4 text-lg md:text-xl text-center text-green-300"
+  style={{
+    fontFamily: "'Montserrat', sans-serif",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.1)",
+  }}
+>
+  Fast. Transparent. Borderless. <span className="currency-animation ml-1">💸</span>
+</p>
               {/* Pass the selection change callback */}
           <SwapDropdown
   onSelectionChange={(option) => {
@@ -217,7 +241,7 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
   type="from"
-  className="mb-1 bg-transparent text-white rounded-2xl shadow-sm shadow-md border border-[#006000] hover:border-[#00aa00] transition-all duration-200"
+  className="mb-1 bg-transparent text-white rounded-2xl shadow-sm shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
 />
 <SwapToggleButton className="mb-2" />
 <SwapAmountInput
@@ -226,7 +250,7 @@ export default function App() {
   swappableTokens={swappableTokensList}
   token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
   type="to"
-  className="bg-transparent mb-1 text-white rounded-2xl shadow-md border border-[#006000] hover:border-[#00aa00] transition-all duration-200"
+  className="bg-transparent mb-1 text-white rounded-2xl shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
 />
                 <SwapButton className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
                 <SwapMessage className="mt-2 text-gray-800 text-sm" />
@@ -296,6 +320,7 @@ export default function App() {
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {activeSection === "notifications" && <CreateMessage />}
+          {activeSection === "rwa" && <MintBurn />}
 
         </div>
       </main>
@@ -303,7 +328,7 @@ export default function App() {
       <footer className="bg-[#003300] border-t border-[#004400] py-4 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-green-300 mb-2 md:mb-0">
-            © 2025 Your Company. All rights reserved.
+            © 2025 GoldenEagle Finance. All rights reserved.
           </div>
           <div className="flex space-x-6">
             <a href="#" className="text-sm text-green-300 hover:text-[#00cc00] transition-colors">Terms</a>

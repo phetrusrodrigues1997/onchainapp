@@ -500,7 +500,18 @@ const LiveCurrencies: React.FC = () => {
       <div style={styles.card}>
         
 
-        
+        {/* Time Range Selector */}
+      <div style={styles.timeRangeContainer}>
+          {TIME_RANGES.map((range) => (
+            <button
+              key={range.value}
+              onClick={() => setTimeRange(range.value)}
+              style={styles.timeRangeButton(timeRange === range.value)}
+            >
+              {range.label}
+            </button>
+          ))}
+        </div>
 
         {/* Error Message */}
         {error && <div style={styles.errorMessage}>Error: {error}</div>}
@@ -521,18 +532,7 @@ const LiveCurrencies: React.FC = () => {
         )}
       </div>
       
-      {/* Time Range Selector */}
-      <div style={styles.timeRangeContainer}>
-          {TIME_RANGES.map((range) => (
-            <button
-              key={range.value}
-              onClick={() => setTimeRange(range.value)}
-              style={styles.timeRangeButton(timeRange === range.value)}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
+      
         {/* Search Section */}
         <div style={styles.searchContainer}>
           <div style={styles.inputGroup}>
