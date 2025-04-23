@@ -70,7 +70,7 @@ const BuySection: React.FC = () => {
       styleTag.innerHTML = `
         [data-testid="ockBuyButton_Button"],
         [data-testid="ockSwapButton_Button"] {
-          background-color: white !important;
+          background-color: #00aa00 !important;
         }
 
         [data-testid="ockBuyButton_Button"] span,

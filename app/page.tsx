@@ -24,15 +24,24 @@ import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 import CreateMessage from './Pages/MessagesPage';
 
+
+
+
 export default function App() {
   const [activeSection, setActiveSection] = useState('swap');
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
   const { address } = useAccount();
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+
+  const displayToast = (message: string) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   useEffect(() => {
     if (activeSection === "swap") {
@@ -78,89 +87,12 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
-        background-color: white !important;
-        color: white !important;
-        border-radius: 6px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 4px 12px rgba(0, 170, 0, 0.3) !important;
-        height: 52px !important;
-        letter-spacing: 0.5px !important;
-      }
-  
-      [data-testid="ockSwapButton_Button"]:hover {
-        background-color: #00cc00 !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px rgba(0, 170, 0, 0.4) !important;
+      background-color: #00aa00 !important;
+        color: black !important;
       }
   
       [data-testid="ockSwapButton_Button"] span {
         color: black !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 16px !important;
-      }
-
-      [data-testid="ockTokenSelectButton"] {
-        border-radius: 6px !important;
-        background: #003300 !important;
-        border: 1px solid #004400 !important;
-        transition: all 0.2s ease !important;
-      }
-
-      [data-testid="ockTokenSelectButton"]:hover {
-        border: 1px solid #00aa00 !important;
-        background: #004400 !important;
-      }
-
-      [data-testid="ockSwapToggleButton"] {
-        background: #003300 !important;
-        border-radius: 50% !important;
-        width: 36px !important;
-        height: 36px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        transition: all 0.2s ease !important;
-        border: 1px solid #004400 !important;
-      }
-
-      [data-testid="ockSwapToggleButton"]:hover {
-        background: #004400 !important;
-        border-color: #00aa00 !important;
-      }
-
-      [data-testid="ockSwapToggleButton"] svg {
-        color: #00aa00 !important;
-      }
-      
-      .ock-swap-amount-input {
-        background-color: #003300 !important;
-        border-color: #004400 !important;
-        color: white !important;
-      }
-      
-      .ock-swap-amount-input:focus-within {
-        border-color: #00aa00 !important;
-        box-shadow: 0 0 0 2px rgba(0, 170, 0, 0.2) !important;
-      }
-
-      /* Mobile responsive styles */
-      @media (max-width: 640px) {
-        [data-testid="ockSwapButton_Button"] {
-          height: 48px !important;
-        }
-        
-        [data-testid="ockSwapButton_Button"] span {
-          font-size: 14px !important;
-        }
-        
-        [data-testid="ockTokenSelectButton"] {
-          padding: 8px !important;
-        }
-        
-        .ock-swap-amount-input {
-          padding: 8px !important;
-        }
       }
     `;
     document.head.appendChild(style);
@@ -171,32 +103,22 @@ export default function App() {
     };
   }, []);
 
-  const displayToast = (message: string) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
+//   useEffect(() => {
+//   if (activeSection === "swap") {
+//     const titleElement = document.querySelector('[data-testid="ockSwap_Title"]');
+//     if (titleElement) {
+//       titleElement.textContent = selectedOption || "Stablecoins"; // Default to "Stablecoins" if selectedOption is falsy
+//     }
+//   }
+// }, [selectedOption, activeSection]);
 
-  if (!isMounted) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#002200] text-white">
-        <div className="p-8 bg-[#003300] rounded-lg shadow-2xl border border-[#004400] max-w-md w-full">
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-medium mb-2">Loading Application</h2>
-            <p className="text-green-300">Please wait while we initialize the interface</p>
-          </div>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#00aa00]"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!isMounted) return <div>Loading...</div>;
 
   return (
-    <div className="flex flex-col min-h-screen font-sans text-gray-100 bg-[#002200]">
+    
+    <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="sticky top-0 z-50 bg-[#003300] border-b border-[#004400] px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#001200] border-b border-[#004400] px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -208,98 +130,79 @@ export default function App() {
             {/* Navigation Menu */}
             <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
           </div>
-          
-          {/* Wallet Connection */}
           <div className="wallet-container">
             <Wallet>
-              <ConnectWallet className="bg-[#00aa00] text-white font-medium py-2 px-4 rounded-md hover:bg-[#00cc00] shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2">
-                <Avatar className="h-5 w-5 rounded-full border border-white/30" />
+            <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full lg:mr-4">
+                <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
               <WalletDropdown>
-                <Identity className="px-4 pt-3 pb-2 bg-[#003300] border-b border-[#004400]" hasCopyAddressOnClick>
-                  <div className="flex items-center gap-3 mb-2">
-                    <Avatar className="h-10 w-10 rounded-full border border-[#004400]" />
-                    <div>
-                      <Name className="font-medium text-white" />
-                      <Address className="text-sm text-green-300" />
-                    </div>
-                  </div>
-                  <div className="mt-2 py-2 px-3 bg-[#002200] rounded-md">
-                    <EthBalance className="font-medium text-white" />
-                  </div>
+                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                  <Avatar />
+                  <Name />
+                  <Address />
+                  <EthBalance />
                 </Identity>
-                <div className="bg-[#003300]">
-                  <WalletDropdownLink
-                    icon="wallet"
-                    href="https://keys.coinbase.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-3 hover:bg-[#004400] transition-colors duration-200 text-green-200"
-                  >
-                    Wallet
-                  </WalletDropdownLink>
-                  <WalletDropdownDisconnect className="px-4 py-3 text-red-400 hover:bg-red-900/30 transition-colors duration-200" />
-                </div>
+                <WalletDropdownLink
+                  icon="wallet"
+                  href="https://keys.coinbase.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Wallet
+                </WalletDropdownLink>
+                <WalletDropdownDisconnect />
               </WalletDropdown>
             </Wallet>
+          
           </div>
         </div>
+
       </header>
 
-      <main className="flex-grow flex flex-col items-center justify-start py-4 px-2 sm:py-8 sm:px-4">
-        <div className={`w-full ${activeSection === "earn" ? "max-w-5xl" : "max-w-md"}`}>
+      <main className="flex-grow flex items-center justify-center mt-2">
+        <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
-        {activeSection === "swap" && (
-  <div className="animate-fadeIn">
-    {/* Bold heading */}
-    <div className="text-center mb-10">
-                 <h1
-                   className="text-2xl md:text-3xl font-bold leading-tight text-white"
-                   style={{
-                     fontFamily: "'Inter', sans-serif",
-                   }}
-                 >
-                   FX trading & remittances <br />redefined.
-                 </h1>
-                 <p className="mt-2 text-green-300 max-w-sm mx-auto">
-                   Fast, secure, and cost-effective currency exchange with global coverage
-                 </p>
-                 <div className="mt-3 w-16 h-1 bg-[#00aa00] mx-auto rounded-full"></div>
-                </div>
-    <div className="mb-6">
-      <SwapDropdown
-        onSelectionChange={(option) => {
-          setSelectedOption(option);
-          if (option === "Crypto") {
-            setSwappableTokensList(cryptoTokens);
-            displayToast('Switched to Crypto tokens');
-          } else {
-            setSwappableTokensList(stablecoinTokens);
-            displayToast('Switched to Stablecoin tokens');
-          }
-        }}
-      />
-    </div>
-    <div className="mb-8">
-      <div className="relative">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00aa00] to-[#008800] rounded-lg blur-sm opacity-30"></div>
-        <div className="relative bg-[#003300] rounded-lg border border-[#004400] shadow-xl p-3 sm:p-6">
-          {/* Removed max-height constraint and improved overflow handling */}
-          <div className="w-full">
-            <Swap
-              experimental={{ useAggregator: true }}
-              className="w-full mx-auto bg-[#002200] rounded-lg border border-[#004400] shadow-xl p-3 sm:p-6"
-              onSuccess={async () => {
-                if (address) {
-                  await recordSwapPoints(address);
-                  const updatedPoints = await getUserPoints(address);
-                  setPoints(updatedPoints);
-                  displayToast('Swap completed successfully!');
-                }
-              }}
-            >
-              <SwapSettings>
+          {activeSection === "swap" && (
+            <div className="animate-fadeIn">
+            
+            <div>
+              <h1
+                    className="text-3xl md:text-3xl font-bold text-center mt-10 leading-tight"
+                    style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      color: "#FFFFFF",
+                      textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                  FX trading & remittances <br />redefined.
+                    {/* <span className="currency-animation ml-2">💸</span> */}
+                  </h1>
+              {/* Pass the selection change callback */}
+          <SwapDropdown
+  onSelectionChange={(option) => {
+    setSelectedOption(option);
+    if (option === "Crypto") {
+      setSwappableTokensList(cryptoTokens);
+      displayToast('Switched to Crypto tokens');
+    } else {
+      setSwappableTokensList(stablecoinTokens);
+      displayToast('Switched to Stablecoin tokens');
+    }
+  }}
+/>
+              <Swap
+                experimental={{ useAggregator: true }}
+                className="bg-transparent p-1 max-w-sm mx-auto mt-8"
+                onSuccess={async () => {
+                  if (address) {
+                    await recordSwapPoints(address);
+                    const updatedPoints = await getUserPoints(address);
+                    setPoints(updatedPoints);
+                  }
+                }}
+              >
+                <SwapSettings>
                   <SwapSettingsSlippageTitle className="text-[#EA580C]">
                     Max. slippage
                   </SwapSettingsSlippageTitle>
@@ -308,41 +211,81 @@ export default function App() {
                   </SwapSettingsSlippageDescription>
                   <SwapSettingsSlippageInput />
                 </SwapSettings>
+                <SwapAmountInput
+  key={`sell-${activeSection}-${selectedOption}`} // Unique key based on section and option
+  label="Sell"
+  swappableTokens={swappableTokensList}
+  token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
+  type="from"
+  className="mb-1 bg-transparent text-white rounded-2xl shadow-sm shadow-md border border-[#006000] hover:border-[#00aa00] transition-all duration-200"
+/>
+<SwapToggleButton className="mb-2" />
+<SwapAmountInput
+  key={`buy-${activeSection}-${selectedOption}`} // Unique key based on section and option
+  label="Buy"
+  swappableTokens={swappableTokensList}
+  token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
+  type="to"
+  className="bg-transparent mb-1 text-white rounded-2xl shadow-md border border-[#006000] hover:border-[#00aa00] transition-all duration-200"
+/>
+                <SwapButton className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
+                <SwapMessage className="mt-2 text-gray-800 text-sm" />
+                <SwapToast />
+              </Swap>
               
-              <div className="mb-1 text-sm font-medium text-green-200">You send</div>
-              <SwapAmountInput
-                key={`sell-${activeSection}-${selectedOption}`}
-                label="Sell"
-                swappableTokens={swappableTokensList}
-                token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
-                type="from"
-                className="mb-3 bg-[#002200] rounded-md shadow-md border border-[#004400] hover:border-[#00aa00] transition-all duration-200"
-              />
-              <div className="flex justify-center my-2">
-                <SwapToggleButton className="mb-2" />
+              
+              {/* Points Display */}
+              {address && points !== null && (
+                <div className="mt-6 text-center">
+                  <div className="inline-flex items-center bg-[#002200] px-4 py-2 rounded-md border border-[#004400]">
+                    <div className="w-8 h-8 rounded-full bg-[#00aa00]/20 flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-[#00cc00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <span className="text-green-300 text-sm block">Swap Points</span>
+                      <span className="text-white font-bold text-lg">{points}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              
+              
+              {/* Trust indicators */}
+              <div className="mt-10 grid grid-cols-3 gap-4 text-center">
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-full bg-[#002200] border border-[#004400] flex items-center justify-center mb-2">
+                    <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-green-200">Secure</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-full bg-[#002200] border border-[#004400] flex items-center justify-center mb-2">
+                    <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-green-200">Fast</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-full bg-[#002200] border border-[#004400] flex items-center justify-center mb-2">
+                    <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-green-200">Low Fees</span>
+                </div>
               </div>
-              <div className="mb-1 text-sm font-medium text-green-200">You receive</div>
-              <SwapAmountInput
-                key={`buy-${activeSection}-${selectedOption}`}
-                label="Buy"
-                swappableTokens={swappableTokensList}
-                token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
-                type="to"
-                className="mb-4 bg-[#002200] rounded-md shadow-md border border-[#004400] hover:border-[#00aa00] transition-all duration-200"
-              />
-              <SwapButton className="w-full font-bold rounded-md text-black py-3 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-85" />
-              <SwapMessage className="mt-3 text-green-300 text-sm" />
-              <SwapToast />
-            </Swap>
-          </div>
-        </div>
-      </div>
-    </div>
-    {/* Other elements like Points Display and Trust Indicators remain unchanged */}
-  </div>
-)}
-          
-          {/* Other sections */}
+
+
+
+            </div>
+            </div>
+          )}
           {activeSection === "earn" && <EarnSection />}
           {activeSection === "usernamePage" && <UsernameSetup />}
           {activeSection === "send" && <Send setActiveSection={setActiveSection} />}
@@ -353,9 +296,9 @@ export default function App() {
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {activeSection === "notifications" && <CreateMessage />}
+
         </div>
       </main>
-      
       {/* Footer */}
       <footer className="bg-[#003300] border-t border-[#004400] py-4 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
@@ -369,7 +312,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-      
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#003300] text-white px-4 py-2 rounded-md shadow-lg border border-[#004400] transition-all duration-200 flex items-center z-50">
@@ -379,25 +321,42 @@ export default function App() {
           {toastMessage}
         </div>
       )}
-      
-      {/* Custom animations */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out forwards;
-        }
-        
-        /* Additional responsive styles */
-        @media (max-width: 480px) {
-          .wallet-container {
-            transform: scale(0.9);
-            transform-origin: right center;
-          }
-        }
-      `}</style>
     </div>
+    
   );
+  {/* Custom animations */}
+
+  <style jsx global>{`
+
+    @keyframes fadeIn {
+
+      from { opacity: 0; transform: translateY(10px); }
+
+      to { opacity: 1; transform: translateY(0); }
+
+    }
+
+    .animate-fadeIn {
+
+      animation: fadeIn 0.3s ease-out forwards;
+
+    }
+
+   
+
+    /* Additional responsive styles */
+
+    @media (max-width: 480px) {
+
+      .wallet-container {
+
+        transform: scale(0.9);
+
+        transform-origin: right center;
+
+      }
+
+    }
+
+  `}</style> 
 }

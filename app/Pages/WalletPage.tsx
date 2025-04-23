@@ -322,7 +322,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
                 </svg>
-                2.4% today
+                0.0% today
               </span>
             </div>
           </div>
@@ -332,7 +332,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         <div className="flex space-x-3 mb-6">
           <button
             onClick={() => setActiveSection("send")}
-            className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+            className="flex-1 bg-[#00aa00] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
             Send
@@ -340,7 +340,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           <div className="relative flex-1">
             <button
               onClick={copyAddressToClipboard}
-              className="w-full bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+              className="w-full bg-[#00aa00] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
             >
               <FontAwesomeIcon icon={faQrcode} className="mr-2" />
               Receive
@@ -356,7 +356,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           </div>
           <button
             onClick={() => setActiveSection("swap")}
-            className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+            className="flex-1 bg-[#00aa00] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />
             Swap
