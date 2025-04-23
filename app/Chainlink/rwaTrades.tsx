@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
 
 // Minimal ABIs for USDC and Synthetic Gold contracts
 const USDC_ABI = [
