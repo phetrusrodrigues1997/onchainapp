@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
 import { toast, ToastContainer } from 'react-toastify';
-
 
 // Minimal ABIs for USDC and Synthetic Gold contracts
 const USDC_ABI = [
@@ -19,26 +18,29 @@ const SYNTHETIC_GOLD_ABI = [
 ] as const;
 
 // Contract addresses (Base Mainnet)
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base
-const SYNTHETIC_GOLD_ADDRESS = '0x3F2d6160c04E19e96483A95F2036367687626989'; // SyntheticGold contract address
+const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const SYNTHETIC_GOLD_ADDRESS = '0x3F2d6160c04E19e96483A95F2036367687626989';
 
 type ActionType = 'mint' | 'burn';
+interface TransactionState {
+  status: 'idle' | 'approving' | 'minting' | 'burning' | 'success' | 'error' | 'pending';
+  errorMessage?: string;
+}
 
 const GoldTrades: React.FC = () => {
   const { address } = useAccount();
   const [activeAction, setActiveAction] = useState<ActionType>('mint');
   const [amount, setAmount] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [transactionStatus, setTransactionStatus] = useState('');
-  const [mintInProgress, setMintInProgress] = useState(false);
-  const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [transactionState, setTransactionState] = useState<TransactionState>({ status: 'idle' });
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
 
-  // Hooks for writing to contracts
-  const { writeContract: approveContract, isPending: isApproving, data: approveHash } = useWriteContract();
-  const { writeContract: mintContract, isPending: isMinting, data: mintHash } = useWriteContract();
-  const { writeContract: burnContract, isPending: isBurning, data: burnHash } = useWriteContract();
+  // Contract hooks
+  const { writeContract: approveContract, data: approveHash, error: approveError } = useWriteContract();
+  const { writeContract: mintContract, data: mintHash, error: mintError } = useWriteContract();
+  const { writeContract: burnContract, data: burnHash, error: burnError } = useWriteContract();
 
-  // Wait for transaction receipts
+  // Transaction receipt hooks
   const { isLoading: isApproveLoading, isSuccess: isApproveSuccess } = 
     useWaitForTransactionReceipt({ hash: approveHash });
   const { isLoading: isMintLoading, isSuccess: isMintSuccess } = 
@@ -46,132 +48,60 @@ const GoldTrades: React.FC = () => {
   const { isLoading: isBurnLoading, isSuccess: isBurnSuccess } = 
     useWaitForTransactionReceipt({ hash: burnHash });
 
-  // Fetch USDC balance
+  // Read contract data
   const { data: usdcBalance, refetch: refetchUsdcBalance } = useReadContract({
     address: USDC_ADDRESS,
     abi: USDC_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: {
-      enabled: Boolean(address),
-      gcTime: 0,
-      refetchInterval: false,
-    },
+    query: { enabled: !!address },
   });
 
-  // Fetch geGOLD balance
   const { data: geGoldBalance, refetch: refetchGeGoldBalance } = useReadContract({
     address: SYNTHETIC_GOLD_ADDRESS,
     abi: SYNTHETIC_GOLD_ABI,
     functionName: 'balanceOf',
-    args: address ? [address] : undefined, 
-    query: {
-      enabled: Boolean(address),
-      gcTime: 0,
-      refetchInterval: false,
-    },
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
   });
 
-  // Fetch USDC allowance for geGOLD contract
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: USDC_ADDRESS,
     abi: USDC_ABI,
     functionName: 'allowance',
     args: address && SYNTHETIC_GOLD_ADDRESS ? [address, SYNTHETIC_GOLD_ADDRESS] : undefined,
-    query: {
-      enabled: Boolean(address),
-      gcTime: 0,
-      refetchInterval: false,
-    },
+    query: { enabled: !!address },
   });
 
-  // Fetch Gold/USD price
   const { data: goldPrice } = useReadContract({
     address: SYNTHETIC_GOLD_ADDRESS,
     abi: SYNTHETIC_GOLD_ABI,
     functionName: 'getTWAP',
-    query: {
-      enabled: true,
-    },
+    query: { enabled: true },
   });
 
-  // Update loading state based on transaction status
-  useEffect(() => {
-    setIsLoading(isApproving || isMinting || isBurning || isApproveLoading || isMintLoading || isBurnLoading);
-  }, [isApproving, isMinting, isBurning, isApproveLoading, isMintLoading, isBurnLoading]);
-
-  // Handle transaction success and refresh balances
-  useEffect(() => {
-    if (isApproveSuccess && mintInProgress) {
-      console.log('Approval successful, proceeding to mint. Hash:', approveHash);
-      handleMintAfterApproval();
-    } else if (isApproveSuccess) {
-      console.log('Approval completed standalone. Hash:', approveHash);
-      toast.success('USDC approved successfully!');
-      setTransactionStatus('');
-      setShouldRefresh(true);
+  const refreshBalances = useCallback(async () => {
+    try {
+      await Promise.all([
+        refetchUsdcBalance(),
+        refetchGeGoldBalance(),
+        refetchAllowance(),
+      ]);
+    } catch (error) {
+      console.error('Balance refresh error:', error);
+      toast.error('Failed to refresh balances');
     }
-    
-    if (isMintSuccess) {
-      
+  }, [refetchUsdcBalance, refetchGeGoldBalance, refetchAllowance]);
 
-      console.log('Mint successful. Hash:', mintHash);
-      toast.success('geGOLD minted successfully! Transaction complete.');
-      setTransactionStatus('');
-      setAmount('');
-      setMintInProgress(false);
-      setShouldRefresh(true);
-      setIsLoading(false);
-      
-    }
-    
-    if (isBurnSuccess) {
-      console.log('Burn successful. Hash:', burnHash);
-      toast.success('geGOLD burned successfully!');
-      setTransactionStatus('');
-      setAmount('');
-      setShouldRefresh(true);
-    }
-  }, [isApproveSuccess, isMintSuccess, isBurnSuccess, mintInProgress, approveHash, mintHash, burnHash]);
-
-  // Refresh balances when needed, with debouncing
-  useEffect(() => {
-    if (shouldRefresh) {
-      const refreshTimeout = setTimeout(() => {
-        Promise.all([
-          refetchUsdcBalance(),
-          refetchGeGoldBalance(),
-          refetchAllowance(),
-        ])
-          .then(() => {
-            setShouldRefresh(false);
-          })
-          .catch((error) => {
-            console.error('Balance refresh error:', error);
-            setShouldRefresh(false);
-          });
-      }, 500);
-
-      return () => clearTimeout(refreshTimeout);
-    }
-  }, [shouldRefresh, refetchUsdcBalance, refetchGeGoldBalance, refetchAllowance]);
-
-  // Clear amount when switching between mint and burn
-  useEffect(() => {
-    setAmount('');
-  }, [activeAction]);
-
-  const handleMintWithApprovalIfNeeded = async () => {
+  const handleMint = useCallback(async () => {
     if (!amount || !address) return;
-    
+
     try {
       const amountToUse = parseUnits(amount, 6);
       
+      // Check allowance
       if (!allowance || (allowance as bigint) < amountToUse) {
-        setTransactionStatus('Approving USDC...');
-        setMintInProgress(true);
-        
-        console.log('Initiating approval for amount:', amountToUse.toString());
+        setTransactionState({ status: 'approving' });
         approveContract({
           address: USDC_ADDRESS,
           abi: USDC_ABI,
@@ -179,59 +109,35 @@ const GoldTrades: React.FC = () => {
           args: [SYNTHETIC_GOLD_ADDRESS, amountToUse],
         });
       } else {
-        handleMintAfterApproval();
+        setTransactionState({ status: 'minting' });
+        mintContract({
+          address: SYNTHETIC_GOLD_ADDRESS,
+          abi: SYNTHETIC_GOLD_ABI,
+          functionName: 'mint',
+          args: [amountToUse],
+        });
       }
     } catch (error) {
-      console.error('Approval error:', error);
-      setTransactionStatus('');
-      setMintInProgress(false);
-      toast.error('Approval failed. Please try again.');
-    }
-  };
-
-  const handleMintAfterApproval = () => {
-    if (!amount) return;
-    
-    try {
-      setTransactionStatus('Minting geGOLD...');
-      const amountToUse = parseUnits(amount, 6);
-      
-      console.log('Initiating mint for amount:', amountToUse.toString());
-      mintContract({
-        address: SYNTHETIC_GOLD_ADDRESS,
-        abi: SYNTHETIC_GOLD_ABI,
-        functionName: 'mint',
-        args: [amountToUse],
-      });
-      let refreshTimeout: NodeJS.Timeout;
-      let counter = 0;
-      // Start the counter and set the refresh timeout
-    refreshTimeout = setInterval(() => {
-      counter++;
-      console.log(`Refreshing in ${18 - counter} seconds...`);
-      if (counter >= 18) {
-        window.location.reload();
-        clearInterval(refreshTimeout); // Clear the interval after refreshing
+      console.error('Mint error:', error);
+      if (retryCount < MAX_RETRIES) {
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => handleMint(), 2000);
+      } else {
+        setTransactionState({ 
+          status: 'error', 
+          errorMessage: 'Minting failed after retries'
+        });
+        toast.error('Minting failed. Please try again.');
+        setRetryCount(0);
       }
-    }, 1000);
-
-    // Clean up the interval if the component unmounts or isApproveSuccess changes
-    return () => {
-      clearInterval(refreshTimeout);
-    };
-    } catch (error) {
-      console.error('Minting error:', error);
-      setTransactionStatus('');
-      setMintInProgress(false);
-      toast.error('Minting failed. Please try again.');
     }
-  };
+  }, [amount, address, allowance, approveContract, mintContract, retryCount]);
 
   const handleBurn = async () => {
     if (!amount) return;
-    
+
     try {
-      setTransactionStatus('Burning geGOLD...');
+      setTransactionState({ status: 'burning' });
       const amountToUse = parseUnits(amount, 18);
       
       burnContract({
@@ -241,15 +147,101 @@ const GoldTrades: React.FC = () => {
         args: [amountToUse],
       });
     } catch (error) {
-      console.error('Burning error:', error);
-      setTransactionStatus('');
+      console.error('Burn error:', error);
+      setTransactionState({ 
+        status: 'error', 
+        errorMessage: 'Burning failed'
+      });
       toast.error('Burning failed. Please try again.');
     }
   };
 
+  // Handle transaction states
+  useEffect(() => {
+    if (approveError) {
+      setTransactionState({ 
+        status: 'error', 
+        errorMessage: 'Approval failed'
+      });
+      toast.error('Approval failed');
+      setRetryCount(0);
+    }
+
+    if (isApproveSuccess) {
+      setTransactionState({ status: 'minting' });
+      mintContract({
+        address: SYNTHETIC_GOLD_ADDRESS,
+        abi: SYNTHETIC_GOLD_ABI,
+        functionName: 'mint',
+        args: [parseUnits(amount, 6)],
+      });
+    }
+
+    if (mintError) {
+      if (retryCount < MAX_RETRIES) {
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => {
+          mintContract({
+            address: SYNTHETIC_GOLD_ADDRESS,
+            abi: SYNTHETIC_GOLD_ABI,
+            functionName: 'mint',
+            args: [parseUnits(amount, 6)],
+          });
+        }, 2000);
+      } else {
+        setTransactionState({ 
+          status: 'error', 
+          errorMessage: 'Minting failed after retries'
+        });
+        toast.error('Minting failed');
+        setRetryCount(0);
+      }
+    }
+
+    if (isMintSuccess) {
+      setTransactionState({ status: 'success' });
+      toast.success('Successfully minted geGOLD!');
+      setAmount('');
+      refreshBalances();
+    }
+
+    if (burnError) {
+      setTransactionState({ 
+        status: 'error', 
+        errorMessage: 'Burning failed'
+      });
+      toast.error('Burning failed');
+    }
+
+    if (isBurnSuccess) {
+      setTransactionState({ status: 'success' });
+      toast.success('Successfully burned geGOLD!');
+      setAmount('');
+      refreshBalances();
+    }
+  }, [
+    approveError,
+    isApproveSuccess,
+    mintError,
+    isMintSuccess,
+    burnError,
+    isBurnSuccess,
+    amount,
+    mintContract,
+    retryCount,
+    refreshBalances
+  ]);
+
+  // Reset amount on action change
+  useEffect(() => {
+    setAmount('');
+    setTransactionState({ status: 'idle' });
+    setRetryCount(0);
+  }, [activeAction]);
+
   const handleAction = () => {
     if (activeAction === 'mint') {
-      handleMintWithApprovalIfNeeded();
+      handleMint();
     } else {
       handleBurn();
     }
@@ -272,18 +264,25 @@ const GoldTrades: React.FC = () => {
     : geGoldBalance ? formatUnits(geGoldBalance as bigint, 18) : '0';
 
   const currencySymbol = activeAction === 'mint' ? 'USDC' : 'geGOLD';
-  
   const estimatedCurrencySymbol = activeAction === 'mint' ? 'geGOLD' : 'USDC';
 
   const getButtonText = () => {
-    if (isApproveLoading) return 'Approving USDC...';
-    if (isMintLoading) return 'Minting geGOLD...';
-    if (isBurnLoading) return 'Burning geGOLD...';
-    return activeAction === 'mint' ? 'Mint geGOLD' : 'Burn geGOLD';
+    switch (transactionState.status) {
+      case 'approving':
+        return 'Approving USDC...';
+      case 'minting':
+        return 'Minting geGOLD...';
+      case 'burning':
+        return 'Burning geGOLD...';
+      case 'error':
+        return 'Retry';
+      default:
+        return activeAction === 'mint' ? 'Mint geGOLD' : 'Burn geGOLD';
+    }
   };
 
   const isActionDisabled = () => {
-    if (isLoading) return true;
+    if (transactionState.status !== 'idle' && transactionState.status !== 'error') return true;
     if (!amount || amount === '0') return true;
     if (activeAction === 'mint' && !hasEnoughUsdc) return true;
     if (activeAction === 'burn' && !hasEnoughGeGold) return true;
@@ -337,9 +336,11 @@ const GoldTrades: React.FC = () => {
       </div>
 
       <div className="bg-[#001800] p-6 rounded-lg border border-[#003300] mb-6">
-        {transactionStatus && (
+        {transactionState.status !== 'idle' && transactionState.status !== 'success' && (
           <div className="mb-6 p-3 bg-[#003300] rounded-lg text-center">
-            <p className="text-[#00cc00]">{transactionStatus}</p>
+            <p className="text-[#00cc00]">
+              {transactionState.errorMessage || getButtonText()}
+            </p>
             <div className="mt-2 w-full bg-[#004400] rounded-full h-1.5">
               <div className="bg-[#00aa00] h-1.5 rounded-full animate-pulse w-full"></div>
             </div>
@@ -365,7 +366,7 @@ const GoldTrades: React.FC = () => {
         <div className="bg-[#002800] p-4 rounded-lg mb-6">
           <div className="flex justify-between items-center">
             <div>
-            <p className="text-xl font-bold text-white">{parseFloat(availableBalance || '0').toFixed(4)} {currencySymbol}</p>
+              <p className="text-xl font-bold text-white">{parseFloat(availableBalance || '0').toFixed(4)} {currencySymbol}</p>
               <p className="text-sm text-[#00aa00]">Available to {activeAction}</p>
             </div>
             <button
