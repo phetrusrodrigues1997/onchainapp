@@ -143,6 +143,25 @@ export default function App() {
         border-color: #00aa00 !important;
         box-shadow: 0 0 0 2px rgba(0, 170, 0, 0.2) !important;
       }
+
+      /* Mobile responsive styles */
+      @media (max-width: 640px) {
+        [data-testid="ockSwapButton_Button"] {
+          height: 48px !important;
+        }
+        
+        [data-testid="ockSwapButton_Button"] span {
+          font-size: 14px !important;
+        }
+        
+        [data-testid="ockTokenSelectButton"] {
+          padding: 8px !important;
+        }
+        
+        .ock-swap-amount-input {
+          padding: 8px !important;
+        }
+      }
     `;
     document.head.appendChild(style);
   
@@ -251,11 +270,12 @@ export default function App() {
     <div className="mb-8">
       <div className="relative">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-[#00aa00] to-[#008800] rounded-lg blur-sm opacity-30"></div>
-        <div className="relative bg-[#003300] rounded-lg border border-[#004400] shadow-xl p-4 sm:p-6">
-          <div className="max-h-[80vh] overflow-auto">
+        <div className="relative bg-[#003300] rounded-lg border border-[#004400] shadow-xl p-3 sm:p-6">
+          {/* Removed max-height constraint and improved overflow handling */}
+          <div className="w-full">
             <Swap
               experimental={{ useAggregator: true }}
-              className="max-w-sm mx-auto bg-[#002200] rounded-lg border border-[#004400] shadow-xl p-6"
+              className="w-full mx-auto bg-[#002200] rounded-lg border border-[#004400] shadow-xl p-3 sm:p-6"
               onSuccess={async () => {
                 if (address) {
                   await recordSwapPoints(address);
@@ -265,11 +285,7 @@ export default function App() {
                 }
               }}
             >
-              <SwapSettings className="mb-4">
-                <SwapSettingsSlippageTitle className="text-green-200">Slippage</SwapSettingsSlippageTitle>
-                <SwapSettingsSlippageInput className="bg-[#002200] text-white border border-[#004400] rounded-md" />
-                <SwapSettingsSlippageDescription className="text-sm text-green-300">Adjust slippage tolerance</SwapSettingsSlippageDescription>
-              </SwapSettings>
+              
               <div className="mb-1 text-sm font-medium text-green-200">You send</div>
               <SwapAmountInput
                 key={`sell-${activeSection}-${selectedOption}`}
@@ -349,6 +365,14 @@ export default function App() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        /* Additional responsive styles */
+        @media (max-width: 480px) {
+          .wallet-container {
+            transform: scale(0.9);
+            transform-origin: right center;
+          }
         }
       `}</style>
     </div>
