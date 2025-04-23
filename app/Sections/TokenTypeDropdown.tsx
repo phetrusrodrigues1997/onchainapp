@@ -18,7 +18,7 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
   return (
     <div
       style={{ zIndex: 1000 }}
-      className={`relative inline-block text-xs text-left ml-60 transform translate-y-[106px] ${selected === "Crypto" ? "translate-x-7" : ""}`}
+      className={`relative inline-block text-xs text-left ml-60 transform translate-y-[106px] sm: mr-10 ${selected === "Crypto" ? "translate-x-7" : ""}`}
     >
       <button
         type="button"

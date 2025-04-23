@@ -252,7 +252,21 @@ export default function App() {
           
         {activeSection === "swap" && (
   <div className="animate-fadeIn">
-    {/* Heading and other elements remain unchanged */}
+    {/* Bold heading */}
+    <div className="text-center mb-10">
+                 <h1
+                   className="text-2xl md:text-3xl font-bold leading-tight text-white"
+                   style={{
+                     fontFamily: "'Inter', sans-serif",
+                   }}
+                 >
+                   FX trading & remittances <br />redefined.
+                 </h1>
+                 <p className="mt-2 text-green-300 max-w-sm mx-auto">
+                   Fast, secure, and cost-effective currency exchange with global coverage
+                 </p>
+                 <div className="mt-3 w-16 h-1 bg-[#00aa00] mx-auto rounded-full"></div>
+                </div>
     <div className="mb-6">
       <SwapDropdown
         onSelectionChange={(option) => {
@@ -285,6 +299,15 @@ export default function App() {
                 }
               }}
             >
+              <SwapSettings>
+                  <SwapSettingsSlippageTitle className="text-[#EA580C]">
+                    Max. slippage
+                  </SwapSettingsSlippageTitle>
+                  <SwapSettingsSlippageDescription className="text-[#EA580C]">
+                    Your swap will revert if the prices change by more than the selected percentage.
+                  </SwapSettingsSlippageDescription>
+                  <SwapSettingsSlippageInput />
+                </SwapSettings>
               
               <div className="mb-1 text-sm font-medium text-green-200">You send</div>
               <SwapAmountInput
