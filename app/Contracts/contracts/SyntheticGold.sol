@@ -1,111 +1,115 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/AggregatorV3Interface.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract SyntheticGold is ERC20 {
-    IERC20 public collateralToken;
-    AggregatorV3Interface public priceFeed;
-    address public owner;
+interface IOracle {
+  function getTWAP() external view returns (uint256);
+}
 
-    uint256 public collateralizationRatio = 150; // 150%
-    uint256 public lastTrustedPrice;
-    uint256 public lastUpdateTime;
-    uint256 public TWAP_INTERVAL = 10 minutes;
-    uint256 public PRICE_DEVIATION_LIMIT = 5 * 1e6; // 5% (scaled by 1e8)
+contract SyntheticGold is ERC20, Ownable {
+  IERC20 public usdc;          // 6 decimals
+  IOracle public oracle;       // 8 decimals
 
-    // Official USDC address (Ethereum mainnet; adjust for your network)
-    address public constant USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
+  uint256 public totalCollateral;
+  uint256 public totalDebt;
+  mapping(address => uint256) public userDebt;
+  uint256 public minCollateral;
 
-    constructor(address _collateral, address _priceFeed)
-        ERC20("GoldenEagle Gold", "geGOLD")
-    {
-        require(_collateral == USDC, "Only official USDC allowed");
-        owner = msg.sender;
-        collateralToken = IERC20(_collateral);
-        priceFeed = AggregatorV3Interface(_priceFeed);
+  event Minted(address indexed user, uint256 usdcAmount, uint256 sGoldMinted);
+  event Burned(address indexed user, uint256 sGoldAmount, uint256 usdcReturned);
+  event PoolFrozen(address indexed user, uint256 attemptedRedemption, uint256 currentCollateral);
+  event CollateralToppedUp(uint256 amount);
+  event MinCollateralUpdated(uint256 newMinCollateral);
 
-        lastTrustedPrice = getLatestPrice(); // Initialize
-        lastUpdateTime = block.timestamp;
+  constructor(address _usdc, address _oracle)
+    ERC20("GoldenEagle Gold", "XAUge")
+    Ownable(msg.sender) // ✅ Correct way to set the contract owner
+{
+    usdc = IERC20(_usdc);
+    oracle = IOracle(_oracle);
+    minCollateral = 0;
+}
+
+
+  function setMinCollateral(uint256 _minCollateral) external onlyOwner {
+    minCollateral = _minCollateral;
+    emit MinCollateralUpdated(_minCollateral);
+  }
+
+  function mint(uint256 usdcAmount) external {
+    require(usdcAmount > 0, "Zero collateral");
+    require(usdc.transferFrom(msg.sender, address(this), usdcAmount), "USDC transfer failed");
+
+    uint256 price      = oracle.getTWAP();
+    uint256 sGoldAmount = (usdcAmount * 1e18) / price;
+    require(sGoldAmount > 0, "Amount too small");
+
+    userDebt[msg.sender] += sGoldAmount;
+    totalDebt           += sGoldAmount;
+    totalCollateral     += usdcAmount;
+
+    _mint(msg.sender, sGoldAmount);
+    emit Minted(msg.sender, usdcAmount, sGoldAmount);
+  }
+
+  function burn(uint256 sGoldAmount) external {
+    require(sGoldAmount > 0, "Zero amount");
+    require(balanceOf(msg.sender) >= sGoldAmount, "Insufficient geGOLD");
+
+    uint256 price       = oracle.getTWAP();
+    uint256 usdcToReturn = (sGoldAmount * price) / 1e18;
+    require(usdcToReturn > 0, "Redeem amount too small");
+
+    if (totalCollateral < usdcToReturn + minCollateral) {
+      emit PoolFrozen(msg.sender, usdcToReturn, totalCollateral);
+      revert("Collateral pool below minimum");
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
-        _;
-    }
+    _burn(msg.sender, sGoldAmount);
+    userDebt[msg.sender]  -= sGoldAmount;
+    totalDebt            -= sGoldAmount;
+    totalCollateral      -= usdcToReturn;
 
-    function mint(uint256 collateralAmount) external {
-        // Calculate mint amount
-        uint256 goldPrice = getTWAP();
-        uint256 mintAmount = (collateralAmount * 1e8) / goldPrice;
-        mintAmount = (mintAmount * 100) / collateralizationRatio;
+    require(usdc.transfer(msg.sender, usdcToReturn), "USDC transfer failed");
+    emit Burned(msg.sender, sGoldAmount, usdcToReturn);
+  }
 
-        // Update state before external call (CEI)
-        _mint(msg.sender, mintAmount);
+  /// @notice Simple two-field view
+  function getPoolStatus() external view returns (uint256 collateral, uint256 debt) {
+    return (totalCollateral, totalDebt);
+  }
 
-        // External call to USDC
-        require(
-            collateralToken.transferFrom(msg.sender, address(this), collateralAmount),
-            "Transfer failed"
-        );
-    }
+  /// @notice Full snapshot in a single call
+  function getPoolDetails() external view 
+    returns (
+      uint256 price,
+      uint256 collateral,
+      uint256 debt
+    )
+  {
+    price      = oracle.getTWAP();
+    collateral = totalCollateral;
+    debt       = totalDebt;
+  }
 
-    function burn(uint256 sGoldAmount) external {
-        require(balanceOf(msg.sender) >= sGoldAmount, "Insufficient balance");
+  /// @notice Expose the min-collateral floor
+  function getMinCollateral() external view returns (uint256) {
+    return minCollateral;
+  }
 
-        // Calculate collateral return
-        uint256 goldPrice = getTWAP();
-        uint256 collateralReturn = (sGoldAmount * goldPrice) / 1e8;
-        collateralReturn = (collateralReturn * collateralizationRatio) / 100;
+  /// @notice Pool collateralization ratio: (collateral×price)/debt, scaled to 18 decimals
+  function collateralizationRatio() external view returns (uint256) {
+    if (totalDebt == 0) return type(uint256).max;
+    // collateral(6) + price(8) → scale by 1e4 to reach 18
+    return (totalCollateral * oracle.getTWAP() * 1e4) / totalDebt;
+  }
 
-        uint256 fee = (collateralReturn * 20) / 10000; // 0.2%
-        uint256 userReceives = collateralReturn - fee;
-
-        // Update state before external calls (CEI)
-        _burn(msg.sender, sGoldAmount);
-
-        // External calls to USDC
-        require(
-            collateralToken.transfer(msg.sender, userReceives),
-            "Transfer to user failed"
-        );
-        require(
-            collateralToken.transfer(owner, fee),
-            "Transfer fee failed"
-        );
-    }
-
-    function getLatestPrice() internal view returns (uint256) {
-        (, int256 price,,,) = priceFeed.latestRoundData();
-        require(price > 0, "Invalid price");
-        return uint256(price);
-    }
-
-    function getTWAP() public returns (uint256) {
-        uint256 currentPrice = getLatestPrice();
-
-        if (block.timestamp >= lastUpdateTime + TWAP_INTERVAL) {
-            uint256 deviation = (currentPrice > lastTrustedPrice)
-                ? (currentPrice - lastTrustedPrice) * 1e8 / lastTrustedPrice
-                : (lastTrustedPrice - currentPrice) * 1e8 / lastTrustedPrice;
-
-            require(deviation <= PRICE_DEVIATION_LIMIT, "Price deviation too high");
-
-            lastTrustedPrice = currentPrice;
-            lastUpdateTime = block.timestamp;
-        }
-
-        return lastTrustedPrice;
-    }
-
-    // Admin can adjust parameters in emergencies
-    function updateTWAPInterval(uint256 interval) external onlyOwner {
-        TWAP_INTERVAL = interval;
-    }
-
-    function updatePriceDeviationLimit(uint256 limit) external onlyOwner {
-        PRICE_DEVIATION_LIMIT = limit;
-    }
+  /// @notice Allow owner to top up the pool
+  function ownerDeposit(uint256 amount) external onlyOwner {
+    require(usdc.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+    totalCollateral += amount;
+    emit CollateralToppedUp(amount);
+  }
 }

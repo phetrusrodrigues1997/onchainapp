@@ -2,7 +2,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount,useSendTransaction } from 'wagmi';
+import { parseUnits } from 'viem';
 import SwapDropdown from './Sections/TokenTypeDropdown'; // Adjust the path if needed
 import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import { recordSwapPoints, getUserPoints } from './Database/actions';
@@ -19,7 +20,6 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
 import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
-import LiveCryptoPrices from './Sections/LiveCryptoPrices';
 import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 import CreateMessage from './Pages/MessagesPage';
@@ -35,8 +35,11 @@ export default function App() {
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
+  const [showSwapButton, setShowSwapButton] = useState(false);
   const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
   const { address } = useAccount();
+  const { sendTransaction } = useSendTransaction();
+  const feeRecipient = '0x1Ac08E56c4d95bD1B8a937C6EB626cFEd9967D67';
 
   const displayToast = (message: string) => {
     setToastMessage(message);
@@ -104,14 +107,7 @@ export default function App() {
     };
   }, []);
 
-//   useEffect(() => {
-//   if (activeSection === "swap") {
-//     const titleElement = document.querySelector('[data-testid="ockSwap_Title"]');
-//     if (titleElement) {
-//       titleElement.textContent = selectedOption || "Stablecoins"; // Default to "Stablecoins" if selectedOption is falsy
-//     }
-//   }
-// }, [selectedOption, activeSection]);
+
 
 if (!isMounted) {
   return (
@@ -215,47 +211,92 @@ if (!isMounted) {
     }
   }}
 />
-              <Swap
-                experimental={{ useAggregator: true }}
-                className="bg-transparent p-1 max-w-sm mx-auto mt-8"
-                onSuccess={async () => {
-                  if (address) {
-                    await recordSwapPoints(address);
-                    const updatedPoints = await getUserPoints(address);
-                    setPoints(updatedPoints);
-                  }
-                }}
-              >
-                <SwapSettings>
-                  <SwapSettingsSlippageTitle className="text-[#EA580C]">
-                    Max. slippage
-                  </SwapSettingsSlippageTitle>
-                  <SwapSettingsSlippageDescription className="text-[#EA580C]">
-                    Your swap will revert if the prices change by more than the selected percentage.
-                  </SwapSettingsSlippageDescription>
-                  <SwapSettingsSlippageInput />
-                </SwapSettings>
-                <SwapAmountInput
-  key={`sell-${activeSection}-${selectedOption}`} // Unique key based on section and option
-  label="Sell"
-  swappableTokens={swappableTokensList}
-  token={activeSection === "swap" ? (selectedOption === "Crypto" ? ETHToken : USDCToken) : undefined}
-  type="from"
-  className="mb-1 bg-transparent text-white rounded-2xl shadow-sm shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
-/>
-<SwapToggleButton className="mb-2" />
-<SwapAmountInput
-  key={`buy-${activeSection}-${selectedOption}`} // Unique key based on section and option
-  label="Buy"
-  swappableTokens={swappableTokensList}
-  token={activeSection === "swap" ? (selectedOption === "Crypto" ? CbBTCToken : EURCToken) : undefined}
-  type="to"
-  className="bg-transparent mb-1 text-white rounded-2xl shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
-/>
-                <SwapButton className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
-                <SwapMessage className="mt-2 text-gray-800 text-sm" />
-                <SwapToast />
-              </Swap>
+<Swap
+  experimental={{ useAggregator: true }}
+  className="bg-transparent p-1 max-w-sm mx-auto mt-8"
+  onSuccess={async () => {
+    if (address) {
+      await recordSwapPoints(address);
+      const updatedPoints = await getUserPoints(address);
+      setPoints(updatedPoints);
+    }
+  }}
+>
+  <SwapSettings>
+    <SwapSettingsSlippageTitle className="text-[#EA580C]">
+      Max. slippage
+    </SwapSettingsSlippageTitle>
+    <SwapSettingsSlippageDescription className="text-[#EA580C]">
+      Your swap will revert if the prices change by more than the selected percentage.
+    </SwapSettingsSlippageDescription>
+    <SwapSettingsSlippageInput />
+  </SwapSettings>
+
+  <SwapAmountInput
+    key={`sell-${activeSection}-${selectedOption}`}
+    label="Sell"
+    swappableTokens={swappableTokensList}
+    token={
+      activeSection === "swap"
+        ? selectedOption === "Crypto"
+          ? ETHToken
+          : USDCToken
+        : undefined
+    }
+    type="from"
+    className="mb-1 bg-transparent text-white rounded-2xl shadow-sm shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
+  />
+  <SwapToggleButton className="mb-2" />
+  <SwapAmountInput
+    key={`buy-${activeSection}-${selectedOption}`}
+    label="Buy"
+    swappableTokens={swappableTokensList}
+    token={
+      activeSection === "swap"
+        ? selectedOption === "Crypto"
+          ? CbBTCToken
+          : EURCToken
+        : undefined
+    }
+    type="to"
+    className="bg-[#003000] shadow-2xl mb-1 text-white rounded-2xl shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
+  />
+
+  {/* Only show the actual SwapButton after "Proceed to Swap" */}
+  {showSwapButton && (
+    <SwapButton className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
+  )}
+
+  <SwapMessage className="mt-2 text-gray-800 text-sm" />
+  <SwapToast />
+</Swap>
+
+{/* Render "Proceed to Swap" only if the actual SwapButton hasn't been shown yet */}
+{!showSwapButton && (
+  <button
+  onClick={async () => {
+    try {
+      
+      // send the 0.00001 ETH fee
+      await sendTransaction({
+        to: feeRecipient,
+        value: parseUnits('0.000005', ETHToken.decimals)
+      });
+      
+      // Wait for 10 seconds using setTimeout
+  await new Promise(resolve => setTimeout(resolve, 9000));
+      setShowSwapButton(true);
+    } catch (err) {
+      console.error('Fee transfer failed:', err);
+      // optionally notify user of the failure
+    }
+  }}
+    className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85"
+  >
+    Begin Swap
+  </button>
+)}
+
               
               
               {/* Points Display */}

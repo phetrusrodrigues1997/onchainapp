@@ -328,13 +328,13 @@ const GoldTrades: React.FC = () => {
       case 'approving':
         return 'Approving USDC...';
       case 'minting':
-        return 'Minting geGOLD...';
+        return 'Purchsing gold...';
       case 'burning':
-        return 'Burning geGOLD...';
+        return 'Selling gold...';
       case 'failed':
         return 'Retry';
       default:
-        return activeAction === 'mint' ? 'Mint geGOLD' : 'Burn geGOLD';
+        return activeAction === 'mint' ? 'Buy Gold' : 'Sell Gold';
     }
   };
 
@@ -359,15 +359,15 @@ const GoldTrades: React.FC = () => {
       case 'approving':
         return 'Approving USDC...';
       case 'minting':
-        return 'Minting geGOLD...';
+        return 'Purchasing gold...';
       case 'burning':
-        return 'Burning geGOLD...';
+        return 'Selling gold...';
       case 'failed':
         return transactionError || 'Transaction failed. Please try again.';
       case 'completed':
         return activeAction === 'mint' 
-          ? 'geGOLD minted successfully!' 
-          : 'geGOLD burned successfully!';
+          ? 'Gold minted successfully!' 
+          : 'Gold sold successfully!';
       default:
         return '';
     }
@@ -398,7 +398,7 @@ const GoldTrades: React.FC = () => {
               : 'bg-transparent text-[#00aa00] hover:bg-[#002200]'
           } ${isTransactionInProgress ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Mint
+          Buy
         </button>
         <button
           onClick={() => setActiveAction('burn')}
@@ -409,7 +409,7 @@ const GoldTrades: React.FC = () => {
               : 'bg-transparent text-[#00aa00] hover:bg-[#002200]'
           } ${isTransactionInProgress ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Burn
+          Sell
         </button>
       </div>
 
@@ -445,7 +445,7 @@ const GoldTrades: React.FC = () => {
               <span className="text-black font-bold text-xs">$</span>
             </div>
             <span className="text-[#00aa00]">
-              {activeAction === 'mint' ? 'USDC' : 'geGOLD'}
+              {activeAction === 'mint' ? 'USDC' : 'Gold'}
             </span>
           </div>
           <div className="bg-[#002200] px-4 py-2 rounded-full">
@@ -489,11 +489,11 @@ const GoldTrades: React.FC = () => {
               {currencySymbol}
             </div>
           </div>
-          {amount && (
+          {/* {amount && (
             <p className="text-sm text-[#00aa00] mt-2">
               Estimated {estimatedCurrencySymbol}: ~{estimatedValue.toFixed(activeAction === 'mint' ? 8 : 6)}
             </p>
-          )}
+          )} */}
         </div>
 
         <button
@@ -518,16 +518,16 @@ const GoldTrades: React.FC = () => {
           </p>
         </div>
         <div className="flex justify-between items-center">
-          <p className="text-[#00aa00]">geGOLD:</p>
+          <p className="text-[#00aa00]">Gold:</p>
           <p className="text-white font-mono">
-            {geGoldBalance ? formatUnits(geGoldBalance as bigint, 18) : '0.00000000'} geGOLD
+            {geGoldBalance ? formatUnits(geGoldBalance as bigint, 18) : '0.00000000'} Gold
           </p>
         </div>
       </div>
       
-      <div className="mt-6 text-center text-xs text-[#006600]">
-        <p>Powered by Synthetic Gold Protocol • Base Mainnet</p>
-      </div>
+      {/* <div className="mt-6 text-center text-xs text-[#006600]">
+        <p>Powered by GoldenEagle Finance • Base Mainnet</p>
+      </div> */}
     </div>
   );
 };
