@@ -129,7 +129,7 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-[#86efac] border-b border-[#004400] px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#050505] border-b border-[#aaaaaa] px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -171,7 +171,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#002200] ">
+      <main className="flex-grow flex items-center justify-center bg-[#050505] ">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
           {activeSection === "swap" && (
@@ -182,14 +182,14 @@ if (!isMounted) {
                     className="text-3xl md:text-3xl font-bold text-center mt-10 leading-tight"
                     style={{
                       fontFamily: "'Montserrat', sans-serif",
-                      color: "#FFFFFF",
+                      color: "#ffffff",
                       textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
                     }}
                   >
                   FX trading & remittances <br />redefined.
                     {/* <span className="currency-animation ml-2">💸</span> */}
                   </h1>
-                  <p
+                  {/* <p
   className="mt-4 text-lg md:text-xl text-center text-green-300"
   style={{
     fontFamily: "'Montserrat', sans-serif",
@@ -197,7 +197,7 @@ if (!isMounted) {
   }}
 >
   Fast. Transparent. Borderless. <span className="currency-animation ml-1">💸</span>
-</p>
+</p> */}
               {/* Pass the selection change callback */}
           <SwapDropdown
   onSelectionChange={(option) => {
@@ -244,14 +244,14 @@ if (!isMounted) {
         : undefined
     }
     type="from"
-    className="mb-1 bg-transparent text-white rounded-2xl shadow-lg shadow-[#00aa00]/30 border border-[#00aa00]/50 hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#060606] text-white rounded-2xl shadow-sm shadow-[#00aa00]/30 border border-[#aaaaaa] hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
   />
   <SwapToggleButton
   className="
     mb-2
     relative           /* position context so z-index applies */
     z-50               /* high stacking priority */
-    bg-black        /* dark card color */
+    bg-[#28282B]        /* dark card color */
     hover:bg-gray-700  /* hover feedback */
     p-2                /* comfortable padding */
     rounded-full       /* pill shape */
@@ -260,7 +260,7 @@ if (!isMounted) {
     duration-200       /* speed up/down */
     ease-out
     border
-    border-[#004400]           /* easing for hover */
+               /* easing for hover */
   "
 />
 
@@ -276,12 +276,12 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="mb-1 bg-transparent text-white rounded-2xl shadow-lg shadow-[#00aa00]/30 border border-[#00aa00]/50 hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#1b1b1b] text-white rounded-2xl shadow-sm shadow-[#00aa00]/30 hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
   {showSwapButton && (
-    <SwapButton className="w-full font-extrabold bg-[#008800] dark:bg-[#008800] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85" />
+    <SwapButton className="w-full font-extrabold bg-[#d3c81a] dark:bg-[#008800] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85" />
   )}
 
   <SwapMessage className="mt-2 text-gray-800 text-sm" />
@@ -308,7 +308,7 @@ if (!isMounted) {
       // optionally notify user of the failure
     }
   }}
-    className="w-full font-extrabold bg-[#008800] dark:bg-[#008800] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85"
+    className="w-full font-extrabold bg-[#7F6A00] dark:bg-[#008800] text-[#FFFF00] dark:text-white rounded-full py-2 transition-colors disabled:opacity-85"
   >
     Trade Now
   </button>
@@ -319,14 +319,14 @@ if (!isMounted) {
               {/* Points Display */}
               {address && points !== null && (
                 <div className="mt-6 text-center">
-                  <div className="inline-flex items-center bg-black/40 px-4 py-2 rounded-md border border-[#004400]">
+                  <div className="inline-flex items-center bg-transparent px-4 py-2 rounded-md border border-[#004400]">
                     <div className="w-8 h-8 rounded-full bg-[#00aa00]/20 flex items-center justify-center mr-3">
                       <svg className="w-4 h-4 text-[#00cc00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </div>
                     <div className="text-left ">
-                      <span className="text-green-300 text-sm block">Swap Points</span>
+                      <span className="text-[#d3c81a] text-sm block">Swap Points</span>
                       <span className="text-white font-bold text-lg">{points}</span>
                     </div>
                   </div>
@@ -336,7 +336,7 @@ if (!isMounted) {
               
               
               {/* Trust indicators */}
-              <div className="mt-10 grid grid-cols-3 gap-4 text-center">
+              {/* <div className="mt-10 grid grid-cols-3 gap-4 text-center">
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
                     <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -361,7 +361,7 @@ if (!isMounted) {
                   </div>
                   <span className="text-sm font-medium text-green-200">Low Fees</span>
                 </div>
-              </div>
+              </div> */}
 
 
 
@@ -383,15 +383,15 @@ if (!isMounted) {
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-[#001100] to-[#003300] border-t border-[#00ff00]/50 py-4 px-4">
+      <footer className="bg-[#050505] border-t border-[#aaaaaa] py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-    <div className="text-sm text-[#00ff00] mb-2 md:mb-0">
+    <div className="text-sm text-[#ffffff] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.
     </div>
     <div className="flex space-x-6">
-      <a href="#" className="text-sm text-[#00ff00] hover:text-shadow-[0_0_5px_#00ff00] transition-all">Terms</a>
-      <a href="#" className="text-sm text-[#00ff00] hover:text-shadow-[0_0_5px_#00ff00] transition-all">Privacy</a>
-      <a href="#" className="text-sm text-[#00ff00] hover:text-shadow-[0_0_5px_#00ff00] transition-all">Support</a>
+      <a href="#" className="text-sm text-white hover:text-shadow-[0_0_5px_#00ff00] transition-all">Terms</a>
+      <a href="#" className="text-sm text-white hover:text-shadow-[0_0_5px_#00ff00] transition-all">Privacy</a>
+      <a href="#" className="text-sm text-white hover:text-shadow-[0_0_5px_#00ff00] transition-all">Support</a>
     </div>
   </div>
 </footer>
