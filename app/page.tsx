@@ -92,11 +92,11 @@ export default function App() {
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
       background-color: #00aa00 !important;
-        color: black !important;
+        color: white !important;
       }
   
       [data-testid="ockSwapButton_Button"] span {
-        color: black !important;
+        color: white !important;
       }
     `;
     document.head.appendChild(style);
@@ -259,12 +259,12 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="bg-[#003000] shadow-2xl mb-1 text-white rounded-2xl shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
+    className="bg-transparent shadow-2xl mb-1 text-white rounded-2xl shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
   {showSwapButton && (
-    <SwapButton className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85" />
+    <SwapButton className="w-full font-extrabold bg-[#008800] dark:bg-[#008800] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85" />
   )}
 
   <SwapMessage className="mt-2 text-gray-800 text-sm" />
@@ -291,9 +291,9 @@ if (!isMounted) {
       // optionally notify user of the failure
     }
   }}
-    className="w-full font-bold bg-[#00aa00] dark:bg-[#00aa00] text-black dark:text-black rounded-full py-2 transition-colors disabled:opacity-85"
+    className="w-full font-extrabold bg-[#008800] dark:bg-[#008800] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85"
   >
-    Begin Swap
+    Trade Now
   </button>
 )}
 
@@ -366,7 +366,7 @@ if (!isMounted) {
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-[#003300] border-t border-[#004400] py-4 px-4">
+      <footer className="bg-[#001500] border-t border-[#004400] py-4 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-green-300 mb-2 md:mb-0">
             © 2025 GoldenEagle Finance. All rights reserved.
@@ -390,39 +390,5 @@ if (!isMounted) {
     </div>
     
   );
-  {/* Custom animations */}
-
-  <style jsx global>{`
-
-    @keyframes fadeIn {
-
-      from { opacity: 0; transform: translateY(10px); }
-
-      to { opacity: 1; transform: translateY(0); }
-
-    }
-
-    .animate-fadeIn {
-
-      animation: fadeIn 0.3s ease-out forwards;
-
-    }
-
-   
-
-    /* Additional responsive styles */
-
-    @media (max-width: 480px) {
-
-      .wallet-container {
-
-        transform: scale(0.9);
-
-        transform-origin: right center;
-
-      }
-
-    }
-
-  `}</style> 
+  
 }

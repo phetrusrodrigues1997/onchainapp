@@ -310,7 +310,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         </div>
 
         {/* Balance Display with Animated Gradient Border */}
-        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A]  overflow-hidden">
+        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-gradient-to-r from-[#001100] to-[#001100]  overflow-hidden">
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#d3c81a]/20 via-[#d3c81a]/5 to-[#d3c81a]/20 opacity-50 animate-gradient-x"></div>
           <div className="relative z-10">
             <h1 className="text-lg font-medium text-gray-400 mb-1">Total Balance</h1>
