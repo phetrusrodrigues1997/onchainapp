@@ -129,7 +129,7 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-[#001200] border-b border-[#004400] px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#86efac] border-b border-[#004400] px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -171,7 +171,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center mt-2 ">
+      <main className="flex-grow flex items-center justify-center bg-[#002200] ">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
           {activeSection === "swap" && (
@@ -258,7 +258,9 @@ if (!isMounted) {
     shadow-lg          /* depth from page below */
     transition         /* smooth state changes */
     duration-200       /* speed up/down */
-    ease-out           /* easing for hover */
+    ease-out
+    border
+    border-[#004400]           /* easing for hover */
   "
 />
 
@@ -381,18 +383,18 @@ if (!isMounted) {
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-[#003300] border-t border-[#004400] py-4 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-          <div className="text-sm text-green-300 mb-2 md:mb-0">
-            © 2025 GoldenEagle Finance. All rights reserved.
-          </div>
-          <div className="flex space-x-6">
-            <a href="#" className="text-sm text-green-300 hover:text-[#00cc00] transition-colors">Terms</a>
-            <a href="#" className="text-sm text-green-300 hover:text-[#00cc00] transition-colors">Privacy</a>
-            <a href="#" className="text-sm text-green-300 hover:text-[#00cc00] transition-colors">Support</a>
-          </div>
-        </div>
-      </footer>
+      <footer className="bg-gradient-to-r from-[#001100] to-[#003300] border-t border-[#00ff00]/50 py-4 px-4">
+  <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+    <div className="text-sm text-[#00ff00] mb-2 md:mb-0">
+      © 2025 GoldenEagle Finance. All rights reserved.
+    </div>
+    <div className="flex space-x-6">
+      <a href="#" className="text-sm text-[#00ff00] hover:text-shadow-[0_0_5px_#00ff00] transition-all">Terms</a>
+      <a href="#" className="text-sm text-[#00ff00] hover:text-shadow-[0_0_5px_#00ff00] transition-all">Privacy</a>
+      <a href="#" className="text-sm text-[#00ff00] hover:text-shadow-[0_0_5px_#00ff00] transition-all">Support</a>
+    </div>
+  </div>
+</footer>
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-[#003300] text-white px-4 py-2 rounded-md shadow-lg border border-[#004400] transition-all duration-200 flex items-center z-50">
