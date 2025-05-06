@@ -319,6 +319,7 @@ svg[aria-label="ock-swapSettingsSvg"] path {
 }
 [data-testid="ockSwapSettings_Settings"] {
 background-color: transparent  !important;
+fill: white !important;
 }
 
 [data-testid="ockConnectButton"] {

@@ -22,7 +22,7 @@ const SwapDropdown: React.FC<SwapDropdownProps> = ({ onSelectionChange }) => {
     >
       <button
         type="button"
-        className="text-white font-bold px-4 py-2 rounded-md shadow-sm border border-[#bfbfbf] "
+        className="flex items-center space-x-2 bg-black/40 text-green-300 hover:bg-[#d3c81a]/20 hover:text-[#d3c81a] px-3 py-1.5 rounded-full transition-all duration-300 text-sm border border-gray-800 "
         onClick={() => setIsOpen(!isOpen)}
       >
         {selected} ▼

@@ -171,7 +171,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center mt-2">
+      <main className="flex-grow flex items-center justify-center mt-2 ">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
           {activeSection === "swap" && (
@@ -244,9 +244,24 @@ if (!isMounted) {
         : undefined
     }
     type="from"
-    className="mb-1 bg-transparent text-white rounded-2xl shadow-sm shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
+    className="mb-1 bg-transparent text-white rounded-2xl shadow-lg shadow-[#00aa00]/30 border border-[#00aa00]/50 hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
   />
-  <SwapToggleButton className="mb-2" />
+  <SwapToggleButton
+  className="
+    mb-2
+    relative           /* position context so z-index applies */
+    z-50               /* high stacking priority */
+    bg-black        /* dark card color */
+    hover:bg-gray-700  /* hover feedback */
+    p-2                /* comfortable padding */
+    rounded-full       /* pill shape */
+    shadow-lg          /* depth from page below */
+    transition         /* smooth state changes */
+    duration-200       /* speed up/down */
+    ease-out           /* easing for hover */
+  "
+/>
+
   <SwapAmountInput
     key={`buy-${activeSection}-${selectedOption}`}
     label="Buy"
@@ -259,7 +274,7 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="bg-transparent shadow-2xl mb-1 text-white rounded-2xl shadow-md border border-[#bfbfbf] hover:border-[#00aa00] transition-all duration-200"
+    className="mb-1 bg-transparent text-white rounded-2xl shadow-lg shadow-[#00aa00]/30 border border-[#00aa00]/50 hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
@@ -302,13 +317,13 @@ if (!isMounted) {
               {/* Points Display */}
               {address && points !== null && (
                 <div className="mt-6 text-center">
-                  <div className="inline-flex items-center bg-[#002200] px-4 py-2 rounded-md border border-[#004400]">
+                  <div className="inline-flex items-center bg-black/40 px-4 py-2 rounded-md border border-[#004400]">
                     <div className="w-8 h-8 rounded-full bg-[#00aa00]/20 flex items-center justify-center mr-3">
                       <svg className="w-4 h-4 text-[#00cc00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </div>
-                    <div className="text-left">
+                    <div className="text-left ">
                       <span className="text-green-300 text-sm block">Swap Points</span>
                       <span className="text-white font-bold text-lg">{points}</span>
                     </div>
@@ -321,7 +336,7 @@ if (!isMounted) {
               {/* Trust indicators */}
               <div className="mt-10 grid grid-cols-3 gap-4 text-center">
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-[#002200] border border-[#004400] flex items-center justify-center mb-2">
+                  <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
                     <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -329,7 +344,7 @@ if (!isMounted) {
                   <span className="text-sm font-medium text-green-200">Secure</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-[#002200] border border-[#004400] flex items-center justify-center mb-2">
+                  <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
                     <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
@@ -337,7 +352,7 @@ if (!isMounted) {
                   <span className="text-sm font-medium text-green-200">Fast</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-[#002200] border border-[#004400] flex items-center justify-center mb-2">
+                  <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
                     <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
                     </svg>
@@ -366,7 +381,7 @@ if (!isMounted) {
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-[#001500] border-t border-[#004400] py-4 px-4">
+      <footer className="bg-[#003300] border-t border-[#004400] py-4 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-green-300 mb-2 md:mb-0">
             © 2025 GoldenEagle Finance. All rights reserved.
