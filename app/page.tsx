@@ -134,7 +134,7 @@ if (!isMounted) {
           <div className="flex items-center gap-6">
             {/* Logo */}
             <div className="relative">
-              <div className="absolute -inset-1 bg-[#00aa00]/20 rounded-full blur-md"></div>
+              <div className="absolute -inset-1 bg-[#d3c81a] rounded-full blur-md"></div>
               <ResponsiveLogo />
             </div>
             
@@ -385,7 +385,7 @@ if (!isMounted) {
       {/* Footer */}
       <footer className="bg-[#111111] border-t border-[#666666] py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-    <div className="text-sm text-[#ffffff] mb-2 md:mb-0">
+    <div className="text-sm text-[#d3c81a] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.
     </div>
     <div className="flex space-x-6">
