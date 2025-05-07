@@ -129,7 +129,7 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-[#050505] border-b border-[#aaaaaa] px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#111111] border-b border-[#666666] px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -171,7 +171,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#050505] ">
+      <main className="flex-grow flex items-center justify-center bg-[#111111] ">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
           {activeSection === "swap" && (
@@ -244,7 +244,7 @@ if (!isMounted) {
         : undefined
     }
     type="from"
-    className="mb-1 bg-[#060606] text-white rounded-2xl shadow-sm shadow-[#00aa00]/30 border border-[#aaaaaa] hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#1b1b1b] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
   <SwapToggleButton
   className="
@@ -276,12 +276,12 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="mb-1 bg-[#1b1b1b] text-white rounded-2xl shadow-sm shadow-[#00aa00]/30 hover:border-[#00ff00] hover:shadow-[#00ff00]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#00ff00]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#1b1b1b] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
   {showSwapButton && (
-    <SwapButton className="w-full font-extrabold bg-[#d3c81a] dark:bg-[#008800] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85" />
+    <SwapButton className="w-full font-extrabold bg-[#7F6A00] dark:bg-[#7F6A00] text-white dark:text-white rounded-full py-2 transition-colors disabled:opacity-85" />
   )}
 
   <SwapMessage className="mt-2 text-gray-800 text-sm" />
@@ -308,7 +308,7 @@ if (!isMounted) {
       // optionally notify user of the failure
     }
   }}
-    className="w-full font-extrabold bg-[#7F6A00] dark:bg-[#008800] text-[#FFFF00] dark:text-white rounded-full py-2 transition-colors disabled:opacity-85"
+    className="w-full font-extrabold bg-[#7F6A00] dark:bg-[#7F6A00] text-[#FFFF00] dark:text-white rounded-full py-2 transition-colors disabled:opacity-85"
   >
     Trade Now
   </button>
@@ -319,9 +319,9 @@ if (!isMounted) {
               {/* Points Display */}
               {address && points !== null && (
                 <div className="mt-6 text-center">
-                  <div className="inline-flex items-center bg-transparent px-4 py-2 rounded-md border border-[#004400]">
-                    <div className="w-8 h-8 rounded-full bg-[#00aa00]/20 flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-[#00cc00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <div className="inline-flex items-center bg-transparent px-4 py-2 rounded-md border border-[#666666]">
+                    <div className="w-8 h-8 rounded-full bg-[#d3c81a] flex items-center justify-center mr-3">
+                      <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
                     </div>
@@ -383,7 +383,7 @@ if (!isMounted) {
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-[#050505] border-t border-[#aaaaaa] py-4 px-4">
+      <footer className="bg-[#111111] border-t border-[#666666] py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
     <div className="text-sm text-[#ffffff] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.
