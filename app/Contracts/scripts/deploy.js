@@ -1,23 +1,28 @@
+// scripts/deploy.js
+require("dotenv").config();
 const hre = require("hardhat");
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
-  console.log("Deploying with:", deployer.address);
+  console.log(`Deploying SimpleVault to network ${hre.network.name}`);
+  console.log("Deploying from:", deployer.address);
 
-  const USDCAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base Mainnet
-  const ETHUSDOracleAddress = "0x5213eBB69743b85644dbB6E25cdF994aFBb8cF31"; // XAU/USD on Base Mainnet
+  const UNDERLYING_TOKEN = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
-  const SyntheticGold = await hre.ethers.getContractFactory("SyntheticGold");
-  console.log("Deploying GoldenEagle Gold...");
+  const SimpleVault = await hre.ethers.getContractFactory("SimpleVault", deployer);
+  console.log("⛏  Deploying SimpleVault…");
+  const vault = await SimpleVault.deploy(UNDERLYING_TOKEN);
 
-  const syntheticGold = await SyntheticGold.deploy(USDCAddress, ETHUSDOracleAddress);
-  const receipt = await syntheticGold.deploymentTransaction().wait(); // Wait for deployment confirmation
-  console.log("GoldenEagle Gold deployed to:", receipt.contractAddress);
+  // Option B: wait for deployment via Ethers v6 helper
+  await vault.waitForDeployment();
+
+  // Now vault.target contains the address
+  console.log("✅  SimpleVault deployed to:", vault.target);
 }
 
 main()
   .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
+  .catch((err) => {
+    console.error(err);
     process.exit(1);
   });
