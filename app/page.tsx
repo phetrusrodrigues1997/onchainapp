@@ -134,7 +134,7 @@ if (!isMounted) {
           <div className="flex items-center gap-6">
             {/* Logo */}
             <div className="relative">
-              <div className="absolute -inset-1 bg-[#d3c81a] rounded-full blur-md"></div>
+              <div className="absolute -inset-1 rounded-full blur-md"></div>
               <ResponsiveLogo />
             </div>
             

@@ -310,8 +310,8 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
         </div>
 
         {/* Balance Display with Animated Gradient Border */}
-        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-black/20 overflow-hidden">
-          <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-50 animate-gradient-x"></div>
+        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-[#1b1b1b] overflow-hidden">
+          <div className="absolute inset-0 rounded-2xl bg-[#1b1b1b] opacity-50 animate-gradient-x"></div>
           <div className="relative z-10">
             <h1 className="text-lg font-medium text-gray-400 mb-1">Total Balance</h1>
             <h2 className="text-5xl font-bold mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
@@ -434,7 +434,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           <div className="space-y-3">
             {/* Native Token Card */}
             {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-              <div className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group">
+              <div className="bg-[#1b1b1b] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-[#d3c81a]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <img
@@ -477,7 +477,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                 return (
                   <div
                     key={token.address}
-                    className="bg-gradient-to-r from-[#0A0A0A] to-[#1A1A1A] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group"
+                    className="bg-[#1b1b1b] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group"
                   >
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-r from-[#d3c81a]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

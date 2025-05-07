@@ -87,7 +87,7 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
           <div className="flex space-x-2 self-center sm:self-auto">
             <button
               onClick={scrollLeft}
-              className="bg-white rounded-full p-2 hover:bg-[#2563EB] transition-colors"
+              className="bg-[#d3c81a] rounded-full p-2 hover:bg-[#2563EB] transition-colors"
             >
               <svg
                 className="w-4 h-4 text-black"
@@ -106,7 +106,7 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
             </button>
             <button
               onClick={scrollRight}
-              className="bg-white rounded-full p-2 hover:bg-[#2563EB] transition-colors"
+              className="bg-[#d3c81a] rounded-full p-2 hover:bg-[#2563EB] transition-colors"
             >
               <svg
                 className="w-4 h-4 text-black"

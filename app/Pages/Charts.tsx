@@ -6,7 +6,7 @@ const ALPHA_API_KEY = 'QTISQI4HWA4IXQ31';
 
 // Theme configuration
 const theme = {
-  primary: '#00aa00',
+  primary: '#d3c81a',
   secondary: '#ff006e',
   success: '#38b000',
   danger: '#d90429',
