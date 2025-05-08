@@ -281,7 +281,7 @@ if (!isMounted) {
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
   {showSwapButton && (
-    <SwapButton className="w-full font-extrabold bg-[#009900] dark:bg-[#009900] text-white font-extrabold dark:text-[#FFF14A] rounded-full py-2 transition-colors disabled:opacity-85"
+    <SwapButton className="w-full bg-yellow-500 hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
 
     />
   )}
@@ -310,7 +310,7 @@ if (!isMounted) {
       // optionally notify user of the failure
     }
   }}
-  className="w-full font-extrabold bg-[#007700] dark:bg-[#007700] text-white font-extrabold dark:text-[#FFF14A] rounded-full py-2 transition-colors disabled:opacity-85"
+  className="w-full bg-yellow-500 hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
 
 
   >
