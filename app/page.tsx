@@ -244,7 +244,7 @@ if (!isMounted) {
         : undefined
     }
     type="from"
-    className="mb-1 bg-[#000000] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
+    className="mb-1 bg-gradient-to-r from-green-900 to-yellow-800 text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
   <SwapToggleButton
   className="
@@ -276,7 +276,7 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="mb-1 bg-[#000000] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
+    className="mb-1 bg-green-950 border border-opacity-20 border-yellow-500 text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}

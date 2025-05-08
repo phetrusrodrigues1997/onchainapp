@@ -14,4 +14,11 @@ interface IAavePool {
         uint256 amount,
         address to
     ) external returns (uint256);
+
+    struct ReserveData {
+        address aTokenAddress; // Simplified struct
+        // Additional fields omitted for brevity
+    }
+
+    function getReserveData(address asset) external view returns (ReserveData memory);
 }
