@@ -143,7 +143,7 @@ if (!isMounted) {
           </div>
           <div className="wallet-container">
             <Wallet>
-            <ConnectWallet className="bg-[#d3c81a] dark:bg-[#d3c81a] rounded-full lg:mr-4">
+            <ConnectWallet className="bg-[#d3c81a] text-black dark:bg-[#d3c81a] rounded-full lg:mr-4">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
