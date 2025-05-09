@@ -14,6 +14,12 @@ const config: HardhatUserConfig = {
     ],
   },
   networks: {
+    hardhat: {
+      forking: {
+        url: "https://mainnet.base.org", // Your Base RPC URL
+        blockNumber: 29971038, // Fork from the block before your failed tx
+      },
+    },
     base: {
       url: "https://mainnet.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],

@@ -1,39 +1,92 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// ========== Imports ==========
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "hardhat/console.sol";
 
-contract SimpleVault is ERC20, ERC4626 {
-    /// @notice Address that collects the performance fees
-    address public feeRecipient = 0x1Ac08E56c4d95bD1B8a937C6EB626cFEd9967D67;
+/// @dev Minimal strategy interface
+interface ICometUSDCStrategy {
+    function deposit() external;
+    function withdraw(uint256 amount) external;
+    function harvest() external returns (uint256);
+}
 
-    /// @notice Performance fee in basis points (bps). 50 = 0.5%
-    uint256 public performanceFeeBps = 50;
+contract SimpleVault is ERC20, ERC4626, Ownable {
+    using SafeERC20 for IERC20Metadata;
 
-    /// @notice Emitted when harvest is called
-    event Harvest(address indexed caller);
+    /// @notice The external strategy contract
+    ICometUSDCStrategy public strategy;
 
-    constructor(IERC20Metadata underlying)
-        ERC20("Simple Vault Token", "sVAULT")
-        ERC4626(underlying)
-    {}
+    /// @param _underlying The USDC token (6 decimals)
+    constructor(IERC20Metadata _underlying)
+        ERC20("SimpleVault Token", "sVAULT")
+        ERC4626(_underlying)
+        Ownable(msg.sender)
+    {
+        // owner is set to deployer via Ownable(msg.sender)
+    }
 
-    /// @dev Resolves decimals conflict between ERC20 and ERC4626
+    /// @notice Owner can set (or upgrade) the strategy
+    function setStrategy(address _strategy) external onlyOwner {
+        require(_strategy != address(0), "zero strategy");
+        strategy = ICometUSDCStrategy(_strategy);
+        console.log("Strategy set to:", _strategy);
+    }
+
+    /// @notice ERC-20 / ERC-4626 both define decimals(): resolve the conflict
     function decimals()
         public
         view
-        virtual
         override(ERC20, ERC4626)
         returns (uint8)
     {
         return ERC4626.decimals();
     }
 
-    /// @notice Stub function to allow future implementation of yield harvesting
+    /// @dev Override deposit path: forward assets to strategy after mint
+    function _deposit(
+        address caller,
+        address receiver,
+        uint256 assets,
+        uint256 shares
+    ) internal override {
+        console.log("Starting deposit, assets:", assets, "shares:", shares);
+        // 1) mint shares & pull in assets
+        console.log("Calling super._deposit...");
+        super._deposit(caller, receiver, assets, shares);
+        console.log("Transferring assets to strategy...");
+        // 2) forward assets to strategy
+        IERC20Metadata(asset()).safeTransfer(address(strategy), assets);
+        console.log("Calling strategy.deposit...");
+        strategy.deposit();
+        console.log("Deposit completed");
+    }
+
+    /// @dev Override withdraw path: pull assets from strategy then burn shares
+    function _withdraw(
+        address caller,
+        address receiver,
+        address owner,
+        uint256 assets,
+        uint256 shares
+    ) internal override {
+        console.log("Starting withdraw, assets:", assets, "shares:", shares);
+        // 1) pull assets out of strategy
+        strategy.withdraw(assets);
+        // 2) burn shares & send assets
+        super._withdraw(caller, receiver, owner, assets, shares);
+        console.log("Withdraw completed");
+    }
+
+    /// @notice Harvest rewards via strategy (vault’s 0.5% fee applies)
     function harvest() external {
-        emit Harvest(msg.sender);
-        // In a real version: collect rewards, calculate fee, send to feeRecipient
+        console.log("Harvesting rewards...");
+        strategy.harvest();
+        console.log("Harvest completed");
     }
 }

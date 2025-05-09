@@ -23,7 +23,7 @@ import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapT
 import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 import CreateMessage from './Pages/MessagesPage';
-import MintBurn from './Chainlink/rwaTrades';
+
 
 
 
@@ -91,7 +91,7 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
-      background-color: #00aa00 !important;
+      background-color: #0000aa !important;
         color: white !important;
       }
   
@@ -111,8 +111,8 @@ export default function App() {
 
 if (!isMounted) {
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-[#002200] text-white">
-      <div className="p-8 bg-[#002200] rounded-lg shadow-2xl border border-[#d3c81a] max-w-md w-full">
+    <div className="flex flex-col items-center justify-center h-screen bg-[#012b1a] text-white">
+      <div className="p-8 bg-[#012b1a] rounded-lg shadow-2xl border border-[#d3c81a] max-w-md w-full">
         <div className="text-center mb-6">
           <h2 className="text-xl font-medium mb-2">Loading Application</h2>
           <p className="text-[#d3c81a]">Please wait while we initialize the interface</p>
@@ -129,7 +129,7 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-[#002200] border-b border-[#666666] px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#012b1a] border-b border-[#666666] px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -171,7 +171,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#002200] ">
+      <main className="flex-grow flex items-center justify-center bg-[#012b1a] ">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
           {activeSection === "swap" && (
@@ -250,7 +250,7 @@ if (!isMounted) {
   className="
     mb-2
     relative           /* position context so z-index applies */
-    z-50               /* high stacking priority */
+    z-10               /* high stacking priority */
     bg-[#28282B]        /* dark card color */
     hover:bg-gray-700  /* hover feedback */
     p-2                /* comfortable padding */
@@ -276,12 +276,12 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="mb-1 bg-green-950 border border-opacity-20 border-yellow-500 text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#1b1b1b] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
   {showSwapButton && (
-    <SwapButton className="w-full bg-yellow-500 hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
+    <SwapButton className="w-full bg-[#0000bb] text-white font-bold rounded-full py-2 transition-colors disabled:opacity-85"
 
     />
   )}
@@ -382,12 +382,12 @@ if (!isMounted) {
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {activeSection === "notifications" && <CreateMessage />}
-          {activeSection === "rwa" && <MintBurn />}
+          
 
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-[#002200] border-t border-[#666666] mt-10 py-4 px-4">
+      <footer className="bg-[#012b1a] border-t border-[#666666] mt-10 py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
     <div className="text-sm text-[#d3c81a] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.

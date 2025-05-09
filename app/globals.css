@@ -6,9 +6,9 @@
 
 
 :root {
-  --background-start: #002200; /* Deep cool green-blue */
-  --background-mid: #002200;   /* Midnight indigo/navy */
-  --background-end: #002200;   /* Clean black */
+  --background-start: #012b1a; /* Deep cool green-blue */
+  --background-mid: #012b1a;   /* Midnight indigo/navy */
+  --background-end: #012b1a;   /* Clean black */
 }
 
 
@@ -106,9 +106,12 @@ button[aria-label="Toggle swap settings"] {
   }
 
 [data-testid="ockTokenSelectDropdown_List"] {
-  max-height: 200px;
-  overflow-y: auto; /* Enables scrolling */
-  -webkit-overflow-scrolling: touch; /* Improves touch scrolling on iOS */
+  
+  scrollbar-gutter: stable both-edges;   /* reserve space, avoid overlay */
+  -webkit-overflow-scrolling: auto;      /* try non‑momentum scrolling */
+  overscroll-behavior: contain;          /* prevent rubber‑banding */
+  z-index: 1000 !important; /* Ensure it appears above other elements */
+  
 }
 
 /* Force scrollbar visibility and style for WebKit browsers (Safari, Chrome) */
@@ -247,9 +250,7 @@ button[aria-label="Toggle swap settings"] {
   }
   }
 
-  [data-testid="ockTokenSelectDropdown_List"] {
-    overflow-y: auto !important;
-  }
+ 
 
 @media (prefers-color-scheme: dark) {
   [data-testid="SwapTokensButton"] {
