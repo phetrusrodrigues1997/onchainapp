@@ -276,7 +276,7 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="mb-1 bg-[#222222] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#333333] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
