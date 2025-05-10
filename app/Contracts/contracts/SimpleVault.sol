@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /// @dev Minimal strategy interface
 interface ICometUSDCStrategy {
@@ -16,7 +16,7 @@ interface ICometUSDCStrategy {
     function harvest() external returns (uint256);
 }
 
-contract SimpleVault is ERC20, ERC4626, Ownable {
+contract SimpleVault is ERC20, ERC4626, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20Metadata;
 
     /// @notice The external strategy contract
@@ -27,15 +27,12 @@ contract SimpleVault is ERC20, ERC4626, Ownable {
         ERC20("SimpleVault Token", "sVAULT")
         ERC4626(_underlying)
         Ownable(msg.sender)
-    {
-        // owner is set to deployer via Ownable(msg.sender)
-    }
+    {}
 
     /// @notice Owner can set (or upgrade) the strategy
     function setStrategy(address _strategy) external onlyOwner {
-        require(_strategy != address(0), "zero strategy");
+        require(_strategy != address(0), "Invalid strategy address");
         strategy = ICometUSDCStrategy(_strategy);
-        console.log("Strategy set to:", _strategy);
     }
 
     /// @notice ERC-20 / ERC-4626 both define decimals(): resolve the conflict
@@ -54,17 +51,15 @@ contract SimpleVault is ERC20, ERC4626, Ownable {
         address receiver,
         uint256 assets,
         uint256 shares
-    ) internal override {
-        console.log("Starting deposit, assets:", assets, "shares:", shares);
-        // 1) mint shares & pull in assets
-        console.log("Calling super._deposit...");
+    ) internal override nonReentrant {
+        require(address(strategy) != address(0), "Strategy not set");
+
+        // Mint shares & pull in assets
         super._deposit(caller, receiver, assets, shares);
-        console.log("Transferring assets to strategy...");
-        // 2) forward assets to strategy
+
+        // Forward assets to strategy
         IERC20Metadata(asset()).safeTransfer(address(strategy), assets);
-        console.log("Calling strategy.deposit...");
         strategy.deposit();
-        console.log("Deposit completed");
     }
 
     /// @dev Override withdraw path: pull assets from strategy then burn shares
@@ -74,19 +69,26 @@ contract SimpleVault is ERC20, ERC4626, Ownable {
         address owner,
         uint256 assets,
         uint256 shares
-    ) internal override {
-        console.log("Starting withdraw, assets:", assets, "shares:", shares);
-        // 1) pull assets out of strategy
+    ) internal override nonReentrant {
+        require(address(strategy) != address(0), "Strategy not set");
+
+        // Pull assets from strategy
         strategy.withdraw(assets);
-        // 2) burn shares & send assets
+
+        // Burn shares and send assets
         super._withdraw(caller, receiver, owner, assets, shares);
-        console.log("Withdraw completed");
     }
 
     /// @notice Harvest rewards via strategy (vault’s 0.5% fee applies)
-    function harvest() external {
-        console.log("Harvesting rewards...");
-        strategy.harvest();
-        console.log("Harvest completed");
+    function harvest() external nonReentrant {
+        require(address(strategy) != address(0), "Strategy not set");
+
+        uint256 harvested = strategy.harvest();
+
+        // Apply 0.5% performance fee to harvested amount
+        uint256 fee = (harvested * 50) / 10_000; // 0.5%
+        if (fee > 0) {
+            IERC20Metadata(asset()).safeTransfer(owner(), fee);
+        }
     }
 }

@@ -14,10 +14,12 @@ async function main() {
   await vault.waitForDeployment();
   console.log("✅ Vault deployed at:", vault.target);
 
-  // 2) Deploy the strategy, pointing at the vault
-  console.log("Deploying CometUSDCStrategy with vault:", vault.target);
-  const CS = await hre.ethers.getContractFactory("CometUSDCStrategy", deployer);
-  const strat = await CS.deploy(vault.target);
+  // 2) Deploy the strategy, pointing at the vault & the Morpho ERC-4626 wrapper
+  console.log("Deploying MorphoUSDCStrategy with vault:", vault.target);
+  const MS = await hre.ethers.getContractFactory("MorphoUSDCStrategy", deployer);
+
+  const MORPHO_VAULT = "0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca";
+  const strat = await MS.deploy(vault.target, MORPHO_VAULT);
   await strat.waitForDeployment();
   console.log("✅ Strategy deployed at:", strat.target);
 
