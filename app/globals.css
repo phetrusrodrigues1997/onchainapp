@@ -11,6 +11,39 @@
   --background-end: #002400;   /* Clean black */
 }
 
+/* in your global CSS or Tailwind add-on */
+
+@keyframes gradientMove {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease infinite alternate;
+}
+
+@keyframes shine {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  80%  { transform: translateX(200%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+.animate-shine {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -30%;
+  width: 150%;
+  height: 200%;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.4) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  animation: shine 2.5s ease-in-out infinite;
+}
+
+
 
 html,
 body {

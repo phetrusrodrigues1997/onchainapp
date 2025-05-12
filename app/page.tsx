@@ -179,24 +179,15 @@ if (!isMounted) {
             
             <div>
               <h1
-  className="
-    text-4xl sm:text-5xl md:text-6xl lg:text-7xl 
-    font-extrabold 
-    text-center 
-    mt-12 
-    leading-tight 
-    tracking-tight 
-    bg-clip-text text-transparent 
-    bg-gradient-to-r from-blue-400 via-teal-300 to-green-200
-    drop-shadow-lg
-    animate-fadeIn
-  "
-  style={{ fontFamily: "'Montserrat', sans-serif" }}
->
-  FX trading & remittances <br />
-  redefined.
-</h1>
-
+      className="text-3xl md:text-3xl font-bold text-center mt-10 leading-tight"
+      style={{
+        fontFamily: "'Montserrat', sans-serif",
+        color: "#ffffff",
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.6), 0 0 6px rgba(0, 0, 0, 0.3)',
+      }}
+    >
+      FX trading & remittances <br />redefined.
+    </h1>
                   {/* <p
   className="mt-4 text-lg md:text-xl text-center text-green-300"
   style={{
@@ -284,7 +275,7 @@ if (!isMounted) {
         : undefined
     }
     type="to"
-    className="mb-1 bg-gradient-to-r from-green-900 to-yellow-800 text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
+    className="mb-1 bg-[#333333] text-white rounded-2xl hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70 backdrop-blur-sm"
   />
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
