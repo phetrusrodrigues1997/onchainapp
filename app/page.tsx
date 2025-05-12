@@ -111,8 +111,8 @@ export default function App() {
 
 if (!isMounted) {
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-[#002400] text-white">
-      <div className="p-8 bg-[#002400] rounded-lg shadow-2xl border border-[#d3c81a] max-w-md w-full">
+    <div className="flex flex-col items-center justify-center h-screen bg-[#0C1F16] text-white">
+      <div className="p-8 bg-[#0C1F16] rounded-lg shadow-2xl border border-[#d3c81a] max-w-md w-full">
         <div className="text-center mb-6">
           <h2 className="text-xl font-medium mb-2">Loading Application</h2>
           <p className="text-[#d3c81a]">Please wait while we initialize the interface</p>
@@ -129,7 +129,7 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-[#002400] border-b border-[#666666] px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#0C1F16] border-b border-[#666666] px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -171,7 +171,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#002400] ">
+      <main className="flex-grow flex items-center justify-center bg-[#0C1F16] ">
         <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
           
           {activeSection === "swap" && (
@@ -387,7 +387,7 @@ if (!isMounted) {
         </div>
       </main>
       {/* Footer */}
-      <footer className="bg-[#002400] border-t border-[#666666] mt-10 py-4 px-4">
+      <footer className="bg-[#0C1F16] border-t border-[#666666] mt-10 py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
     <div className="text-sm text-[#d3c81a] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.

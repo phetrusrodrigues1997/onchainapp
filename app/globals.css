@@ -6,9 +6,9 @@
 
 
 :root {
-  --background-start: #002400; /* Deep cool green-blue */
-  --background-mid: #002400;   /* Midnight indigo/navy */
-  --background-end: #002400;   /* Clean black */
+  --background-start: #0C1F16; /* Deep cool green-blue */
+  --background-mid: #0C1F16;   /* Midnight indigo/navy */
+  --background-end: #0C1F16;   /* Clean black */
 }
 
 
@@ -64,6 +64,8 @@ body::before {
 
 button[aria-label="Toggle swap settings"] {
   background:transparent  !important;
+  fill: white !important;
+  opacity: 0.99 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -316,11 +318,13 @@ button[aria-label="Toggle menu"] svg {
 
 svg[aria-label="ock-swapSettingsSvg"] path {
   fill: white !important;
+  opacity: 0.99 !important;
   
 }
 [data-testid="ockSwapSettings_Settings"] {
 background-color: transparent  !important;
 fill: white !important;
+opacity: 0.99 !important;
 }
 
 [data-testid="ockConnectButton"] {
