@@ -355,7 +355,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             )}
           </div>
           <button
-            // onClick={() => setActiveSection("")}
+            onClick={() => setActiveSection("LendingBorrowing")}
             className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />

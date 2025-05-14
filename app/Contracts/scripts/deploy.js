@@ -1,38 +1,50 @@
-require("dotenv").config();
-const hre = require("hardhat");
+ // deploy.js
+ async function main() {
+ const [deployer] = await ethers.getSigners();
 
-async function main() {
-  const [deployer] = await hre.ethers.getSigners();
-  console.log("Deployer:", deployer.address);
-  console.log("Network:", hre.network.name);
+ console.log("Deploying contracts with the account:", deployer.address);
 
-  // 1) Deploy the vault (no strategy yet)
-  const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-  console.log("Deploying SimpleVault with USDC:", USDC);
-  const SV = await hre.ethers.getContractFactory("SimpleVault", deployer);
-  const vault = await SV.deploy(USDC);
-  await vault.waitForDeployment();
-  console.log("✅ Vault deployed at:", vault.target);
+//  const balance = await ethers.provider.getBalance(deployer.address);
+//  console.log("Account balance:", ethers.formatEther(balance) + " ETH");
 
-  // 2) Deploy the strategy, pointing at the vault & the Morpho ERC-4626 wrapper
-  console.log("Deploying MorphoUSDCStrategy with vault:", vault.target);
-  const MS = await hre.ethers.getContractFactory("MorphoUSDCStrategy", deployer);
+ const usdcTokenAddressBase = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
-  const MORPHO_VAULT = "0xc1256Ae5FF1cf2719D4937adb3bbCCab2E00A2Ca";
-  const strat = await MS.deploy(vault.target, MORPHO_VAULT);
-  await strat.waitForDeployment();
-  console.log("✅ Strategy deployed at:", strat.target);
+ const USDCLendingPool = await ethers.getContractFactory("USDCLendingPool");
 
-  // 3) Wire them up: vault.setStrategy(strat)
-  console.log("Setting strategy on vault...");
-  const tx = await vault.connect(deployer).setStrategy(strat.target);
-  await tx.wait();
-  console.log("🔗 Vault strategy set to:", strat.target);
-}
+ console.log(`Deploying USDCLendingPool with USDC address: ${usdcTokenAddressBase}...`);
+ // In ethers v6, the deploy() method returns a promise that resolves to the deployed contract instance once mined.
+ // There is no separate .deployed() function to call.
+ const usdcLendingPool = await USDCLendingPool.deploy(usdcTokenAddressBase);
 
-main()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+ // To be absolutely sure it's mined and to get the contract instance, you can await the deployment transaction
+ // although `await USDCLendingPool.deploy()` should already handle this.
+ // For explicit waiting on the transaction to be mined (optional, as deploy() should suffice):
+ // await usdcLendingPool.deployTransaction.wait(); 
+ // However, the instance `usdcLendingPool` returned by `deploy()` is what you need.
+
+ console.log("USDCLendingPool deployed to:", usdcLendingPool.target);
+
+ // Verification example (requires hardhat-etherscan plugin and configuration)
+ // if (hre.network.name !== "localhost" && hre.network.name !== "hardhat") {
+ //   console.log("Verifying contract on Basescan...");
+ //   // Wait for a few blocks to ensure Etherscan can pick it up
+ //   await new Promise(resolve => setTimeout(resolve, 30000)); // 30 seconds wait
+ //   try {
+ //     await hre.run("verify:verify", {
+ //       address: usdcLendingPool.address,
+ //       constructorArguments: [usdcTokenAddressBase],
+ //     });
+ //     console.log("Contract verified.");
+ //   } catch (error) {
+ //     console.error("Verification failed:", error);
+ //   }
+ // }
+ }
+
+ main()
+ .then(() => process.exit(0))
+ .catch((error) => {
+ console.error(error);
+ process.exit(1);
+ });
+
