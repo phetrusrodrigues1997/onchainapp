@@ -8,13 +8,14 @@
 //  console.log("Account balance:", ethers.formatEther(balance) + " ETH");
 
  const usdcTokenAddressBase = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+ const withdrawalAddressBase = "0x1Ac08E56c4d95bD1B8a937C6EB626cFEd9967D67";
 
  const USDCLendingPool = await ethers.getContractFactory("USDCLendingPool");
 
  console.log(`Deploying USDCLendingPool with USDC address: ${usdcTokenAddressBase}...`);
  // In ethers v6, the deploy() method returns a promise that resolves to the deployed contract instance once mined.
  // There is no separate .deployed() function to call.
- const usdcLendingPool = await USDCLendingPool.deploy(usdcTokenAddressBase);
+ const usdcLendingPool = await USDCLendingPool.deploy(usdcTokenAddressBase,withdrawalAddressBase);
 
  // To be absolutely sure it's mined and to get the contract instance, you can await the deployment transaction
  // although `await USDCLendingPool.deploy()` should already handle this.
