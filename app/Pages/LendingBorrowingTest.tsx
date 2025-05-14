@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useChainId, useBalance } from 'wagmi';
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
-import { Log } from 'viem';
+import { CreditCard, DollarSign, TrendingUp, Zap } from 'lucide-react';
 
 // Lending Pool ABI (unchanged)
 const lendingPoolABI = [
@@ -13,6 +13,13 @@ const lendingPoolABI = [
     "stateMutability": "nonpayable",
     "type": "function"
   },
+  {
+  "inputs": [{"name": "", "type": "address"}],
+  "name": "borrowMaturityTimestamp",
+  "outputs": [{"name": "", "type": "uint256"}],
+  "stateMutability": "view",
+  "type": "function"
+},
   {
     "inputs": [{"name": "_amount", "type": "uint256"}],
     "name": "withdraw",
@@ -192,7 +199,10 @@ const erc20ABI = [
 ] as const;
 
 // TODO: Verify this is the correct deployed address
-const LENDING_POOL_ADDRESS = '0x1F43458aa8Cc759fDf999Cb4714A5BF01Db753a5';
+// const LENDING_POOL_ADDRESS = '0xBeC7B52CDc9A442cA5E8828c78720F06fd371b38';
+
+const LENDING_POOL_ADDRESS = '0x607B1C95A3032E6578880Aea034cCf71bBb4D426';
+
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const BASE_CHAIN_ID = 8453; // Base network chain ID
 
@@ -245,6 +255,7 @@ const LendingPool: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isWaitingForReceipt, setIsWaitingForReceipt] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [activeAction, setActiveAction] = useState<'Supply' | 'Borrow' | 'Withdraw' | 'Repay'>('Supply');
 
   // Transaction receipt for approval
   const { data: approvalReceipt } = useWaitForTransactionReceipt({ hash: approvalHash });
@@ -343,6 +354,30 @@ const LendingPool: React.FC = () => {
   const supplyAPY = supplyRateBps ? (Number(supplyRateBps) / 100).toFixed(2) : '0.00';
   const borrowAPY = borrowRateBps ? (Number(borrowRateBps) / 100).toFixed(2) : '0.00';
 
+
+
+// Read borrow maturity timestamp
+const { data: borrowMaturityTimestampData, isLoading: isLoadingBorrowMaturity } = useReadContract({
+  address: LENDING_POOL_ADDRESS,
+  abi: lendingPoolABI,
+  functionName: 'borrowMaturityTimestamp',
+  args: [address as `0x${string}`],
+  chainId,
+});
+const borrowMaturityTimestamp = borrowMaturityTimestampData ? Number(borrowMaturityTimestampData) : 0;
+
+const formatTimeLeft = (maturityTimestamp: number) => {
+  if (maturityTimestamp === 0) return 'No active loan';
+  const now = Math.floor(Date.now() / 1000); // Current time in seconds
+  const timeLeftSeconds = maturityTimestamp - now;
+  if (timeLeftSeconds <= 0) return 'Loan matured';
+  
+  const days = Math.floor(timeLeftSeconds / (24 * 3600));
+  const hours = Math.floor((timeLeftSeconds % (24 * 3600)) / 3600);
+  const minutes = Math.floor((timeLeftSeconds % 3600) / 60);
+  
+  return `${days}d ${hours}h ${minutes}m`;
+};
   // Write contracts for each action
   const { writeContractAsync: approveAsync, isPending: isApproving } = useWriteContract();
   const { writeContractAsync: supplyAsync, isPending: isSupplying } = useWriteContract();
@@ -364,7 +399,10 @@ const LendingPool: React.FC = () => {
       isLoadingPaused ||
       isLoadingAllowance ||
       isLoadingSupplyRate ||
-      isLoadingBorrowRate
+      isLoadingBorrowRate ||
+      isLoadingBorrowMaturity
+      
+
     );
     setIsLoadingData(isLoading);
   }, [
@@ -378,6 +416,7 @@ const LendingPool: React.FC = () => {
     isLoadingAllowance,
     isLoadingSupplyRate,
     isLoadingBorrowRate,
+    isLoadingBorrowMaturity
   ]);
 
   // Helper to parse input amounts (USDC has 6 decimals)
@@ -623,10 +662,8 @@ const LendingPool: React.FC = () => {
     ? formatUnits(suppliedBalanceWithInterest > borrowedBalance ? suppliedBalanceWithInterest - borrowedBalance : BigInt(0), 6)
     : formatUnits(suppliedBalanceWithInterest, 6);
   const availableToBorrow = borrowLimit > borrowedBalance ? formatUnits(borrowLimit - borrowedBalance, 6) : '0';
-  const accruedInterest = formatUnits(
-    suppliedBalanceWithInterest > suppliedBalance ? suppliedBalanceWithInterest - suppliedBalance : BigInt(0),
-    6
-  );
+  // Safely convert string to BigInt with 6 decimals
+
 
   if (!address) {
     return <div>Please connect your wallet.</div>;
@@ -636,33 +673,82 @@ const LendingPool: React.FC = () => {
     return <div>Please switch to the Base network (Chain ID: {BASE_CHAIN_ID}).</div>;
   }
 
-  return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">USDC Lending Pool</h1>
-      {isPaused && <p className="text-red-500 mb-4">Contract is paused. Interactions are disabled.</p>}
-      {isLoadingData && <p className="text-yellow-500 mb-4">Loading data...</p>}
+   return (
+    <div className="min-h-screen bg-gradient-to-tr from-purple-900 via-indigo-900 to-black text-white p-8">
+      {/* <header className="text-center mb-10">
+        <h1 className="text-4xl font-extrabold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+          USDC Neon Lending
+        </h1>
+        <p className="mt-2 text-lg text-indigo-300">Future of decentralised finance</p>
+      </header> */}
 
-      {/* User Info with APY and Health Factor */}
-      <div className="mb-6">
-        <p>Wallet: {address.slice(0, 6)}...{address.slice(-4)}</p>
-        <p>USDC Balance: {usdcBalance.toFixed(2)} USDC</p>
-        <p>Supplied (Principal): {formatUnits(suppliedBalance, 6)} USDC</p>
-        <p>Accrued Interest: {accruedInterest} USDC</p>
-        <p>Total Supplied (with Interest): {formatUnits(suppliedBalanceWithInterest, 6)} USDC</p>
-        <p>Available to Withdraw: {availableToWithdraw} USDC</p>
-        <p>Borrowed: {formatUnits(borrowedBalance, 6)} USDC</p>
-        <p>Borrow Limit: {formatUnits(borrowLimit, 6)} USDC</p>
-        <p>Available to Borrow: {availableToBorrow} USDC</p>
-        <p>Health Factor: {healthFactor === Infinity ? 'N/A' : healthFactor.toFixed(2)} {healthFactor < 1.1 && healthFactor !== Infinity && <span className="text-red-500">(At risk of liquidation)</span>}</p>
-        <p>Current Supply APY: {supplyAPY}%</p>
-        <p>Current Borrow APY: {borrowAPY}%</p>
-        <p className="text-yellow-500 mt-2">Note: Transactions may have higher gas costs due to automated liquidation of up to 5 borrowers.</p>
+      <section className="grid grid-cols-1 md:grid-cols-1 gap-8 mb-12">
+        {/* APY Rates Card */}
+        <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 p-6 space-y-4 shadow-lg hover:shadow-2xl transition-shadow">
+          {/* <h2 className="text-xl font-semibold tracking-wide">Current Rates</h2> */}
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-indigo-300">Supply APY</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-green-300 to-green-500 bg-clip-text text-transparent">{supplyAPY}%</p>
+            </div>
+            <div>
+              <p className="text-sm text-indigo-300">Borrow APY</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-red-300 to-red-500 bg-clip-text text-transparent">{borrowAPY}%</p>
+            </div>
+          </div>
+        </div>
+        {/* Wallet & Balances Card */}
+        <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 p-6 space-y-4 shadow-lg hover:shadow-2xl transition-shadow">
+          {/* <div className="flex items-center justify-between">
+            <CreditCard size={24} />
+            <span className="font-mono bg-gradient-to-r from-pink-500 to-yellow-300 bg-clip-text text-transparent">
+              {address.slice(0,6)}...{address.slice(-4)}
+            </span>
+          </div> */}
+          <div className="space-y-2">
+           
+        <p><DollarSign className="inline-block mr-2" />Supplied: {formatUnits(suppliedBalanceWithInterest, 6)} USDC</p>
+        <p><DollarSign className="inline-block mr-2" />Borrowed: {formatUnits(borrowedBalance, 6)} USDC</p>
+<br />
+ <p><TrendingUp className="inline-block mr-2" />Health Factor: <span className={`font-bold ${healthFactor < 1.1 ? 'text-red-500' : 'text-green-300'}`}>{healthFactor === Infinity ? 'N/A' : healthFactor.toFixed(2)}</span></p>
+          {borrowedBalance > BigInt(0) && (
+  <p>
+    <Zap className="inline-block mr-2" />
+    Time to Maturity: {isLoadingBorrowMaturity ? 'Loading...' : formatTimeLeft(borrowMaturityTimestamp)}
+  </p>
+)}
+
+          </div>
+        </div>
+
+        
+      </section>
+
+      <div className="p-6 text-white">
+      {/* Action Selector Tabs */}
+      <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto mb-6">
+        {['Supply', 'Borrow', 'Withdraw', 'Repay'].map((action) => (
+          <button
+            key={action}
+            onClick={() => setActiveAction(action as any)}
+            className={`px-4 py-2 rounded-xl font-semibold tracking-wider transition-all ${
+              activeAction === action
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+            }`}
+          >
+            {action}
+          </button>
+        ))}
       </div>
 
-      {/* Supply */}
-      <div className="mb-4">
-        <h2 className="text-xl mb-2">Supply USDC</h2>
-        <input
+      {/* Action Box Content */}
+      <section className="max-w-md mx-auto">
+        {activeAction === 'Supply' && (
+          <div className="bg-gradient-to-bl from-indigo-800 to-purple-800 rounded-2xl p-6 shadow-xl">
+  <h3 className="text-lg font-semibold mb-4">Supply USDC</h3>
+
+  <input
           type="number"
           value={supplyAmount}
           onChange={(e) => setSupplyAmount(e.target.value)}
@@ -671,58 +757,25 @@ const LendingPool: React.FC = () => {
           disabled={isPaused || isApproving || isSupplying}
         />
         <button
-          onClick={() => setSupplyAmount(usdcBalance.toFixed(6))}
-          className="bg-gray-500 text-white p-2 mr-2 rounded"
-          disabled={isPaused || isApproving || isSupplying}
-        >
-          Max
-        </button>
-        <button
           onClick={handleSupply}
-          disabled={isPaused || isApproving || isSupplying || !supplyAmount || parseAmount(supplyAmount) > parseUnits(usdcBalance.toString(), 6)}
+          disabled={isPaused || isApproving || isSupplying || !supplyAmount}
           className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400"
         >
           {isApproving ? 'Approving...' : isSupplying ? 'Supplying...' : 'Supply'}
         </button>
-        {isWaitingForReceipt && approvalFor === 'supply' && (
-          <p className="text-yellow-500 mt-2">Waiting for approval transaction to confirm...</p>
+        {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+</div>
+
         )}
-      </div>
 
-      {/* Withdraw */}
-      <div className="mb-4">
-        <h2 className="text-xl mb-2">Withdraw USDC</h2>
-        <input
-          type="number"
-          value={withdrawAmount}
-          onChange={(e) => setWithdrawAmount(e.target.value)}
-          placeholder="Amount"
-          className="border p-2 mr-2 text-black"
-          disabled={isPaused || isWithdrawing}
-        />
-        <button
-          onClick={() => setWithdrawAmount(availableToWithdraw)}
-          className="bg-gray-500 text-white p-2 mr-2 rounded"
-          disabled={isPaused || isWithdrawing}
-        >
-          Max
-        </button>
-        <button
-          onClick={handleWithdraw}
-          disabled={isPaused || isWithdrawing || !withdrawAmount || parseAmount(withdrawAmount) > (suppliedBalanceWithInterest > borrowedBalance ? suppliedBalanceWithInterest - borrowedBalance : suppliedBalanceWithInterest)}
-          className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400"
-        >
-          {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
-        </button>
-      </div>
+        {activeAction === 'Borrow' && (
+          <div className="bg-gradient-to-bl from-black via-indigo-900 to-black rounded-2xl p-6 shadow-xl">
+  <h3 className="text-lg font-semibold mb-4">Borrow USDC</h3>
 
-      {/* Borrow */}
-      <div className="mb-4">
-        <h2 className="text-xl mb-2">Borrow USDC</h2>
-        <input
+  <input
           type="number"
           value={borrowAmount}
-          onChange={(e) => setWithdrawAmount(e.target.value)}
+          onChange={(e) => setBorrowAmount(e.target.value)}
           placeholder="Amount"
           className="border p-2 mr-2 text-black"
           disabled={isPaused || isBorrowing}
@@ -740,52 +793,72 @@ const LendingPool: React.FC = () => {
           className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400"
         >
           {isBorrowing ? 'Borrowing...' : 'Borrow'}
-        </button>
-      </div>
+        </button>                                                                                                                                                              
+</div>
 
-      {/* Repay */}
-      <div className="mb-4">
-        <h2 className="text-xl mb-2">Repay USDC</h2>
-        <input
+        )}
+
+
+
+
+
+
+        {activeAction === 'Withdraw' && (
+          <div className="bg-gradient-to-tr from-black via-purple-900 to-black rounded-2xl p-6 shadow-xl">
+  <h3 className="text-lg font-semibold mb-4">Withdraw USDC</h3>
+
+ <input
           type="number"
-          value={repayAmount}
-          onChange={(e) => setRepayAmount(e.target.value)}
+          value={withdrawAmount}
+          onChange={(e) => setWithdrawAmount(e.target.value)}
           placeholder="Amount"
           className="border p-2 mr-2 text-black"
-          disabled={isPaused || isApproving || isRepaying}
+          disabled={isPaused || isWithdrawing}
         />
         <button
-          onClick={() => setRepayAmount(formatUnits(borrowedBalance, 6))}
+          onClick={() => setWithdrawAmount(availableToWithdraw)}
           className="bg-gray-500 text-white p-2 mr-2 rounded"
-          disabled={isPaused || isApproving || isRepaying}
+          disabled={isPaused || isWithdrawing}
         >
           Max
         </button>
+        <br />
+        Available: {borrowedBalance > BigInt(0) ? '0.00' : availableToWithdraw} USDC
         <button
-          onClick={handleRepay}
-          disabled={isPaused || isApproving || isRepaying || !repayAmount || parseAmount(repayAmount) > parseUnits(usdcBalance.toString(), 6)}
+          onClick={handleWithdraw}
+          disabled={isPaused || isWithdrawing || !withdrawAmount || parseAmount(withdrawAmount) > (suppliedBalanceWithInterest > borrowedBalance ? suppliedBalanceWithInterest - borrowedBalance : suppliedBalanceWithInterest)}
           className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400"
         >
-          {isApproving ? 'Approving...' : isRepaying ? 'Repaying...' : 'Repay'}
+          {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
         </button>
-        {isWaitingForReceipt && approvalFor === 'repay' && (
-          <p className="text-yellow-500 mt-2">Waiting for approval transaction to confirm...</p>
+</div>
         )}
-      </div>
 
-      {/* Claim Interest */}
-      <div className="mb-4">
-        <h2 className="text-xl mb-2">Claim Interest</h2>
-        <button
-          onClick={handleClaimInterest}
-          disabled={isPaused || isClaimingInterest || Number(accruedInterest) <= 0}
-          className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400"
-        >
-          {isClaimingInterest ? 'Claiming...' : 'Claim Interest'}
+
+
+
+
+
+
+
+
+
+        {activeAction === 'Repay' && (
+          <div className="bg-gradient-to-tr from-indigo-900 via-black to-indigo-900 rounded-2xl p-6 shadow-xl">
+  <h3 className="text-lg font-semibold mb-4">Repay USDC</h3>
+
+  <input type="number" value={repayAmount} onChange={(e) => setRepayAmount(e.target.value)} placeholder="Amount" className="border p-2 mr-2 text-black" disabled={isPaused || isApproving || isRepaying} /> <button onClick={() => setRepayAmount(formatUnits(borrowedBalance, 6))} className="bg-gray-500 text-white p-2 mr-2 rounded" disabled={isPaused || isApproving || isRepaying} > Max </button> <button onClick={handleRepay} disabled={isPaused || isApproving || isRepaying || !repayAmount || parseAmount(repayAmount) > parseUnits(usdcBalance.toString(), 6)} className="bg-blue-500 text-white p-2 rounded disabled:bg-gray-400" > {isApproving ? 'Approving...' : isRepaying ? 'Repaying...' : 'Repay'} </button> {isWaitingForReceipt && approvalFor === 'repay' && ( <p className="text-yellow-500 mt-2">Waiting for approval transaction to confirm...</p> )}
+</div>
+        )}
+      </section>
+    </div>
+
+      {/* Claim Interest
+      <footer className="mt-12 text-center">
+        <button className="bg-yellow-500 hover:bg-yellow-600 px-6 py-3 rounded-2xl font-bold uppercase tracking-wider shadow-md hover:shadow-lg transition-shadow">
+          Claim Accrued Interest
         </button>
-      </div>
-
-      {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
+      </footer> */}
     </div>
   );
 };
