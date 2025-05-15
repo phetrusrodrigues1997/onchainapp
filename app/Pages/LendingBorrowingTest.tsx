@@ -14,6 +14,20 @@ const lendingPoolABI = [
     "type": "function"
   },
   {
+  "inputs": [],
+  "name": "totalReserves",
+  "outputs": [{"name": "", "type": "uint256"}],
+  "stateMutability": "view",
+  "type": "function"
+},
+{
+  "inputs": [],
+  "name": "MIN_RESERVE_THRESHOLD",
+  "outputs": [{"name": "", "type": "uint256"}],
+  "stateMutability": "view",
+  "type": "function"
+},
+  {
   "inputs": [{"name": "", "type": "address"}],
   "name": "borrowMaturityTimestamp",
   "outputs": [{"name": "", "type": "uint256"}],
@@ -199,9 +213,9 @@ const erc20ABI = [
 ] as const;
 
 // TODO: Verify this is the correct deployed address
-// const LENDING_POOL_ADDRESS = '0x607B1C95A3032E6578880Aea034cCf71bBb4D426';
+// const LENDING_POOL_ADDRESS = '0x9Cb208337DC927d928AcA98e2F49a46edC7A3D2A';
 
-const LENDING_POOL_ADDRESS = '0xAd922cA7Ef63407F32ec455F32c2c2fa95165a38';
+const LENDING_POOL_ADDRESS = '0x0d6C351997Ec7dcFe260076B7177CC813E07BdEA';
 
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const BASE_CHAIN_ID = 8453; // Base network chain ID
@@ -366,6 +380,21 @@ const { data: borrowMaturityTimestampData, isLoading: isLoadingBorrowMaturity } 
 });
 const borrowMaturityTimestamp = borrowMaturityTimestampData ? Number(borrowMaturityTimestampData) : 0;
 
+const { data: totalReservesData, isLoading: isLoadingTotalReserves } = useReadContract({
+  address: LENDING_POOL_ADDRESS,
+  abi: lendingPoolABI,
+  functionName: 'totalReserves',
+  chainId,
+});
+const { data: minReserveThresholdData, isLoading: isLoadingMinReserveThreshold } = useReadContract({
+  address: LENDING_POOL_ADDRESS,
+  abi: lendingPoolABI,
+  functionName: 'MIN_RESERVE_THRESHOLD',
+  chainId,
+});
+const totalReserves = totalReservesData ? Number(formatUnits(BigInt(totalReservesData.toString()), 6)) : 0;
+const minReserveThreshold = minReserveThresholdData ? Number(formatUnits(BigInt(minReserveThresholdData.toString()), 6)) : 0;
+
 const formatTimeLeft = (maturityTimestamp: number) => {
   if (maturityTimestamp === 0) return 'No active loan';
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
@@ -400,7 +429,8 @@ const formatTimeLeft = (maturityTimestamp: number) => {
       isLoadingAllowance ||
       isLoadingSupplyRate ||
       isLoadingBorrowRate ||
-      isLoadingBorrowMaturity
+      isLoadingBorrowMaturity ||
+      isLoadingMinReserveThreshold
       
 
     );
@@ -416,7 +446,8 @@ const formatTimeLeft = (maturityTimestamp: number) => {
     isLoadingAllowance,
     isLoadingSupplyRate,
     isLoadingBorrowRate,
-    isLoadingBorrowMaturity
+    isLoadingBorrowMaturity,
+    isLoadingMinReserveThreshold
   ]);
 
   // Helper to parse input amounts (USDC has 6 decimals)
@@ -674,7 +705,7 @@ const formatTimeLeft = (maturityTimestamp: number) => {
   }
 
    return (
-    <div className="min-h-screen bg-gradient-to-tr from-purple-900 via-indigo-900 to-black text-white p-8">
+    <div className="min-h-screen bg-transparent text-white p-8">
       {/* <header className="text-center mb-10">
         <h1 className="text-4xl font-extrabold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
           USDC Neon Lending
@@ -696,6 +727,15 @@ const formatTimeLeft = (maturityTimestamp: number) => {
               <p className="text-2xl font-bold bg-gradient-to-r from-red-300 to-red-500 bg-clip-text text-transparent">{borrowAPY}%</p>
             </div>
           </div>
+          <div className="flex justify-between items-center">
+    <div>
+      <p className="text-sm text-indigo-300">Total Reserves (Threshold: {isLoadingMinReserveThreshold ? 'Loading...' : `${minReserveThreshold.toFixed(2)} USDC`})</p>
+      <p className="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">
+        {isLoadingTotalReserves ? 'Loading...' : `${totalReserves.toFixed(9)}`}
+      </p>
+    </div>
+    
+  </div>
         </div>
         {/* Wallet & Balances Card */}
         <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 p-6 space-y-4 shadow-lg hover:shadow-2xl transition-shadow">
@@ -709,7 +749,6 @@ const formatTimeLeft = (maturityTimestamp: number) => {
            
         <p><DollarSign className="inline-block mr-2" />Supplied: {formatUnits(suppliedBalanceWithInterest, 6)} USDC</p>
         <p><DollarSign className="inline-block mr-2" />Borrowed: {formatUnits(borrowedBalance, 6)} USDC</p>
-<br />
  <p><TrendingUp className="inline-block mr-2" />Health Factor: <span className={`font-bold ${healthFactor < 1.1 ? 'text-red-500' : 'text-green-300'}`}>{healthFactor === Infinity ? 'N/A' : healthFactor.toFixed(2)}</span></p>
           {borrowedBalance > BigInt(0) && (
   <p>

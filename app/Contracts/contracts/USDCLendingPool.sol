@@ -26,7 +26,7 @@ contract USDCLendingPool {
         address indexed borrower,
         uint256 debtAmount,
         uint256 collateralSeizedAmount,
-        uint256 interestDistributed
+        uint256 interestAddedToPool
     );
     event NewOwner(address indexed oldOwner, address indexed newOwner);
     event Paused(address account);
@@ -41,41 +41,36 @@ contract USDCLendingPool {
     IERC20 public immutable usdcToken;
     address public owner;
     bool public paused;
-    address public immutable reserveWithdrawalAddress; // Address to auto-withdraw reserves
+    address public immutable reserveWithdrawalAddress;
 
-    // Balances
-    uint256 public totalSupplied; // Total principal supplied by users
-    uint256 public totalBorrowed; // Total principal borrowed by users
+    uint256 public totalSupplied;
+    uint256 public totalBorrowed;
     uint256 public totalReserves;
 
-    mapping(address => uint256) public suppliedBalances; // User's principal supply
-    mapping(address => uint256) public suppliedInterestBalances; // User's accrued interest
-    mapping(address => uint256) public supplyStartTimestamp; // Timestamp when user last supplied or updated
-    mapping(address => uint256) public borrowedPrincipals; // User's principal borrowed amount
-    mapping(address => uint256) public borrowStartTimestamp; // Timestamp when user last borrowed or updated borrow
-    mapping(address => uint256) public borrowMaturityTimestamp; // Timestamp when borrow matures
+    mapping(address => uint256) public suppliedBalances;
+    mapping(address => uint256) public suppliedInterestBalances;
+    mapping(address => uint256) public supplyStartTimestamp;
+    mapping(address => uint256) public borrowedPrincipals;
+    mapping(address => uint256) public borrowStartTimestamp;
+    mapping(address => uint256) public borrowMaturityTimestamp;
 
-    // Track borrowers
-    address[] public borrowers; // List of users with non-zero borrows, sorted by borrowMaturityTimestamp
-    mapping(address => uint256) public borrowerIndex; // Index of borrower in array (1-based for non-zero)
+    address[] public borrowers;
+    mapping(address => uint256) public borrowerIndex;
+    address[] public suppliers;
+    mapping(address => uint256) public supplierIndex;
 
-    // Interest Rate Model Parameters (all in BPS, 1% = 100 BPS)
-    uint256 public baseRateBps; // Annual Percentage Rate (APR)
-    uint256 public multiplierBps; // Additional APR per 100% utilization
+    uint256 public baseRateBps;
+    uint256 public multiplierBps;
+    uint256 public reserveFactorBps;
+    uint256 public loanToValueRatioBps;
+    uint256 public liquidationThresholdBps;
 
-    // Protocol Parameters
-    uint256 public reserveFactorBps; // Share of interest income going to reserves (e.g., 1000 for 10%)
-    uint256 public loanToValueRatioBps; // Max borrow amount relative to supply (e.g., 7500 for 75%)
-    uint256 public liquidationThresholdBps; // Threshold for liquidation (e.g., 8000 for 80%)
-
-    // Constants
     uint256 private constant BPS_DIVISOR = 10000;
     uint256 private constant SECONDS_IN_YEAR = 365 days;
-    uint256 private constant LOAN_DURATION = 5 minutes; // 1 day maturity for testing
-    uint256 private constant MIN_RESERVE_THRESHOLD = 1_000_000; // 1 USDC (6 decimals)
-    uint256 private constant MAX_LIQUIDATIONS_PER_TX = 5; // Limit liquidations per transaction
+    uint256 private constant LOAN_DURATION = 30 minutes;
+    uint256 private constant MIN_RESERVE_THRESHOLD = 15_000;
+    uint256 private constant MAX_LIQUIDATIONS_PER_TX = 10;
 
-    // Reentrancy guard
     bool private locked;
 
     // --- Modifiers ---
@@ -109,12 +104,11 @@ contract USDCLendingPool {
         owner = msg.sender;
         reserveWithdrawalAddress = _reserveWithdrawalAddress;
 
-        // Default parameters (can be changed by owner)
-        baseRateBps = 200; // 2% APR
-        multiplierBps = 2000; // 20% APR slope for utilization
-        reserveFactorBps = 1000; // 10%
-        loanToValueRatioBps = 7500; // 75%
-        liquidationThresholdBps = 8000; // 80%
+        baseRateBps = 100; // Changed from 200 (2% to 1%)
+    multiplierBps = 1000; // Changed from 2000 (20% to 10%)
+        reserveFactorBps = 1; //
+        loanToValueRatioBps = 7000;
+        liquidationThresholdBps = 8000;
 
         emit NewOwner(address(0), msg.sender);
     }
@@ -130,6 +124,11 @@ contract USDCLendingPool {
         liquidateAllEligible();
 
         usdcToken.transferFrom(msg.sender, address(this), _amount);
+
+        if (suppliedBalances[msg.sender] == 0 && _amount > 0) {
+            suppliers.push(msg.sender);
+            supplierIndex[msg.sender] = suppliers.length;
+        }
 
         suppliedBalances[msg.sender] += _amount;
         totalSupplied += _amount;
@@ -149,11 +148,21 @@ contract USDCLendingPool {
         uint256 userSupply = suppliedBalances[msg.sender];
         require(userSupply >= _amount, "Insufficient supplied balance");
 
-        // Disable withdrawal if user has any borrowed amount
         require(borrowedPrincipals[msg.sender] == 0, "Cannot withdraw while loan is active");
 
         suppliedBalances[msg.sender] -= _amount;
         totalSupplied -= _amount;
+
+        if (suppliedBalances[msg.sender] == 0 && supplierIndex[msg.sender] > 0) {
+            uint256 index = supplierIndex[msg.sender] - 1;
+            if (index < suppliers.length - 1) {
+                address lastSupplier = suppliers[suppliers.length - 1];
+                suppliers[index] = lastSupplier;
+                supplierIndex[lastSupplier] = index + 1;
+            }
+            suppliers.pop();
+            supplierIndex[msg.sender] = 0;
+        }
 
         uint256 interestToTransfer = 0;
         if (_amount == userSupply && suppliedInterestBalances[msg.sender] > 0) {
@@ -177,23 +186,19 @@ contract USDCLendingPool {
         uint256 userBorrowedWithInterest = getBorrowedBalanceWithInterest(msg.sender);
         uint256 newTotalUserBorrow = userBorrowedWithInterest + _amount;
 
-        // Check LTV
         uint256 borrowLimit = (suppliedBalances[msg.sender] * loanToValueRatioBps) / BPS_DIVISOR;
         require(newTotalUserBorrow <= borrowLimit, "Borrow amount exceeds LTV limit");
 
-        // Check pool liquidity
         uint256 availableToBorrow = usdcToken.balanceOf(address(this)) - totalReserves;
         require(_amount <= availableToBorrow, "Insufficient liquidity in pool");
 
         uint256 newMaturityTimestamp = block.timestamp + LOAN_DURATION;
 
         if (borrowedPrincipals[msg.sender] > 0) {
-            // User already has a loan; update their existing entry
             uint256 accruedInterest = _calculateAccruedInterest(msg.sender);
             borrowedPrincipals[msg.sender] += accruedInterest;
             totalBorrowed += accruedInterest;
 
-            // Remove user from current position in borrowers array
             if (borrowerIndex[msg.sender] > 0) {
                 uint256 index = borrowerIndex[msg.sender] - 1;
                 if (index < borrowers.length - 1) {
@@ -206,16 +211,13 @@ contract USDCLendingPool {
             }
         }
 
-        // Update borrowed amount and timestamps
         borrowedPrincipals[msg.sender] += _amount;
         borrowStartTimestamp[msg.sender] = block.timestamp;
         borrowMaturityTimestamp[msg.sender] = newMaturityTimestamp;
         totalBorrowed += _amount;
 
-        // Insert user into the sorted borrowers array
         _insertBorrowerSorted(msg.sender, newMaturityTimestamp);
 
-        // Transfer the borrowed amount to the user
         usdcToken.transfer(msg.sender, _amount);
         
         emit Borrowed(msg.sender, _amount);
@@ -236,7 +238,7 @@ contract USDCLendingPool {
         uint256 principalPortion;
         uint256 interestPortion;
 
-        uint256 originalPrincipal = borrowedPrincipals[msg.sender]; // Before interest update in this call
+        uint256 originalPrincipal = borrowedPrincipals[msg.sender];
 
         if (originalPrincipal >= amountToRepay) {
             principalPortion = amountToRepay;
@@ -254,7 +256,6 @@ contract USDCLendingPool {
         if (borrowedPrincipals[msg.sender] == 0 && getBorrowedBalanceWithInterest(msg.sender) == 0) {
             borrowStartTimestamp[msg.sender] = 0;
             borrowMaturityTimestamp[msg.sender] = 0;
-            // Remove from borrowers list
             if (borrowerIndex[msg.sender] > 0) {
                 uint256 index = borrowerIndex[msg.sender] - 1;
                 if (index < borrowers.length - 1) {
@@ -295,15 +296,12 @@ contract USDCLendingPool {
         uint256 usersProcessed = 0;
         uint256 i = 0;
 
-        // Process the first MAX_LIQUIDATIONS_PER_TX borrowers (earliest maturities)
         while (i < borrowers.length && usersProcessed < MAX_LIQUIDATIONS_PER_TX) {
             address borrower = borrowers[i];
-            // Check if borrower is still in list (in case liquidated earlier in loop)
             if (borrowerIndex[borrower] > 0) {
                 _updateUserBorrowInterest(borrower);
                 _updateUserSupplyInterest(borrower);
                 _liquidateIfEligible(borrower);
-                // If liquidated, array may have changed; stay at same index
                 if (borrowerIndex[borrower] == 0) {
                     continue;
                 }
@@ -316,14 +314,12 @@ contract USDCLendingPool {
     // --- Internal Helper Functions ---
 
     function _insertBorrowerSorted(address _borrower, uint256 _maturityTimestamp) internal {
-        // If array is empty, simply append
         if (borrowers.length == 0) {
             borrowers.push(_borrower);
-            borrowerIndex[_borrower] = 1; // 1-based index
+            borrowerIndex[_borrower] = 1;
             return;
         }
 
-        // Find the correct position to insert
         uint256 insertPos = borrowers.length;
         for (uint256 i = 0; i < borrowers.length; i++) {
             if (borrowMaturityTimestamp[borrowers[i]] > _maturityTimestamp) {
@@ -332,31 +328,13 @@ contract USDCLendingPool {
             }
         }
 
-        // Insert at the correct position
-        borrowers.push(address(0)); // Extend array
-        // Shift elements to the right
+        borrowers.push(address(0));
         for (uint256 i = borrowers.length - 1; i > insertPos; i--) {
             borrowers[i] = borrowers[i - 1];
-            borrowerIndex[borrowers[i]] = i + 1; // Update index
+            borrowerIndex[borrowers[i]] = i + 1;
         }
         borrowers[insertPos] = _borrower;
-        borrowerIndex[_borrower] = insertPos + 1; // 1-based index
-    }
-
-    function _distributeInterestToSuppliers(uint256 _interest) internal {
-        if (_interest == 0 || totalSupplied == 0) {
-            return;
-        }
-        // Distribute interest proportionally to suppliers based on their supplied balance
-        for (uint256 i = 0; i < borrowers.length; i++) {
-            address supplier = borrowers[i];
-            if (suppliedBalances[supplier] > 0) {
-                uint256 supplierShare = (suppliedBalances[supplier] * _interest) / totalSupplied;
-                suppliedInterestBalances[supplier] += supplierShare;
-            }
-        }
-        // Note: If no borrowers are suppliers, check all non-zero suppliedBalances
-        // This is a simplification; in practice, we'd need a list of suppliers
+        borrowerIndex[_borrower] = insertPos + 1;
     }
 
     function _liquidateIfEligible(address _user) internal {
@@ -371,53 +349,67 @@ contract USDCLendingPool {
             borrowerDebt > borrowerSupplyWithInterest ||
             block.timestamp > borrowMaturityTimestamp[_user]
         ) {
-            // Calculate accrued interest and principal
             uint256 accruedInterest = _calculateAccruedInterest(_user);
             uint256 principalDebt = borrowedPrincipals[_user];
-            uint256 collateralToSeize = suppliedBalances[_user];
+            uint256 netCollateral = suppliedBalances[_user] > principalDebt
+                ? suppliedBalances[_user] - principalDebt
+                : 0;
             uint256 contractBalance = usdcToken.balanceOf(address(this));
 
-            // Calculate interest to distribute to suppliers (net of reserve factor)
-            uint256 interestToDistribute = (accruedInterest * (BPS_DIVISOR - reserveFactorBps)) / BPS_DIVISOR;
-            uint256 reserveShare = accruedInterest - interestToDistribute;
+            // Cap interest at available collateral
+            uint256 totalInterest = netCollateral > accruedInterest ? accruedInterest : netCollateral;
+            uint256 interestToPool = (totalInterest * (BPS_DIVISOR - reserveFactorBps)) / BPS_DIVISOR;
+            uint256 reserveShare = totalInterest - interestToPool;
 
-            // Distribute interest to suppliers
-            _distributeInterestToSuppliers(interestToDistribute);
-
-            // Calculate collateral to send to reserveWithdrawalAddress (principal only)
-            uint256 collateralToReserve = collateralToSeize > principalDebt ? principalDebt : collateralToSeize;
+            // Remaining collateral to reserve
+            uint256 collateralToReserve = netCollateral > totalInterest ? netCollateral - totalInterest : 0;
             uint256 actualCollateralToReserve = collateralToReserve > contractBalance ? contractBalance : collateralToReserve;
 
-            // Transfer the collateral to reserveWithdrawalAddress
+            // Update reserves and transfer collateral
+            totalReserves += reserveShare;
             if (actualCollateralToReserve > 0) {
                 usdcToken.transfer(reserveWithdrawalAddress, actualCollateralToReserve);
             }
-
-            // Update reserves
-            totalReserves += reserveShare;
 
             // Clear borrower's balances
             borrowedPrincipals[_user] = 0;
             borrowStartTimestamp[_user] = 0;
             borrowMaturityTimestamp[_user] = 0;
             totalBorrowed -= borrowerDebt;
-            totalSupplied -= collateralToSeize;
+            totalSupplied -= suppliedBalances[_user];
             suppliedBalances[_user] = 0;
             suppliedInterestBalances[_user] = 0;
 
-            // Remove from borrowers list
-            if (borrowerIndex[_user] > 0) {
-                uint256 index = borrowerIndex[_user] - 1;
-                if (index < borrowers.length - 1) {
-                    address lastBorrower = borrowers[borrowers.length - 1];
-                    borrowers[index] = lastBorrower;
-                    borrowerIndex[lastBorrower] = index + 1;
-                }
-                borrowers.pop();
-                borrowerIndex[_user] = 0;
-            }
+            // Remove from lists
+            _removeFromLists(_user);
 
-            emit Liquidated(msg.sender, _user, borrowerDebt, actualCollateralToReserve, interestToDistribute);
+            emit Liquidated(msg.sender, _user, borrowerDebt, actualCollateralToReserve, interestToPool);
+        }
+    }
+
+    function _removeFromLists(address _user) internal {
+        // Remove from borrowers list
+        if (borrowerIndex[_user] > 0) {
+            uint256 index = borrowerIndex[_user] - 1;
+            if (index < borrowers.length - 1) {
+                address lastBorrower = borrowers[borrowers.length - 1];
+                borrowers[index] = lastBorrower;
+                borrowerIndex[lastBorrower] = index + 1;
+            }
+            borrowers.pop();
+            borrowerIndex[_user] = 0;
+        }
+
+        // Remove from suppliers list
+        if (supplierIndex[_user] > 0) {
+            uint256 index = supplierIndex[_user] - 1;
+            if (index < suppliers.length - 1) {
+                address lastSupplier = suppliers[suppliers.length - 1];
+                suppliers[index] = lastSupplier;
+                supplierIndex[lastSupplier] = index + 1;
+            }
+            suppliers.pop();
+            supplierIndex[_user] = 0;
         }
     }
 
@@ -448,10 +440,8 @@ contract USDCLendingPool {
         if (borrowedPrincipals[_user] == 0 || borrowStartTimestamp[_user] == 0 || borrowStartTimestamp[_user] >= block.timestamp) {
             return 0;
         }
-
         uint256 timeDelta = block.timestamp - borrowStartTimestamp[_user];
         uint256 currentBorrowRateBps = getCurrentBorrowRateBps();
-
         uint256 interest = (borrowedPrincipals[_user] * currentBorrowRateBps * timeDelta) / (BPS_DIVISOR * SECONDS_IN_YEAR);
         return interest;
     }
@@ -460,10 +450,8 @@ contract USDCLendingPool {
         if (suppliedBalances[_user] == 0 || supplyStartTimestamp[_user] == 0 || supplyStartTimestamp[_user] >= block.timestamp) {
             return 0;
         }
-
         uint256 timeDelta = block.timestamp - supplyStartTimestamp[_user];
         uint256 currentSupplyRateBps = getCurrentSupplyRateBps();
-
         uint256 interest = (suppliedBalances[_user] * currentSupplyRateBps * timeDelta) / (BPS_DIVISOR * SECONDS_IN_YEAR);
         return interest;
     }
@@ -512,7 +500,6 @@ contract USDCLendingPool {
         if (totalSupplied == 0) return 0;
         uint256 borrowRate = getCurrentBorrowRateBps();
         uint256 utilization = getUtilizationRateBps();
-
         uint256 grossSupplyRate = (borrowRate * utilization) / BPS_DIVISOR;
         return (grossSupplyRate * (BPS_DIVISOR - reserveFactorBps)) / BPS_DIVISOR;
     }
@@ -524,14 +511,12 @@ contract USDCLendingPool {
     function getAccountHealthFactor(address _user) public view returns (uint256) {
         uint256 userSupply = suppliedBalances[_user];
         uint256 userDebt = getBorrowedBalanceWithInterest(_user);
-
         if (userDebt == 0) {
             return type(uint256).max;
         }
         if (userSupply == 0) {
             return 0;
         }
-
         uint256 maxDebtBeforeLiquidation = (userSupply * liquidationThresholdBps) / BPS_DIVISOR;
         return (maxDebtBeforeLiquidation * BPS_DIVISOR) / userDebt;
     }
@@ -588,7 +573,7 @@ contract USDCLendingPool {
         emit ReservesWithdrawn(_to, _amount);
     }
 
-    // --- View Functions for Borrowers List ---
+    // --- View Functions for Borrowers and Suppliers Lists ---
     function getBorrowersCount() external view returns (uint256) {
         return borrowers.length;
     }
@@ -596,5 +581,14 @@ contract USDCLendingPool {
     function getBorrowerAtIndex(uint256 index) external view returns (address) {
         require(index < borrowers.length, "Index out of bounds");
         return borrowers[index];
+    }
+
+    function getSuppliersCount() external view returns (uint256) {
+        return suppliers.length;
+    }
+
+    function getSupplierAtIndex(uint256 index) external view returns (address) {
+        require(index < suppliers.length, "Index out of bounds");
+        return suppliers[index];
     }
 }

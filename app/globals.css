@@ -5,11 +5,14 @@
 /* #182848 */
 
 
-:root {
-  --background-start: #002400; /* Deep cool green-blue */
-  --background-mid: #002400;   /* Midnight indigo/navy */
-  --background-end: #002400;   /* Clean black */
+
+   :root {
+  --background-start: #14532d; /* Tailwind green-900 */
+  --background-mid: #5a5a1a;   /* Blended midpoint */
+  --background-end: #a16207;   /* Tailwind yellow-800 */
 }
+
+
 
 /* in your global CSS or Tailwind add-on */
 
