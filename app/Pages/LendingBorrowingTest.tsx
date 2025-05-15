@@ -731,7 +731,7 @@ const formatTimeLeft = (maturityTimestamp: number) => {
     <div>
       <p className="text-sm text-indigo-300">Total Reserves (Threshold: {isLoadingMinReserveThreshold ? 'Loading...' : `${minReserveThreshold.toFixed(2)} USDC`})</p>
       <p className="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">
-        {isLoadingTotalReserves ? 'Loading...' : `${totalReserves.toFixed(9)}`}
+        {isLoadingTotalReserves ? 'Loading...' : `${totalReserves.toFixed(14)}`}
       </p>
     </div>
     
