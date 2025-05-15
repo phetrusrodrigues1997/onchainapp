@@ -7,7 +7,7 @@
 //  const balance = await ethers.provider.getBalance(deployer.address);
 //  console.log("Account balance:", ethers.formatEther(balance) + " ETH");
 
- const usdcTokenAddressBase = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+ const usdcTokenAddressBase = "0xE9185Ee218cae427aF7B9764A011bb89FeA761B4";
  const withdrawalAddressBase = "0x1Ac08E56c4d95bD1B8a937C6EB626cFEd9967D67";
 
  const USDCLendingPool = await ethers.getContractFactory("USDCLendingPool");

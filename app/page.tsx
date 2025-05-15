@@ -251,7 +251,7 @@ if (!isMounted) {
     mb-2
     relative           /* position context so z-index applies */
     z-10               /* high stacking priority */
-    bg-[#28282B]        /* dark card color */
+    bg-yellow-500 hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]        /* dark card color */
     hover:bg-gray-700  /* hover feedback */
     p-2                /* comfortable padding */
     rounded-full       /* pill shape */
@@ -310,7 +310,7 @@ if (!isMounted) {
       // optionally notify user of the failure
     }
   }}
-  className="w-full bg-yellow-500 hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
+  className="w-full bg-[#d3c81a] hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
 
 
   >
