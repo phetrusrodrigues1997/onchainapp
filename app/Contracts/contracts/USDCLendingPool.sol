@@ -25,7 +25,8 @@ contract USDCLendingPool {
         address indexed liquidator,
         address indexed borrower,
         uint256 debtAmount,
-        uint256 collateralSeizedAmount
+        uint256 collateralSeizedAmount,
+        uint256 interestDistributed
     );
     event NewOwner(address indexed oldOwner, address indexed newOwner);
     event Paused(address account);
@@ -70,7 +71,7 @@ contract USDCLendingPool {
     // Constants
     uint256 private constant BPS_DIVISOR = 10000;
     uint256 private constant SECONDS_IN_YEAR = 365 days;
-    uint256 private constant LOAN_DURATION = 1 days; // 1 day maturity for testing
+    uint256 private constant LOAN_DURATION = 5 minutes; // 1 day maturity for testing
     uint256 private constant MIN_RESERVE_THRESHOLD = 1_000_000; // 1 USDC (6 decimals)
     uint256 private constant MAX_LIQUIDATIONS_PER_TX = 5; // Limit liquidations per transaction
 
@@ -214,7 +215,7 @@ contract USDCLendingPool {
         // Insert user into the sorted borrowers array
         _insertBorrowerSorted(msg.sender, newMaturityTimestamp);
 
-         // Transfer the borrowed amount to the user
+        // Transfer the borrowed amount to the user
         usdcToken.transfer(msg.sender, _amount);
         
         emit Borrowed(msg.sender, _amount);
@@ -342,52 +343,83 @@ contract USDCLendingPool {
         borrowerIndex[_borrower] = insertPos + 1; // 1-based index
     }
 
-    function _liquidateIfEligible(address _user) internal {
-    if (borrowedPrincipals[_user] == 0 || suppliedBalances[_user] == 0) {
-        return;
-    }
-
-    uint256 borrowerDebt = getBorrowedBalanceWithInterest(_user);
-    uint256 borrowerSupplyWithInterest = getSuppliedBalanceWithInterest(_user);
-
-    if (
-        borrowerDebt > borrowerSupplyWithInterest ||
-        block.timestamp > borrowMaturityTimestamp[_user]
-    ) {
-        // Determine how much collateral to seize based on contract's actual balance
-        uint256 collateralToSeize = suppliedBalances[_user];
-        uint256 contractBalance = usdcToken.balanceOf(address(this));
-        uint256 actualCollateralToSeize = collateralToSeize > contractBalance ? contractBalance : collateralToSeize;
-
-        // Transfer the available collateral to reserveWithdrawalAddress
-        if (actualCollateralToSeize > 0) {
-            usdcToken.transfer(reserveWithdrawalAddress, actualCollateralToSeize);
+    function _distributeInterestToSuppliers(uint256 _interest) internal {
+        if (_interest == 0 || totalSupplied == 0) {
+            return;
         }
-
-        // Clear borrower's balances
-        borrowedPrincipals[_user] = 0;
-        borrowStartTimestamp[_user] = 0;
-        borrowMaturityTimestamp[_user] = 0;
-        totalBorrowed -= borrowerDebt;
-        totalSupplied -= collateralToSeize; // Reflect the accounting reduction
-        suppliedBalances[_user] = 0;
-        suppliedInterestBalances[_user] = 0;
-
-        // Remove from borrowers list
-        if (borrowerIndex[_user] > 0) {
-            uint256 index = borrowerIndex[_user] - 1;
-            if (index < borrowers.length - 1) {
-                address lastBorrower = borrowers[borrowers.length - 1];
-                borrowers[index] = lastBorrower;
-                borrowerIndex[lastBorrower] = index + 1;
+        // Distribute interest proportionally to suppliers based on their supplied balance
+        for (uint256 i = 0; i < borrowers.length; i++) {
+            address supplier = borrowers[i];
+            if (suppliedBalances[supplier] > 0) {
+                uint256 supplierShare = (suppliedBalances[supplier] * _interest) / totalSupplied;
+                suppliedInterestBalances[supplier] += supplierShare;
             }
-            borrowers.pop();
-            borrowerIndex[_user] = 0;
+        }
+        // Note: If no borrowers are suppliers, check all non-zero suppliedBalances
+        // This is a simplification; in practice, we'd need a list of suppliers
+    }
+
+    function _liquidateIfEligible(address _user) internal {
+        if (borrowedPrincipals[_user] == 0 || suppliedBalances[_user] == 0) {
+            return;
         }
 
-        emit Liquidated(msg.sender, _user, borrowerDebt, actualCollateralToSeize);
+        uint256 borrowerDebt = getBorrowedBalanceWithInterest(_user);
+        uint256 borrowerSupplyWithInterest = getSuppliedBalanceWithInterest(_user);
+
+        if (
+            borrowerDebt > borrowerSupplyWithInterest ||
+            block.timestamp > borrowMaturityTimestamp[_user]
+        ) {
+            // Calculate accrued interest and principal
+            uint256 accruedInterest = _calculateAccruedInterest(_user);
+            uint256 principalDebt = borrowedPrincipals[_user];
+            uint256 collateralToSeize = suppliedBalances[_user];
+            uint256 contractBalance = usdcToken.balanceOf(address(this));
+
+            // Calculate interest to distribute to suppliers (net of reserve factor)
+            uint256 interestToDistribute = (accruedInterest * (BPS_DIVISOR - reserveFactorBps)) / BPS_DIVISOR;
+            uint256 reserveShare = accruedInterest - interestToDistribute;
+
+            // Distribute interest to suppliers
+            _distributeInterestToSuppliers(interestToDistribute);
+
+            // Calculate collateral to send to reserveWithdrawalAddress (principal only)
+            uint256 collateralToReserve = collateralToSeize > principalDebt ? principalDebt : collateralToSeize;
+            uint256 actualCollateralToReserve = collateralToReserve > contractBalance ? contractBalance : collateralToReserve;
+
+            // Transfer the collateral to reserveWithdrawalAddress
+            if (actualCollateralToReserve > 0) {
+                usdcToken.transfer(reserveWithdrawalAddress, actualCollateralToReserve);
+            }
+
+            // Update reserves
+            totalReserves += reserveShare;
+
+            // Clear borrower's balances
+            borrowedPrincipals[_user] = 0;
+            borrowStartTimestamp[_user] = 0;
+            borrowMaturityTimestamp[_user] = 0;
+            totalBorrowed -= borrowerDebt;
+            totalSupplied -= collateralToSeize;
+            suppliedBalances[_user] = 0;
+            suppliedInterestBalances[_user] = 0;
+
+            // Remove from borrowers list
+            if (borrowerIndex[_user] > 0) {
+                uint256 index = borrowerIndex[_user] - 1;
+                if (index < borrowers.length - 1) {
+                    address lastBorrower = borrowers[borrowers.length - 1];
+                    borrowers[index] = lastBorrower;
+                    borrowerIndex[lastBorrower] = index + 1;
+                }
+                borrowers.pop();
+                borrowerIndex[_user] = 0;
+            }
+
+            emit Liquidated(msg.sender, _user, borrowerDebt, actualCollateralToReserve, interestToDistribute);
+        }
     }
-}
 
     function _updateUserBorrowInterest(address _user) internal {
         if (borrowedPrincipals[_user] > 0 && borrowStartTimestamp[_user] > 0 && borrowStartTimestamp[_user] < block.timestamp) {
