@@ -36,7 +36,7 @@ const tokenImages = {
   CADC: "https://www.svgrepo.com/show/405442/flag-for-flag-canada.svg",
   BRZ: "https://www.svgrepo.com/show/401552/flag-for-brazil.svg",
   LIRA: "https://www.svgrepo.com/show/242355/turkey.svg",
-  MXP: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
+  MXNe: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
 };
 
 interface HomePageProps {
@@ -355,11 +355,11 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             )}
           </div>
           <button
-            onClick={() => setActiveSection("LendingBorrowing")}
+            onClick={() => setActiveSection("swap")}
             className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />
-            Stocks
+            Swap
           </button>
         </div>
 

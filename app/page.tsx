@@ -14,7 +14,7 @@ import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
 import CurrencySelection from './Pages/LiquidityPage';
 import DiscordXSection from './Pages/Discord';
-import EarnSection from "./Pages/EarnPage";
+// import EarnSection from "./Pages/EarnPage";
 import Send from './Chatbot/SendPage';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
@@ -92,10 +92,9 @@ export default function App() {
     const style = document.createElement('style');
     style.innerHTML = `
       [data-testid="ockSwapButton_Button"] {
-      background-color: #0000aa !important;
+      background-color: #d3c81a !important;
         color: white !important;
       }
-  
       [data-testid="ockSwapButton_Button"] span {
         color: white !important;
       }
@@ -281,7 +280,7 @@ if (!isMounted) {
 
   {/* Only show the actual SwapButton after "Proceed to Swap" */}
   {showSwapButton && (
-    <SwapButton className="w-full bg-[#0000bb] text-white font-bold rounded-full py-2 transition-colors disabled:opacity-85"
+    <SwapButton className="w-full bg-[#d3c81a] text-white font-bold rounded-full py-2 transition-colors disabled:opacity-85"
 
     />
   )}
@@ -311,8 +310,6 @@ if (!isMounted) {
     }
   }}
   className="w-full bg-[#d3c81a] hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
-
-
   >
     Trade Now
   </button>
@@ -338,41 +335,10 @@ if (!isMounted) {
               )}
               
               
-              
-              {/* Trust indicators */}
-              {/* <div className="mt-10 grid grid-cols-3 gap-4 text-center">
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-green-200">Secure</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-green-200">Fast</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-black/40 border border-[#004400] flex items-center justify-center mb-2">
-                    <svg className="w-6 h-6 text-[#00aa00]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-green-200">Low Fees</span>
-                </div>
-              </div> */}
-
-
-
             </div>
             </div>
           )}
-          {activeSection === "earn" && <EarnSection />}
+          {/* {activeSection === "earn" && <EarnSection />} */}
           {activeSection === "usernamePage" && <UsernameSetup />}
           {activeSection === "send" && <Send setActiveSection={setActiveSection} />}
           {activeSection === "liquidity" && <CurrencySelection />}

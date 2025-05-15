@@ -700,7 +700,7 @@ const LendingPool: React.FC = () => {
         <p className="text-gray-400">Manage your positions seamlessly</p>
       </header>
 <div className="flex justify-between items-center">
-          <label className="text-white">Pool:</label>
+          <label className="text-white">Choose Pool:</label>
           <select
             value={selectedPool}
             onChange={(e) => setSelectedPool(e.target.value)}
