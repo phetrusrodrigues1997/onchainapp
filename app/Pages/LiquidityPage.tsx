@@ -79,7 +79,7 @@ const CurrencySelection: React.FC<CurrencySelectionProps> = ({ className = '' })
 
   return (
     <div className={`min-h-screen bg-transparent py-8 px-4 flex items-center justify-center ${className}`}>
-      <div className="max-w-4xl w-full bg-[#101010] rounded-lg shadow-md p-6 border border-gray-700">
+      <div className="max-w-4xl w-full bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white text-center sm:text-left mb-4 sm:mb-0">
             Provide Liquidity on Aerodrome
