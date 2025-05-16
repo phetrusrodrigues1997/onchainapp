@@ -292,7 +292,7 @@ if (!isMounted) {
   <SwapToast />
 </Swap>
 
-{/* Render "Proceed to Swap" only if the actual SwapButton hasn't been shown yet */}
+{/* Render "Proceed to Swap" only if the actual SwapButton hasn't been shown yet
 {!showSwapButton && (
   <button
   onClick={async () => {
@@ -316,7 +316,7 @@ if (!isMounted) {
   >
     Trade Now
   </button>
-)}
+)} */}
 
               
               
