@@ -732,11 +732,17 @@ const LendingPool: React.FC = () => {
         <div className="bg-gradient-to-b from-gray-900 to-black backdrop-blur-lg rounded-2xl p-6 flex flex-col space-y-4 shadow-lg hover:shadow-2xl transition-shadow">
           <div className="flex items-center space-x-2">
             <DollarSign size={24} className="text-blue-300" />
-            <span>Supplied: <strong>{formatUnits(suppliedBalanceWithInterest, decimals)}</strong></span>
+            <span>
+  Supplied: <strong>{Number(formatUnits(suppliedBalanceWithInterest, decimals)).toFixed(2)}</strong>
+</span>
+
           </div>
           <div className="flex items-center space-x-2">
             <DollarSign size={24} className="text-pink-300" />
-            <span>Borrowed: <strong>{formatUnits(borrowedBalance, decimals)}</strong></span>
+            <span>
+  Borrowed: <strong>{Number(formatUnits(borrowedBalance, decimals)).toFixed(2)}</strong>
+</span>
+
           </div>
            <div className="flex items-center space-x-2">
             <TrendingUp
