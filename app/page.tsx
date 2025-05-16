@@ -36,7 +36,7 @@ export default function App() {
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
-  const [showSwapButton, setShowSwapButton] = useState(false);
+  const [showSwapButton, setShowSwapButton] = useState(true);
   const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
   const { address } = useAccount();
   const { sendTransaction } = useSendTransaction();
