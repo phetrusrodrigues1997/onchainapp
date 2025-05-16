@@ -259,6 +259,9 @@ if (!isMounted) {
     duration-200       /* speed up/down */
     ease-out
     border
+    border-white/20
+    dark:bg-yellow-500
+
                /* easing for hover */
   "
 />

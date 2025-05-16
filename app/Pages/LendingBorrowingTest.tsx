@@ -696,7 +696,7 @@ const LendingPool: React.FC = () => {
     <div className="min-h-screen bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg p-8 text-white space-y-8">
       {/* Header */}
       <header className="flex flex-col items-center space-y-2">
-        <h1 className="text-3xl font-bold">Lending Dashboard</h1>
+        <h1 className="text-3xl font-bold">My Dashboard</h1>
         <p className="text-gray-400">Manage your positions seamlessly</p>
       </header>
 <div className="flex justify-between items-center">
@@ -786,7 +786,7 @@ const LendingPool: React.FC = () => {
               <button
                 onClick={handleSupply}
                 disabled={isPaused || isApproving || isSupplying || !supplyAmount}
-                className="bg-blue-500 text-white p-2 mt-5 rounded disabled:bg-[#d3c81a]"
+                className="bg-blue-500 mt-5 ml-32 flex-1 text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center disabled:bg-gradient-to-r from-[#d3c81a] to-[#c4b918]"
               >
                 {isApproving ? 'Approving...' : isSupplying ? 'Supplying...' : 'Supply'}
               </button>
@@ -805,20 +805,25 @@ const LendingPool: React.FC = () => {
                 className="bg-white/10 backdrop-blur-lg border border-cyan-400/20 shadow-green-400 text-white placeholder-white/50 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300"
                 disabled={isPaused || isBorrowing}
               />
-              <button
-                onClick={() => setBorrowAmount(availableToBorrow)}
-                className="bg-[#ff0000] mt-5 text-white p-2 mr-2 rounded"
-                disabled={isPaused || isBorrowing}
-              >
-                Max
-              </button>
-              <button
-                onClick={handleBorrow}
-                disabled={isPaused || isBorrowing || !borrowAmount || parseAmount(borrowAmount,decimals) > (borrowLimit - borrowedBalance)}
-                className="bg-blue-500 mt-5 text-white p-2 rounded disabled:bg-[#d3c81a]"
-              >
-                {isBorrowing ? 'Borrowing...' : 'Borrow'}
-              </button>
+              <div className="flex items-center space-x-2 mt-5">
+  <button
+    onClick={() => setBorrowAmount(availableToBorrow)}
+    className="bg-[#ff0000] text-white p-2 rounded"
+    disabled={isPaused || isBorrowing}
+  >
+    Max
+  </button>
+  <button
+    onClick={handleBorrow}
+    disabled={
+      isPaused || isBorrowing || !borrowAmount || parseAmount(borrowAmount, decimals) > (borrowLimit - borrowedBalance)
+    }
+    className="bg-blue-500 flex-1 text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center disabled:bg-gradient-to-r from-[#d3c81a] to-[#c4b918]"
+  >
+    {isBorrowing ? 'Borrowing...' : 'Borrow'}
+  </button>
+</div>
+
             </div>
           )}
 
@@ -833,9 +838,10 @@ const LendingPool: React.FC = () => {
                 className="bg-white/10 backdrop-blur-lg border border-cyan-400/20 shadow-green-400 text-white placeholder-white/50 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300"
                 disabled={isPaused || isWithdrawing}
               />
+              <div className="flex items-center space-x-2 mt-5">
               <button
                 onClick={() => setWithdrawAmount(availableToWithdraw)}
-                className="bg-[#ff0000] mt-5 text-white p-2 mr-2 rounded"
+                className="bg-[#ff0000] text-white p-2 mr-2 rounded"
                 disabled={isPaused || isWithdrawing}
               >
                 Max
@@ -844,10 +850,11 @@ const LendingPool: React.FC = () => {
               <button
                 onClick={handleWithdraw}
                 disabled={isPaused || isWithdrawing || !withdrawAmount || parseAmount(withdrawAmount,decimals) > (suppliedBalanceWithInterest > borrowedBalance ? suppliedBalanceWithInterest - borrowedBalance : suppliedBalanceWithInterest)}
-                className="bg-blue-500 text-white mt-5 p-2 rounded disabled:bg-[#d3c81a]"
+                className="bg-blue-500 flex-1 text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center disabled:bg-gradient-to-r from-[#d3c81a] to-[#c4b918]"
               >
                 {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
               </button>
+              </div>
                <br />
               Available: {borrowedBalance > BigInt(0) ? '0.00' : availableToWithdraw}
             </div>
@@ -864,9 +871,10 @@ const LendingPool: React.FC = () => {
                 className="bg-white/10 backdrop-blur-lg border border-cyan-400/20 shadow-green-400 text-white placeholder-white/50 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition-all duration-300"
                 disabled={isPaused || isApproving || isRepaying}
               />
+              <div className="flex items-center space-x-2 mt-5">
               <button
                 onClick={() => setRepayAmount(formatUnits(borrowedBalance, decimals))}
-                className="bg-[#ff0000] mt-5 text-white p-2 mr-2 rounded"
+                className="bg-[#ff0000] text-white p-2 mr-2 rounded"
                 disabled={isPaused || isApproving || isRepaying}
               >
                 Max
@@ -874,10 +882,11 @@ const LendingPool: React.FC = () => {
               <button
                 onClick={handleRepay}
                 disabled={isPaused || isApproving || isRepaying || !repayAmount || parseAmount(repayAmount,decimals) > parseUnits(tokenBalance.toString(), 6)}
-                className="bg-blue-500 text-white mt-5 p-2 rounded disabled:bg-[#d3c81a]"
+                className="bg-blue-500 flex-1 text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center disabled:bg-gradient-to-r from-[#d3c81a] to-[#c4b918]"
               >
                 {isApproving ? 'Approving...' : isRepaying ? 'Repaying...' : 'Repay'}
               </button>
+              </div>
               {isWaitingForReceipt && approvalFor === 'repay' && (
                 <p className="text-yellow-500 mt-2">Waiting for approval transaction to confirm...</p>
               )}
