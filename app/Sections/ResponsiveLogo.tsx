@@ -21,25 +21,12 @@ const ResponsiveLogo = () => {
   }, []);
 
   return (
-    <div className="logo-container">
-      <span className="relative inline-block font-sans">
-        {isMobile ? (
-          // Mobile version - just the eagle emoji with smaller text
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
-            <span className="text-black"></span><span>🦅</span>
-          </span>
-            {/* <span className="text-black">🦅</span> */}
-          </span>
-          
-        ) : (
-          // Desktop version - full logo
-            <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-[#d3c81a]">
-            Golden<span className="text-[#f3f3f3]">Eagle</span><span>🦅</span>
-          </span>
-        )}
-      </span>
-    </div>
+    <div className="logo-container flex items-center space-x-2">
+  <span className="text-3xl">🦉</span>
+  <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">Foresight.ai
+  </span>
+</div>
+
   );
 };
 

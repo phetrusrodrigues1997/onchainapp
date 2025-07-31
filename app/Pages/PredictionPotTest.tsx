@@ -255,14 +255,14 @@ export default function PredictionPotTest() {
   return (
     <div className="min-h-screen bg-invisible p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-black/40 backdrop-blur-sm rounded-lg p-6 mb-6">
+        <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6 mb-6">
           <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
   The <span style={{ color: '#F7931A' }}>₿itcoin</span> Pot
 </h1>
 
           
           {!isConnected && (
-            <div className="text-center text-white mb-6">
+            <div className="text-center text-[#F5F5F5] mb-6">
               Please connect your wallet to interact with the contract.
             </div>
           )}
@@ -274,27 +274,27 @@ export default function PredictionPotTest() {
             <div className="mb-6">
               {/* <h2 className="text-xl font-semibold text-white mb-4">Contract Information</h2> */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-sm text-gray-300">Entry Amount</div>
-                  <div className="text-[#d3c81a] font-semibold">
+                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                  <div className="text-sm text-[#A0A0B0]">Entry Amount</div>
+                  <div className="text-[#F5F5F5] font-semibold">
                     {formatBigIntValue(entryAmount)} USDC
                   </div>
                 </div>
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-sm text-gray-300">Pot Balance</div>
-                  <div className="text-[#d3c81a] font-semibold">
+                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                  <div className="text-sm text-[#A0A0B0]">Pot Balance</div>
+                  <div className="text-[#F5F5F5] font-semibold">
                     {formatBigIntValue(potBalance)} USDC
                   </div>
                 </div>
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-sm text-gray-300">Participants</div>
-                  <div className="text-[#d3c81a] font-semibold">
+                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                  <div className="text-sm text-[#A0A0B0]">Participants</div>
+                  <div className="text-[#F5F5F5] font-semibold">
                     {getParticipantCount()}
                   </div>
                 </div>
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <div className="text-sm text-gray-300">Your USDC Balance</div>
-                  <div className="text-[#d3c81a] font-semibold">
+                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                  <div className="text-sm text-[#A0A0B0]">Your USDC Balance</div>
+                  <div className="text-[#F5F5F5] font-semibold">
                     {formatBigIntValue(userUsdcBalance)} USDC
                   </div>
                 </div>
@@ -305,34 +305,34 @@ export default function PredictionPotTest() {
           {/* User Actions */}
           {isConnected && contractAddress && !isParticipant && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">User Actions</h2>
+              <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">User Actions</h2>
               <div className="space-y-4">
                 
                 {/* Approve USDC */}
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <h3 className="text-white font-medium mb-2">1. Approve USDC Spending</h3>
-                  <p className="text-gray-300 text-sm mb-3">
+                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                  <h3 className="text-[#F5F5F5] font-medium mb-2">1. Approve USDC Spending</h3>
+                  <p className="text-[#A0A0B0] text-sm mb-3">
                     Allow the contract to spend your USDC. Current allowance: {formatBigIntValue(allowance)} USDC
                   </p>
                   <button
                     onClick={handleApprove}
                     disabled={isLoading || hasEnoughAllowance}
-                    className="bg-[#d3c81a] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {hasEnoughAllowance ? 'Already Approved' : 'Approve USDC'}
                   </button>
                 </div>
 
                 {/* Enter Pot */}
-                <div className="bg-black/30 p-4 rounded-lg">
-                  <h3 className="text-white font-medium mb-2">2. Enter Prediction Pot</h3>
-                  <p className="text-gray-300 text-sm mb-3">
+                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                  <h3 className="text-[#F5F5F5] font-medium mb-2">2. Enter Prediction Pot</h3>
+                  <p className="text-[#A0A0B0] text-sm mb-3">
                     Pay 10 USDC to enter the pot. Make sure you have approved USDC spending first.
                   </p>
                   <button
                     onClick={handleEnterPot}
                     disabled={isLoading || !hasEnoughAllowance || !hasEnoughBalance}
-                    className="bg-[#d3c81a] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Enter Pot (10 USDC)
                   </button>
@@ -350,10 +350,10 @@ export default function PredictionPotTest() {
           {/* Owner Actions */}
           {isOwner && contractAddress && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Owner Actions</h2>
-              <div className="bg-black/30 p-4 rounded-lg">
-                <h3 className="text-white font-medium mb-2">Distribute Pot to Winners</h3>
-                <p className="text-gray-300 text-sm mb-3">
+              <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">Owner Actions</h2>
+              <div className="bg-[#2C2C47] p-4 rounded-lg">
+                <h3 className="text-[#F5F5F5] font-medium mb-2">Distribute Pot to Winners</h3>
+                <p className="text-[#A0A0B0] text-sm mb-3">
                   Enter winner addresses separated by commas. The pot will be divided equally among all winners.
                 </p>
                 <textarea
@@ -361,12 +361,12 @@ export default function PredictionPotTest() {
                   onChange={(e) => setWinnerAddresses(e.target.value)}
                   placeholder="0x123..., 0x456..., 0x789..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
+                  className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
                 />
                 <button
                   onClick={handleDistributePot}
                   disabled={isLoading || !winnerAddresses.trim()}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Distribute Pot
                 </button>
@@ -393,7 +393,7 @@ export default function PredictionPotTest() {
           {/* Status Message */}
           {message && (
             <div className={`p-4 rounded-lg ${message.includes('failed') ? 'bg-red-900/50 border border-red-500' : 'bg-green-900/50 border border-green-500'}`}>
-              <p className="text-white">{message}</p>
+              <p className="text-[#F5F5F5]">{message}</p>
             </div>
           )}
         </div>

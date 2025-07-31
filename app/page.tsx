@@ -125,7 +125,7 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-gradient-to-r from-[#3f3f3f] to-[#444444] border-b border-white/20 px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-[#1A1A2E] border-b border-white/20 px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           
             {/* Logo */}
@@ -139,7 +139,7 @@ if (!isMounted) {
           
           <div className="wallet-container">
             <Wallet>
-            <ConnectWallet className="bg-[#d3c81a] text-black dark:bg-[#d3c81a] rounded-full lg:mr-4">
+            <ConnectWallet className="bg-[#6A5ACD] text-black dark:bg-[#6A5ACD] rounded-full lg:mr-4">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
@@ -167,7 +167,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-gradient-to-r from-[#3f3f3f] to-[#444444] ">
+      <main className="flex-grow flex items-center justify-center bg-[#1A1A2E] ">
         
           
           
@@ -185,7 +185,7 @@ if (!isMounted) {
       </main>
       {/* Footer */}
       {/* from-green-900 to-yellow-800*/}
-      <footer className="bg-gradient-to-r from-[#3f3f3f] to-[#444444] border-t border-white/20  py-4 px-4">
+      <footer className="bg-[#1A1A2E] border-t border-white/20  py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
     <div className="text-sm text-[#d3c81a] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.
