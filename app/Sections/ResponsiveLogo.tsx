@@ -23,7 +23,7 @@ const ResponsiveLogo = () => {
   return (
     <div className="logo-container flex items-center space-x-2">
   <span className="text-3xl">🦉</span>
-  <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">Foresight.ai
+  <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">Foresight
   </span>
 </div>
 

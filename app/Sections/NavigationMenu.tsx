@@ -27,7 +27,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
   // Menu items for reusability
   const menuItems = [
-    { id: 'predictionPot', label: 'Predictions' },
+    { id: 'predictionPot', label: 'Markets' },
     { id: 'home', label: 'Wallet' },
     { id: 'buy', label: 'Purchase' },
     { id: 'market', label: 'Charts' },
@@ -40,7 +40,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMobile && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 text-black bg-white rounded-md shadow-md md:hidden border border-white/20"
+          className="p-2 text-black bg-white rounded-md shadow-md md:hidden border border-[#fafafa] mr-16"
           aria-label="Toggle menu"
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}

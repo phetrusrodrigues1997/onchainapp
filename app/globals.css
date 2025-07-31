@@ -98,11 +98,7 @@ body::before {
   margin-left: calc(-50vw + 50%);
 }
 
-button[aria-label="Toggle swap settings"] {
-  background:transparent  !important;
-  fill: white !important;
-  opacity: 0.99 !important;
-}
+
 
 @media (prefers-color-scheme: dark) {
   .flex.flex-col.ock-text-foreground :not([data-testid="ockTokenSelectButton_Symbol"]) .font-semibold {
@@ -115,16 +111,10 @@ button[aria-label="Toggle swap settings"] {
     background-color: #E0E0E0 !important; /* from-gray-700 to-gray-800 */
   }}
 
-[data-testid="ockSwapMessage_Message"] {
-  color: transparent   !important;
-}
 
 
-@media (prefers-color-scheme: dark) {
-  [data-testid="ockSwapButton_Button"]:disabled {
-    opacity: 0.85 !important; /* Ensures full opacity when disabled */
-  }
-}
+
+
 
 @media (prefers-color-scheme: dark) {
   .flex.h-12.items-center.px-2.pl-4.ock-bg-default.ock-border-radius.ock-border-line-default {
@@ -181,9 +171,7 @@ button[aria-label="Toggle swap settings"] {
 }
 
 
-[data-testid="ockSwap_Title"] {
-  color:white !important;
-}
+
 
 [data-testid="ock-vaultDetails"] {
   background:#1F2937 !important;
@@ -267,19 +255,12 @@ button[aria-label="Toggle swap settings"] {
   display: none !important; /* green-600 */
 }
 
-[data-testid="ockEarnBalance"] .ock-font-family.font-semibold {
-  color: white !important;
-}
 
 [data-testid="ockWithdrawBalance"] .ock-font-family.font-semibold {
   color: white !important;
 }
 
-@media (min-width: 640px) { /* sm breakpoint in Tailwind */
-  .ockEarnBalance {
-    font-size: 10px !important;
-  }
-}
+
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenRow_Container"] {
@@ -290,28 +271,18 @@ button[aria-label="Toggle swap settings"] {
 
  
 
-@media (prefers-color-scheme: dark) {
-  [data-testid="SwapTokensButton"] {
-    background-color: var(--ock-bg-alternate) !important;
-    border-color: var(--ock-border-default) !important;
-    color: inherit !important;
-  }
 
-  [data-testid="SwapTokensButton"]:hover {
-    background-color: var(--ock-bg-alternate-hover) !important;
-  }
 
-  [data-testid="SwapTokensButton"]:active {
-    background-color: var(--ock-bg-alternate-active) !important;
-  }
+ 
 
+  
  
 
   /* Ensuring the SVG icon color does not change in dark mode */
   [data-testid="ock-toggleSvg"] path {
     fill: currentColor !important;
   }
-}
+
 
 
 
@@ -352,19 +323,11 @@ button[aria-label="Toggle menu"] svg {
   stroke: white !important;
 }
 
-svg[aria-label="ock-swapSettingsSvg"] path {
-  fill: white !important;
-  opacity: 0.99 !important;
-  
-}
-[data-testid="ockSwapSettings_Settings"] {
-background-color: transparent  !important;
-fill: white !important;
-opacity: 0.99 !important;
-}
+
+
 
 [data-testid="ockConnectButton"] {
-  background: #d3c81a !important; /* green-500 */
+  background: blue !important; /* green-500 */
   color: black !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
@@ -381,7 +344,7 @@ opacity: 0.99 !important;
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockConnectButton"] {
-    background: #d3c81a !important; /* from-gray-700 to-gray-800 */
+    background: blue !important; /* from-gray-700 to-gray-800 */
     color: white !important;
   }
 }

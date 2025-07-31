@@ -70,7 +70,7 @@ const BuySection: React.FC = () => {
       styleTag.innerHTML = `
         [data-testid="ockBuyButton_Button"],
         [data-testid="ockSwapButton_Button"] {
-          background-color: #d3c81a !important;
+          background-color: #6A5ACD !important;
         }
 
         [data-testid="ockBuyButton_Button"] span,
@@ -169,7 +169,7 @@ const BuySection: React.FC = () => {
       <div className="w-full max-w-sm mx-auto p-4">
   {/* Icon row */}
   <div className="flex justify-center mb-8">
-    <FontAwesomeIcon icon={faCreditCard} className="text-[#d3c81a] text-8xl" />
+    <FontAwesomeIcon icon={faCreditCard} className="text-[#6A5ACD] text-8xl" />
   </div>
 
   <p className="text-xl sm:text-xl font-bold text-white text-center mb-4 sm:mb-6">

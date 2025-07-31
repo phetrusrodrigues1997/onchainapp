@@ -129,7 +129,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             <p className="text-gray-400">Please connect your wallet to access your balance and transactions</p>
           </div>
           <div className="animate-pulse opacity-50 flex justify-center">
-            <svg className="w-24 h-24 text-[#d3c81a]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-24 h-24 text-[#6A5ACD]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
             </svg>
           </div>
@@ -147,7 +147,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             <p className="text-gray-400">Fetching your latest balances and market data</p>
           </div>
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#d3c81a]"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#6A5ACD]"></div>
           </div>
         </div>
       </div>
@@ -207,7 +207,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
               </div>
             ) : username ? (
               <div className="flex items-center bg-black/40 px-3 py-1.5 rounded-full">
-                <div className="w-7 h-7 rounded-full bg-[#d3c81a] flex items-center justify-center mr-2">
+                <div className="w-7 h-7 rounded-full bg-[#6A5ACD] flex items-center justify-center mr-2">
                   <FontAwesomeIcon icon={faUser} className="text-black text-sm" />
                 </div>
                 <span className="text-white font-medium" style={{
@@ -230,9 +230,9 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                   shadow-md
                   transition-all
                   duration-300
-                  hover:bg-[#d3c81a]/20
-                  hover:border-[#d3c81a]/50
-                  hover:text-[#d3c81a]
+                  hover:bg-[#6A5ACD]/20
+                  hover:border-[#6A5ACD]/50
+                  hover:text-[#6A5ACD]
                 "
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
@@ -248,7 +248,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           <div className="flex justify-end space-x-4">
             {/* Notification button */}
             <button 
-              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:text-[#d3c81a] hover:bg-black/60 transition-all duration-300" 
+              className="relative w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:text-[#6A5ACD] hover:bg-black/60 transition-all duration-300" 
               onClick={() => setActiveSection('notifications')}
             >
               <svg
@@ -266,12 +266,12 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                 />
               </svg>
               {/* Notification indicator dot */}
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#d3c81a] rounded-full"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#6A5ACD] rounded-full"></span>
             </button>
 
             {/* Settings button */}
             <button 
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:text-[#d3c81a] hover:bg-black/60 transition-all duration-300" 
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:text-[#6A5ACD] hover:bg-black/60 transition-all duration-300" 
               onClick={() => setActiveSection('usernamePage')}
             >
               <svg
@@ -369,7 +369,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             onClick={() => setSelectedTab('stablecoins')}
             className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
               selectedTab === 'stablecoins'
-                ? 'text-[#d3c81a] border-b-2 border-[#d3c81a]'
+                ? 'text-[#6A5ACD] border-b-2 border-[#6A5ACD]'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -379,7 +379,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             onClick={() => setSelectedTab('crypto')}
             className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
               selectedTab === 'crypto'
-                ? 'text-[#d3c81a] border-b-2 border-[#d3c81a]'
+                ? 'text-[#6A5ACD] border-b-2 border-[#6A5ACD]'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -389,7 +389,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
             onClick={() => setSelectedTab('stocks')}
             className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
               selectedTab === 'stocks'
-                ? 'text-[#d3c81a] border-b-2 border-[#d3c81a]'
+                ? 'text-[#6A5ACD] border-b-2 border-[#6A5ACD]'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -410,7 +410,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
           </div>
           
           <button
-            className="flex items-center space-x-2 bg-black/40 text-white hover:bg-[#d3c81a]/20 hover:text-[#d3c81a] px-3 py-1.5 rounded-full transition-all duration-300 text-sm border border-gray-800"
+            className="flex items-center space-x-2 bg-black/40 text-white hover:bg-[#6A5ACD]/20 hover:text-[#6A5ACD] px-3 py-1.5 rounded-full transition-all duration-300 text-sm border border-gray-800"
             onClick={() => setActiveSection('activity')}
           >
             <FontAwesomeIcon icon={faChartLine} className="text-xs" />
@@ -440,7 +440,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                   <img
                     src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                     alt={nativeToken?.symbol || 'unknown'}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#d3c81a]/30 transition-all duration-300"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#6A5ACD]/30 transition-all duration-300"
                   />
                 </div>
                 <div className="flex-1 ml-4">
@@ -484,7 +484,7 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
                       <img
                         src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
                         alt={token.symbol}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#d3c81a]/30 transition-all duration-300"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#6A5ACD]/30 transition-all duration-300"
                       />
                     </div>
                     <div className="flex-1 ml-4">

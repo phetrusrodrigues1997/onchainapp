@@ -257,7 +257,7 @@ export default function PredictionPotTest() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6 mb-6">
           <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
-  The <span style={{ color: '#F7931A' }}>₿itcoin</span> Pot
+  The <span style={{ color: '#F7931A' }}>₿</span>itcoin Pot
 </h1>
 
           

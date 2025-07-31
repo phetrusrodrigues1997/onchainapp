@@ -3,10 +3,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount,useSendTransaction } from 'wagmi';
-import { parseUnits } from 'viem';
 import PredictionPotTest from './Pages/PredictionPotTest';
+import LandingPage from './Pages/LandingPage';
 import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
-import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
@@ -38,27 +37,10 @@ export default function App() {
   const { sendTransaction } = useSendTransaction();
   const feeRecipient = '0x1Ac08E56c4d95bD1B8a937C6EB626cFEd9967D67';
 
-  const displayToast = (message: string) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
+  
 
-  useEffect(() => {
-    if (activeSection === "swap") {
-      setSelectedOption("Stablecoins");
-      setSwappableTokensList(stablecoinTokens);
-    }
-  }, [activeSection]);
 
-  // Update user points when wallet address changes
-  useEffect(() => {
-    if (address) {
-      getUserPoints(address)
-        .then(setPoints)
-        .catch((err) => console.error(err));
-    }
-  }, [address]);
+  
 
   // Mounting and MutationObserver for styling
   useEffect(() => {
@@ -84,48 +66,41 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      [data-testid="ockSwapButton_Button"] {
-      background-color: #d3c81a !important;
-        color: white !important;
-      }
-      [data-testid="ockSwapButton_Button"] span {
-        color: white !important;
-      }
-    `;
-    document.head.appendChild(style);
-  
-    // Cleanup on unmount
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
 
 
-if (!isMounted) {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-green-900 to-yellow-800 text-white">
-      <div className="p-8 bg-gradient-to-r from-green-900 to-yellow-800 rounded-lg shadow-2xl border border-[#d3c81a] max-w-md w-full">
-        <div className="text-center mb-6">
-          <h2 className="text-xl font-medium mb-2">Loading Application</h2>
-          <p className="text-[#d3c81a]">Please wait while we initialize the interface</p>
-        </div>
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#d3c81a]"></div>
-        </div>
-      </div>
-    </div>
-  );
-}
+// if (!isMounted) {
+//   return (
+//     <div className="flex flex-col items-center justify-center h-screen bg-invisible text-white">
+//       <div className="p-8 bg-invisible rounded-lg shadow-2xl border border-[#fefefe] max-w-md w-full">
+//         <div className="text-center mb-6">
+//           <h2 className="text-xl font-medium mb-2">Loading Application</h2>
+//           <p className="text-[#d3c81a]">Please wait while we initialize the interface</p>
+//         </div>
+//         <div className="flex justify-center">
+//           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fefefe]"></div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
   return (
     
-    <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
+     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 text-white overflow-hidden">
+      {/* Animated background elements */}
+      {/* <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-500"></div>
+      </div> */}
+      
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-[#1A1A2E] border-b border-white/20 px-4 py-3 shadow-md">
+      <header
+  className={`top-0 z-50 px-4 py-3 shadow-md ${
+    activeSection === "predictionPot" ? "bg-invisible" : "bg-[#1A1A2E] border-b border-white/20"
+  }`}
+>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           
             {/* Logo */}
@@ -139,7 +114,7 @@ if (!isMounted) {
           
           <div className="wallet-container">
             <Wallet>
-            <ConnectWallet className="bg-[#6A5ACD] text-black dark:bg-[#6A5ACD] rounded-full lg:mr-4">
+            <ConnectWallet className="bg-[#] text-black dark:bg-blue rounded-full lg:mr-4">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
@@ -178,25 +153,13 @@ if (!isMounted) {
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {activeSection === "notifications" && <CreateMessage />}
-          {activeSection === "predictionPot" && <PredictionPotTest />}
+          {activeSection === "bitcoinPot" && <PredictionPotTest />}
+          {activeSection === "predictionPot" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           
 
         
       </main>
-      {/* Footer */}
-      {/* from-green-900 to-yellow-800*/}
-      <footer className="bg-[#1A1A2E] border-t border-white/20  py-4 px-4">
-  <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-    <div className="text-sm text-[#d3c81a] mb-2 md:mb-0">
-      © 2025 GoldenEagle Finance. All rights reserved.
-    </div>
-    <div className="flex space-x-6">
-      <a href="#" className="text-sm text-white hover:text-shadow-[0_0_5px_#00ff00] transition-all">Terms</a>
-      <a href="#" className="text-sm text-white hover:text-shadow-[0_0_5px_#00ff00] transition-all">Privacy</a>
-      <a href="#" className="text-sm text-white hover:text-shadow-[0_0_5px_#00ff00] transition-all">Support</a>
-    </div>
-  </div>
-</footer>
+      
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-md shadow-lg border border-[#004400] transition-all duration-200 flex items-center z-50">
