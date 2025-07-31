@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useReadContract } from 'wagmi';
+import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 
 // Contract ABI for PredictionPot
@@ -78,9 +78,14 @@ const USDC_ABI = [
   }
 ];
 
-export default function PredictionPotTest() {
+interface PredictionPotProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotProps) => {
   const { address, isConnected } = useAccount();
-  const { writeContract } = useWriteContract();
+  const { writeContract, data: txHash, isPending } = useWriteContract();
   
   // Contract addresses (you'll need to update these with your deployed addresses)
   const [contractAddress, setContractAddress] = useState<string>('0x390896082E635c9F9f07C0609d73140e4F166471');
@@ -90,6 +95,49 @@ export default function PredictionPotTest() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [winnerAddresses, setWinnerAddresses] = useState<string>('');
+  const [lastAction, setLastAction] = useState<string>('');
+
+  // Wait for transaction receipt
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
+
+  // Handle transaction confirmation and errors
+  useEffect(() => {
+    if (isConfirmed) {
+      setIsLoading(false);
+      if (lastAction === 'approve') {
+        showMessage('USDC approval confirmed! You can now enter the pot.');
+        // Refresh the page data
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else if (lastAction === 'enterPot') {
+        showMessage('Successfully entered the pot! Redirecting to betting page...');
+        // Navigate to betting page after a short delay
+        
+      } else if (lastAction === 'distributePot') {
+        showMessage('Pot distributed successfully!');
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+      setLastAction('');
+    }
+  }, [isConfirmed, lastAction]);
+
+  // Reset loading state if transaction fails
+  useEffect(() => {
+    if (!isPending && !isConfirming && !isConfirmed && lastAction) {
+      // Transaction might have failed, reset loading state
+      setTimeout(() => {
+        if (isLoading) {
+          setIsLoading(false);
+          setLastAction('');
+        }
+      }, 3000);
+    }
+  }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
 
   // Read contract data with proper typing
   const { data: participants } = useReadContract({
@@ -158,13 +206,18 @@ export default function PredictionPotTest() {
 
   const showMessage = (msg: string, isError = false) => {
     setMessage(msg);
-    setTimeout(() => setMessage(''), 5000);
+    if (!isError) {
+      setTimeout(() => setMessage(''), 8000); // Longer timeout for success messages
+    } else {
+      setTimeout(() => setMessage(''), 5000);
+    }
   };
 
   const handleApprove = async () => {
     if (!contractAddress || !entryAmount) return;
     
     setIsLoading(true);
+    setLastAction('approve');
     try {
       await writeContract({
         address: usdcAddress as `0x${string}`,
@@ -172,11 +225,11 @@ export default function PredictionPotTest() {
         functionName: 'approve',
         args: [contractAddress, entryAmount],
       });
-      showMessage('USDC approval transaction submitted!');
+      showMessage('USDC approval transaction submitted! Waiting for confirmation...');
     } catch (error) {
       console.error('Approval failed:', error);
       showMessage('Approval failed. Check console for details.', true);
-    } finally {
+      setLastAction('');
       setIsLoading(false);
     }
   };
@@ -185,17 +238,18 @@ export default function PredictionPotTest() {
     if (!contractAddress) return;
     
     setIsLoading(true);
+    setLastAction('enterPot');
     try {
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
       });
-      showMessage('Enter pot transaction submitted!');
+      showMessage('Enter pot transaction submitted! Waiting for confirmation...');
     } catch (error) {
       console.error('Enter pot failed:', error);
       showMessage('Enter pot failed. Check console for details.', true);
-    } finally {
+      setLastAction('');
       setIsLoading(false);
     }
   };
@@ -203,8 +257,6 @@ export default function PredictionPotTest() {
   const handleDistributePot = async () => {
     if (!contractAddress || !winnerAddresses.trim()) return;
 
-
-    
     const winners = winnerAddresses
       .split(',')
       .map(addr => addr.trim())
@@ -216,6 +268,7 @@ export default function PredictionPotTest() {
     }
 
     setIsLoading(true);
+    setLastAction('distributePot');
     try {
       await writeContract({
         address: contractAddress as `0x${string}`,
@@ -223,15 +276,17 @@ export default function PredictionPotTest() {
         functionName: 'distributePot',
         args: [winners],
       });
-      showMessage('Distribute pot transaction submitted!');
+      showMessage('Distribute pot transaction submitted! Waiting for confirmation...');
     } catch (error) {
       console.error('Distribute pot failed:', error);
       showMessage('Distribute pot failed. Check console for details.', true);
-    } finally {
+      setLastAction('');
       setIsLoading(false);
     }
   };
 
+  const isActuallyLoading = isLoading || isPending || isConfirming;
+  
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase();
   
   const hasEnoughAllowance = (() => {
@@ -257,22 +312,18 @@ export default function PredictionPotTest() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6 mb-6">
           <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
-  The <span style={{ color: '#F7931A' }}>₿</span>itcoin Pot
-</h1>
+            The <span style={{ color: '#F7931A' }}>₿</span>itcoin Pot
+          </h1>
 
-          
           {!isConnected && (
             <div className="text-center text-[#F5F5F5] mb-6">
               Please connect your wallet to interact with the contract.
             </div>
           )}
 
-          
-
           {/* Contract Info */}
           {contractAddress && (
             <div className="mb-6">
-              {/* <h2 className="text-xl font-semibold text-white mb-4">Contract Information</h2> */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-[#2C2C47] p-4 rounded-lg">
                   <div className="text-sm text-[#A0A0B0]">Entry Amount</div>
@@ -302,7 +353,54 @@ export default function PredictionPotTest() {
             </div>
           )}
 
-          {/* User Actions */}
+          {/* Transaction Status */}
+          {(isPending || isConfirming) && (
+            <div className="mb-6">
+              <div className="bg-[#2C2C47] p-4 rounded-lg border border-[#d3c81a]">
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#d3c81a]"></div>
+                  <div className="text-[#F5F5F5]">
+                    {isPending && 'Waiting for wallet confirmation...'}
+                    {isConfirming && 'Transaction confirming on blockchain...'}
+                  </div>
+                </div>
+                {txHash && (
+                  <div className="text-center mt-2">
+                    <a
+                      href={`https://basescan.org/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#d3c81a] text-sm hover:underline"
+                    >
+                      View on BaseScan →
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* User Actions - Show different content if already a participant */}
+          {isConnected && contractAddress && isParticipant && (
+            <div className="mb-6">
+              <div className="bg-[#2C2C47] p-6 rounded-lg text-center">
+                <div className="text-[#d3c81a] text-xl font-semibold mb-3">
+                  🎉 You're in the Pot!
+                </div>
+                <div className="text-[#F5F5F5] mb-4">
+                  You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!
+                </div>
+                <button
+                  onClick={() => setActiveSection('bitcoinBetting')}
+                  className="bg-[#6A5ACD] text-black px-6 py-3 rounded-md font-medium hover:bg-[#c4b517] transition-colors"
+                >
+                  Go to Betting Page
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* User Actions - Only show if not yet a participant */}
           {isConnected && contractAddress && !isParticipant && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">User Actions</h2>
@@ -316,10 +414,10 @@ export default function PredictionPotTest() {
                   </p>
                   <button
                     onClick={handleApprove}
-                    disabled={isLoading || hasEnoughAllowance}
+                    disabled={isActuallyLoading || hasEnoughAllowance}
                     className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {hasEnoughAllowance ? 'Already Approved' : 'Approve USDC'}
+                    {isActuallyLoading && lastAction === 'approve' ? 'Processing...' : hasEnoughAllowance ? 'Already Approved' : 'Approve USDC'}
                   </button>
                 </div>
 
@@ -331,10 +429,10 @@ export default function PredictionPotTest() {
                   </p>
                   <button
                     onClick={handleEnterPot}
-                    disabled={isLoading || !hasEnoughAllowance || !hasEnoughBalance}
+                    disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
                     className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Enter Pot (10 USDC)
+                    {isActuallyLoading && lastAction === 'enterPot' ? 'Processing...' : 'Enter Pot (10 USDC)'}
                   </button>
                   {!hasEnoughBalance && (
                     <p className="text-red-400 text-sm mt-2">Insufficient USDC balance</p>
@@ -365,28 +463,12 @@ export default function PredictionPotTest() {
                 />
                 <button
                   onClick={handleDistributePot}
-                  disabled={isLoading || !winnerAddresses.trim()}
+                  disabled={isActuallyLoading || !winnerAddresses.trim()}
                   className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Distribute Pot
+                  {isActuallyLoading && lastAction === 'distributePot' ? 'Processing...' : 'Distribute Pot'}
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* Participants List */}
-          {participants && Array.isArray(participants) && participants.length > 0 && (
-            <div className="mb-6">
-              {/* <h2 className="text-xl font-semibold text-white mb-4">Current Participants</h2>
-              <div className="bg-black/30 p-4 rounded-lg">
-                <div className="space-y-2">
-                  {participants.map((participant: string, index: number) => (
-                    <div key={index} className="text-[#d3c81a] font-mono text-sm">
-                      {index + 1}. {participant}
-                    </div>
-                  ))}
-                </div>
-              </div> */}
             </div>
           )}
 
@@ -400,4 +482,6 @@ export default function PredictionPotTest() {
       </div>
     </div>
   );
-}
+};
+
+export default PredictionPotTest;

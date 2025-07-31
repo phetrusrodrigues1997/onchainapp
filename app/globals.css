@@ -327,7 +327,7 @@ button[aria-label="Toggle menu"] svg {
 
 
 [data-testid="ockConnectButton"] {
-  background: blue !important; /* green-500 */
+  background: #6A5ACD !important; /* green-500 */
   color: black !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
@@ -344,7 +344,7 @@ button[aria-label="Toggle menu"] svg {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockConnectButton"] {
-    background: blue !important; /* from-gray-700 to-gray-800 */
+    background: #6A5ACD !important; /* from-gray-700 to-gray-800 */
     color: white !important;
   }
 }

@@ -5,7 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { useAccount,useSendTransaction } from 'wagmi';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
-import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
+import BitcoinBetting from './Pages/BitcoinBetting';
+// import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
@@ -16,7 +17,7 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
 // import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
-import HomePage from './Pages/WalletPage';
+import WalletPage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 import CreateMessage from './Pages/MessagesPage';
 
@@ -25,10 +26,10 @@ import CreateMessage from './Pages/MessagesPage';
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('predictionPot'); // Default section
+  const [activeSection, setActiveSection] = useState('home'); // Default section
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
-  const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
+  // const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
   const [isMounted, setIsMounted] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [showSwapButton, setShowSwapButton] = useState(true);
@@ -97,10 +98,7 @@ export default function App() {
       
       {/* Dark green header */}
       <header
-  className={`top-0 z-50 px-4 py-3 shadow-md ${
-    activeSection === "predictionPot" ? "bg-invisible" : "bg-[#1A1A2E] border-b border-white/20"
-  }`}
->
+  className="top-0 z-50 px-4 py-3 shadow-md bg-[#1A1A2E] border-b border-white/20">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           
             {/* Logo */}
@@ -114,7 +112,7 @@ export default function App() {
           
           <div className="wallet-container">
             <Wallet>
-            <ConnectWallet className="bg-[#] text-black dark:bg-blue rounded-full lg:mr-4">
+            <ConnectWallet className="bg-[#6A5ACD] text-black dark:bg-[#6A5ACD] rounded-full lg:mr-4">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
@@ -150,12 +148,12 @@ export default function App() {
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay/>}
           {activeSection === "discord" && <DiscordXSection />}
-          {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {activeSection === "notifications" && <CreateMessage />}
-          {activeSection === "bitcoinPot" && <PredictionPotTest />}
-          {activeSection === "predictionPot" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
-          
+          {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "bitcoinBetting" && <BitcoinBetting contractAddress="0x390896082E635c9F9f07C0609d73140e4F166471" /> }
 
         
       </main>

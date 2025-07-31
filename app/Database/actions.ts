@@ -2,10 +2,8 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { userPoints } from "./schema"; // Import the schema
+import { userPoints, Messages, BitcoinBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
-import { Messages } from './schema';
-
 
 // Initialize database connection
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -151,5 +149,80 @@ export async function getAllMessages(address: string) {
   } catch (error) {
     console.error("Error fetching all messages:", error);
     throw new Error("Failed to fetch all messages");
+  }
+}
+
+/**
+ * Places a Bitcoin price prediction bet for today.
+ * Only allows one bet per wallet per day.
+ */
+export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative') {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check if user already has a bet for today
+    const existingBet = await db
+      .select()
+      .from(BitcoinBets)
+      .where(and(
+        eq(BitcoinBets.walletAddress, walletAddress),
+        eq(BitcoinBets.betDate, today)
+      ))
+      .limit(1);
+
+    if (existingBet.length > 0) {
+      throw new Error('You have already placed a bet for today');
+    }
+
+    // Place the bet
+    return db
+      .insert(BitcoinBets)
+      .values({
+        walletAddress,
+        prediction,
+        betDate: today,
+      })
+      .returning();
+  } catch (error: any) {
+    console.error("Error placing Bitcoin bet:", error);
+    throw new Error(error.message || "Failed to place Bitcoin bet");
+  }
+}
+
+/**
+ * Gets the user's bet for today (if any).
+ */
+export async function getTodaysBet(walletAddress: string) {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    const result = await db
+      .select()
+      .from(BitcoinBets)
+      .where(and(
+        eq(BitcoinBets.walletAddress, walletAddress),
+        eq(BitcoinBets.betDate, today)
+      ))
+      .limit(1);
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error("Error fetching today's bet:", error);
+    throw new Error("Failed to fetch today's bet");
+  }
+}
+
+/**
+ * Gets all bets for a specific date.
+ */
+export async function getBetsForDate(date: string) {
+  try {
+    return db
+      .select()
+      .from(BitcoinBets)
+      .where(eq(BitcoinBets.betDate, date));
+  } catch (error) {
+    console.error("Error fetching bets for date:", error);
+    throw new Error("Failed to fetch bets for date");
   }
 }

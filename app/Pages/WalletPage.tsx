@@ -39,12 +39,12 @@ const tokenImages = {
   MXNe: "https://www.svgrepo.com/show/401694/flag-for-mexico.svg",
 };
 
-interface HomePageProps {
+interface WalletPageProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) => {
+const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection }) => {
   const { address } = useAccount();
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -536,4 +536,4 @@ const HomePage: React.FC<HomePageProps> = ({ activeSection, setActiveSection }) 
   );
 };
 
-export default HomePage;
+export default WalletPage;
