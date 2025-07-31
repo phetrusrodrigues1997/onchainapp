@@ -26,7 +26,7 @@ import CreateMessage from './Pages/MessagesPage';
 
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('swap');
+  const [activeSection, setActiveSection] = useState('predictionPot'); // Default section
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
@@ -125,9 +125,9 @@ if (!isMounted) {
     
     <div className="flex flex-col min-h-screen font-sans text-white dark:text-white">
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-gradient-to-r from-green-900 to-yellow-800 border-b border-white/20 px-4 py-3 shadow-md">
+      <header className="top-0 z-50 bg-gradient-to-r from-[#3f3f3f] to-[#444444] border-b border-white/20 px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-6">
+          
             {/* Logo */}
             <div className="relative">
               <div className="absolute -inset-1 rounded-full blur-md"></div>
@@ -136,7 +136,7 @@ if (!isMounted) {
             
             {/* Navigation Menu */}
             <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-          </div>
+          
           <div className="wallet-container">
             <Wallet>
             <ConnectWallet className="bg-[#d3c81a] text-black dark:bg-[#d3c81a] rounded-full lg:mr-4">
@@ -167,7 +167,7 @@ if (!isMounted) {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-gradient-to-r from-green-900 to-yellow-800 ">
+      <main className="flex-grow flex items-center justify-center bg-gradient-to-r from-[#3f3f3f] to-[#444444] ">
         
           
           
@@ -184,7 +184,8 @@ if (!isMounted) {
         
       </main>
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-green-900 to-yellow-800 border-t border-white/20  py-4 px-4">
+      {/* from-green-900 to-yellow-800*/}
+      <footer className="bg-gradient-to-r from-[#3f3f3f] to-[#444444] border-t border-white/20  py-4 px-4">
   <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
     <div className="text-sm text-[#d3c81a] mb-2 md:mb-0">
       © 2025 GoldenEagle Finance. All rights reserved.

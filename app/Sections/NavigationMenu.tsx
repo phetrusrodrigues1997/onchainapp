@@ -27,12 +27,10 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
   // Menu items for reusability
   const menuItems = [
+    { id: 'predictionPot', label: 'Predictions' },
     { id: 'home', label: 'Wallet' },
-    { id: 'swap', label: 'Swap' },
     { id: 'buy', label: 'Purchase' },
-    { id: 'LendingBorrowing', label: 'Earn' },
     { id: 'market', label: 'Charts' },
-    { id: 'predictionPot', label: 'Prediction' },
     { id: 'discord', label: 'Discord' },
   ];
 
@@ -51,8 +49,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Desktop menu */}
       {!isMobile && (
-        <div className="flex space-x-10 ">
-        <div className="bg-white-400 ml-24 rounded-full py-2 flex space-x-10">
+        <div className="w-full flex justify-center">
+          <div className="bg-white-400 mx-auto rounded-full py-2 flex space-x-10 w-fit">
           {menuItems.map((item) => (
             <button
               key={item.id}

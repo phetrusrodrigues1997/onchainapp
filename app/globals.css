@@ -7,8 +7,8 @@
 
 
    :root {
-  --background-start: #14532d; /* Tailwind green-900 */
-  --background-mid: #5a5a1a;   /* Blended midpoint */
+  --background-start: #333333; /* Tailwind green-900 */
+  --background-mid: #444444;   /* Blended midpoint */
   --background-end: #a16207;   /* Tailwind yellow-800 */
 }
 

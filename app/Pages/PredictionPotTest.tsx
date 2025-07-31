@@ -136,6 +136,11 @@ export default function PredictionPotTest() {
     query: { enabled: !!address && !!contractAddress && !!usdcAddress }
   }) as { data: bigint | undefined };
 
+  // Check if the user is a participant
+  const isParticipant = address && participants && Array.isArray(participants) 
+    ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
+    : false;
+
   // Type-safe helpers
   const formatBigIntValue = (value: bigint | undefined, decimals: number = 6): string => {
     if (!value) return '0';
@@ -197,6 +202,8 @@ export default function PredictionPotTest() {
 
   const handleDistributePot = async () => {
     if (!contractAddress || !winnerAddresses.trim()) return;
+
+
     
     const winners = winnerAddresses
       .split(',')
@@ -246,12 +253,13 @@ export default function PredictionPotTest() {
   })();
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-green-900 to-yellow-800 p-4">
+    <div className="min-h-screen bg-invisible p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-black/20 backdrop-blur-sm rounded-lg border border-[#d3c81a] p-6 mb-6">
-          <h1 className="text-3xl font-bold text-[#d3c81a] mb-6 text-center">
-            PredictionPot Contract Testing
-          </h1>
+        <div className="bg-black/40 backdrop-blur-sm rounded-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
+  The <span style={{ color: '#F7931A' }}>₿itcoin</span> Pot
+</h1>
+
           
           {!isConnected && (
             <div className="text-center text-white mb-6">
@@ -259,41 +267,12 @@ export default function PredictionPotTest() {
             </div>
           )}
 
-          {/* Contract Setup */}
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Contract Setup</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  PredictionPot Contract Address
-                </label>
-                <input
-                  type="text"
-                  value={contractAddress}
-                  onChange={(e) => setContractAddress(e.target.value)}
-                  placeholder="0x..."
-                  className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  USDC Contract Address
-                </label>
-                <input
-                  type="text"
-                  value={usdcAddress}
-                  onChange={(e) => setUsdcAddress(e.target.value)}
-                  placeholder="0x..."
-                  className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a]"
-                />
-              </div>
-            </div>
-          </div>
+          
 
           {/* Contract Info */}
           {contractAddress && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Contract Information</h2>
+              {/* <h2 className="text-xl font-semibold text-white mb-4">Contract Information</h2> */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-sm text-gray-300">Entry Amount</div>
@@ -324,7 +303,7 @@ export default function PredictionPotTest() {
           )}
 
           {/* User Actions */}
-          {isConnected && contractAddress && (
+          {isConnected && contractAddress && !isParticipant && (
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-white mb-4">User Actions</h2>
               <div className="space-y-4">
@@ -398,7 +377,7 @@ export default function PredictionPotTest() {
           {/* Participants List */}
           {participants && Array.isArray(participants) && participants.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Current Participants</h2>
+              {/* <h2 className="text-xl font-semibold text-white mb-4">Current Participants</h2>
               <div className="bg-black/30 p-4 rounded-lg">
                 <div className="space-y-2">
                   {participants.map((participant: string, index: number) => (
@@ -407,7 +386,7 @@ export default function PredictionPotTest() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 
