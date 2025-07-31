@@ -129,7 +129,7 @@ const LandingPage =  ({ activeSection, setActiveSection }: LandingPageProps) => 
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
-              <button className="group bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 flex items-center">
+              <button onClick={() => setActiveSection("bitcoinPot")} className="group bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25 flex items-center">
                 Start Trading Now
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -147,7 +147,7 @@ const LandingPage =  ({ activeSection, setActiveSection }: LandingPageProps) => 
       </section>
 
       {/* Live Markets Preview */}
-      <section className="relative z-10 px-6 py-20">
+      {/* <section className="relative z-10 px-6 py-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">Live Markets</h2>
@@ -200,7 +200,7 @@ const LandingPage =  ({ activeSection, setActiveSection }: LandingPageProps) => 
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Features */}
       <section className="relative z-10 px-6 py-20">
