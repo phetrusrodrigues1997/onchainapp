@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount,useSendTransaction } from 'wagmi';
 import { parseUnits } from 'viem';
-import SwapDropdown from './Sections/TokenTypeDropdown'; // Adjust the path if needed
+import PredictionPotTest from './Pages/PredictionPotTest';
 import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import { recordSwapPoints, getUserPoints } from './Database/actions';
 import BuySection from "./Pages/BuyPage";
@@ -12,18 +12,14 @@ import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
-import CurrencySelection from './Pages/LiquidityPage';
 import DiscordXSection from './Pages/Discord';
-// import EarnSection from "./Pages/EarnPage";
-import Send from './Chatbot/SendPage';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import type { Token } from '@coinbase/onchainkit/token';
-import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
+// import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 import HomePage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
 import CreateMessage from './Pages/MessagesPage';
-import LendingPool from './Pages/LendingBorrowingTest';
 
 
 
@@ -172,189 +168,20 @@ if (!isMounted) {
       </header>
 
       <main className="flex-grow flex items-center justify-center bg-gradient-to-r from-green-900 to-yellow-800 ">
-        <div className={`w-full p-1 ${activeSection === "earn" ? "max-w-5xl" : "max-w-sm"}`}>
+        
           
-          {activeSection === "swap" && (
-            <div className="animate-fadeIn">
-            
-            <div>
-              <h1
-      className="text-3xl md:text-3xl font-bold text-center mt-10 leading-tight"
-      style={{
-        fontFamily: "'Montserrat', sans-serif",
-        color: "#ffffff",
-        textShadow: '0 2px 4px rgba(0, 0, 0, 0.6), 0 0 6px rgba(0, 0, 0, 0.3)',
-      }}
-    >
-      FX trading & remittances <br />redefined.
-    </h1>
-                  {/* <p
-  className="mt-4 text-lg md:text-xl text-center text-green-300"
-  style={{
-    fontFamily: "'Montserrat', sans-serif",
-    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.1)",
-  }}
->
-  Fast. Transparent. Borderless. <span className="currency-animation ml-1">💸</span>
-</p> */}
-              {/* Pass the selection change callback */}
-          <SwapDropdown
-  onSelectionChange={(option) => {
-    setSelectedOption(option);
-    if (option === "Crypto") {
-      setSwappableTokensList(cryptoTokens);
-      displayToast('Switched to Crypto tokens');
-    } else {
-      setSwappableTokensList(stablecoinTokens);
-      displayToast('Switched to Stablecoin tokens');
-    }
-  }}
-/>
-<Swap
-  experimental={{ useAggregator: true }}
-  className="bg-transparent p-1 max-w-sm mx-auto mt-8"
-  onSuccess={async () => {
-    if (address) {
-      await recordSwapPoints(address);
-      const updatedPoints = await getUserPoints(address);
-      setPoints(updatedPoints);
-    }
-  }}
->
-  <SwapSettings>
-    <SwapSettingsSlippageTitle className="text-[#EA580C]">
-      Max. slippage
-    </SwapSettingsSlippageTitle>
-    <SwapSettingsSlippageDescription className="text-[#EA580C]">
-      Your swap will revert if the prices change by more than the selected percentage.
-    </SwapSettingsSlippageDescription>
-    <SwapSettingsSlippageInput />
-  </SwapSettings>
-
-  <SwapAmountInput
-    key={`sell-${activeSection}-${selectedOption}`}
-    label="Sell"
-    swappableTokens={swappableTokensList}
-    token={
-      activeSection === "swap"
-        ? selectedOption === "Crypto"
-          ? ETHToken
-          : USDCToken
-        : undefined
-    }
-    type="from"
-    className="mb-1 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg text-white hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70"
-  />
-  <SwapToggleButton
-  className="
-    mb-2
-    relative           /* position context so z-index applies */
-    z-10               /* high stacking priority */
-    bg-yellow-500 hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]        /* dark card color */
-    hover:bg-gray-700  /* hover feedback */
-    p-2                /* comfortable padding */
-    rounded-full       /* pill shape */
-    shadow-lg          /* depth from page below */
-    transition         /* smooth state changes */
-    duration-200       /* speed up/down */
-    ease-out
-    border
-    border-white/20
-    dark:bg-yellow-500
-
-               /* easing for hover */
-  "
-/>
-
-  <SwapAmountInput
-    key={`buy-${activeSection}-${selectedOption}`}
-    label="Buy"
-    swappableTokens={swappableTokensList}
-    token={
-      activeSection === "swap"
-        ? selectedOption === "Crypto"
-          ? CbBTCToken
-          : EURCToken
-        : undefined
-    }
-    type="to"
-    className="mb-1 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg text-white hover:border-[#d3c81a] hover:shadow-[#d3c81a]/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] focus-within:ring-2 focus-within:ring-[#d3c81a]/70"
-  />
-
-  {/* Only show the actual SwapButton after "Proceed to Swap" */}
-  {showSwapButton && (
-    <SwapButton className="w-full bg-[#d3c81a] text-white font-bold rounded-full py-2 transition-colors disabled:opacity-85"
-
-    />
-  )}
-
-  <SwapMessage className="mt-2 text-gray-800 text-sm" />
-  <SwapToast />
-</Swap>
-
-{/* Render "Proceed to Swap" only if the actual SwapButton hasn't been shown yet
-{!showSwapButton && (
-  <button
-  onClick={async () => {
-    try {
-      
-      // send the 0.00001 ETH fee
-      await sendTransaction({
-        to: feeRecipient,
-        value: parseUnits('0.000005', ETHToken.decimals)
-      });
-      
-      // Wait for 10 seconds using setTimeout
-  await new Promise(resolve => setTimeout(resolve, 9000));
-      setShowSwapButton(true);
-    } catch (err) {
-      console.error('Fee transfer failed:', err);
-      // optionally notify user of the failure
-    }
-  }}
-  className="w-full bg-[#d3c81a] hover:bg-yellow-400 text-green-950 font-bold rounded-full py-2 transition-colors disabled:opacity-85"
-  >
-    Trade Now
-  </button>
-)} */}
-
-              
-              
-              {/* Points Display */}
-              {address && points !== null && (
-                <div className="mt-6 text-center">
-                  <div className="inline-flex items-center bg-transparent px-4 py-2 rounded-md border border-white/20">
-                    <div className="w-8 h-8 rounded-full bg-[#d3c81a] flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                      </svg>
-                    </div>
-                    <div className="text-left ">
-                      <span className="text-[#d3c81a] text-sm block">Swap Points</span>
-                      <span className="text-white font-bold text-lg">{points}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              
-            </div>
-            </div>
-          )}
-          {/* {activeSection === "earn" && <EarnSection />} */}
+          
           {activeSection === "usernamePage" && <UsernameSetup />}
-          {activeSection === "send" && <Send setActiveSection={setActiveSection} />}
-          {activeSection === "liquidity" && <CurrencySelection />}
           {activeSection === "buy" && <BuySection />}
           {activeSection === "market" && <CurrencyDisplay/>}
           {activeSection === "discord" && <DiscordXSection />}
           {activeSection === "home" && <HomePage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {activeSection === "notifications" && <CreateMessage />}
-          {activeSection === "LendingBorrowing" && <LendingPool />}
+          {activeSection === "predictionPot" && <PredictionPotTest />}
           
 
-        </div>
+        
       </main>
       {/* Footer */}
       <footer className="bg-gradient-to-r from-green-900 to-yellow-800 border-t border-white/20  py-4 px-4">
