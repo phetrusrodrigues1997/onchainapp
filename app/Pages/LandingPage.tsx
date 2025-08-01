@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { Star, ArrowRight, ChevronDown } from 'lucide-react';
+import { Star, ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 
 interface LandingPageProps {
@@ -14,6 +14,9 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [selectedMarket, setSelectedMarket] = useState('bitcoin');
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
 
   useEffect(() => {
     const savedLang = Cookies.get('language') as Language | undefined;
@@ -21,6 +24,13 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       setCurrentLanguage(savedLang);
     }
     setIsVisible(true);
+    
+    // Check initial scroll state
+    const container = document.getElementById('market-carousel');
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setShowRightArrow(scrollWidth > clientWidth);
+    }
   }, []);
 
   const handleLanguageChange = (language: Language) => {
@@ -32,73 +42,173 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const t = getTranslation(currentLanguage);
 
   const markets = [
-    {
-      id: 'bitcoin',
-      name: 'Bitcoin',
-      symbol: '₿',
-      color: '#F7931A',
-      question: t.bitcoinQuestion,
-      icon: '₿',
-      currentPrice: '$67,234',
-      participants: 127,
-      potSize: '$1,270',
-    },
-    {
-      id: 'ethereum',
-      name: 'Ethereum',
-      symbol: 'Ξ',
-      color: '#627EEA',
-      question: t.ethereumQuestion,
-      icon: 'Ξ',
-      currentPrice: '$3,456',
-      participants: 89,
-      potSize: '$890',
-    },
-    {
-      id: 'solana',
-      name: 'Solana',
-      symbol: 'SOL',
-      color: '#9945FF',
-      question: t.solanaQuestion,
-      icon: '◎',
-      currentPrice: '$198',
-      participants: 64,
-      potSize: '$640',
-    },
-    {
-      id: 'tesla',
-      name: 'Tesla',
-      symbol: 'TSLA',
-      color: '#E31837',
-      question: t.teslaQuestion,
-      icon: '🚗',
-      currentPrice: '$248.50',
-      participants: 156,
-      potSize: '$1,560',
-    },
-    {
-      id: 'nvidia',
-      name: 'NVIDIA',
-      symbol: 'NVDA',
-      color: '#76B900',
-      question: t.nvidiaQuestion,
-      icon: '🎮',
-      currentPrice: '$876.20',
-      participants: 203,
-      potSize: '$2,030',
-    },
-    {
-      id: 'sp500',
-      name: 'S&P 500',
-      symbol: 'SPX',
-      color: '#1f77b4',
-      question: t.sp500Question,
-      icon: '📈',
-      currentPrice: '5,987',
-      participants: 78,
-      potSize: '$780',
-    },
-  ];
+  {
+    id: 'bitcoin',
+    name: 'Bitcoin',
+    symbol: '₿',
+    color: '#F7931A',
+    question: t.bitcoinQuestion,
+    icon: '₿',
+    currentPrice: '$67,234',
+    participants: 127,
+    potSize: '$1,270',
+  },
+  {
+    id: 'ethereum',
+    name: 'Ethereum',
+    symbol: 'Ξ',
+    color: '#627EEA',
+    question: t.ethereumQuestion,
+    icon: 'Ξ',
+    currentPrice: '$3,456',
+    participants: 89,
+    potSize: '$890',
+  },
+  {
+    id: 'solana',
+    name: 'Solana',
+    symbol: 'SOL',
+    color: '#9945FF',
+    question: t.solanaQuestion,
+    icon: '◎',
+    currentPrice: '$198',
+    participants: 64,
+    potSize: '$640',
+  },
+  {
+    id: 'tesla',
+    name: 'Tesla',
+    symbol: 'TSLA',
+    color: '#E31837',
+    question: t.teslaQuestion,
+    icon: '🚗',
+    currentPrice: '$248.50',
+    participants: 156,
+    potSize: '$1,560',
+  },
+  {
+    id: 'nvidia',
+    name: 'NVIDIA',
+    symbol: 'NVDA',
+    color: '#76B900',
+    question: t.nvidiaQuestion,
+    icon: '🎮',
+    currentPrice: '$876.20',
+    participants: 203,
+    potSize: '$2,030',
+  },
+  {
+    id: 'sp500',
+    name: 'S&P 500',
+    symbol: 'SPX',
+    color: '#1f77b4',
+    question: t.sp500Question,
+    icon: '📈',
+    currentPrice: '5,987',
+    participants: 78,
+    potSize: '$780',
+  },
+  {
+    id: 'apple',
+    name: 'Apple',
+    symbol: 'AAPL',
+    color: '#A2AAAD',
+    question: t.appleQuestion,
+    icon: '🍎',
+    currentPrice: '$190.30',
+    participants: 134,
+    potSize: '$1,340',
+  },
+  {
+    id: 'google',
+    name: 'Alphabet',
+    symbol: 'GOOGL',
+    color: '#34A853',
+    question: t.googleQuestion,
+    icon: '🔍',
+    currentPrice: '$142.80',
+    participants: 101,
+    potSize: '$1,010',
+  },
+  {
+    id: 'amazon',
+    name: 'Amazon',
+    symbol: 'AMZN',
+    color: '#FF9900',
+    question: t.amazonQuestion,
+    icon: '📦',
+    currentPrice: '$171.25',
+    participants: 97,
+    potSize: '$970',
+  },
+  {
+    id: 'meta',
+    name: 'Meta',
+    symbol: 'META',
+    color: '#4267B2',
+    question: t.metaQuestion,
+    icon: '📘',
+    currentPrice: '$355.60',
+    participants: 88,
+    potSize: '$880',
+  },
+  {
+    id: 'dogecoin',
+    name: 'Dogecoin',
+    symbol: 'DOGE',
+    color: '#C2A633',
+    question: t.dogecoinQuestion,
+    icon: '🐶',
+    currentPrice: '$0.075',
+    participants: 72,
+    potSize: '$720',
+  },
+  {
+    id: 'cardano',
+    name: 'Cardano',
+    symbol: 'ADA',
+    color: '#0033AD',
+    question: t.cardanoQuestion,
+    icon: '🔷',
+    currentPrice: '$0.42',
+    participants: 54,
+    potSize: '$540',
+  },
+  {
+    id: 'xrp',
+    name: 'XRP',
+    symbol: 'XRP',
+    color: '#346AA9',
+    question: t.xrpQuestion,
+    icon: '💧',
+    currentPrice: '$0.62',
+    participants: 60,
+    potSize: '$600',
+  },
+  {
+    id: 'ftse100',
+    name: 'FTSE 100',
+    symbol: 'FTSE',
+    color: '#0057B8',
+    question: t.ftse100Question,
+    icon: '🇬🇧',
+    currentPrice: '7,624',
+    participants: 48,
+    potSize: '$480',
+  },
+  {
+    id: 'gold',
+    name: 'Gold',
+    symbol: 'XAU',
+    color: '#FFD700',
+    question: t.goldQuestion,
+    icon: '🥇',
+    currentPrice: '$2,308',
+    participants: 69,
+    potSize: '$690',
+  },
+];
+
 
   const handleMarketClick = (marketId: string) => {
     if (marketId === 'bitcoin') {
@@ -106,6 +216,24 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     } else {
       alert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`);
     }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+  };
+
+  const scrollLeft = () => {
+    const container = document.getElementById('market-carousel');
+    container?.scrollBy({ left: -200, behavior: 'smooth' });
+  };
+
+  const scrollRight = () => {
+    const container = document.getElementById('market-carousel');
+    container?.scrollBy({ left: 200, behavior: 'smooth' });
   };
 
   return (
@@ -125,17 +253,80 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       <section className="relative z-10 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 relative">
-            <h2 className="text-4xl text-[#111111] font-bold mb-4">
-              {t.marketsTitle}
-            </h2>
+            {/* Market Carousel */}
+            <div className="relative transform: translate-y-[-30%]">
+              {/* Left Arrow - Only shown when there's content to scroll left */}
+              {showLeftArrow && (
+                <button
+                  onClick={scrollLeft}
+                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+              )}
+
+              {/* Right Arrow - Only shown when there's content to scroll right */}
+              {showRightArrow && (
+                <button
+                  onClick={scrollRight}
+                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+              )}
+
+              {/* Scrollable Markets Container */}
+              <div
+                id="market-carousel"
+                className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-0 md:px-12"
+                onScroll={handleScroll}
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
+                }}
+              >
+                {markets.map((market) => (
+                  <button
+                    key={market.id}
+                    onClick={() => setSelectedMarket(market.id)}
+                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 hover:bg-gray-50 ${
+                      selectedMarket === market.id
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                    style={{
+                      minWidth: 'fit-content',
+                      height: '40px'
+                    }}
+                  >
+                    {/* Icon */}
+                    <div
+                      className="w-6 h-6 rounded flex items-center justify-center text-sm font-bold flex-shrink-0"
+                      style={{
+                        backgroundColor: selectedMarket === market.id ? market.color : `${market.color}20`,
+                        color: selectedMarket === market.id ? 'white' : market.color,
+                      }}
+                    >
+                      {market.icon}
+                    </div>
+                    
+                    {/* Name */}
+                    <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
+                      {market.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Language Selector */}
-            <div className="absolute top-0 right-0">
+            <div className="absolute top-0 ml-24 mt-12">
               <div className="relative">
                 <button
-                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-                  className="flex items-center space-x-2 bg-[#efefef] hover:bg-gray-200 px-3 py-2 rounded-xl border border-gray-200 transition-all text-sm"
-                >
+  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+  className="flex items-center space-x-2 bg-blue-100/30 hover:bg-blue-200/50 px-4 py-2 rounded-full border border-blue-300 transition-all text-sm"
+>
+
                   <span className="text-lg">
                     {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
                   </span>
@@ -163,6 +354,17 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                 )}
               </div>
             </div>
+            <div className="flex justify-end mr-24 mt-2">
+  <a
+    href="#how-it-works"
+    className="text-sm font-semibold text-blue-600 hover:underline transition-all"
+  >
+    {t.howItWorksLink || 'How it works'}
+  </a>
+</div>
+
+
+            {/* Hello, can you see this? */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -230,7 +432,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         </div>
       </section>
 
-      <section className="relative z-10 px-6 py-20">
+      <section id="how-it-works" className="relative z-10 px-6 py-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">{t.howItWorksTitle}</h2>

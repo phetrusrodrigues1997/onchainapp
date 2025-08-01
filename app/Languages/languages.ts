@@ -53,6 +53,17 @@ export interface Translations {
   enterPotButton?: string; // Added for the enter pot button text
   insufficientUSDC?: string; // Added for the insufficient balance message
   pleaseApproveFirst?: string; // Added for the message to approve USDC spending first  
+  appleQuestion?: string; // Added for the Apple stock question
+  googleQuestion?: string; // Added for the Google stock question
+  microsoftQuestion?: string; // Added for the Microsoft stock question
+  amazonQuestion?: string; // Added for the Amazon stock question
+  metaQuestion?: string; // Added for the Meta stock question
+  dogecoinQuestion?: string; // Added for the Dogecoin question
+  cardanoQuestion?: string; // Added for the Cardano question
+  xrpQuestion?: string; // Added for the XRP question
+  ftse100Question?: string; // Added for the FTX token question
+  goldQuestion?: string; // Added for the Gold question
+  howItWorksLink?: string; // Added for the link to the How It Works section
   
   
   // Footer
@@ -113,6 +124,17 @@ export const translations: Record<Language, Translations> = {
     enterPotButton: 'Enter Pot (10 USDC)',
     insufficientUSDC: 'Insufficient USDC balance',
     pleaseApproveFirst: 'Please approve USDC spending first',
+    amazonQuestion: 'Will Amazon stock end the day higher?',
+    appleQuestion: 'Will Apple stock end the day higher?',
+    googleQuestion: 'Will Google stock end the day higher?',
+    microsoftQuestion: 'Will Microsoft stock end the day higher?',
+    metaQuestion: 'Will Meta stock end the day higher?',
+    dogecoinQuestion: 'Will Dogecoin end the day higher?',
+    cardanoQuestion: 'Will Cardano end the day higher?',
+    xrpQuestion: 'Will XRP end the day higher?',
+    ftse100Question: 'Will FTSE 100 end the day higher?',
+    goldQuestion: 'Will Gold end the day higher?',
+    howItWorksLink: 'How it works >', // Added for the link to the How It Works section
 
     
 
@@ -172,6 +194,18 @@ export const translations: Record<Language, Translations> = {
     enterPotButton: 'Entrar no Pote (10 USDC)',
     insufficientUSDC: 'Saldo insuficiente de USDC',
     pleaseApproveFirst: 'Por favor, aprove primeiro os gastos de USDC',
+    amazonQuestion: 'A ação da Amazon vai terminar o dia em alta?',
+    appleQuestion: 'A ação da Apple vai terminar o dia em alta?',
+    googleQuestion: 'A ação do Google vai terminar o dia em alta?',
+    microsoftQuestion: 'A ação da Microsoft vai terminar o dia em alta?',
+    metaQuestion: 'A ação da Meta vai terminar o dia em alta?',
+    dogecoinQuestion: 'O Dogecoin vai terminar o dia em alta?',
+    cardanoQuestion: 'O Cardano vai terminar o dia em alta?',
+    xrpQuestion: 'O XRP vai terminar o dia em alta?',
+    ftse100Question: 'O FTSE 100 vai terminar o dia em alta?',
+    goldQuestion: 'O Ouro vai terminar o dia em alta?',
+    howItWorksLink: 'Como funciona?', // Added for the link to the How It Works section
+
     // Footer
     footerText: 'Foresight Markets — Todos os direitos reservados.',
   },
