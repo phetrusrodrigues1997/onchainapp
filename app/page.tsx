@@ -139,7 +139,7 @@ export default function App() {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#f5f5f5] -mt-32">
+      <main className="flex-grow flex items-center justify-center bg-[#f5f5f5]">
         
           
           

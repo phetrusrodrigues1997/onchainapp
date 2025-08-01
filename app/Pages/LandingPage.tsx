@@ -93,7 +93,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fefefe] text-[#111111] overflow-hidden">
+    <div className="min-h-screen bg-[#fefefe] text-[#111111] overflow-hidden -mt-32">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
