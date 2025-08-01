@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, ArrowRight } from 'lucide-react';
+import Cookies from 'js-cookie';
+import { Star, ArrowRight, ChevronDown } from 'lucide-react';
+import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 
 interface LandingPageProps {
   activeSection: string;
@@ -10,10 +12,24 @@ interface LandingPageProps {
 
 const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   useEffect(() => {
+    const savedLang = Cookies.get('language') as Language | undefined;
+    if (savedLang && supportedLanguages.some(lang => lang.code === savedLang)) {
+      setCurrentLanguage(savedLang);
+    }
     setIsVisible(true);
   }, []);
+
+  const handleLanguageChange = (language: Language) => {
+    setCurrentLanguage(language);
+    setShowLanguageDropdown(false);
+    Cookies.set('language', language, { sameSite: 'lax' });
+  };
+
+  const t = getTranslation(currentLanguage);
 
   const markets = [
     {
@@ -21,7 +37,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       name: 'Bitcoin',
       symbol: '₿',
       color: '#F7931A',
-      question: 'Will Bitcoin end the day higher?',
+      question: t.bitcoinQuestion,
       icon: '₿',
       currentPrice: '$67,234',
       participants: 127,
@@ -32,7 +48,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       name: 'Ethereum',
       symbol: 'Ξ',
       color: '#627EEA',
-      question: 'Will Ethereum end the day higher?',
+      question: t.ethereumQuestion,
       icon: 'Ξ',
       currentPrice: '$3,456',
       participants: 89,
@@ -43,7 +59,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       name: 'Solana',
       symbol: 'SOL',
       color: '#9945FF',
-      question: 'Will Solana end the day higher?',
+      question: t.solanaQuestion,
       icon: '◎',
       currentPrice: '$198',
       participants: 64,
@@ -54,7 +70,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       name: 'Tesla',
       symbol: 'TSLA',
       color: '#E31837',
-      question: 'Will Tesla stock end the day higher?',
+      question: t.teslaQuestion,
       icon: '🚗',
       currentPrice: '$248.50',
       participants: 156,
@@ -65,7 +81,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       name: 'NVIDIA',
       symbol: 'NVDA',
       color: '#76B900',
-      question: 'Will NVIDIA stock end the day higher?',
+      question: t.nvidiaQuestion,
       icon: '🎮',
       currentPrice: '$876.20',
       participants: 203,
@@ -76,7 +92,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       name: 'S&P 500',
       symbol: 'SPX',
       color: '#1f77b4',
-      question: 'Will S&P 500 end the day higher?',
+      question: t.sp500Question,
       icon: '📈',
       currentPrice: '5,987',
       participants: 78,
@@ -88,7 +104,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     if (marketId === 'bitcoin') {
       setActiveSection('bitcoinPot');
     } else {
-      alert(`${markets.find((m) => m.id === marketId)?.name} market coming soon!`);
+      alert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`);
     }
   };
 
@@ -101,29 +117,52 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
             className={`text-center transform transition-all duration-1000 ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}
-          >
-           
-
-            {/* <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
-               Choose Your Market
-              </span>
-              <br />
-            </h1> */}
-
-            
-          </div>
+          ></div>
         </div>
       </section>
 
       {/* Markets Grid */}
       <section className="relative z-10 px-6 py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            
+          <div className="text-center mb-12 relative">
             <h2 className="text-4xl text-[#111111] font-bold mb-4">
-              Will you predict higher or lower?
+              {t.marketsTitle}
             </h2>
+
+            {/* Language Selector */}
+            <div className="absolute top-0 right-0">
+              <div className="relative">
+                <button
+                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                  className="flex items-center space-x-2 bg-[#efefef] hover:bg-gray-200 px-3 py-2 rounded-xl border border-gray-200 transition-all text-sm"
+                >
+                  <span className="text-lg">
+                    {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
+                  </span>
+                  <span className="font-medium">
+                    {supportedLanguages.find(lang => lang.code === currentLanguage)?.name}
+                  </span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+
+                {showLanguageDropdown && (
+                  <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] overflow-hidden z-50">
+                    {supportedLanguages.map((language) => (
+                      <button
+                        key={language.code}
+                        onClick={() => handleLanguageChange(language.code)}
+                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-all text-sm ${
+                          currentLanguage === language.code ? 'bg-purple-50 text-purple-700' : ''
+                        }`}
+                      >
+                        <span className="text-lg">{language.flag}</span>
+                        <span className="font-medium">{language.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -151,7 +190,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-[#111111]">{market.currentPrice}</div>
-                    <div className="text-sm text-gray-400">Current Price</div>
+                    <div className="text-sm text-gray-400">{t.currentPrice}</div>
                   </div>
                 </div>
 
@@ -163,23 +202,23 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
 
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <button className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 py-3 rounded-xl font-bold transition-all group-hover:scale-105">
-                    📈 Higher
+                    {t.higher}
                   </button>
                   <button className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 py-3 rounded-xl font-bold transition-all group-hover:scale-105">
-                    📉 Lower
+                    {t.lower}
                   </button>
                 </div>
 
                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
                   <div className="text-center">
                     <div className="text-sm font-bold text-[#111111]">{market.participants}</div>
-                    <div className="text-xs text-gray-400">Players</div>
+                    <div className="text-xs text-gray-400">{t.players}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-sm font-bold" style={{ color: market.color }}>
                       {market.potSize}
                     </div>
-                    <div className="text-xs text-gray-400">Pot Size</div>
+                    <div className="text-xs text-gray-400">{t.potSize}</div>
                   </div>
                   <div className="text-center">
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
@@ -191,51 +230,29 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="relative z-10 px-6 py-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-[#666666]">Simple 3-step process to start winning</p>
+            <h2 className="text-4xl font-bold mb-4">{t.howItWorksTitle}</h2>
+            <p className="text-xl text-[#666666]">{t.howItWorksSubtitle}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                1
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="text-center">
+                <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+                  {step}
+                </div>
+                <h3 className="text-xl font-bold mb-4">{t[`step${step}Title` as keyof typeof t]}</h3>
+                <p className="text-[#666666]">{t[`step${step}Description` as keyof typeof t]}</p>
               </div>
-              <h3 className="text-xl font-bold mb-4">Choose Your Market</h3>
-              <p className="text-[#666666]">
-                Pick from Bitcoin, Ethereum, Tesla, and more. Each market has its own daily pot.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                2
-              </div>
-              <h3 className="text-xl font-bold mb-4">Make Your Prediction</h3>
-              <p className="text-[#666666]">
-                Will it end higher or lower? Pay the entry fee and lock in your prediction for the day.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                3
-              </div>
-              <h3 className="text-xl font-bold mb-4">Win or Lose</h3>
-              <p className="text-[#666666]">
-                If your prediction is correct, you share the pot with other winners. Wrong guess? Try again tomorrow.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="relative z-10 px-6 py-10 bg-white text-center text-[#666666] text-sm">
-        &copy; {new Date().getFullYear()} Foresight Markets — All rights reserved.
+        &copy; {new Date().getFullYear()} {t.footerText}
       </footer>
     </div>
   );

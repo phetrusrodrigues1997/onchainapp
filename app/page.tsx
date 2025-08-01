@@ -15,7 +15,7 @@ import ResponsiveLogo from './Sections/ResponsiveLogo';
 import DiscordXSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
-import type { Token } from '@coinbase/onchainkit/token';
+import Markets from './Pages/Markets';
 // import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 import WalletPage from './Pages/WalletPage';
 import UsernameSetup from './Pages/UsernameSetup';
@@ -153,7 +153,8 @@ export default function App() {
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting contractAddress="0x390896082E635c9F9f07C0609d73140e4F166471" /> }
-
+          {activeSection === "markets" && <Markets activeSection={activeSection} setActiveSection={setActiveSection}/>}
+          {/* Add more sections as needed */}
         
       </main>
       

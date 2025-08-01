@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
+import Cookies from 'js-cookie';
+import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 
 // Contract ABI for PredictionPot
 const PREDICTION_POT_ABI = [
@@ -101,6 +103,22 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
   });
+
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
+    const savedLang = Cookies.get('language');
+    if (savedLang && supportedLanguages.some(lang => lang.code === savedLang)) {
+      return savedLang as Language;
+    }
+    return 'en';
+  });
+  
+  
+    // Update cookie when language changes
+    useEffect(() => {
+      Cookies.set('language', currentLanguage, { sameSite: 'lax' });
+    }, [currentLanguage]);
+  
+    const t = getTranslation(currentLanguage);
 
   // Handle transaction confirmation and errors
   useEffect(() => {
@@ -310,34 +328,34 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   return (
     <div className="min-h-screen bg-invisible p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
-            The <span style={{ color: '#F7931A' }}>₿</span>itcoin Pot
+        <div className="bg-invisible rounded-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-[#111111] mb-6 text-center">
+            {t.bitcoinPotTitle || 'The ₿itcoin Pot'}
           </h1>
 
           {!isConnected && (
             <div className="text-center text-[#F5F5F5] mb-6">
-              Please connect your wallet to interact with the contract.
+              {t.connectWalletPrompt || 'Please connect your wallet to interact with the contract.'}
             </div>
           )}
 
           {/* Contract Info */}
           {contractAddress && (
             <div className="mb-6">
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <div className="text-sm text-[#A0A0B0]">Entry Amount</div>
-                  <div className="text-[#F5F5F5] font-semibold">
+              <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
+                <div className="bg-[#f5f5f5] p-4 rounded-lg border border-[#dedede]">
+                  <div className="text-sm text-[#111111]">{t.entryAmount || 'Entry Amount'}</div>
+                  <div className="text-[#666666] font-semibold">
                     {formatBigIntValue(entryAmount)} USDC
                   </div>
                 </div>
-                <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <div className="text-sm text-[#A0A0B0]">Pot Balance</div>
-                  <div className="text-[#F5F5F5] font-semibold">
+                <div className="bg-[#f5f5f5] p-4 rounded-lg border border-[#dedede]">
+                  <div className="text-sm text-[#111111]">{t.amountBalance || 'Amount Balance'}</div>
+                  <div className="text-[#666666] font-semibold">
                     {formatBigIntValue(potBalance)} USDC
                   </div>
                 </div>
-                <div className="bg-[#2C2C47] p-4 rounded-lg">
+                {/* <div className="bg-[#2C2C47] p-4 rounded-lg">
                   <div className="text-sm text-[#A0A0B0]">Participants</div>
                   <div className="text-[#F5F5F5] font-semibold">
                     {getParticipantCount()}
@@ -348,7 +366,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
                   <div className="text-[#F5F5F5] font-semibold">
                     {formatBigIntValue(userUsdcBalance)} USDC
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           )}
@@ -385,16 +403,14 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
             <div className="mb-6">
               <div className="bg-[#2C2C47] p-6 rounded-lg text-center">
                 <div className="text-[#d3c81a] text-xl font-semibold mb-3">
-                  🎉 You're in the Pot!
-                </div>
+                  {t.alreadyInPot || "🎉 You're in the Pot!"}                </div>
                 <div className="text-[#F5F5F5] mb-4">
-                  You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!
-                </div>
+                  {t.enteredPotMessage || "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!"}                </div>
                 <button
                   onClick={() => setActiveSection('bitcoinBetting')}
                   className="bg-[#6A5ACD] text-black px-6 py-3 rounded-md font-medium hover:bg-[#c4b517] transition-colors"
                 >
-                  Go to Betting Page
+                  {t.goToBetting || 'Go to Betting Page'}
                 </button>
               </div>
             </div>
@@ -408,37 +424,43 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
                 
                 {/* Approve USDC */}
                 <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <h3 className="text-[#F5F5F5] font-medium mb-2">1. Approve USDC Spending</h3>
+                  <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
                   <p className="text-[#A0A0B0] text-sm mb-3">
-                    Allow the contract to spend your USDC. Current allowance: {formatBigIntValue(allowance)} USDC
+                   {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
                   </p>
                   <button
                     onClick={handleApprove}
                     disabled={isActuallyLoading || hasEnoughAllowance}
                     className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isActuallyLoading && lastAction === 'approve' ? 'Processing...' : hasEnoughAllowance ? 'Already Approved' : 'Approve USDC'}
+{isActuallyLoading && lastAction === 'approve'
+  ? t.approveProcessing
+  : hasEnoughAllowance
+  ? t.alreadyApproved
+  : t.approveUSDC}
                   </button>
                 </div>
 
                 {/* Enter Pot */}
                 <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <h3 className="text-[#F5F5F5] font-medium mb-2">2. Enter Prediction Pot</h3>
+                  <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
                   <p className="text-[#A0A0B0] text-sm mb-3">
-                    Pay 10 USDC to enter the pot. Make sure you have approved USDC spending first.
+                    {t.pay10USDC || 'Pay 10 USDC to enter the pot. Make sure you have approved USDC spending first.'}
                   </p>
                   <button
                     onClick={handleEnterPot}
                     disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
                     className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isActuallyLoading && lastAction === 'enterPot' ? 'Processing...' : 'Enter Pot (10 USDC)'}
+{isActuallyLoading && lastAction === 'enterPot'
+  ? t.enterPotProcessing
+  : t.enterPotButton}
                   </button>
                   {!hasEnoughBalance && (
-                    <p className="text-red-400 text-sm mt-2">Insufficient USDC balance</p>
+                    <p className="text-red-400 text-sm mt-2"> {t.insufficientUSDC || 'Insufficient USDC balance'}</p>
                   )}
                   {!hasEnoughAllowance && hasEnoughBalance && (
-                    <p className="text-yellow-400 text-sm mt-2">Please approve USDC spending first</p>
+                    <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
                   )}
                 </div>
               </div>
