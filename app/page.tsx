@@ -97,7 +97,7 @@ export default function App() {
       </div> */}
       
       {/* Dark green header */}
-      <header className="top-0 z-50 bg-white px-4 py-3 shadow-md">
+      <header className="z-50 bg-white px-4 py-3 shadow-md sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -139,7 +139,7 @@ export default function App() {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#f5f5f5] ">
+      <main className="flex-grow flex items-center justify-center bg-[#f5f5f5] -mt-32">
         
           
           
