@@ -93,7 +93,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-black overflow-hidden">
+    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -121,7 +121,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             
-            <h2 className="text-4xl font-bold mb-4">
+            <h2 className="text-4xl text-[#111111] font-bold mb-4">
               Will you predict higher or lower?
             </h2>
           </div>
@@ -145,18 +145,18 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                       {market.icon}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-black">{market.name}</h3>
+                      <h3 className="text-xl font-bold text-[#111111]">{market.name}</h3>
                       <p className="text-sm text-gray-400">{market.symbol}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold text-black">{market.currentPrice}</div>
+                    <div className="text-lg font-bold text-[#111111]">{market.currentPrice}</div>
                     <div className="text-sm text-gray-400">Current Price</div>
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-lg font-semibold text-center text-black mb-4">
+                  <p className="text-lg font-semibold text-center text-[#111111] mb-4">
                     {market.question}
                   </p>
                 </div>
@@ -172,7 +172,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
 
                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
                   <div className="text-center">
-                    <div className="text-sm font-bold text-black">{market.participants}</div>
+                    <div className="text-sm font-bold text-[#111111]">{market.participants}</div>
                     <div className="text-xs text-gray-400">Players</div>
                   </div>
                   <div className="text-center">
