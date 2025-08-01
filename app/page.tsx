@@ -97,10 +97,9 @@ export default function App() {
       </div> */}
       
       {/* Dark green header */}
-      <header
-  className="top-0 z-50 px-4 py-3 shadow-md bg-[#fcfcfc] border-b border-[#ececec]">
+      <header className="top-0 z-50 bg-white px-4 py-3 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          
+          <div className="flex items-center gap-6">
             {/* Logo */}
             <div className="relative">
               <div className="absolute -inset-1 rounded-full blur-md"></div>
@@ -109,10 +108,10 @@ export default function App() {
             
             {/* Navigation Menu */}
             <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-          
+          </div>
           <div className="wallet-container">
             <Wallet>
-            <ConnectWallet className="bg-[#6A5ACD] text-black dark:bg-[#6A5ACD] rounded-full lg:mr-4">
+            <ConnectWallet className="bg-[#d3c81a] text-black dark:bg-[#d3c81a] rounded-full lg:mr-4">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>

@@ -27,12 +27,12 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
   // Menu items for reusability
   const menuItems = [
-    { id: 'home', label: 'Wallet' },
-    { id: 'swap', label: 'Swap' },
+    { id: 'home', label: 'Home' },
+    { id: 'markets', label: 'Markets' },
+    { id: 'wallet', label: 'Wallet' },
     { id: 'buy', label: 'Purchase' },
-    { id: 'LendingBorrowing', label: 'Earn' },
+    { id: 'discord', label: 'Discord' },
     { id: 'market', label: 'Charts' },
-    { id: 'liquidity', label: 'Liquidity' },
     { id: 'discord', label: 'Discord' },
   ];
 
@@ -60,7 +60,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               className={`font-medium ${
                 activeSection === item.id
                   ? 'text-[#d3c81a] text-base font-semibold'
-                  : 'text-[#FFFFFF] hover:text-[#d3c81a] '
+                  : 'text-[#666666] hover:text-[#d3c81a] '
               }`}
             >
               {item.label}
@@ -72,7 +72,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Mobile menu dropdown */}
       {isMobile && isMenuOpen && (
-        <div className="absolute bg-white top-12 z-10 w-32 mt-2 rounded-md shadow-lg">
+        <div className="absolute bg-white top-12 z-50 w-32 mt-2 rounded-md shadow-lg">
         <div className="py-2">
           {menuItems.map((item) => (
             <button
