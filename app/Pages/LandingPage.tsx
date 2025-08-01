@@ -93,7 +93,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1A2E] text-white overflow-hidden">
+    <div className="min-h-screen bg-[#fbfbfb] text-black overflow-hidden">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -104,12 +104,12 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
           >
            
 
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+            {/* <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent">
                Choose Your Market
               </span>
               <br />
-            </h1>
+            </h1> */}
 
             
           </div>
@@ -121,9 +121,9 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             
-            <p className="text-xl text-gray-300">
-              Pick an asset and predict if it will end the day higher or lower
-            </p>
+            <h2 className="text-4xl font-bold mb-4">
+              Will you predict higher or lower?
+            </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -131,7 +131,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               <div
                 key={market.id}
                 onClick={() => handleMarketClick(market.id)}
-                className="group bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 cursor-pointer"
+                className="group bg-[#ededed] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
@@ -145,18 +145,18 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                       {market.icon}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{market.name}</h3>
+                      <h3 className="text-xl font-bold text-black">{market.name}</h3>
                       <p className="text-sm text-gray-400">{market.symbol}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold text-white">{market.currentPrice}</div>
+                    <div className="text-lg font-bold text-black">{market.currentPrice}</div>
                     <div className="text-sm text-gray-400">Current Price</div>
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-lg font-semibold text-center text-white mb-4">
+                  <p className="text-lg font-semibold text-center text-black mb-4">
                     {market.question}
                   </p>
                 </div>
@@ -172,7 +172,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
 
                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
                   <div className="text-center">
-                    <div className="text-sm font-bold text-white">{market.participants}</div>
+                    <div className="text-sm font-bold text-black">{market.participants}</div>
                     <div className="text-xs text-gray-400">Players</div>
                   </div>
                   <div className="text-center">
@@ -196,7 +196,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-gray-300">Simple 3-step process to start winning</p>
+            <p className="text-xl text-[#666666]">Simple 3-step process to start winning</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -205,7 +205,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                 1
               </div>
               <h3 className="text-xl font-bold mb-4">Choose Your Market</h3>
-              <p className="text-gray-300">
+              <p className="text-[#666666]">
                 Pick from Bitcoin, Ethereum, Tesla, and more. Each market has its own daily pot.
               </p>
             </div>
@@ -215,7 +215,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                 2
               </div>
               <h3 className="text-xl font-bold mb-4">Make Your Prediction</h3>
-              <p className="text-gray-300">
+              <p className="text-[#666666]">
                 Will it end higher or lower? Pay the entry fee and lock in your prediction for the day.
               </p>
             </div>
@@ -225,7 +225,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                 3
               </div>
               <h3 className="text-xl font-bold mb-4">Win or Lose</h3>
-              <p className="text-gray-300">
+              <p className="text-[#666666]">
                 If your prediction is correct, you share the pot with other winners. Wrong guess? Try again tomorrow.
               </p>
             </div>

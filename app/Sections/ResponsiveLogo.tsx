@@ -21,12 +21,23 @@ const ResponsiveLogo = () => {
   }, []);
 
   return (
-    <div className="logo-container flex items-center space-x-2">
-  <span className="text-3xl">🦉</span>
-  <span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">Foresight
-  </span>
-</div>
-
+    <div className="logo-container">
+      <span className="relative inline-block font-sans">
+        {isMobile ? (
+          // Mobile version - just the eagle emoji with smaller text
+          <span className="text-xl font-bold tracking-tight">
+            🦉
+          
+            {/* <span className="text-black">🦅</span> */}
+          </span>
+          
+        ) : (
+          <span className="text-3xl">🦉<span className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-black to-[#040404]">Foresight
+          </span>
+          </span>
+        )}
+      </span>
+    </div>
   );
 };
 

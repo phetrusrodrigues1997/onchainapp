@@ -320,7 +320,7 @@ button[aria-label="Toggle menu"] {
 }
 
 button[aria-label="Toggle menu"] svg {
-  stroke: white !important;
+  stroke: black !important;
 }
 
 
