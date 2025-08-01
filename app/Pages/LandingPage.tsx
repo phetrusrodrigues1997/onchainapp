@@ -93,7 +93,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfdfd] text-[#111111] overflow-hidden">
+    <div className="min-h-screen bg-[#fefefe] text-[#111111] overflow-hidden">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -234,7 +234,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-10 bg-[#111827] text-center text-gray-400 text-sm">
+      <footer className="relative z-10 px-6 py-10 bg-white text-center text-[#666666] text-sm">
         &copy; {new Date().getFullYear()} Foresight Markets — All rights reserved.
       </footer>
     </div>

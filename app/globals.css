@@ -316,7 +316,8 @@ body::before {
 
 
 button[aria-label="Toggle menu"] {
-  background-color: transparent !important;
+  background-color: white !important;
+  transform: translateX(-14px) !important; /* Adjusted for better alignment */
 }
 
 button[aria-label="Toggle menu"] svg {
