@@ -152,7 +152,7 @@ export default function App() {
           {activeSection === "notifications" && <CreateMessage />}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "bitcoinBetting" && <BitcoinBetting contractAddress="0x390896082E635c9F9f07C0609d73140e4F166471" /> }
+          {activeSection === "bitcoinBetting" && <BitcoinBetting contractAddress="0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794" /> }
           {activeSection === "markets" && <Markets activeSection={activeSection} setActiveSection={setActiveSection}/>}
           {/* Add more sections as needed */}
         

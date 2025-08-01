@@ -1,10 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
+import { setDailyOutcome, determineWinners, clearWrongPredictions } from './OwnerActions'; // Adjust path as needed
 
-// Contract ABI for PredictionPot
+
+
+// Updated Contract ABI for PredictionPot (reflecting modified contract)
 const PREDICTION_POT_ABI = [
   {
     "inputs": [{"internalType": "address", "name": "_usdc", "type": "address"}],
@@ -12,7 +16,7 @@ const PREDICTION_POT_ABI = [
     "type": "constructor"
   },
   {
-    "inputs": [],
+    "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
     "name": "enterPot",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -43,13 +47,6 @@ const PREDICTION_POT_ABI = [
     "inputs": [],
     "name": "owner",
     "outputs": [{"internalType": "address", "name": "", "type": "address"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "entryAmount",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
   }
@@ -89,8 +86,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const { address, isConnected } = useAccount();
   const { writeContract, data: txHash, isPending } = useWriteContract();
   
-  // Contract addresses (you'll need to update these with your deployed addresses)
-  const [contractAddress, setContractAddress] = useState<string>('0x390896082E635c9F9f07C0609d73140e4F166471');
+  const [outcomeInput, setOutcomeInput] = useState<string>('');
+  // Contract addresses
+  const [contractAddress, setContractAddress] = useState<string>('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
   const [usdcAddress, setUsdcAddress] = useState<string>('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'); 
   
   // State
@@ -112,13 +110,12 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     return 'en';
   });
   
+  // Update cookie when language changes
+  useEffect(() => {
+    Cookies.set('language', currentLanguage, { sameSite: 'lax' });
+  }, [currentLanguage]);
   
-    // Update cookie when language changes
-    useEffect(() => {
-      Cookies.set('language', currentLanguage, { sameSite: 'lax' });
-    }, [currentLanguage]);
-  
-    const t = getTranslation(currentLanguage);
+  const t = getTranslation(currentLanguage);
 
   // Handle transaction confirmation and errors
   useEffect(() => {
@@ -126,14 +123,11 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       setIsLoading(false);
       if (lastAction === 'approve') {
         showMessage('USDC approval confirmed! You can now enter the pot.');
-        // Refresh the page data
         setTimeout(() => {
           window.location.reload();
         }, 2000);
       } else if (lastAction === 'enterPot') {
         showMessage('Successfully entered the pot! Redirecting to betting page...');
-        // Navigate to betting page after a short delay
-        
       } else if (lastAction === 'distributePot') {
         showMessage('Pot distributed successfully!');
         setTimeout(() => {
@@ -147,7 +141,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   // Reset loading state if transaction fails
   useEffect(() => {
     if (!isPending && !isConfirming && !isConfirmed && lastAction) {
-      // Transaction might have failed, reset loading state
       setTimeout(() => {
         if (isLoading) {
           setIsLoading(false);
@@ -157,7 +150,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
 
-  // Read contract data with proper typing
+  // Read contract data
   const { data: participants } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: PREDICTION_POT_ABI,
@@ -179,12 +172,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     query: { enabled: !!contractAddress }
   }) as { data: string | undefined };
 
-  const { data: entryAmount } = useReadContract({
-    address: contractAddress as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'entryAmount',
-    query: { enabled: !!contractAddress }
-  }) as { data: bigint | undefined };
+  const entryAmount = BigInt(50000); // 0.10 USDC (6 decimals: 0.10 * 10^6 = 100,000)
 
   const { data: userUsdcBalance } = useReadContract({
     address: usdcAddress as `0x${string}`,
@@ -225,7 +213,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const showMessage = (msg: string, isError = false) => {
     setMessage(msg);
     if (!isError) {
-      setTimeout(() => setMessage(''), 8000); // Longer timeout for success messages
+      setTimeout(() => setMessage(''), 8000);
     } else {
       setTimeout(() => setMessage(''), 5000);
     }
@@ -262,6 +250,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
+        args: [entryAmount], // Pass the hardcoded entryAmount
       });
       showMessage('Enter pot transaction submitted! Waiting for confirmation...');
     } catch (error) {
@@ -343,30 +332,18 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
           {contractAddress && (
             <div className="mb-6">
               <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
-                <div className="bg-[#f5f5f5] p-4 rounded-lg border border-[#dedede]">
-                  <div className="text-sm text-[#111111]">{t.entryAmount || 'Entry Amount'}</div>
+                <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
+                  <div className="text-sm font-semibold text-[#111111]">{t.entryAmount || 'Entry Amount'}</div>
                   <div className="text-[#666666] font-semibold">
                     {formatBigIntValue(entryAmount)} USDC
                   </div>
                 </div>
-                <div className="bg-[#f5f5f5] p-4 rounded-lg border border-[#dedede]">
-                  <div className="text-sm text-[#111111]">{t.amountBalance || 'Amount Balance'}</div>
+                <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
+                  <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Amount Balance'}</div>
                   <div className="text-[#666666] font-semibold">
                     {formatBigIntValue(potBalance)} USDC
                   </div>
                 </div>
-                {/* <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <div className="text-sm text-[#A0A0B0]">Participants</div>
-                  <div className="text-[#F5F5F5] font-semibold">
-                    {getParticipantCount()}
-                  </div>
-                </div>
-                <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <div className="text-sm text-[#A0A0B0]">Your USDC Balance</div>
-                  <div className="text-[#F5F5F5] font-semibold">
-                    {formatBigIntValue(userUsdcBalance)} USDC
-                  </div>
-                </div> */}
               </div>
             </div>
           )}
@@ -403,9 +380,11 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
             <div className="mb-6">
               <div className="bg-[#2C2C47] p-6 rounded-lg text-center">
                 <div className="text-[#d3c81a] text-xl font-semibold mb-3">
-                  {t.alreadyInPot || "🎉 You're in the Pot!"}                </div>
+                  {t.alreadyInPot || "🎉 You're in the Pot!"}
+                </div>
                 <div className="text-[#F5F5F5] mb-4">
-                  {t.enteredPotMessage || "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!"}                </div>
+                  {t.enteredPotMessage || "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!"}
+                </div>
                 <button
                   onClick={() => setActiveSection('bitcoinBetting')}
                   className="bg-[#6A5ACD] text-black px-6 py-3 rounded-md font-medium hover:bg-[#c4b517] transition-colors"
@@ -426,18 +405,18 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
                 <div className="bg-[#2C2C47] p-4 rounded-lg">
                   <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
                   <p className="text-[#A0A0B0] text-sm mb-3">
-                   {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
+                    {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
                   </p>
                   <button
                     onClick={handleApprove}
                     disabled={isActuallyLoading || hasEnoughAllowance}
                     className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-{isActuallyLoading && lastAction === 'approve'
-  ? t.approveProcessing
-  : hasEnoughAllowance
-  ? t.alreadyApproved
-  : t.approveUSDC}
+                    {isActuallyLoading && lastAction === 'approve'
+                      ? t.approveProcessing
+                      : hasEnoughAllowance
+                      ? t.alreadyApproved
+                      : t.approveUSDC}
                   </button>
                 </div>
 
@@ -445,19 +424,19 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
                 <div className="bg-[#2C2C47] p-4 rounded-lg">
                   <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
                   <p className="text-[#A0A0B0] text-sm mb-3">
-                    {t.pay10USDC || 'Pay 10 USDC to enter the pot. Make sure you have approved USDC spending first.'}
+                    {t.pay10USDC || 'Pay 0.10 USDC to enter the pot. Make sure you have approved USDC spending first.'}
                   </p>
                   <button
                     onClick={handleEnterPot}
                     disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
                     className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-{isActuallyLoading && lastAction === 'enterPot'
-  ? t.enterPotProcessing
-  : t.enterPotButton}
+                    {isActuallyLoading && lastAction === 'enterPot'
+                      ? t.enterPotProcessing
+                      : t.enterPotButton}
                   </button>
                   {!hasEnoughBalance && (
-                    <p className="text-red-400 text-sm mt-2"> {t.insufficientUSDC || 'Insufficient USDC balance'}</p>
+                    <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>
                   )}
                   {!hasEnoughAllowance && hasEnoughBalance && (
                     <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
@@ -469,30 +448,120 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
           {/* Owner Actions */}
           {isOwner && contractAddress && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">Owner Actions</h2>
-              <div className="bg-[#2C2C47] p-4 rounded-lg">
-                <h3 className="text-[#F5F5F5] font-medium mb-2">Distribute Pot to Winners</h3>
-                <p className="text-[#A0A0B0] text-sm mb-3">
-                  Enter winner addresses separated by commas. The pot will be divided equally among all winners.
-                </p>
-                <textarea
-                  value={winnerAddresses}
-                  onChange={(e) => setWinnerAddresses(e.target.value)}
-                  placeholder="0x123..., 0x456..., 0x789..."
-                  rows={3}
-                  className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
-                />
-                <button
-                  onClick={handleDistributePot}
-                  disabled={isActuallyLoading || !winnerAddresses.trim()}
-                  className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isActuallyLoading && lastAction === 'distributePot' ? 'Processing...' : 'Distribute Pot'}
-                </button>
-              </div>
-            </div>
-          )}
+  <div className="mb-6">
+    <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">Owner Actions</h2>
+    
+    {/* Set Today's Outcome */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">Set Today's Outcome</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Enter the actual Bitcoin price movement for today ("positive" or "negative").
+      </p>
+      <input
+        type="text"
+        placeholder="positive or negative"
+        value={outcomeInput}
+        onChange={(e) => setOutcomeInput(e.target.value.toLowerCase())}
+        className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
+      />
+      <button
+        onClick={async () => {
+          if (outcomeInput !== "positive" && outcomeInput !== "negative") {
+            showMessage("Please enter 'positive' or 'negative'", true);
+            return;
+          }
+          setIsLoading(true);
+          try {
+            await setDailyOutcome(outcomeInput as "positive" | "negative");
+            showMessage("Today's outcome set successfully!");
+            setOutcomeInput("");
+          } catch (error) {
+            showMessage("Failed to set outcome", true);
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+        disabled={isActuallyLoading}
+        className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActuallyLoading ? "Processing..." : "Set Today's Outcome"}
+      </button>
+    </div>
+
+    {/* Determine Winners */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">Determine Winners</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Generate a list of winners who correctly predicted all three days and save to winners.txt.
+      </p>
+      <button
+        onClick={async () => {
+          setIsLoading(true);
+          try {
+            await determineWinners();
+            showMessage("Winners determined and saved to winners.txt!");
+          } catch (error) {
+            showMessage("Failed to determine winners", true);
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+        disabled={isActuallyLoading}
+        className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActuallyLoading ? "Processing..." : "Determine Winners"}
+      </button>
+    </div>
+
+    {/* Distribute Pot */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">Distribute Pot to Winners</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Enter winner addresses separated by commas. The pot will be divided equally among all winners.
+      </p>
+      <textarea
+        value={winnerAddresses}
+        onChange={(e) => setWinnerAddresses(e.target.value)}
+        placeholder="0x123..., 0x456..., 0x789..."
+        rows={3}
+        className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
+      />
+      <button
+        onClick={handleDistributePot}
+        disabled={isActuallyLoading || !winnerAddresses.trim()}
+        className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActuallyLoading && lastAction === "distributePot" ? "Processing..." : "Distribute Pot"}
+      </button>
+    </div>
+    {/* Clear Wrong Predictions */}
+<div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
+  <h3 className="text-[#F5F5F5] font-medium mb-2">Clear Wrong Predictions</h3>
+  <p className="text-[#A0A0B0] text-sm mb-3">
+    Use this if you want to reset all users flagged for wrong predictions.
+  </p>
+  <button
+    onClick={async () => {
+      setIsLoading(true);
+      try {
+        await clearWrongPredictions(); // make sure this is imported
+        showMessage("Cleared wrong predictions!");
+      } catch (error) {
+        showMessage("Failed to clear wrong predictions", true);
+      } finally {
+        setIsLoading(false);
+      }
+    }}
+    disabled={isActuallyLoading}
+    className="bg-yellow-600 text-black px-4 py-2 rounded-md font-medium hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    {isActuallyLoading ? "Processing..." : "Clear Wrong Predictions"}
+  </button>
+</div>
+
+  </div>
+  
+)}
 
           {/* Status Message */}
           {message && (

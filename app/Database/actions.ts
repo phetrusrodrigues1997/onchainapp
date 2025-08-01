@@ -4,48 +4,13 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { userPoints, Messages, BitcoinBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
+import { WrongPredictions } from "./schema";
 
 // Initialize database connection
 const sqlConnection = neon(process.env.DATABASE_URL!);
 const db = drizzle(sqlConnection);
 
-/**
- * Records 50 points for a wallet address when a swap is completed.
- * If the wallet address doesn't exist, creates a new entry with 50 points.
- * If it exists, increments the points by 50.
- */
-export async function recordSwapPoints(walletAddress: string) {
-  try {
-    await db
-      .insert(userPoints)
-      .values({ walletAddress, points: 50 })
-      .onConflictDoUpdate({
-        target: userPoints.walletAddress,
-        set: { points: sql`${userPoints.points} + 50` },
-      });
-  } catch (error) {
-    console.error("Error recording swap points:", error);
-    throw new Error("Failed to record swap points");
-  }
-}
 
-/**
- * Retrieves the current points for a given wallet address.
- * Returns 0 if the wallet address doesn't exist.
- */
-export async function getUserPoints(walletAddress: string): Promise<number> {
-  try {
-    const result = await db
-      .select({ points: userPoints.points })
-      .from(userPoints)
-      .where(eq(userPoints.walletAddress, walletAddress))
-      .limit(1);
-    return result.length > 0 ? result[0].points : 0;
-  } catch (error) {
-    console.error("Error fetching user points:", error);
-    throw new Error("Failed to fetch user points");
-  }
-}
 
 /**
  * Sets a unique username for a given wallet address.
@@ -156,11 +121,23 @@ export async function getAllMessages(address: string) {
  * Places a Bitcoin price prediction bet for today.
  * Only allows one bet per wallet per day.
  */
+
 export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative') {
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    
-    // Check if user already has a bet for today
+
+    // 1. Check if the user is blocked due to wrong prediction
+    const isBlocked = await db
+      .select()
+      .from(WrongPredictions)
+      .where(eq(WrongPredictions.walletAddress, walletAddress))
+      .limit(1);
+
+    if (isBlocked.length > 0) {
+      throw new Error('You are temporarily blocked from betting due to an incorrect prediction.');
+    }
+
+    // 2. Check if the user already placed a bet today
     const existingBet = await db
       .select()
       .from(BitcoinBets)
@@ -171,10 +148,18 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
       .limit(1);
 
     if (existingBet.length > 0) {
-      throw new Error('You have already placed a bet for today');
+      // 3. If a bet exists, update the prediction
+      await db
+        .update(BitcoinBets)
+        .set({ prediction })
+        .where(and(
+          eq(BitcoinBets.walletAddress, walletAddress),
+          eq(BitcoinBets.betDate, today)
+        ));
+      return { updated: true };
     }
 
-    // Place the bet
+    // 4. Otherwise, insert a new bet
     return db
       .insert(BitcoinBets)
       .values({
@@ -183,11 +168,13 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
         betDate: today,
       })
       .returning();
+
   } catch (error: any) {
     console.error("Error placing Bitcoin bet:", error);
     throw new Error(error.message || "Failed to place Bitcoin bet");
   }
 }
+
 
 /**
  * Gets the user's bet for today (if any).

@@ -22,3 +22,6 @@ export const BitcoinBets = pgTable("bitcoin_bets", {
   betDate: text("bet_date").notNull(), // Date of the bet (YYYY-MM-DD format)
   createdAt: timestamp("created_at").defaultNow().notNull(), // When the bet was placed
 });
+
+export const WrongPredictions = pgTable("wrong_Predictions", {
+  walletAddress: text("walletAddress").notNull(),});

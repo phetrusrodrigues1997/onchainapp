@@ -170,7 +170,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               <div
                 key={market.id}
                 onClick={() => handleMarketClick(market.id)}
-                className="group bg-[#efefef] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 cursor-pointer"
+                className="group bg-[#f4f4f4] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
