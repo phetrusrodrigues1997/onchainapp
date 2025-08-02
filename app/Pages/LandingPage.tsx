@@ -151,7 +151,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               {/* Scrollable Markets Container */}
               <div
                 ref={carouselRef}
-                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-0 md:px-12"
+                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-0 md:px-12 transform: md:-translate-x-12"
                 onScroll={handleScroll}
                 style={{
                   scrollbarWidth: 'none',
@@ -162,13 +162,14 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                   <button
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-200 hover:bg-gray-50 ${selectedMarket === market.id
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200 hover:bg-[rgba(211,200,26,0.5)]  ${selectedMarket === market.id
+                        ? 'border-[#d3c81a] bg-[rgba(211,200,26,0.5)] '
+                        : 'border-gray-200 bg-white hover:border-[#d3c81a]'
                       }`}
                     style={{
                       minWidth: 'fit-content',
-                      height: '40px'
+                      height: '40px',
+                      
                     }}
                   >
                     {/* Icon */}
@@ -195,7 +196,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               <div className="relative flex-shrink-0">
                 <button
                   onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-                  className="flex items-center space-x-2 bg-blue-100/30 hover:bg-blue-200/50 px-4 py-2 rounded-full border border-blue-300 transition-all text-sm whitespace-nowrap"
+                  className="flex items-center space-x-2 bg-[rgba(211,200,26,0.5)] hover:bg-[rgba(211,200,26,0.5)] px-4 py-2 rounded-full border border-[#d3c81a] transition-all text-sm whitespace-nowrap"
                 >
                   <span className="text-lg">
                     {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
@@ -238,7 +239,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               <div
                 key={market.id}
                 onClick={() => handleMarketClick(market.id)}
-                className="group bg-[#f4f4f4] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 cursor-pointer"
+                className="group bg-[#fcfcfc] backdrop-blur-sm rounded-2xl p-6 border border-[#aaaaaa] hover:border-[#d3c81a] transition-all hover:transform hover:scale-105 cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">

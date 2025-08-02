@@ -1,6 +1,7 @@
 // src/data/markets.ts
 import { getTranslation } from '../Languages/languages'
 
+
 // “Translation” is whatever shape getTranslation returns
 type Translation = ReturnType<typeof getTranslation>
 
@@ -16,13 +17,10 @@ export interface Market {
   potSize: string
 }
 
-export const getMarkets = (t: Translation, category: String): Market[] => {
+export const getMarkets = (t: Translation): Market[] => { 
 
-
-
-  if (category === 'sports') {
     return [
-  // Football (Soccer)
+        // Football (Soccer)
   {
     id: 'chelsea-manutd',
     name: 'Chelsea vs Man United',
@@ -177,221 +175,7 @@ export const getMarkets = (t: Translation, category: String): Market[] => {
     currentPrice: '-',
     participants: 120,
     potSize: '$1,200',
-  },
-]
-  }
-
-  else if (category === 'options') {
-    return [
-  {
-    id: 'crypto',
-    name: 'Crypto',
-    symbol: '₿',
-    color: '#FF5733',
-    question: '',
-    icon: '₿',
-    currentPrice: '$100',
-    participants: 50,
-    potSize: '$500',
-  },
-  {
-    id: 'stocks',
-    name: 'Stocks',
-    symbol: '💰',
-    color: '#228B22',
-    question: '',
-    icon: '💰',
-    currentPrice: '$190',
-    participants: 49,
-    potSize: '$490',
-  },
-  {
-    id: 'weather',
-    name: 'Weather',
-    symbol: '☁️',
-    color: '#87CEEB',
-    question: '',
-    icon: '☁️',
-    currentPrice: '$90',
-    participants: 38,
-    potSize: '$380',
-  },
-  {
-  id: 'xtrends',
-  name: 'X Trending Topics',
-  symbol: '🔥',
-  color: '#FF4500',
-  question: 'Which topic will rank #1 on X trending topics in the United States by 21:00 UTC today?',
-  icon: '🔥',
-  currentPrice: '$250',
-  participants: 62,
-  potSize: '$620',
-}
-,
-{
-    id: 'music',
-    name: 'Music Charts',
-    symbol: '🎵',
-    color: '#DA70D6',
-    question: '',
-    icon: '🎵',
-    currentPrice: '$130',
-    participants: 42,
-    potSize: '$420',
-  },
-  {
-    id: 'sports',
-    name: 'Sports',
-    symbol: '🏆',
-    color: '#33FF57',
-    question: '',
-    icon: '🏆',
-    currentPrice: '$200',
-    participants: 75,
-    potSize: '$750',
-  },
-  {
-    id: 'politics',
-    name: 'Politics',
-    symbol: '🏛️',
-    color: '#1E90FF',
-    question: '',
-    icon: '🏛️',
-    currentPrice: '$310',
-    participants: 62,
-    potSize: '$620',
-  },
-  
-  {
-    id: 'elections',
-    name: 'Elections',
-    symbol: '🗳️',
-    color: '#FF4500',
-    question: '',
-    icon: '🗳️',
-    currentPrice: '$470',
-    participants: 94,
-    potSize: '$940',
-  },
-  {
-    id: 'tvshows',
-    name: 'TV Shows',
-    symbol: '📺',
-    color: '#8A2BE2',
-    question: '',
-    icon: '📺',
-    currentPrice: '$180',
-    participants: 51,
-    potSize: '$510',
-  },
-  {
-    id: 'popculture',
-    name: 'Pop Culture',
-    symbol: '🎤',
-    color: '#FF69B4',
-    question: '',
-    icon: '🎤',
-    currentPrice: '$150',
-    participants: 45,
-    potSize: '$450',
-  },
-  {
-    id: 'technews',
-    name: 'Tech News',
-    symbol: '💻',
-    color: '#00CED1',
-    question: '',
-    icon: '💻',
-    currentPrice: '$225',
-    participants: 60,
-    potSize: '$600',
-  },
-  
-  {
-    id: 'movies',
-    name: 'Box Office',
-    symbol: '🎬',
-    color: '#FFD700',
-    question: '',
-    icon: '🎬',
-    currentPrice: '$270',
-    participants: 58,
-    potSize: '$580',
-  },
-  {
-    id: 'space',
-    name: 'Space & Astronomy',
-    symbol: '🚀',
-    color: '#7B68EE',
-    question: '',
-    icon: '🚀',
-    currentPrice: '$140',
-    participants: 36,
-    potSize: '$360',
-  },
-  {
-    id: 'fashion',
-    name: 'Fashion Trends',
-    symbol: '👗',
-    color: '#FFB6C1',
-    question: '',
-    icon: '👗',
-    currentPrice: '$110',
-    participants: 30,
-    potSize: '$300',
-  },
-  {
-    id: 'celebs',
-    name: 'Celebrity News',
-    symbol: '🌟',
-    color: '#FFA500',
-    question: '',
-    icon: '🌟',
-    currentPrice: '$160',
-    participants: 47,
-    potSize: '$470',
-  },
-  
-  {
-    id: 'health',
-    name: 'Health & Fitness',
-    symbol: '💪',
-    color: '#32CD32',
-    question: '',
-    icon: '💪',
-    currentPrice: '$175',
-    participants: 44,
-    potSize: '$440',
-  },
-  {
-    id: 'gaming',
-    name: 'Gaming',
-    symbol: '🎮',
-    color: '#6A5ACD',
-    question: '',
-    icon: '🎮',
-    currentPrice: '$205',
-    participants: 53,
-    potSize: '$530',
-  },
-  {
-    id: 'travel',
-    name: 'Travel & Tourism',
-    symbol: '✈️',
-    color: '#00BFFF',
-    question: '',
-    icon: '✈️',
-    currentPrice: '$185',
-    participants: 40,
-    potSize: '$400',
-  }
-]
-
- }
-
- else if (category === 'music') {
-  return [
-    {
+  },{
   id: 'spotify-global-1',
   name: 'Global #1',
   symbol: '🌍',
@@ -555,13 +339,7 @@ export const getMarkets = (t: Translation, category: String): Market[] => {
   currentPrice: '$190',
   participants: 49,
   potSize: '$490',
-}
-
-  ]}
-
- else if (category === 'weather') {
-  return [
-    {
+}, {
       id: 'london-temp-3pm',
       name: 'London 3PM ≥ 22°C',
       symbol: '🌡️',
@@ -626,14 +404,7 @@ export const getMarkets = (t: Translation, category: String): Market[] => {
       currentPrice: '-',
       participants: 79,
       potSize: '$790',
-    },
-  ]
-}
-
-
- else if (category === 'stocks') {
-  return [
-    {
+    },{
     id: 'tesla',
     name: 'Tesla',
     symbol: 'TSLA',
@@ -720,13 +491,7 @@ export const getMarkets = (t: Translation, category: String): Market[] => {
     currentPrice: '7,624',
     participants: 48,
     potSize: '$480',
-  },
-  ]
-}
-
-else if (category === 'xtrends') {
-  return [
-    {
+  },{
       id: 'us-sports-top',
       name: 'Sports #1 in US X Trends',
       symbol: '🏈',
@@ -813,12 +578,7 @@ else if (category === 'xtrends') {
       currentPrice: '-',
       participants: 123,
       potSize: '$1230',
-    }
-  ] }
-
-  // Default category (financial/crypto/etc)
-  return [
-  {
+    },{
     id: 'bitcoin',
     name: 'Bitcoin',
     symbol: '₿',
@@ -919,8 +679,5 @@ else if (category === 'xtrends') {
     participants: 50,
     potSize: '$500',
   }
-]
+    ]
 }
-
-
-

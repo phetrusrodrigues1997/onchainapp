@@ -159,15 +159,21 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
       return { updated: true };
     }
 
-    // 4. Otherwise, insert a new bet
-    return db
-      .insert(BitcoinBets)
-      .values({
-        walletAddress,
-        prediction,
-        betDate: today,
-      })
-      .returning();
+    // 4. Otherwise, delete all previous bets for this wallet and insert new bet
+await db
+  .delete(BitcoinBets)
+  .where(eq(BitcoinBets.walletAddress, walletAddress))
+  .execute();
+
+return db
+  .insert(BitcoinBets)
+  .values({
+    walletAddress,
+    prediction,
+    betDate: today,
+  })
+  .returning();
+
 
   } catch (error: any) {
     console.error("Error placing Bitcoin bet:", error);

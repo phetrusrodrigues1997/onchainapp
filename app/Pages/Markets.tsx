@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { Star, ArrowRight, Search } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
+import { getMarkets } from '../Constants/allMarkets';
+
 
 interface MarketsProps {
   activeSection: string;
@@ -29,74 +31,7 @@ const Markets = ({ activeSection, setActiveSection }: MarketsProps) => {
 
   const t = getTranslation(currentLanguage);
 
-  const markets = [
-    {
-      id: 'bitcoin',
-      name: 'Bitcoin',
-      symbol: '₿',
-      color: '#F7931A',
-      question: t.bitcoinQuestion,
-      icon: '₿',
-      currentPrice: '$67,234',
-      participants: 127,
-      potSize: '$1,270',
-    },
-    {
-      id: 'ethereum',
-      name: 'Ethereum',
-      symbol: 'Ξ',
-      color: '#627EEA',
-      question: t.ethereumQuestion,
-      icon: 'Ξ',
-      currentPrice: '$3,456',
-      participants: 89,
-      potSize: '$890',
-    },
-    {
-      id: 'solana',
-      name: 'Solana',
-      symbol: 'SOL',
-      color: '#9945FF',
-      question: t.solanaQuestion,
-      icon: '◎',
-      currentPrice: '$198',
-      participants: 64,
-      potSize: '$640',
-    },
-    {
-      id: 'tesla',
-      name: 'Tesla',
-      symbol: 'TSLA',
-      color: '#E31837',
-      question: t.teslaQuestion,
-      icon: '🚗',
-      currentPrice: '$248.50',
-      participants: 156,
-      potSize: '$1,560',
-    },
-    {
-      id: 'nvidia',
-      name: 'NVIDIA',
-      symbol: 'NVDA',
-      color: '#76B900',
-      question: t.nvidiaQuestion,
-      icon: '🎮',
-      currentPrice: '$876.20',
-      participants: 203,
-      potSize: '$2,030',
-    },
-    {
-      id: 'sp500',
-      name: 'S&P 500',
-      symbol: 'SPX',
-      color: '#1f77b4',
-      question: t.sp500Question,
-      icon: '📈',
-      currentPrice: '5,987',
-      participants: 78,
-      potSize: '$780',
-    },
-  ];
+  const markets = getMarkets(t);
 
   const filteredMarkets = markets.filter(market =>
     market.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -131,7 +66,7 @@ const Markets = ({ activeSection, setActiveSection }: MarketsProps) => {
                   placeholder={t.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 text-lg bg-[#efefef] border border-gray-200 rounded-2xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                  className="w-full pl-12 pr-6 py-4 text-lg bg-[#f3f3f3] border border-gray-200 rounded-2xl focus:outline-none focus:border-[#d3c81a] focus:ring-2 focus:ring-purple-500/20 transition-all"
                 />
               </div>
             </div>
@@ -154,7 +89,7 @@ const Markets = ({ activeSection, setActiveSection }: MarketsProps) => {
                 <div
                   key={market.id}
                   onClick={() => handleMarketClick(market.id)}
-                  className="group bg-[#efefef] backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 cursor-pointer"
+                  className="group bg-[#fcfcfc] backdrop-blur-sm rounded-2xl p-6 border border-[#aaaaaa] hover:border-[#d3c81a] transition-all hover:transform hover:scale-105 cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-3">

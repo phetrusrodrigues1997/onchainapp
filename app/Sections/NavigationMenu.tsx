@@ -42,7 +42,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMobile && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 text-black bg-white rounded-md md:hidden border border-gray-200"
+          className="p-2 text-black bg-white rounded-md md:hidden border border-gray-200  "
           aria-label="Toggle menu"
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -52,7 +52,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {/* Desktop menu */}
       {!isMobile && (
         <div className="flex space-x-10 ">
-        <div className="bg-white-400 ml-24 rounded-full py-2 flex space-x-10">
+        <div className="bg-white-400 ml-32 rounded-full py-2 flex space-x-10">
           {menuItems.map((item) => (
             <button
               key={item.id}
