@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { placeBitcoinBet, getTodaysBet } from '../Database/actions';
+import { TrendingUp, TrendingDown, Clock, Shield, Zap, CheckCircle2 } from 'lucide-react';
 
 // Contract ABI for PredictionPot (minimal version to check participants)
 const PREDICTION_POT_ABI = [
@@ -95,15 +96,14 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
   // If wallet is not connected
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-invisible p-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6">
-            <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
-              <span style={{ color: '#F7931A' }}>₿</span>itcoin Price Prediction
-            </h1>
-            <div className="text-center text-[#F5F5F5]">
-              Please connect your wallet to place your Bitcoin price prediction.
+      <div className="min-h-screen bg-transparent p-4 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+            <div className="w-20 h-20 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/25">
+              <span className="text-3xl font-bold text-white">₿</span>
             </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Connect Wallet</h1>
+            <p className="text-gray-600">Connect to start predicting</p>
           </div>
         </div>
       </div>
@@ -113,22 +113,17 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
   // If user is not a participant in the pot
   if (!isParticipant) {
     return (
-      <div className="min-h-screen bg-invisible p-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6">
-            <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
-              <span style={{ color: '#F7931A' }}>₿</span>itcoin Price Prediction
-            </h1>
-            <div className="bg-[#2C2C47] p-6 rounded-lg text-center">
-              <div className="text-[#F5F5F5] text-lg mb-4">
-                🚫 Access Restricted
-              </div>
-              <div className="text-[#A0A0B0]">
-                You must be a participant in the Bitcoin Pot to place predictions.
-                <br />
-                Please enter the pot first to unlock betting functionality.
-              </div>
+      <div className="min-h-screen bg-transparent p-4 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 shadow-2xl">
+            <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Shield className="w-10 h-10 text-white" />
             </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Required</h1>
+            <p className="text-gray-600 mb-6">Join the Bitcoin Pot first</p>
+            <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl">
+              Enter Pot
+            </button>
           </div>
         </div>
       </div>
@@ -136,99 +131,101 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
   }
 
   return (
-    <div className="min-h-screen bg-invisible p-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-invisible backdrop-blur-sm border border-white/20 rounded-lg p-6">
-          <h1 className="text-3xl font-bold text-[#ffffff] mb-6 text-center">
-            <span style={{ color: '#F7931A' }}>₿</span>itcoin Price Prediction
-          </h1>
+    <div className="min-h-screen bg-transparent p-4">
+      <div className="max-w-lg mx-auto pt-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-24 h-24 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/25">
+            <span className="text-4xl font-bold text-white">₿</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+            <Clock className="w-4 h-4" />
+            <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          </div>
+        </div>
 
-          <div className="bg-[#2C2C47] p-6 rounded-lg mb-6">
-            <div className="text-center mb-6">
-              <div className="text-[#A0A0B0] text-sm mb-2">Today's Date</div>
-              <div className="text-[#F5F5F5] text-lg font-semibold">{getTodaysDate()}</div>
-            </div>
-
-            {todaysBet ? (
-              // Show existing bet
-              <div className="text-center">
-                <div className="bg-[#1a1a2e] p-4 rounded-lg border border-[#d3c81a]">
-                  <div className="text-[#d3c81a] text-sm mb-2">Your Prediction for Today</div>
-                  <div className="text-[#F5F5F5] text-2xl font-bold mb-2">
-                    {todaysBet.prediction === 'positive' ? '📈 POSITIVE' : '📉 NEGATIVE'}
-                  </div>
-                  <div className="text-[#A0A0B0] text-sm">
-                    You predicted Bitcoin will end the day {todaysBet.prediction}
-                  </div>
-                  <div className="text-[#A0A0B0] text-xs mt-2">
-                    Bet placed at: {new Date(todaysBet.createdAt).toLocaleTimeString()}
-                  </div>
+        {todaysBet ? (
+          // Show existing bet - MINIMAL
+          <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 mb-6 shadow-2xl text-center">
+            <div className={`inline-flex items-center gap-4 px-8 py-6 rounded-2xl ${
+              todaysBet.prediction === 'positive' 
+                ? 'bg-green-50 border-2 border-green-200' 
+                : 'bg-red-50 border-2 border-red-200'
+            }`}>
+              {todaysBet.prediction === 'positive' ? (
+                <TrendingUp className="w-12 h-12 text-green-600" />
+              ) : (
+                <TrendingDown className="w-12 h-12 text-red-600" />
+              )}
+              <div>
+                <div className={`text-3xl font-bold ${
+                  todaysBet.prediction === 'positive' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {todaysBet.prediction === 'positive' ? 'BULLISH' : 'BEARISH'}
                 </div>
-                <div className="text-[#A0A0B0] text-sm mt-4">
-                  You can only place one prediction per day. Come back tomorrow for another prediction!
+                <div className="text-gray-500 text-sm">
+                  {new Date(todaysBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </div>
               </div>
-            ) : (
-              // Show betting interface
-              <div>
-                <div className="text-center mb-6">
-                  <div className="text-[#F5F5F5] text-lg mb-2">
-                    Will Bitcoin's price end today higher or lower than it started?
-                  </div>
-                  <div className="text-[#A0A0B0] text-sm">
-                    Make your prediction for today's Bitcoin price movement
-                  </div>
+            </div>
+            <p className="text-gray-500 text-sm mt-6">Come back tomorrow!</p>
+          </div>
+        ) : (
+          // Show betting interface - MINIMAL
+          <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 mb-6 shadow-2xl">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">Your Call?</h2>
+              <div className="w-16 h-1 bg-gradient-to-r from-green-500 to-red-500 mx-auto rounded-full"></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Positive Button */}
+              <button
+                onClick={() => handlePlaceBet('positive')}
+                disabled={isLoading}
+                className="group bg-gradient-to-br from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white p-8 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25"
+              >
+                <TrendingUp className="w-12 h-12 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                <div>BULLISH</div>
+              </button>
+
+              {/* Negative Button */}
+              <button
+                onClick={() => handlePlaceBet('negative')}
+                disabled={isLoading}
+                className="group bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white p-8 rounded-2xl font-bold text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-red-500/25"
+              >
+                <TrendingDown className="w-12 h-12 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                <div>BEARISH</div>
+              </button>
+            </div>
+
+            {isLoading && (
+              <div className="text-center mt-6">
+                <div className="inline-flex items-center gap-2 text-orange-500">
+                  <Zap className="w-5 h-5 animate-pulse" />
+                  <span className="font-medium">Placing bet...</span>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Positive Button */}
-                  <button
-                    onClick={() => handlePlaceBet('positive')}
-                    disabled={isLoading}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-6 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105"
-                  >
-                    <div className="text-3xl mb-2">📈</div>
-                    <div>POSITIVE</div>
-                    <div className="text-sm opacity-80 mt-1">Bitcoin will end higher</div>
-                  </button>
-
-                  {/* Negative Button */}
-                  <button
-                    onClick={() => handlePlaceBet('negative')}
-                    disabled={isLoading}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-6 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105"
-                  >
-                    <div className="text-3xl mb-2">📉</div>
-                    <div>NEGATIVE</div>
-                    <div className="text-sm opacity-80 mt-1">Bitcoin will end lower</div>
-                  </button>
-                </div>
-
-                {isLoading && (
-                  <div className="text-center mt-4">
-                    <div className="text-[#d3c81a]">Placing your bet...</div>
-                  </div>
-                )}
               </div>
             )}
           </div>
+        )}
 
-          {/* Status Message */}
-          {message && (
-            <div className={`p-4 rounded-lg ${message.includes('Failed') || message.includes('Error') ? 'bg-red-900/50 border border-red-500' : 'bg-green-900/50 border border-green-500'}`}>
-              <p className="text-[#F5F5F5]">{message}</p>
-            </div>
-          )}
+        {/* Status Message */}
+        {message && (
+          <div className={`p-4 rounded-2xl mb-6 text-center ${
+            message.includes('Failed') || message.includes('Error') 
+              ? 'bg-red-50 border-2 border-red-200 text-red-700' 
+              : 'bg-green-50 border-2 border-green-200 text-green-700'
+          }`}>
+            <p className="font-medium">{message}</p>
+          </div>
+        )}
 
-          {/* Info Section */}
-          <div className="bg-[#1a1a2e] p-4 rounded-lg border border-[#d3c81a]/30">
-            <div className="text-[#d3c81a] text-sm font-semibold mb-2">How it works:</div>
-            <ul className="text-[#A0A0B0] text-sm space-y-1">
-              <li>• Predict if Bitcoin will end the day positive or negative</li>
-              <li>• You can only make one prediction per day</li>
-              <li>• Only Bitcoin Pot participants can place predictions</li>
-              <li>• Results are determined at the end of each trading day</li>
-            </ul>
+        {/* Minimal Rules */}
+        <div className="bg-orange-50/80 border border-orange-200 rounded-2xl p-4 text-center">
+          <div className="text-orange-600 text-sm font-semibold mb-2">
+            One prediction per day • Pot participants only
           </div>
         </div>
       </div>

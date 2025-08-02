@@ -5,7 +5,6 @@ import Cookies from 'js-cookie';
 import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
-import { get } from 'lodash';
 
 interface LandingPageProps {
   activeSection: string;
@@ -38,6 +37,22 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     }
     setIsVisible(true);
   }, []);
+
+  useEffect(() => {
+  const detectLanguage = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      const isBrazil = data.country === 'BR';
+      setCurrentLanguage(isBrazil ? 'pt-BR' : 'en');
+    } catch (err) {
+      console.error('Geo IP detection failed:', err);
+      setCurrentLanguage('en'); // fallback
+    }
+  };
+  detectLanguage();
+}, []);
+
 
   // Update arrow visibility when selectedMarket changes
   useEffect(() => {
@@ -190,47 +205,6 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                   </button>
                 ))}
               </div>
-            </div>
-            <div className="w-full flex flex-row justify-between items-center px-4 md:px-24 mt-8">
-              {/* Language Selector (left side) */}
-              <div className="relative flex-shrink-0">
-                <button
-                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-                  className="flex items-center space-x-2 bg-[rgba(211,200,26,0.5)] hover:bg-[rgba(211,200,26,0.5)] px-4 py-2 rounded-full border border-[#d3c81a] transition-all text-sm whitespace-nowrap"
-                >
-                  <span className="text-lg">
-                    {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
-                  </span>
-                  <span className="font-medium">
-                    {supportedLanguages.find(lang => lang.code === currentLanguage)?.name}
-                  </span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
-
-                {showLanguageDropdown && (
-                  <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] overflow-hidden z-50">
-                    {supportedLanguages.map((language) => (
-                      <button
-                        key={language.code}
-                        onClick={() => handleLanguageChange(language.code)}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-all text-sm ${currentLanguage === language.code ? 'bg-purple-50 text-purple-700' : ''
-                          }`}
-                      >
-                        <span className="text-lg">{language.flag}</span>
-                        <span className="font-medium">{language.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* How it Works link (right side) */}
-              <a
-                href="#how-it-works"
-                className="text-sm font-semibold text-[#d3c81a] hover:underline transition-all whitespace-nowrap"
-              >
-                {t.howItWorksLink || 'How it works'}
-              </a>
             </div>
           </div>
 

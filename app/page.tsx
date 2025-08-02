@@ -88,7 +88,7 @@ export default function App() {
 
   return (
     
-     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800 text-white overflow-hidden">
+     <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
       {/* Animated background elements */}
       {/* <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
