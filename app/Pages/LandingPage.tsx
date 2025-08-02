@@ -177,9 +177,9 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                   <button
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200 hover:bg-[rgba(211,200,26,0.5)]  ${selectedMarket === market.id
-                        ? 'border-[#d3c81a] bg-[rgba(211,200,26,0.5)] '
-                        : 'border-gray-200 bg-white hover:border-[#d3c81a]'
+                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200  ${selectedMarket === market.id
+                        ? 'border-[#3D9DF6] bg-[rgba(61, 157, 246, 0.15)] '
+                        : 'border-gray-200 bg-white hover:border-[#3D9DF6]'
                       }`}
                     style={{
                       minWidth: 'fit-content',
@@ -213,7 +213,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               <div
                 key={market.id}
                 onClick={() => handleMarketClick(market.id)}
-                className="group bg-[#fcfcfc] backdrop-blur-sm rounded-2xl p-6 border border-[#aaaaaa] hover:border-[#d3c81a] transition-all hover:transform hover:scale-105 cursor-pointer"
+                className="group bg-[#fcfcfc] backdrop-blur-sm rounded-2xl p-6 border border-[#aaaaaa] hover:border-[#3D9DF6] transition-all hover:transform hover:scale-105 cursor-pointer"
               >
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
@@ -224,7 +224,11 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                         color: market.color,
                       }}
                     >
-                      {market.icon}
+                      {market.icon?.slice(0, 4) === 'http' ? (
+    <img src={market.icon} alt="Ethereum Icon" className="w-8 h-8" />
+  ) : (
+    market.icon
+  )}
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-[#111111]">{market.name}</h3>
