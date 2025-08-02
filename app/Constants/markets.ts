@@ -206,17 +206,6 @@ export const getMarkets = (t: Translation, category: String): Market[] => {
     potSize: '$490',
   },
   {
-    id: 'weather',
-    name: 'Weather',
-    symbol: '☁️',
-    color: '#87CEEB',
-    question: '',
-    icon: '☁️',
-    currentPrice: '$90',
-    participants: 38,
-    potSize: '$380',
-  },
-  {
   id: 'xtrends',
   name: 'X Trending Topics',
   symbol: '🔥',
@@ -226,7 +215,18 @@ export const getMarkets = (t: Translation, category: String): Market[] => {
   currentPrice: '$250',
   participants: 62,
   potSize: '$620',
-}
+},
+  {
+    id: 'weather',
+    name: 'Weather',
+    symbol: '☁️',
+    color: '#87CEEB',
+    question: '',
+    icon: '☁️',
+    currentPrice: '$90',
+    participants: 38,
+    potSize: '$380',
+  }
 ,
 {
     id: 'music',
