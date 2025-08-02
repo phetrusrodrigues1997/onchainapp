@@ -68,6 +68,9 @@ export interface Translations {
   barcaMadridQuestion?: string; // Added for the Barcelona vs Real Madrid question
   lakersCelticsQuestion?: string; // Added for the Lakers vs Celtics question
   brazilArgentinaQuestion?: string; // Added for the Brazil vs Argentina question
+  litecoinQuestion?: string; // Added for the Litecoin question
+  polkadotQuestion?: string; // Added for the Polkadot question
+  chainlinkQuestion?: string; // Added for the Chainlink question
   
   
   // Footer
@@ -143,6 +146,9 @@ export const translations: Record<Language, Translations> = {
     barcaMadridQuestion: 'Will Barcelona vs Real Madrid end with a higher score for Barcelona?',
     lakersCelticsQuestion: 'Will Lakers vs Celtics end with a higher score for Lakers?',
     brazilArgentinaQuestion: 'Will Brazil vs Argentina end with a higher score for Brazil?',
+    litecoinQuestion: 'Will Litecoin end the day higher?',
+    polkadotQuestion: 'Will Polkadot end the day higher?',
+    chainlinkQuestion: 'Will Chainlink end the day higher?',
 
     
 
@@ -217,6 +223,9 @@ export const translations: Record<Language, Translations> = {
     barcaMadridQuestion: 'Barcelona vai ganhar do Real Madrid?',
     lakersCelticsQuestion: 'Lakers vai ganhar do Celtics?',
     brazilArgentinaQuestion: 'Brasil vai ganhar da Argentina?',
+    litecoinQuestion: 'O Litecoin vai terminar o dia em alta?',
+    polkadotQuestion: 'O Polkadot vai terminar o dia em alta?',
+    chainlinkQuestion: 'O Chainlink vai terminar o dia em alta?',
 
     // Footer
     footerText: 'Foresight Markets — Todos os direitos reservados.',

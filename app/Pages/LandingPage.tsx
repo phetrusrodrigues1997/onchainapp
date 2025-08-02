@@ -126,7 +126,8 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 relative">
             {/* Market Carousel */}
-            <div className="relative transform: translate-y-[-30%]">
+            <div className="relative -translate-y-1/3">
+
               {/* Left Arrow - Only shown when there's content to scroll left */}
               {showLeftArrow && (
                 <button
@@ -150,7 +151,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               {/* Scrollable Markets Container */}
               <div
                 ref={carouselRef}
-                className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-0 md:px-12"
+                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-0 md:px-12"
                 onScroll={handleScroll}
                 style={{
                   scrollbarWidth: 'none',
