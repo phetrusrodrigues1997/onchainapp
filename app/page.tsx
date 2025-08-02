@@ -111,7 +111,8 @@ export default function App() {
           </div>
           <div className="wallet-container">
             <Wallet>
-            <ConnectWallet className="bg-[#3D9DF6] text-black dark:bg-[#d3c81a] rounded-full lg:mr-4">
+<ConnectWallet
+  className=" border border-[#3D9DF6] rounded-full lg:mr-4 bg-[rgba(179,229,255,0.1)] dark:bg-[rgba(179,229,255,0.1)]">
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>

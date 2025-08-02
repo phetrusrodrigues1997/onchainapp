@@ -178,7 +178,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
                     className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200  ${selectedMarket === market.id
-                        ? 'border-[#3D9DF6] bg-[rgba(61, 157, 246, 0.15)] '
+                        ? 'border-[#3D9DF6] bg-[rgba(179,229,255,0.1)] '
                         : 'border-gray-200 bg-white hover:border-[#3D9DF6]'
                       }`}
                     style={{

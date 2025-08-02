@@ -328,7 +328,7 @@ button[aria-label="Toggle menu"] svg {
 
 
 [data-testid="ockConnectButton"] {
-  background: #3D9DF6 !important; /* green-500 */
+  background: rgba(179,229,255,0.1) !important; /* green-500 */
   color: black !important;
   border-radius: 9999px !important; /* Tailwind's rounded-md */
   padding-top: 0.5rem !important; /* Tailwind's py-2 */
