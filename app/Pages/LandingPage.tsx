@@ -319,52 +319,54 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
               </div>
             </div>
 
-            {/* Language Selector */}
-            <div className="absolute top-0 ml-24 mt-12">
-              <div className="relative">
-                <button
-  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-  className="flex items-center space-x-2 bg-blue-100/30 hover:bg-blue-200/50 px-4 py-2 rounded-full border border-blue-300 transition-all text-sm"
->
+            <div className="w-full flex flex-col items-end md:flex-row md:justify-between md:items-start px-4 md:px-24 mt-8 gap-4">
+  {/* Language Selector */}
+  <div className="relative">
+    <button
+      onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+      className="flex items-center space-x-2 bg-blue-100/30 hover:bg-blue-200/50 px-4 py-2 rounded-full border border-blue-300 transition-all text-sm"
+    >
+      <span className="text-lg">
+        {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
+      </span>
+      <span className="font-medium">
+        {supportedLanguages.find(lang => lang.code === currentLanguage)?.name}
+      </span>
+      <ChevronDown className="w-3 h-3" />
+    </button>
 
-                  <span className="text-lg">
-                    {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
-                  </span>
-                  <span className="font-medium">
-                    {supportedLanguages.find(lang => lang.code === currentLanguage)?.name}
-                  </span>
-                  <ChevronDown className="w-3 h-3" />
-                </button>
+    {showLanguageDropdown && (
+      <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] overflow-hidden z-50">
+        {supportedLanguages.map((language) => (
+          <button
+            key={language.code}
+            onClick={() => handleLanguageChange(language.code)}
+            className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-all text-sm ${
+              currentLanguage === language.code ? 'bg-purple-50 text-purple-700' : ''
+            }`}
+          >
+            <span className="text-lg">{language.flag}</span>
+            <span className="font-medium">{language.name}</span>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
 
-                {showLanguageDropdown && (
-                  <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] overflow-hidden z-50">
-                    {supportedLanguages.map((language) => (
-                      <button
-                        key={language.code}
-                        onClick={() => handleLanguageChange(language.code)}
-                        className={`w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-all text-sm ${
-                          currentLanguage === language.code ? 'bg-purple-50 text-purple-700' : ''
-                        }`}
-                      >
-                        <span className="text-lg">{language.flag}</span>
-                        <span className="font-medium">{language.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-end mr-24 mt-2">
-  <a
-    href="#how-it-works"
-    className="text-sm font-semibold text-blue-600 hover:underline transition-all"
-  >
-    {t.howItWorksLink || 'How it works'}
-  </a>
+  {/* How it Works Link */}
+  <div>
+    <a
+      href="#how-it-works"
+      className="text-sm font-semibold text-blue-600 hover:underline transition-all"
+    >
+      {t.howItWorksLink || 'How it works'}
+    </a>
+  </div>
 </div>
 
 
-            {/* Hello, can you see this? */}
+
+            
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
