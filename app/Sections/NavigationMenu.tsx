@@ -42,7 +42,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMobile && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 text-black bg-white rounded-md md:hidden border border-[#d3c81a]"
+          className="p-2 text-black bg-white rounded-md md:hidden border border-gray-200"
           aria-label="Toggle menu"
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -59,8 +59,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               onClick={() => setActiveSection(item.id)}
               className={`font-medium ${
                 activeSection === item.id
-                  ? 'text-[#d3c81a] text-base font-semibold'
-                  : 'text-[#666666] hover:text-[#d3c81a] '
+                  ? 'text-black text-base font-semibold'
+                  : 'text-[#666666] hover:text-black hover:font-semibold'
               }`}
             >
               {item.label}

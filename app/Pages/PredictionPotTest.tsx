@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseUnits, formatUnits } from 'viem';
+import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { setDailyOutcome, determineWinners, clearWrongPredictions } from './OwnerActions'; // Adjust path as needed

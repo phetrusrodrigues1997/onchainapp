@@ -64,6 +64,10 @@ export interface Translations {
   ftse100Question?: string; // Added for the FTX token question
   goldQuestion?: string; // Added for the Gold question
   howItWorksLink?: string; // Added for the link to the How It Works section
+  chelseaManUtdQuestion?: string; // Added for the Chelsea
+  barcaMadridQuestion?: string; // Added for the Barcelona vs Real Madrid question
+  lakersCelticsQuestion?: string; // Added for the Lakers vs Celtics question
+  brazilArgentinaQuestion?: string; // Added for the Brazil vs Argentina question
   
   
   // Footer
@@ -135,6 +139,10 @@ export const translations: Record<Language, Translations> = {
     ftse100Question: 'Will FTSE 100 end the day higher?',
     goldQuestion: 'Will Gold end the day higher?',
     howItWorksLink: 'How it works >', // Added for the link to the How It Works section
+    chelseaManUtdQuestion: 'Will Chelsea vs Manchester United end with a higher score for Chelsea?',
+    barcaMadridQuestion: 'Will Barcelona vs Real Madrid end with a higher score for Barcelona?',
+    lakersCelticsQuestion: 'Will Lakers vs Celtics end with a higher score for Lakers?',
+    brazilArgentinaQuestion: 'Will Brazil vs Argentina end with a higher score for Brazil?',
 
     
 
@@ -205,6 +213,10 @@ export const translations: Record<Language, Translations> = {
     ftse100Question: 'O FTSE 100 vai terminar o dia em alta?',
     goldQuestion: 'O Ouro vai terminar o dia em alta?',
     howItWorksLink: 'Como funciona?', // Added for the link to the How It Works section
+    chelseaManUtdQuestion: 'Chelsea vai ganhar do Machester United?',
+    barcaMadridQuestion: 'Barcelona vai ganhar do Real Madrid?',
+    lakersCelticsQuestion: 'Lakers vai ganhar do Celtics?',
+    brazilArgentinaQuestion: 'Brasil vai ganhar da Argentina?',
 
     // Footer
     footerText: 'Foresight Markets — Todos os direitos reservados.',
@@ -217,5 +229,5 @@ export const getTranslation = (language: Language): Translations => {
 
 export const supportedLanguages: { code: Language; name: string; flag: string }[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'pt-BR', name: 'Português (Brasil)', flag: '🇧🇷' },
+  { code: 'pt-BR', name: 'Português', flag: '🇧🇷' },
 ];

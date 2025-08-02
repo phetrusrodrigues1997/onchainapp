@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CADCToken, BRZToken, EURCToken } from '../Token Lists/coins';
+import { CADCToken, BRZToken, EURCToken } from '../Constants/coins';
 
 
 // Define MXNT locally since it’s not in your original token list

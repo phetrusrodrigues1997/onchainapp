@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { Token } from '@coinbase/onchainkit/token';
-import { cryptoTokens, stablecoinTokens } from '../Token Lists/coins';
+import { cryptoTokens, stablecoinTokens } from '../Constants/coins';
 import { getUsername } from '../Database/actions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faArrowRight, faPaperPlane, faExchangeAlt, faQrcode, faChartLine } from '@fortawesome/free-solid-svg-icons';
