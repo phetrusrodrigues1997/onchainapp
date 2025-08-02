@@ -318,13 +318,12 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                 ))}
               </div>
             </div>
-
-            <div className="w-full flex flex-col items-end md:flex-row md:justify-between md:items-start px-4 md:px-24 mt-8 gap-4">
-  {/* Language Selector */}
-  <div className="relative">
+<div className="w-full flex flex-row justify-between items-center px-4 md:px-24 mt-8">
+  {/* Language Selector (left side) */}
+  <div className="relative flex-shrink-0">
     <button
       onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-      className="flex items-center space-x-2 bg-blue-100/30 hover:bg-blue-200/50 px-4 py-2 rounded-full border border-blue-300 transition-all text-sm"
+      className="flex items-center space-x-2 bg-blue-100/30 hover:bg-blue-200/50 px-4 py-2 rounded-full border border-blue-300 transition-all text-sm whitespace-nowrap"
     >
       <span className="text-lg">
         {supportedLanguages.find(lang => lang.code === currentLanguage)?.flag}
@@ -336,7 +335,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     </button>
 
     {showLanguageDropdown && (
-      <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] overflow-hidden z-50">
+      <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg min-w-[180px] overflow-hidden z-50">
         {supportedLanguages.map((language) => (
           <button
             key={language.code}
@@ -353,16 +352,15 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     )}
   </div>
 
-  {/* How it Works Link */}
-  <div>
-    <a
-      href="#how-it-works"
-      className="text-sm font-semibold text-blue-600 hover:underline transition-all"
-    >
-      {t.howItWorksLink || 'How it works'}
-    </a>
-  </div>
+  {/* How it Works link (right side) */}
+  <a
+    href="#how-it-works"
+    className="text-sm font-semibold text-blue-600 hover:underline transition-all whitespace-nowrap"
+  >
+    {t.howItWorksLink || 'How it works'}
+  </a>
 </div>
+
 
 
 
