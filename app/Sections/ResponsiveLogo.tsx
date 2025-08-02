@@ -25,12 +25,11 @@ const ResponsiveLogo = () => {
       <span className="relative inline-block font-sans">
         {isMobile ? (
           // Mobile version - just the eagle emoji with smaller text
-          <span className="text-xl font-bold tracking-tight">
-            <span className='text-[#d3c81a]'>Foresight<span className='text-white'></span></span>
+          <span className="text-xl font-bold tracking-tight text-[#b5ae15]">Foresight
           </span>
           
         ) : (
-          <span className="text-3xl"><span className="text-3xl font-bold tracking-tight bg-clip-text text-[#d3c81a]">Foresight<span className='text-white'></span>
+          <span className="text-3xl"><span className="text-3xl font-bold tracking-tight bg-clip-text text-[#b5ae15]">Foresight
           </span>
           </span>
         )}
