@@ -172,7 +172,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     query: { enabled: !!contractAddress }
   }) as { data: string | undefined };
 
-  const entryAmount = BigInt(50000); // 0.10 USDC (6 decimals: 0.10 * 10^6 = 100,000)
+  const entryAmount = BigInt(20000); // 0.02 USDC (6 decimals: 0.10 * 10^6 = 100,000)
 
   const { data: userUsdcBalance } = useReadContract({
     address: usdcAddress as `0x${string}`,
