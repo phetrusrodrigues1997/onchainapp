@@ -228,7 +228,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     <div className="flex items-center space-x-2">
       <div className="w-8 h-8 rounded-md bg-gray-50 flex items-center justify-center">
         {market.icon?.slice(0, 4) === 'http' ? (
-          <img src={market.icon} alt={`${market.name} Icon`} className="w-9 h-9" />
+          <img src={market.icon} alt={`${market.name} Icon`} className="w-9 h-8" />
         ) : (
           <span className="text-sm text-gray-600">{market.icon}</span>
         )}
