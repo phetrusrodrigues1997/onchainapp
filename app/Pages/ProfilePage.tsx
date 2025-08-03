@@ -57,92 +57,90 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] py-6">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="min-h-screen bg-[#fdfdfd] py-4 sm:py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4">
         
         {/* Profile Header */}
-<div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-  <div className="flex flex-col md:flex-row gap-8 items-start">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
 
-    {/* Profile Image Section (Left) */}
-    <div className="flex-shrink-0">
-      <div className="relative group w-48 h-48 rounded-lg overflow-hidden border border-gray-200">
-        <img 
-          src={profileImage} 
-          alt="Profile" 
-          className="w-full h-full object-cover"
-        />
-        <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 cursor-pointer">
-          <Upload className="text-white opacity-0 group-hover:opacity-100 w-6 h-6" />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
-        </label>
-      </div>
-      <p className="text-xs text-gray-400 mt-2 text-center uppercase tracking-wide">Profile Picture</p>
-    </div>
+            {/* Profile Image Section */}
+            <div className="flex-shrink-0 w-full sm:w-auto flex justify-center lg:justify-start">
+              <div className="relative group w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-lg overflow-hidden border border-gray-200">
+                <img 
+                  src={profileImage} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 cursor-pointer">
+                  <Upload className="text-white opacity-0 group-hover:opacity-100 w-5 h-5 sm:w-6 sm:h-6" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
 
-    {/* Main Info Section (Right) */}
-    <div className="flex flex-col md:flex-row w-full gap-8">
-      
-      {/* Left Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-1 gap-6 min-w-[200px]">
-        <div>
-          <div className="text-2xl font-semibold text-gray-900">{userStats.totalEarnings}</div>
-          <div className="text-sm text-gray-500 uppercase tracking-wide">Total Earnings</div>
-        </div>
-        <div>
-          <div className="text-2xl font-semibold text-gray-900">{userStats.potsWon}</div>
-          <div className="text-sm text-gray-500 uppercase tracking-wide">Pots Won</div>
-        </div>
-        <div>
-          <div className="text-2xl font-semibold text-gray-900">{userStats.accuracy}</div>
-          <div className="text-sm text-gray-500 uppercase tracking-wide">Accuracy</div>
-        </div>
-        <div>
-          <div className="text-2xl font-semibold text-gray-900">#{userStats.rank}</div>
-          <div className="text-sm text-gray-500 uppercase tracking-wide">Global Rank</div>
-        </div>
-      </div>
+            {/* Main Info Section */}
+            <div className="flex flex-col w-full gap-6 lg:gap-8">
+              
+              {/* Stats Grid - Responsive Layout */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                <div className="text-center sm:text-left">
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.totalEarnings}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Total Earnings</div>
+                </div>
+                <div className="text-center sm:text-left">
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.potsWon}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Pots Won</div>
+                </div>
+                <div className="text-center sm:text-left">
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.accuracy}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Accuracy</div>
+                </div>
+                <div className="text-center sm:text-left">
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">#{userStats.rank}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Global Rank</div>
+                </div>
+              </div>
 
-      {/* Trading Profile Content */}
-      <div className="flex-1">
-        <h1 className="text-lg font-semibold text-gray-900 mb-4">Trading Profile</h1>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <div className="text-gray-900 font-medium">{userStats.totalPredictions}</div>
-            <div className="text-xs text-gray-500 uppercase tracking-wide">Total Predictions</div>
+              {/* Trading Profile Content */}
+              <div className="lg:flex-1">
+                <h1 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">Trading Profile</h1>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-center sm:text-left">
+                    <div className="text-gray-900 font-medium">{userStats.totalPredictions}</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wide">Total Predictions</div>
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <div className="text-gray-900 font-medium">8 Days</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wide">Win Streak</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
-          <div>
-            <div className="text-gray-900 font-medium">8 Days</div>
-            <div className="text-xs text-gray-500 uppercase tracking-wide">Win Streak</div>
-          </div>
         </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 
         {/* Leaderboard */}
         <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900">Global Leaderboard</h2>
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[500px]">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trader</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pots Won</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accuracy</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trader</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Pots Won</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accuracy</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
@@ -151,7 +149,7 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
                     key={user.rank} 
                     className={`${user.isCurrentUser ? 'bg-gray-50 border-l-2 border-gray-400' : ''} hover:bg-gray-50 transition-colors`}
                   >
-                    <td className="px-6 py-3 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
                         <span className="text-sm font-semibold text-gray-900">#{user.rank}</span>
                         {user.rank <= 3 && (
@@ -159,22 +157,29 @@ const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap">
-                      <span className={`text-sm font-medium ${user.isCurrentUser ? 'text-gray-900' : 'text-gray-800'}`}>
-                        {user.name}
-                      </span>
-                      {user.isCurrentUser && (
-                        <span className="ml-2 text-xs text-gray-500 uppercase tracking-wide">You</span>
-                      )}
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
+                      <div className="flex flex-col sm:flex-row sm:items-center">
+                        <span className={`text-sm font-medium ${user.isCurrentUser ? 'text-gray-900' : 'text-gray-800'}`}>
+                          {user.name}
+                        </span>
+                        {user.isCurrentUser && (
+                          <span className="text-xs text-gray-500 uppercase tracking-wide sm:ml-2">You</span>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
                       {user.earnings}
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-800">
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-800 hidden sm:table-cell">
                       {user.potsWon}
                     </td>
-                    <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-800">
-                      {user.accuracy}
+                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-800">
+                      <div className="flex flex-col sm:flex-row sm:items-center">
+                        <span>{user.accuracy}</span>
+                        <span className="text-xs text-gray-500 sm:hidden mt-1">
+                          {user.potsWon} pots
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}

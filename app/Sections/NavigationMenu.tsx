@@ -28,13 +28,13 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   // Menu items for reusability
   const menuItems = [
     { id: 'home', label: 'Home' },
+    { id: 'markets', label: 'Search' },
     { id: 'profile', label: 'Profile' },
-    { id: 'markets', label: 'Markets' },
     { id: 'wallet', label: 'Wallet' },
     { id: 'buy', label: 'Purchase' },
     { id: 'discord', label: 'Discord' },
     
-    { id: 'discord', label: 'Discord' },
+    { id: 'placeHolder', label: 'PlaceHold' },
   ];
 
   return (
