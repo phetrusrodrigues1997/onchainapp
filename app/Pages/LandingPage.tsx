@@ -181,8 +181,8 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
                     className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200  ${selectedMarket === market.id
-                        ? 'border-[#3D9DF6] bg-[rgba(179,229,255,0.1)] font-bold '
-                        : 'border-gray-200 bg-white hover:border-[#3D9DF6]'
+                        ? 'border-[#666666] '
+                        : ''
                       }`}
                     style={{
                       minWidth: 'fit-content',
@@ -191,15 +191,17 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                     }}
                   >
                     {/* Icon */}
-                    <div
-                      className="w-6 h-6 rounded flex items-center justify-center text-sm font-bold flex-shrink-0"
-                      style={{
-                        backgroundColor: selectedMarket === market.id ? market.color : `${market.color}20`,
-                        color: selectedMarket === market.id ? 'white' : market.color,
-                      }}
-                    >
-                      {market.icon}
-                    </div>
+                    {selectedMarket === market.id && (
+  <div
+    className="w-6 h-6 rounded flex items-center justify-center text-sm font-bold flex-shrink-0"
+    style={{
+      color: 'black',
+    }}
+  >
+    {market.icon}
+  </div>
+)}
+
 
                     {/* Name */}
                     <span

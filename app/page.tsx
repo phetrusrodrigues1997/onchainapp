@@ -6,6 +6,7 @@ import { useAccount,useSendTransaction } from 'wagmi';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
 import BitcoinBetting from './Pages/BitcoinBetting';
+import ProfilePage from './Pages/ProfilePage';
 // import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import BuySection from "./Pages/BuyPage";
 import CurrencyDisplay from './Pages/Charts';
@@ -43,29 +44,7 @@ export default function App() {
 
   
 
-  // Mounting and MutationObserver for styling
-  useEffect(() => {
-    setIsMounted(true);
-    const setBlackColor = () => {
-      const selector =
-        '[data-testid="ockTokenSelectButton_Symbol"], span.ock-font-family.font-semibold.overflow-hidden.text-ellipsis.whitespace-nowrap.text-left';
-      const elements = document.querySelectorAll(selector);
-      elements.forEach((element) => {
-        if (element instanceof HTMLElement) {
-          element.style.color = 'black';
-          element.style.setProperty('color', 'black', 'important');
-        }
-      });
-    };
-    setBlackColor();
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.addedNodes.length > 0) setBlackColor();
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
+  
 
 
 
@@ -111,8 +90,7 @@ export default function App() {
           </div>
           <div className="wallet-container">
             <Wallet>
-<ConnectWallet
-  className=" border border-[#3D9DF6] rounded-full lg:mr-4 bg-[rgba(179,229,255,0.1)] dark:bg-[rgba(179,229,255,0.1)]">
+<ConnectWallet>
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
@@ -146,7 +124,7 @@ export default function App() {
           
           {activeSection === "usernamePage" && <UsernameSetup />}
           {activeSection === "buy" && <BuySection />}
-          {activeSection === "market" && <CurrencyDisplay/>}
+          {activeSection === "profile" && <ProfilePage/>}
           {activeSection === "discord" && <DiscordXSection />}
           {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}

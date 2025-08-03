@@ -327,33 +327,6 @@ button[aria-label="Toggle menu"] svg {
 
 
 
-[data-testid="ockConnectButton"] {
-  background: rgba(179,229,255,0.1) !important; /* green-500 */
-  color: black !important;
-  border-radius: 9999px !important; /* Tailwind's rounded-md */
-  padding-top: 0.5rem !important; /* Tailwind's py-2 */
-  padding-bottom: 0.5rem !important;
-  padding-left: 1rem !important; /* Tailwind's px-4 */
-  padding-right: 1rem !important;
-  width: 100% !important;
-  transition: background-color 150ms ease-in-out !important;
-  border: none !important; /* Remove any default border */
-  opacity: 1 !important; /* Override the disabled opacity */
-  pointer-events: auto !important; /* Override pointer-events-none if needed */
-   /* from-gray-700 to-gray-800 */
-}
-
-@media (prefers-color-scheme: dark) {
-  [data-testid="ockConnectButton"] {
-    background: #3D9DF6 !important; /* from-gray-700 to-gray-800 */
-    color: white !important;
-  }
-}
-
-[data-testid="ockConnectButton"]:hover {
-  background: #6B7280 !important; /* from-gray-700 to-gray-800 */
-}
-
 
 
 @layer utilities {
