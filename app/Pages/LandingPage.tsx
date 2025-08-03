@@ -236,7 +236,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         )}
       </div>
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">{market.name}</h3>
+        <h3 className="text-md font-semibold text-gray-900">{market.name}</h3>
         <p className="text-xs text-gray-500">{market.symbol}</p>
       </div>
     </div>
