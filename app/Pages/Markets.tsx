@@ -90,69 +90,67 @@ const Markets = ({ activeSection, setActiveSection }: MarketsProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredMarkets.map((market) => (
                 <div
-                      key={market.id}
-                      onClick={() => handleMarketClick(market.id)}
-                      className="group bg-white rounded-lg p-6 border border-gray-300 hover:border-gray-400 hover:shadow-lg transition-all duration-200 cursor-pointer"
-                    >
-                      {/* Header Section */}
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center">
-                            {market.icon?.slice(0, 4) === 'http' ? (
-                              <img src={market.icon} alt={`${market.name} Icon`} className="w-6 h-6" />
-                            ) : (
-                              <span className="text-lg text-gray-600">{market.icon}</span>
-                            )}
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{market.name}</h3>
-                            <p className="text-sm text-gray-500">{market.symbol}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-gray-900">{market.currentPrice}</div>
-                          <div className="text-xs text-gray-500 uppercase tracking-wide">{t.currentPrice}</div>
-                        </div>
+                  key={market.id}
+                  onClick={() => handleMarketClick(market.id)}
+                  className="group bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 cursor-pointer"
+                >
+                  {/* Compact Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 rounded-md bg-gray-50 flex items-center justify-center">
+                        {market.icon?.slice(0, 4) === 'http' ? (
+                          <img src={market.icon} alt={`${market.name} Icon`} className="w-9 h-8" />
+                        ) : (
+                          <span className="text-sm text-gray-600">{market.icon}</span>
+                        )}
                       </div>
-                
-                      {/* Question Section */}
-                      <div className="mb-5">
-                        <p className="text-base font-medium text-gray-800 leading-relaxed">
-                          {market.question}
-                        </p>
+                      <div>
+                        <h3 className="text-md font-semibold text-gray-900">{market.name}</h3>
+                        <p className="text-xs text-gray-500">{market.symbol}</p>
                       </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-gray-900">{market.currentPrice}</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Current</div>
+                    </div>
+                  </div>
                 
-                      
-                {/* Trading Buttons */}
-                <div className="grid grid-cols-2 gap-2 mb-5">
-                  <button className="bg-white hover:bg-green-50 border border-gray-300 hover:border-green-600 text-gray-900 hover:text-green-700 py-2 px-3 rounded font-semibold text-xs uppercase tracking-wide transition-all duration-150">
-                    YES
-                  </button>
-            <button className="bg-white hover:bg-red-50 border border-gray-300 hover:border-red-600 text-gray-900 hover:text-red-700 py-2 px-3 rounded font-semibold text-xs uppercase tracking-wide transition-all duration-150">
-              NO
-            </button>
-          </div>
-          {/* Stats Section */}
-          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-            <div className="text-center">
-              <div className="flex flex-col items-center space-y-1">
-                {/* Status Dot */}
-                <div className={`w-3 h-3 rounded-full ${availableMarkets.includes(market.name.toLowerCase()) ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                {/* Status Label */}
-                <div className={`text-xs uppercase tracking-wide ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-green-500' : 'text-red-500'}`}>
-                  {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Coming Soon'}
+                  {/* Compact Question */}
+                  <div className="mb-3">
+                    <p className="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+                      {market.question}
+                    </p>
+                  </div>
+                
+                  {/* Compact Trading Buttons */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <button className="bg-white hover:bg-green-50 border border-gray-200 hover:border-green-500 text-gray-800 hover:text-green-700 py-1.5 px-2 rounded text-xs font-semibold uppercase tracking-wide transition-all duration-150">
+                      YES
+                    </button>
+                    <button className="bg-white hover:bg-red-50 border border-gray-200 hover:border-red-500 text-gray-800 hover:text-red-700 py-1.5 px-2 rounded text-xs font-semibold uppercase tracking-wide transition-all duration-150">
+                      NO
+                    </button>
+                  </div>
+                
+                  {/* Compact Stats Footer */}
+                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                    <div className="flex items-center space-x-1">
+                      <div className={`w-2 h-2 rounded-full ${availableMarkets.includes(market.name.toLowerCase()) ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <div className={`text-xs font-medium ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
+                        {availableMarkets.includes(market.name.toLowerCase()) ? 'Live' : 'Soon'}
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="text-xs font-semibold text-gray-900">{market.potSize}</div>
+                      <div className="text-xs text-gray-400">Volume</div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-all duration-200" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-sm font-semibold text-gray-900">{market.potSize}</div>
-              <div className="text-xs text-gray-500 uppercase tracking-wide">{t.potSize}</div>
-            </div>
-            <div className="text-center">
-              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all duration-200" />
-            </div>
-          </div>
-        </div>
         ))}
       </div>
     )}

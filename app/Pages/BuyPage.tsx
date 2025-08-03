@@ -165,7 +165,7 @@ const BuySection: React.FC = () => {
   });
 
   return (
-    <div className="mb-12">
+    <div className="mt-28">
       <div className="w-full max-w-sm mx-auto p-4">
   {/* Icon row */}
   <div className="flex justify-center mb-8">

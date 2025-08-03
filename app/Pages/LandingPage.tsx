@@ -182,7 +182,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                     onClick={() => setSelectedMarket(market.id)}
                     className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200  ${selectedMarket === market.id
                         ? 'border-[#666666] '
-                        : ''
+                        : 'hover:border[#666666] font-bold'
                       }`}
                     style={{
                       minWidth: 'fit-content',

@@ -122,14 +122,14 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
 
   if (!address) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-[#121212] to-[#1e1e1e] text-white">
-        <div className="p-8 bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-800 max-w-md w-full">
+      <div className="flex flex-col items-center justify-center h-screen bg-[#fafafa] text-gray-900">
+        <div className="p-8 bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold mb-2">Connect Wallet</h2>
-            <p className="text-gray-400">Please connect your wallet to access your balance and transactions</p>
+            <p className="text-gray-600">Please connect your wallet to access your balance and transactions</p>
           </div>
           <div className="animate-pulse opacity-50 flex justify-center">
-            <svg className="w-24 h-24 text-[#6A5ACD]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-24 h-24 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
             </svg>
           </div>
@@ -140,14 +140,14 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-[#121212] to-[#1e1e1e] text-white">
-        <div className="p-8 bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-800 max-w-md w-full">
+      <div className="flex flex-col items-center justify-center h-screen bg-[#fafafa] text-gray-900">
+        <div className="p-8 bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold mb-2">Loading Assets</h2>
-            <p className="text-gray-400">Fetching your latest balances and market data</p>
+            <p className="text-gray-600">Fetching your latest balances and market data</p>
           </div>
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#6A5ACD]"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
           </div>
         </div>
       </div>
@@ -310,15 +310,15 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
         </div>
 
         {/* Balance Display with Animated Gradient Border */}
-        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-[#1b1b1b] overflow-hidden">
-          <div className="absolute inset-0 rounded-2xl bg-[#1b1b1b] opacity-50 animate-gradient-x"></div>
+        <div className="relative mx-auto mb-6 p-6 rounded-2xl bg-white border border-gray-200 shadow-lg overflow-hidden">
+          <div className="absolute inset-0 rounded-2xl bg-white opacity-50 animate-gradient-x"></div>
           <div className="relative z-10">
-            <h1 className="text-lg font-medium text-gray-400 mb-1">Total Balance</h1>
-            <h2 className="text-5xl font-bold mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <h1 className="text-lg font-medium text-gray-600 mb-1">Total Balance</h1>
+            <h2 className="text-5xl font-bold mb-1 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
               ${overallTotalUSD.toFixed(2)}
             </h2>
             <div className="flex items-center justify-center mt-1">
-              <span className="text-xs text-green-400 flex items-center">
+              <span className="text-xs text-green-600 flex items-center">
                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
                 </svg>
@@ -332,7 +332,7 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
         <div className="flex space-x-3 mb-6">
           <button
             onClick={() => setActiveSection("send")}
-            className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
             Send
@@ -340,13 +340,13 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
           <div className="relative flex-1">
             <button
               onClick={copyAddressToClipboard}
-              className="w-full bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center"
             >
               <FontAwesomeIcon icon={faQrcode} className="mr-2" />
               Receive
             </button>
             {showToast && (
-              <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-12 bg-black/80 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300 flex items-center">
+              <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-12 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300 flex items-center">
                 <svg className="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
@@ -356,7 +356,7 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
           </div>
           <button
             onClick={() => setActiveSection("swap")}
-            className="flex-1 bg-gradient-to-r from-[#d3c81a] to-[#c4b918] text-black font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-[#e4d81b] hover:to-[#d5ca19] transition-all duration-300 flex items-center justify-center"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center"
           >
             <FontAwesomeIcon icon={faExchangeAlt} className="mr-2" />
             Swap
@@ -369,8 +369,8 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
             onClick={() => setSelectedTab('stablecoins')}
             className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
               selectedTab === 'stablecoins'
-                ? 'text-[#6A5ACD] border-b-2 border-[#6A5ACD]'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Stablecoins
@@ -379,8 +379,8 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
             onClick={() => setSelectedTab('crypto')}
             className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
               selectedTab === 'crypto'
-                ? 'text-[#6A5ACD] border-b-2 border-[#6A5ACD]'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Crypto
@@ -389,8 +389,8 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
             onClick={() => setSelectedTab('stocks')}
             className={`px-4 py-2 font-medium text-sm transition-all duration-300 ${
               selectedTab === 'stocks'
-                ? 'text-[#6A5ACD] border-b-2 border-[#6A5ACD]'
-                : 'text-gray-400 hover:text-white'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             Stocks
@@ -403,14 +403,14 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
         {/* Transactions Button and Tab Total */}
         <div className="flex justify-between items-center mb-4 px-1">
           <div className="text-left">
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-gray-600">
               {selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1)} Total
             </span>
-            <h3 className="text-xl font-bold">${selectedTabTotalUSD.toFixed(2)}</h3>
+            <h3 className="text-xl font-bold text-gray-900">${selectedTabTotalUSD.toFixed(2)}</h3>
           </div>
           
           <button
-            className="flex items-center space-x-2 bg-black/40 text-white hover:bg-[#6A5ACD]/20 hover:text-[#6A5ACD] px-3 py-1.5 rounded-full transition-all duration-300 text-sm border border-gray-800"
+            className="flex items-center space-x-2 bg-white border border-gray-200 text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 px-3 py-1.5 rounded-full transition-all duration-300 text-sm shadow-sm"
             onClick={() => setActiveSection('activity')}
           >
             <FontAwesomeIcon icon={faChartLine} className="text-xs" />
@@ -419,13 +419,13 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
         </div>
 
         {selectedTabTotalUSD === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-6 bg-black/20 rounded-xl border border-gray-800">
-            <div className="w-16 h-16 rounded-full bg-black/40 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center py-12 px-6 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
               <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
               </svg>
             </div>
-            <h3 className="text-xl font-medium text-gray-300 mb-2">No {selectedTab} found</h3>
+            <h3 className="text-xl font-medium text-gray-700 mb-2">No {selectedTab} found</h3>
             <p className="text-gray-500 text-sm max-w-xs text-center">
               Add some {selectedTab} to your wallet to see them displayed here.
             </p>
@@ -434,19 +434,19 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
           <div className="space-y-3">
             {/* Native Token Card */}
             {selectedTab === 'crypto' && nativeBalance.data && parseFloat(nativeBalance.data.formatted) > 0 && (
-              <div className="bg-[#1b1b1b] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group">
+              <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200 hover:border-gray-300 transition-all duration-300 flex items-center group">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#d3c81a]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <img
                     src={nativeToken && tokenImages[nativeToken.symbol as keyof typeof tokenImages] || ''}
                     alt={nativeToken?.symbol || 'unknown'}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#6A5ACD]/30 transition-all duration-300"
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-300 transition-all duration-300"
                   />
                 </div>
                 <div className="flex-1 ml-4">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-300">{nativeToken?.name}</span>
-                    <span className="text-white font-bold">
+                    <span className="font-medium text-gray-700">{nativeToken?.name}</span>
+                    <span className="text-gray-900 font-bold">
                       ${(nativeToken?.symbol && prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]
                         ? (parseFloat(nativeBalance.data.formatted) * prices[tokenToCoingeckoId[nativeToken.symbol as keyof typeof tokenToCoingeckoId]]).toFixed(2)
                         : '0.00')}
@@ -454,7 +454,7 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
                   </div>
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-sm text-gray-500">{nativeToken?.symbol}</span>
-                    <span className="text-sm text-gray-400">{parseFloat(nativeBalance.data.formatted).toFixed(4)}</span>
+                    <span className="text-sm text-gray-600">{parseFloat(nativeBalance.data.formatted).toFixed(4)}</span>
                   </div>
                 </div>
               </div>
@@ -477,30 +477,30 @@ const WalletPage: React.FC<WalletPageProps> = ({ activeSection, setActiveSection
                 return (
                   <div
                     key={token.address}
-                    className="bg-[#1b1b1b] p-4 rounded-xl shadow-lg border border-gray-800/50 hover:border-gray-700/70 transition-all duration-300 flex items-center group"
+                    className="bg-white p-4 rounded-xl shadow-lg border border-gray-200 hover:border-gray-300 transition-all duration-300 flex items-center group"
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#d3c81a]/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       <img
                         src={tokenImages[token.symbol as keyof typeof tokenImages] || ''}
                         alt={token.symbol}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-gray-800 group-hover:border-[#6A5ACD]/30 transition-all duration-300"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-300 transition-all duration-300"
                       />
                     </div>
                     <div className="flex-1 ml-4">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium text-gray-300">
+                        <span className="font-medium text-gray-700">
                           {token.name === 'USDC'
                             ? 'US Dollar Coin'
                             : token.name === 'EURC'
                             ? 'Euro Coin'
                             : token.name}
                         </span>
-                        <span className="text-white font-bold">${value.toFixed(2)}</span>
+                        <span className="text-gray-900 font-bold">${value.toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between items-center mt-1">
                         <span className="text-sm text-gray-500">{token.symbol}</span>
-                        <span className="text-sm text-gray-400">{parseFloat(balance.data.formatted).toFixed(isStablecoin ? 2 : 4)}</span>
+                        <span className="text-sm text-gray-600">{parseFloat(balance.data.formatted).toFixed(isStablecoin ? 2 : 4)}</span>
                       </div>
                     </div>
                   </div>
