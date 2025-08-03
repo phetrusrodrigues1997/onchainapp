@@ -90,7 +90,7 @@ export default function App() {
           </div>
           <div className="wallet-container">
             <Wallet>
-<ConnectWallet>
+<ConnectWallet className='dark:bg-[#dd0000]'>
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>

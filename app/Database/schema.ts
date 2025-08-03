@@ -25,3 +25,10 @@ export const BitcoinBets = pgTable("bitcoin_bets", {
 
 export const WrongPredictions = pgTable("wrong_Predictions", {
   walletAddress: text("walletAddress").notNull(),});
+
+  export const ImageURLs = pgTable("image_urls", {
+  id: serial("id").primaryKey(),                // Auto-incremented ID
+  walletAddress: text("wallet_address").notNull(), // Associated user's wallet address
+  imageUrl: text("image_url").notNull(),        // URL to the image
+  createdAt: timestamp("created_at").defaultNow().notNull(), // Timestamp for when the image was added
+});

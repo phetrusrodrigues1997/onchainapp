@@ -5,6 +5,8 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { userPoints, Messages, BitcoinBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions } from "./schema";
+import { ImageURLs } from "./schema";
+import { desc } from "drizzle-orm";
 
 // Initialize database connection
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -17,6 +19,28 @@ const db = drizzle(sqlConnection);
  * If the wallet address doesn't exist, creates a new entry with the username.
  * If the username is already taken, throws an error.
  */
+
+/**
+ * Stores a new image URL for a wallet address.
+ * Each entry gets a timestamp automatically.
+ */
+export async function saveImageUrl(walletAddress: string, imageUrl: string) {
+  try {
+    const result = await db
+      .insert(ImageURLs)
+      .values({
+        walletAddress,
+        imageUrl,
+      })
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Error saving image URL:", error);
+    throw new Error("Failed to save image URL");
+  }
+}
+
 export async function setUsername(walletAddress: string, newUsername: string) {
   try {
     await db
@@ -217,5 +241,23 @@ export async function getBetsForDate(date: string) {
   } catch (error) {
     console.error("Error fetching bets for date:", error);
     throw new Error("Failed to fetch bets for date");
+  }
+
+  
+}
+
+export async function getLatestImageUrl(walletAddress: string): Promise<string | null> {
+  try {
+    const result = await db
+      .select({ imageUrl: ImageURLs.imageUrl })
+      .from(ImageURLs)
+      .where(eq(ImageURLs.walletAddress, walletAddress))
+      .orderBy(desc(ImageURLs.createdAt))
+      .limit(1);
+
+    return result.length > 0 ? result[0].imageUrl : null;
+  } catch (error) {
+    console.error("Failed to retrieve image URL:", error);
+    return null;
   }
 }

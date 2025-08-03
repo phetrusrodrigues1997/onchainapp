@@ -1,8 +1,27 @@
 import React, { useState } from 'react';
 import { Upload, Trophy, Award, Crown } from 'lucide-react';
+import { useAccount } from 'wagmi';
+import { saveImageUrl } from '../Database/actions';
+import { getLatestImageUrl } from '../Database/actions'; // adjust path
+import { useEffect } from 'react'; // Add to top
+
 
 const ProfilePage = () => {
   const [profileImage, setProfileImage] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center');
+
+  const { address } = useAccount();
+  useEffect(() => {
+  const fetchImage = async () => {
+    if (address) {
+      const img = await getLatestImageUrl(address);
+      if (img) {
+        setProfileImage(img);
+      }
+    }
+  };
+
+  fetchImage();
+}, [address]);
 
   // Mock user data
   const userStats = {
@@ -43,18 +62,29 @@ interface LeaderboardUser {
     isCurrentUser?: boolean;
 }
 
-const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target && typeof e.target.result === 'string') {
-                setProfileImage(e.target.result);
-            }
-        };
-        reader.readAsDataURL(file);
+const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (e: ProgressEvent<FileReader>) => {
+    if (e.target && typeof e.target.result === 'string') {
+      const base64Image = e.target.result;
+      setProfileImage(base64Image); // Update UI
+
+      if (address) {
+        try {
+          await saveImageUrl(address, base64Image); // Save to DB
+          console.log("Image URL saved successfully");
+        } catch (err) {
+          console.error("Failed to save image:", err);
+        }
+      }
     }
+  };
+  reader.readAsDataURL(file);
 };
+
 
   return (
     <div className="min-h-screen bg-[#fdfdfd] py-4 sm:py-6">
