@@ -8,7 +8,7 @@ export interface Translations {
   // Markets Section
   marketsTitle: string;
   currentPrice: string;
-  players: string;
+  availability: string;
   potSize: string;
   higher: string;
   lower: string;
@@ -86,7 +86,7 @@ export const translations: Record<Language, Translations> = {
     // Markets Section
     marketsTitle: 'Will you predict higher or lower?',
     currentPrice: 'Current Price',
-    players: 'Players',
+    availability: 'Available',
     potSize: 'Pot Size',
     higher: '📈 Higher',
     lower: '📉 Lower',
@@ -163,7 +163,7 @@ export const translations: Record<Language, Translations> = {
     // Markets Section
     marketsTitle: 'Você prevê alta ou baixa?',
     currentPrice: 'Preço Atual',
-    players: 'Jogadores',
+    availability: 'Disponível',
     potSize: 'Valor do Pote',
     higher: '📈 Alta',
     lower: '📉 Baixa',

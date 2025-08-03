@@ -406,7 +406,7 @@ useEffect(() => {
     {
   id: 'spotify-global-1',
   name: 'Global #1',
-  symbol: '🌍',
+  symbol: '',
   color: '#1DB954',
   question: 'Will “Espresso” be the #1 track on Spotify Global Top 50 by 21:00 UTC today?',
   icon: '🌍',
@@ -417,7 +417,7 @@ useEffect(() => {
 {
   id: 'spotify-us-1',
   name: 'US #1',
-  symbol: '🇺🇸',
+  symbol: '',
   color: '#228B22',
   question: 'Will “I Had Some Help” by Post Malone be #1 on Spotify US Top 50 at 21:00 UTC today?',
   icon: '🇺🇸',
@@ -428,7 +428,7 @@ useEffect(() => {
 {
   id: 'female-global-1',
   name: 'Female at #1 Global',
-  symbol: '👩‍🎤',
+  symbol: '',
   color: '#C71585',
   question: 'Will the top track on Spotify Global Top 50 be by a female artist at 21:00 UTC today?',
   icon: '👩‍🎤',
@@ -439,7 +439,7 @@ useEffect(() => {
 {
   id: 'drake-global-top10',
   name: 'Drake in Global Top 10',
-  symbol: '🦉',
+  symbol: '',
   color: '#000000',
   question: 'Will any Drake song appear in the Spotify Global Top 10 at 21:00 UTC today?',
   icon: '🦉',
@@ -450,7 +450,7 @@ useEffect(() => {
 {
   id: 'kpop-global-top10',
   name: 'K-pop in Top 10',
-  symbol: '🇰🇷',
+  symbol: '',
   color: '#FF69B4',
   question: 'Will any K-pop song be in Spotify Global Top 10 by 21:00 UTC today?',
   icon: '🇰🇷',
@@ -461,7 +461,7 @@ useEffect(() => {
 {
   id: 'newcomer-us-top10',
   name: 'New Artist US Top 10',
-  symbol: '🆕',
+  symbol: '',
   color: '#4169E1',
   question: 'Will a debut artist be in Spotify US Top 10 at 21:00 UTC today?',
   icon: '🆕',
@@ -472,7 +472,7 @@ useEffect(() => {
 {
   id: 'latin-global-top5',
   name: 'Latin Song in Top 5',
-  symbol: '🇲🇽',
+  symbol: '',
   color: '#FFA500',
   question: 'Will a Spanish-language track be in the Spotify Global Top 5 by 21:00 UTC today?',
   icon: '🇲🇽',
@@ -483,7 +483,7 @@ useEffect(() => {
 {
   id: 'rap-global-top3',
   name: 'Rap in Global Top 3',
-  symbol: '🎤',
+  symbol: '',
   color: '#8B0000',
   question: 'Will any rap song be in Spotify Global Top 3 by 21:00 UTC today?',
   icon: '🎤',
@@ -494,7 +494,7 @@ useEffect(() => {
 {
   id: 'uk-artist-global',
   name: 'UK Artist in Top 10',
-  symbol: '🇬🇧',
+  symbol: '',
   color: '#B22222',
   question: 'Will a UK artist hold a Top 10 spot on Spotify Global by 21:00 UTC today?',
   icon: '🇬🇧',
@@ -505,7 +505,7 @@ useEffect(() => {
 {
   id: 'billie-global-top5',
   name: 'Billie Eilish Top 5',
-  symbol: '👁️',
+  symbol: '',
   color: '#9932CC',
   question: 'Will Billie Eilish be in the Spotify Global Top 5 by 21:00 UTC today?',
   icon: '👁️',
@@ -516,7 +516,7 @@ useEffect(() => {
 {
   id: 'afrobeats-global-top10',
   name: 'Afrobeats Global Top 10',
-  symbol: '🇳🇬',
+  symbol: '',
   color: '#006400',
   question: 'Will an Afrobeats track appear in Spotify Global Top 10 by 21:00 UTC today?',
   icon: '🇳🇬',
@@ -527,7 +527,7 @@ useEffect(() => {
 {
   id: 'country-us-top3',
   name: 'Country Track in US Top 3',
-  symbol: '🤠',
+  symbol: '',
   color: '#DAA520',
   question: 'Will a country song be in Spotify US Top 3 at 21:00 UTC today?',
   icon: '🤠',
@@ -538,7 +538,7 @@ useEffect(() => {
 {
   id: 'tiktok-song-global-top5',
   name: 'TikTok Song in Global Top 5',
-  symbol: '🎧',
+  symbol: '',
   color: '#FF4500',
   question: 'Will a song trending on TikTok today be in Spotify Global Top 5 at 21:00 UTC?',
   icon: '🎧',
@@ -549,7 +549,7 @@ useEffect(() => {
 {
   id: 'non-english-global-1',
   name: 'Non-English #1',
-  symbol: '🌐',
+  symbol: '',
   color: '#808000',
   question: 'Will the #1 song on Spotify Global be in a language other than English at 21:00 UTC today?',
   icon: '🌐',
@@ -560,7 +560,7 @@ useEffect(() => {
 {
   id: 'album-drop-impact',
   name: 'Album Drop Surge',
-  symbol: '📀',
+  symbol: '',
   color: '#708090',
   question: 'Will any track from an album dropped in the last 24h enter Spotify Global Top 10 by 21:00 UTC today?',
   icon: '📀',
@@ -740,8 +740,8 @@ else if (category === 'xtrends') {
   return [
     {
       id: 'us-sports-top',
-      name: 'Sports #1 in US X Trends',
-      symbol: '🏈',
+      name: 'Sports',
+      symbol: '',
       color: '#1DA1F2',
       question: 'Will a sports-related topic be the #1 trending topic on X in the United States at 21:00 UTC today?',
       icon: '🏈',
@@ -751,8 +751,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'global-crime-top',
-      name: 'Crime #1 in Global X Trends',
-      symbol: '🚓',
+      name: 'Crime',
+      symbol: '',
       color: '#DC143C',
       question: 'Will a crime-related topic be the #1 global trend on X at 21:00 UTC today?',
       icon: '🚓',
@@ -762,8 +762,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'us-celeb-top',
-      name: 'Celebs #1 in US X Trends',
-      symbol: '🎤',
+      name: 'Celebrities',
+      symbol: '',
       color: '#DA70D6',
       question: 'Will a celebrity-related topic be the top US trend on X at 21:00 UTC today?',
       icon: '🎤',
@@ -773,8 +773,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'global-crypto-top',
-      name: 'Crypto #1 in Global X Trends',
-      symbol: '₿',
+      name: 'Crypto',
+      symbol: '',
       color: '#F7931A',
       question: 'Will a crypto-related topic be the #1 global X trend at 21:00 UTC today?',
       icon: '₿',
@@ -784,8 +784,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'us-trump-top3',
-      name: 'Trump Top 3 in US X Trends',
-      symbol: '🇺🇸',
+      name: 'Trump',
+      symbol: '',
       color: '#FF4500',
       question: 'Will the word “Trump” be in the top 3 trending topics on X in the United States by 21:00 UTC today?',
       icon: '🇺🇸',
@@ -795,8 +795,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'ukraine-top10-global',
-      name: 'Ukraine Top 10 Globally',
-      symbol: '🌍',
+      name: 'Ukraine',
+      symbol: '',
       color: '#87CEEB',
       question: 'Will the word “Ukraine” appear in the top 10 trending topics on X globally by 21:00 UTC today?',
       icon: '🌍',
@@ -806,8 +806,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'kardashian-top5-us',
-      name: 'Kardashian Top 5 in US',
-      symbol: '💄',
+      name: 'Kardashians',
+      symbol: '',
       color: '#FFC0CB',
       question: 'Will any Kardashian-related topic be trending in the top 5 on X in the United States by 21:00 UTC today?',
       icon: '💄',
@@ -817,8 +817,8 @@ else if (category === 'xtrends') {
     },
     {
       id: 'elon-top10-global',
-      name: 'Elon Musk Top 10 Global',
-      symbol: '🚀',
+      name: 'Elon Musk',
+      symbol: '',
       color: '#000000',
       question: 'Will “Elon” or “Musk” be among the top 10 global trending topics on X by 21:00 UTC today?',
       icon: '🚀',

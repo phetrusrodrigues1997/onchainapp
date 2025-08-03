@@ -19,6 +19,9 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const availableMarkets = ["bitcoin"];
+
+
 
   // Function to update arrow visibility
   const updateArrowVisibility = () => {
@@ -83,11 +86,11 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLanguageChange = (language: Language) => {
-    setCurrentLanguage(language);
-    setShowLanguageDropdown(false);
-    Cookies.set('language', language, { sameSite: 'lax' });
-  };
+  // const handleLanguageChange = (language: Language) => {
+  //   setCurrentLanguage(language);
+  //   setShowLanguageDropdown(false);
+  //   Cookies.set('language', language, { sameSite: 'lax' });
+  // };
 
   const t = getTranslation(currentLanguage);
 
@@ -178,7 +181,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
                     className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200  ${selectedMarket === market.id
-                        ? 'border-[#3D9DF6] bg-[rgba(179,229,255,0.1)] '
+                        ? 'border-[#3D9DF6] bg-[rgba(179,229,255,0.1)] font-bold '
                         : 'border-gray-200 bg-white hover:border-[#3D9DF6]'
                       }`}
                     style={{
@@ -199,9 +202,14 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
                     </div>
 
                     {/* Name */}
-                    <span className="text-sm font-medium text-gray-800 whitespace-nowrap">
-                      {market.name}
-                    </span>
+                    <span
+  className={`text-sm whitespace-nowrap text-gray-800 ${
+    selectedMarket === market.id ? 'font-bold' : 'font-medium'
+  }`}
+>
+  {market.name}
+</span>
+
                   </button>
                 ))}
               </div>
@@ -209,71 +217,71 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {markets.map((market) => (
-              <div
-                key={market.id}
-                onClick={() => handleMarketClick(market.id)}
-                className="group bg-[#fcfcfc] backdrop-blur-sm rounded-2xl p-6 border border-[#aaaaaa] hover:border-[#3D9DF6] transition-all hover:transform hover:scale-105 cursor-pointer"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold"
-                      style={{
-                        backgroundColor: `${market.color}20`,
-                        color: market.color,
-                      }}
-                    >
-                      {market.icon?.slice(0, 4) === 'http' ? (
-    <img src={market.icon} alt="Ethereum Icon" className="w-8 h-8" />
-  ) : (
-    market.icon
-  )}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-[#111111]">{market.name}</h3>
-                      <p className="text-sm text-gray-400">{market.symbol}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-[#111111]">{market.currentPrice}</div>
-                    <div className="text-sm text-gray-400">{t.currentPrice}</div>
-                  </div>
-                </div>
+  {markets.map((market) => (
+    <div
+  key={market.id}
+  onClick={() => handleMarketClick(market.id)}
+  className="group bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 cursor-pointer"
+>
+  {/* Compact Header */}
+  <div className="flex items-center justify-between mb-3">
+    <div className="flex items-center space-x-2">
+      <div className="w-8 h-8 rounded-md bg-gray-50 flex items-center justify-center">
+        {market.icon?.slice(0, 4) === 'http' ? (
+          <img src={market.icon} alt={`${market.name} Icon`} className="w-9 h-9" />
+        ) : (
+          <span className="text-sm text-gray-600">{market.icon}</span>
+        )}
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900">{market.name}</h3>
+        <p className="text-xs text-gray-500">{market.symbol}</p>
+      </div>
+    </div>
+    <div className="text-right">
+      <div className="text-sm font-semibold text-gray-900">{market.currentPrice}</div>
+      <div className="text-xs text-gray-400 uppercase tracking-wide">Current</div>
+    </div>
+  </div>
 
-                <div className="mb-6">
-                  <p className="text-lg font-semibold text-center text-[#111111] mb-4">
-                    {market.question}
-                  </p>
-                </div>
+  {/* Compact Question */}
+  <div className="mb-3">
+    <p className="text-sm font-medium text-gray-800 leading-snug line-clamp-2">
+      {market.question}
+    </p>
+  </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  <button className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 py-3 rounded-xl font-bold transition-all group-hover:scale-105">
-                    {t.higher}
-                  </button>
-                  <button className="bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 py-3 rounded-xl font-bold transition-all group-hover:scale-105">
-                    {t.lower}
-                  </button>
-                </div>
+  {/* Compact Trading Buttons */}
+  <div className="grid grid-cols-2 gap-2 mb-3">
+    <button className="bg-white hover:bg-green-50 border border-gray-200 hover:border-green-500 text-gray-800 hover:text-green-700 py-1.5 px-2 rounded text-xs font-semibold uppercase tracking-wide transition-all duration-150">
+      YES
+    </button>
+    <button className="bg-white hover:bg-red-50 border border-gray-200 hover:border-red-500 text-gray-800 hover:text-red-700 py-1.5 px-2 rounded text-xs font-semibold uppercase tracking-wide transition-all duration-150">
+      NO
+    </button>
+  </div>
 
-                <div className="flex justify-between items-center pt-4 border-t border-white/10">
-                  <div className="text-center">
-                    <div className="text-sm font-bold text-[#111111]">{market.participants}</div>
-                    <div className="text-xs text-gray-400">{t.players}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm font-bold" style={{ color: market.color }}>
-                      {market.potSize}
-                    </div>
-                    <div className="text-xs text-gray-400">{t.potSize}</div>
-                  </div>
-                  <div className="text-center">
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+  {/* Compact Stats Footer */}
+  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+    <div className="flex items-center space-x-1">
+      <div className={`w-2 h-2 rounded-full ${availableMarkets.includes(market.name.toLowerCase()) ? 'bg-green-500' : 'bg-red-500'}`}></div>
+      <div className={`text-xs font-medium ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
+        {availableMarkets.includes(market.name.toLowerCase()) ? 'Live' : 'Soon'}
+      </div>
+    </div>
+    
+    <div className="text-center">
+      <div className="text-xs font-semibold text-gray-900">{market.potSize}</div>
+      <div className="text-xs text-gray-400">Volume</div>
+    </div>
+    
+    <div className="text-center">
+      <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-all duration-200" />
+    </div>
+  </div>
+</div>
+  ))}
+</div>
         </div>
       </section>
 
