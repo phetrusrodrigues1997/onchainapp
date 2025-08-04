@@ -3,75 +3,72 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { WrongPredictions, BitcoinBets } from "../Database/schema";
-import { eq, inArray, sql, desc, and } from "drizzle-orm";
-import { ethers, JsonRpcProvider } from "ethers";
-import { values } from "lodash";
+import { eq, inArray } from "drizzle-orm";
 
 // Database setup
 const sqlConnection = neon(process.env.DATABASE_URL!);
 const db = drizzle(sqlConnection);
 
-
-
-
 /**
  * Sets the actual Bitcoin price movement outcome for the current day.
  * @param outcome - Either "positive" or "negative".
+ * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
  */
-export async function setDailyOutcome(outcome: "positive" | "negative") {
+export async function setDailyOutcome(
+  outcome: "positive" | "negative",
+  betsTable = BitcoinBets, wrongPredictionTable = WrongPredictions
+) {
   const opposite = outcome === "positive" ? "negative" : "positive";
 
   try {
-    // Get all users with wrong prediction
     const wrongBets = await db
       .select()
-      .from(BitcoinBets)
-      .where(eq(BitcoinBets.prediction, opposite));
+      .from(betsTable)
+      .where(eq(betsTable.prediction, opposite));
 
-    // Insert wrong predictors into wrong_predictions
-    const wrongAddresses = wrongBets.map(bet => ({ walletAddress: bet.walletAddress }));
+    const wrongAddresses = wrongBets.map(bet => ({
+      walletAddress: bet.walletAddress,
+    }));
 
     if (wrongAddresses.length > 0) {
       await db
-        .insert(WrongPredictions)
+        .insert(wrongPredictionTable)
         .values(wrongAddresses)
-        .onConflictDoNothing(); // avoid duplicate inserts
+        .onConflictDoNothing();
 
-      // Remove wrong bets from BitcoinBets
       await db
-  .delete(BitcoinBets)
-  .where(inArray(BitcoinBets.walletAddress, wrongAddresses.map(w => w.walletAddress)));
+        .delete(betsTable)
+        .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
     }
-
-    
-   
-    
   } catch (error) {
     console.error("Error processing outcome:", error);
     throw new Error("Failed to set daily outcome");
   }
 }
 
-
-export async function canUserBet(address: string): Promise<boolean> {
+/**
+ * Checks if a user is eligible to bet.
+ * @param address - Wallet address.
+ * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
+ */
+export async function canUserBet(
+  address: string,
+  betsTable = BitcoinBets, wrongPredictionTable = WrongPredictions
+): Promise<boolean> {
   const [alreadyBet, isWrong] = await Promise.all([
-    db
-      .select()
-      .from(BitcoinBets)
-      .where(eq(BitcoinBets.walletAddress, address)),
-    
-    db
-      .select()
-      .from(WrongPredictions)
-      .where(eq(WrongPredictions.walletAddress, address)),
+    db.select().from(betsTable).where(eq(betsTable.walletAddress, address)),
+    db.select().from(wrongPredictionTable).where(eq(wrongPredictionTable.walletAddress, address)),
   ]);
 
   return alreadyBet.length === 0 && isWrong.length === 0;
 }
 
-export async function clearWrongPredictions() {
+/**
+ * Clears all wrong predictions.
+ */
+export async function clearWrongPredictions(wrongPredictionTable = WrongPredictions) {
   try {
-    await db.delete(WrongPredictions);
+    await db.delete(wrongPredictionTable);
     console.log("Cleared wrong_predictions table");
   } catch (err) {
     console.error("Failed to clear wrong_predictions table", err);
@@ -79,27 +76,17 @@ export async function clearWrongPredictions() {
   }
 }
 
-
 /**
- * Determines the winners who correctly predicted all three days and writes their wallet addresses to a text file.
+ * Gets the wallet addresses of users who are still in the game.
+ * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
  */
-export async function determineWinners() {
+export async function determineWinners(betsTable = BitcoinBets) {
   try {
-    
- 
-
-    // Find participants with correct predictions for all three days
     const winners = await db
-      .select({ walletAddress: BitcoinBets.walletAddress })
-      .from(BitcoinBets);
+      .select({ walletAddress: betsTable.walletAddress })
+      .from(betsTable);
 
-    const winnerAddresses = winners.map((w) => w.walletAddress);
-
-    // Write winners to a text file
-    const fs = require("fs");
-    fs.writeFileSync("winners.txt", winnerAddresses.join(","));
-
-    return winnerAddresses; // Optional: return winners for frontend use
+    return winners.map(w => w.walletAddress).join(",");
   } catch (error) {
     console.error("Error determining winners:", error);
     throw new Error("Failed to determine winners");

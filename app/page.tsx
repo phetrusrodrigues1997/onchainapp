@@ -18,9 +18,9 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import Markets from './Pages/Markets';
 // import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
-import WalletPage from './Pages/WalletPage';
-import UsernameSetup from './Pages/UsernameSetup';
-import CreateMessage from './Pages/MessagesPage';
+// import WalletPage from './Pages/WalletPage';
+// import UsernameSetup from './Pages/UsernameSetup';
+// import CreateMessage from './Pages/MessagesPage';
 
 
 
@@ -90,7 +90,7 @@ export default function App() {
           </div>
           <div className="wallet-container">
             <Wallet>
-<ConnectWallet className='dark:bg-[#dd0000]'>
+<ConnectWallet className='dark:bg-[#e1e1e1]'>
                 <Avatar className="h-6 w-6" />
                 <Name />
               </ConnectWallet>
@@ -122,13 +122,13 @@ export default function App() {
         
           
           
-          {activeSection === "usernamePage" && <UsernameSetup />}
+          {/* {activeSection === "usernamePage" && <UsernameSetup />} */}
           {activeSection === "buy" && <BuySection />}
           {activeSection === "profile" && <ProfilePage/>}
           {activeSection === "discord" && <DiscordXSection />}
-          {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {/* {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />} */}
           {activeSection === "activity" && <Activity />}
-          {activeSection === "notifications" && <CreateMessage />}
+          {/* {activeSection === "notifications" && <CreateMessage />} */}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting contractAddress="0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794" /> }

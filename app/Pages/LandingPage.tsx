@@ -11,10 +11,15 @@ interface LandingPageProps {
   setActiveSection: (section: string) => void;
 }
 
+const contractAddresses = {
+  bitcoin: '0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794',
+  ethereum: '0xD4B6F1CF1d063b760628952DDf32a44974129697',
+  solana: '0xSolanaAddress...'
+} as const;
+
 const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
-  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState('crypto');
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
@@ -86,24 +91,33 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // const handleLanguageChange = (language: Language) => {
-  //   setCurrentLanguage(language);
-  //   setShowLanguageDropdown(false);
-  //   Cookies.set('language', language, { sameSite: 'lax' });
-  // };
 
   const t = getTranslation(currentLanguage);
 
   const markets = getMarkets(t, selectedMarket);
   const marketOptions = getMarkets(t, 'options');
 
-  const handleMarketClick = (marketId: string) => {
-    if (marketId === 'bitcoin') {
+  
+const handleMarketClick = (marketId: string) => {
+  if (contractAddresses[marketId as keyof typeof contractAddresses]) {
+    const contractAddress = contractAddresses[marketId as keyof typeof contractAddresses];
+    console.log('Selected market:', marketId, 'Contract address:', contractAddress);
+    // Set the cookie with proper options
+    Cookies.set('selectedMarket', contractAddress, { 
+      sameSite: 'lax',
+      expires: 7 // Cookie expires in 7 days
+    });
+    
+    // Optional: Add a small delay to ensure cookie is set before navigation
+    setTimeout(() => {
       setActiveSection('bitcoinPot');
-    } else {
-      alert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`);
-    }
-  };
+    }, 200);
+    
+    console.log('Set cookie selectedMarket:', contractAddress); // Debug log
+  } else {
+    alert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`);
+  }
+};
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;

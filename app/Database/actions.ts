@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { userPoints, Messages, BitcoinBets } from "./schema"; // Import the schema
+import {  Messages, BitcoinBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions } from "./schema";
 import { ImageURLs } from "./schema";
@@ -41,56 +41,56 @@ export async function saveImageUrl(walletAddress: string, imageUrl: string) {
   }
 }
 
-export async function setUsername(walletAddress: string, newUsername: string) {
-  try {
-    await db
-      .insert(userPoints)
-      .values({ walletAddress, username: newUsername })
-      .onConflictDoUpdate({
-        target: userPoints.walletAddress,
-        set: { username: newUsername },
-      });
-  } catch (error: any) {
-    if (error.code === '23505' && error.constraint === 'user_points_username_key') {
-      throw new Error('Username is already taken');
-    } else {
-      console.error("Error setting username:", error);
-      throw new Error('Failed to set username');
-    }
-  }
-}
+// export async function setUsername(walletAddress: string, newUsername: string) {
+//   try {
+//     await db
+//       .insert(userPoints)
+//       .values({ walletAddress, username: newUsername })
+//       .onConflictDoUpdate({
+//         target: userPoints.walletAddress,
+//         set: { username: newUsername },
+//       });
+//   } catch (error: any) {
+//     if (error.code === '23505' && error.constraint === 'user_points_username_key') {
+//       throw new Error('Username is already taken');
+//     } else {
+//       console.error("Error setting username:", error);
+//       throw new Error('Failed to set username');
+//     }
+//   }
+// }
 
-export async function getUsername(walletAddress: string): Promise<string | null> {
-  try {
-    const result = await db
-      .select({ username: userPoints.username })
-      .from(userPoints)
-      .where(eq(userPoints.walletAddress, walletAddress))
-      .limit(1);
-    return result.length > 0 ? result[0].username : null;
-  } catch (error) {
-    console.error("Error fetching username:", error);
-    throw new Error("Failed to fetch username");
-  }
-}
+// export async function getUsername(walletAddress: string): Promise<string | null> {
+//   try {
+//     const result = await db
+//       .select({ username: userPoints.username })
+//       .from(userPoints)
+//       .where(eq(userPoints.walletAddress, walletAddress))
+//       .limit(1);
+//     return result.length > 0 ? result[0].username : null;
+//   } catch (error) {
+//     console.error("Error fetching username:", error);
+//     throw new Error("Failed to fetch username");
+//   }
+// }
 
 /**
  * Retrieves the wallet address for a given username.
  * Returns null if the username doesn't exist.
  */
-export async function getWalletAddress(username: string): Promise<string | null> {
-  try {
-    const result = await db
-      .select({ walletAddress: userPoints.walletAddress })
-      .from(userPoints)
-      .where(eq(userPoints.username, username))
-      .limit(1);
-    return result.length > 0 ? result[0].walletAddress : null;
-  } catch (error) {
-    console.error("Error fetching wallet address:", error);
-    throw new Error("Failed to fetch wallet address");
-  }
-}
+// export async function getWalletAddress(username: string): Promise<string | null> {
+//   try {
+//     const result = await db
+//       .select({ walletAddress: userPoints.walletAddress })
+//       .from(userPoints)
+//       .where(eq(userPoints.username, username))
+//       .limit(1);
+//     return result.length > 0 ? result[0].walletAddress : null;
+//   } catch (error) {
+//     console.error("Error fetching wallet address:", error);
+//     throw new Error("Failed to fetch wallet address");
+//   }
+// }
 
 export async function createMessage(from: string, to: string, message: string, datetime: string) {
   return db.insert(Messages).values({ from, to, message, datetime }).returning();

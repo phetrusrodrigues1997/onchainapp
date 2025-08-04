@@ -5,7 +5,7 @@ import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { setDailyOutcome, determineWinners, clearWrongPredictions } from './OwnerActions'; // Adjust path as needed
-
+import { WrongPredictions, BitcoinBets } from "../Database/schema";
 
 
 // Updated Contract ABI for PredictionPot (reflecting modified contract)
@@ -82,20 +82,27 @@ interface PredictionPotProps {
   setActiveSection: (section: string) => void;
 }
 
+
+
+
+
 const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotProps) => {
   const { address, isConnected } = useAccount();
   const { writeContract, data: txHash, isPending } = useWriteContract();
   
   const [outcomeInput, setOutcomeInput] = useState<string>('');
   // Contract addresses
-  const [contractAddress, setContractAddress] = useState<string>('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
+  const [contractAddress, setContractAddress] = useState<string>('');
   const [usdcAddress, setUsdcAddress] = useState<string>('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'); 
   
+
   // State
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [winnerAddresses, setWinnerAddresses] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
+
+  
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -117,26 +124,61 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   
   const t = getTranslation(currentLanguage);
 
-  // Handle transaction confirmation and errors
+ // Add useEffect to handle cookie retrieval
   useEffect(() => {
-    if (isConfirmed) {
-      setIsLoading(false);
-      if (lastAction === 'approve') {
-        showMessage('USDC approval confirmed! You can now enter the pot.');
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else if (lastAction === 'enterPot') {
-        showMessage('Successfully entered the pot! Redirecting to betting page...');
-      } else if (lastAction === 'distributePot') {
-        showMessage('Pot distributed successfully!');
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      }
-      setLastAction('');
+    const savedContract = Cookies.get('selectedMarket');
+    
+    if (savedContract) {
+      setContractAddress(savedContract);
+    } else {
+      // Fallback to bitcoin contract if no cookie is found
+      
+      console.log('No cookie found, using default bitcoin contract');
     }
-  }, [isConfirmed, lastAction]);
+  }, []);
+
+useEffect(() => {
+  if (isConfirmed) {
+    if (lastAction === 'approve') {
+      setIsLoading(false);
+      showMessage('USDC approval confirmed! You can now enter the pot.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else if (lastAction === 'enterPot') {
+      setIsLoading(false);
+      showMessage('Successfully entered the pot! Redirecting to betting page...');
+    } else if (lastAction === 'distributePot') {
+      setIsLoading(false);
+      showMessage('Pot distributed successfully!');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else if (lastAction === 'processWinners') {
+      // This handles the combined action - pot distribution is confirmed, now clear wrong predictions
+      const finishProcessing = async () => {
+        try {
+          showMessage("Step 3/3: Clearing wrong predictions...");
+          await clearWrongPredictions();
+          showMessage("🎉 Winners processed successfully! Pot distributed and wrong predictions cleared!");
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        } catch (error) {
+          showMessage("Pot distributed but failed to clear wrong predictions. Please clear manually.", true);
+        } finally {
+          setIsLoading(false);
+          setLastAction('');
+        }
+      };
+      
+      finishProcessing();
+      return; // Don't execute the common cleanup below
+    }
+    
+    setLastAction('');
+  }
+}, [isConfirmed, lastAction]);
 
   // Reset loading state if transaction fails
   useEffect(() => {
@@ -447,7 +489,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
           )}
 
           {/* Owner Actions */}
-          {isOwner && contractAddress && (
+          /* Replace your entire Owner Actions section with this combined version */
+
+{isOwner && contractAddress && (
   <div className="mb-6">
     <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">Owner Actions</h2>
     
@@ -488,79 +532,66 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       </button>
     </div>
 
-    {/* Determine Winners */}
+    {/* Combined Winner Processing & Pot Distribution */}
     <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
-      <h3 className="text-[#F5F5F5] font-medium mb-2">Determine Winners</h3>
+      <h3 className="text-[#F5F5F5] font-medium mb-2">Process Winners & Distribute Pot</h3>
       <p className="text-[#A0A0B0] text-sm mb-3">
-        Generate a list of winners who correctly predicted all three days and save to winners.txt.
+        This will automatically determine winners, distribute the pot equally among them, and clear wrong predictions for the next round.
       </p>
       <button
         onClick={async () => {
           setIsLoading(true);
+          setLastAction("processWinners");
+          
           try {
-            await determineWinners();
-            showMessage("Winners determined and saved to winners.txt!");
+            // Step 1: Determine winners
+            showMessage("Step 1/3: Determining winners...");
+            const winnersString = await determineWinners();
+            
+            if (!winnersString || winnersString.trim() === "") {
+              showMessage("No winners found for this round", true);
+              return;
+            }
+            
+            // Parse winner addresses
+            const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
+            
+            if (addresses.length === 0) {
+              showMessage("No valid winner addresses found", true);
+              return;
+            }
+            
+            showMessage(`Found ${addresses.length} winner(s). Step 2/3: Distributing pot...`);
+            
+            // Step 2: Distribute pot using the blockchain contract
+            await writeContract({
+              address: contractAddress as `0x${string}`,
+              abi: PREDICTION_POT_ABI,
+              functionName: 'distributePot',
+              args: [addresses],
+            });
+            
+            // Note: The transaction confirmation will be handled by the existing useEffect
+            // We'll show the final message there, but for now show the interim message
+            showMessage("Pot distribution transaction submitted! Step 3/3 will happen after confirmation...");
+            
           } catch (error) {
-            showMessage("Failed to determine winners", true);
-          } finally {
+            console.error("Error in combined winner processing:", error);
+            showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
+            setLastAction("");
           }
+          // Note: Don't set setIsLoading(false) here because the transaction is still pending
         }}
         disabled={isActuallyLoading}
-        className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-green-600 text-[#F5F5F5] px-6 py-3 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed w-full"
       >
-        {isActuallyLoading ? "Processing..." : "Determine Winners"}
+        {isActuallyLoading && lastAction === "processWinners" ? "Processing Winners..." : "🏆 Process Winners & Distribute Pot"}
       </button>
     </div>
 
-    {/* Distribute Pot */}
-    <div className="bg-[#2C2C47] p-4 rounded-lg">
-      <h3 className="text-[#F5F5F5] font-medium mb-2">Distribute Pot to Winners</h3>
-      <p className="text-[#A0A0B0] text-sm mb-3">
-        Enter winner addresses separated by commas. The pot will be divided equally among all winners.
-      </p>
-      <textarea
-        value={winnerAddresses}
-        onChange={(e) => setWinnerAddresses(e.target.value)}
-        placeholder="0x123..., 0x456..., 0x789..."
-        rows={3}
-        className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
-      />
-      <button
-        onClick={handleDistributePot}
-        disabled={isActuallyLoading || !winnerAddresses.trim()}
-        className="bg-red-600 text-[#F5F5F5] px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isActuallyLoading && lastAction === "distributePot" ? "Processing..." : "Distribute Pot"}
-      </button>
-    </div>
-    {/* Clear Wrong Predictions */}
-<div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
-  <h3 className="text-[#F5F5F5] font-medium mb-2">Clear Wrong Predictions</h3>
-  <p className="text-[#A0A0B0] text-sm mb-3">
-    Use this if you want to reset all users flagged for wrong predictions.
-  </p>
-  <button
-    onClick={async () => {
-      setIsLoading(true);
-      try {
-        await clearWrongPredictions(); // make sure this is imported
-        showMessage("Cleared wrong predictions!");
-      } catch (error) {
-        showMessage("Failed to clear wrong predictions", true);
-      } finally {
-        setIsLoading(false);
-      }
-    }}
-    disabled={isActuallyLoading}
-    className="bg-yellow-600 text-black px-4 py-2 rounded-md font-medium hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    {isActuallyLoading ? "Processing..." : "Clear Wrong Predictions"}
-  </button>
-</div>
-
+    
   </div>
-  
 )}
 
           {/* Status Message */}
