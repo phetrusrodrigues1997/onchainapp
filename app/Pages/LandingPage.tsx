@@ -24,7 +24,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const availableMarkets = ["bitcoin"];
+  const availableMarkets = ["bitcoin", "ethereum"];
 
 
 

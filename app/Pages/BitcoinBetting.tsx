@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { placeBitcoinBet, getTodaysBet } from '../Database/actions';
-import { TrendingUp, TrendingDown, Clock, Shield, Zap, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
+import Cookies from 'js-cookie';
+import { WrongPredictions, BitcoinBets, EthereumBets } from "../Database/schema";
+
+// Define table identifiers instead of passing table objects
+const tableMapping = {
+  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "bitcoin",
+  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "ethereum",
+} as const;
+
+type TableType = typeof tableMapping[keyof typeof tableMapping];
 
 // Contract ABI for PredictionPot (minimal version to check participants)
 const PREDICTION_POT_ABI = [
@@ -14,12 +24,6 @@ const PREDICTION_POT_ABI = [
   }
 ];
 
-
-
-interface BitcoinBettingProps {
-  contractAddress: string;
-}
-
 interface TodaysBet {
   id: number;
   walletAddress: string;
@@ -28,13 +32,35 @@ interface TodaysBet {
   createdAt: Date;
 }
 
-export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps) {
+export default function BitcoinBetting() {
   const { address, isConnected } = useAccount();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [todaysBet, setTodaysBet] = useState<TodaysBet | null>(null);
   const [isBetLoading, setIsBetLoading] = useState<boolean>(true);
+  const [contractAddress, setContractAddress] = useState<string>('');
+  const [selectedTableType, setSelectedTableType] = useState<TableType>('bitcoin');
 
+  // Add useEffect to handle cookie retrieval
+  useEffect(() => {
+    const savedContract = Cookies.get('selectedMarket');
+    
+    if (savedContract) {
+      setContractAddress(savedContract);
+      // Set the table type based on contract address
+      const tableType = tableMapping[savedContract as keyof typeof tableMapping];
+      if (tableType) {
+        setSelectedTableType(tableType);
+      } else {
+        setSelectedTableType('bitcoin'); // Default fallback
+      }
+    } else {
+      // Fallback to bitcoin contract if no cookie is found
+      setContractAddress('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
+      setSelectedTableType('bitcoin');
+      console.log('No cookie found, using default bitcoin contract');
+    }
+  }, []);
 
   // Read contract data to get participants
   const { data: participants } = useReadContract({
@@ -54,23 +80,23 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
     if (address && isParticipant) {
       loadTodaysBet();
     }
-  }, [address, isParticipant]);
+  }, [address, isParticipant, selectedTableType]);
 
   const loadTodaysBet = async () => {
-  if (!address) return;
+    if (!address) return;
 
-  setIsBetLoading(true);
-  try {
-    const bet = await getTodaysBet(address);
-    setTodaysBet(bet);
-  } catch (error) {
-    console.error("Error loading today's bet:", error);
-    setTodaysBet(null); // still safe fallback
-  } finally {
-    setIsBetLoading(false);
-  }
-};
-
+    setIsBetLoading(true);
+    try {
+      // Pass the table type string instead of the table object
+      const bet = await getTodaysBet(address, selectedTableType);
+      setTodaysBet(bet);
+    } catch (error) {
+      console.error("Error loading today's bet:", error);
+      setTodaysBet(null);
+    } finally {
+      setIsBetLoading(false);
+    }
+  };
 
   const showMessage = (msg: string, isError = false) => {
     setMessage(msg);
@@ -82,8 +108,11 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
     
     setIsLoading(true);
     try {
-      await placeBitcoinBet(address, prediction);
-      showMessage(`Bet placed successfully! You predicted Bitcoin will end ${prediction} today.`);
+      // Pass the table type string instead of the table object
+      await placeBitcoinBet(address, prediction, selectedTableType);
+      
+      const marketName = selectedTableType === 'bitcoin' ? 'Bitcoin' : 'Ethereum';
+      showMessage(`Bet placed successfully! You predicted ${marketName} will end ${prediction} today.`);
       await loadTodaysBet(); // Reload to show the new bet
     } catch (error: any) {
       console.error('Error placing bet:', error);
@@ -93,6 +122,7 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
     }
   };
 
+  // Rest of your component remains the same...
   // If wallet is not connected
   if (!isConnected) {
     return (
@@ -136,7 +166,7 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
               <Shield className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Access Required</h1>
-            <p className="text-gray-600 mb-8 text-lg">Join the Bitcoin Pot first</p>
+            <p className="text-gray-600 mb-8 text-lg">Join the {selectedTableType === 'bitcoin' ? 'Bitcoin' : 'Ethereum'} Pot first</p>
             <button className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300">
               Enter Pot
             </button>
@@ -156,24 +186,6 @@ export default function BitcoinBetting({ contractAddress }: BitcoinBettingProps)
       </div>
       
       <div className="max-w-lg mx-auto pt-12 relative z-10">
-        {/* Floating Header with enhanced glassmorphism */}
-        {/* <div className="text-center mb-12">
-          <div className="relative inline-block">
-            <div className="w-28 h-28 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-gray-900/30 transform hover:rotate-12 transition-all duration-500 relative">
-              <span className="text-5xl font-black text-white drop-shadow-2xl">₿</span>
-             
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl"></div>
-            </div>
-            
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-full px-4 py-2 shadow-lg">
-              <div className="flex items-center gap-2 text-gray-700 text-sm font-medium">
-                <Clock className="w-4 h-4" />
-                <span>{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
         {isBetLoading ? (
           <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center">
             <div className="inline-flex items-center gap-3 text-gray-600">

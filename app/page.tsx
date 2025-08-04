@@ -17,7 +17,6 @@ import DiscordXSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import Markets from './Pages/Markets';
-// import { Swap, SwapAmountInput, SwapToggleButton, SwapButton, SwapMessage, SwapToast, SwapSettings, SwapSettingsSlippageDescription, SwapSettingsSlippageInput, SwapSettingsSlippageTitle } from '@coinbase/onchainkit/swap';
 // import WalletPage from './Pages/WalletPage';
 // import UsernameSetup from './Pages/UsernameSetup';
 // import CreateMessage from './Pages/MessagesPage';
@@ -68,12 +67,6 @@ export default function App() {
   return (
     
      <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
-      {/* Animated background elements */}
-      {/* <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-500"></div>
-      </div> */}
       
       {/* Dark green header */}
       <header className="z-50 bg-white px-4 py-3 shadow-md sticky top-0">

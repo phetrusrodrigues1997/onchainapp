@@ -2,9 +2,9 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import {  Messages, BitcoinBets } from "./schema"; // Import the schema
+import {  Messages, BitcoinBets, EthereumBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
-import { WrongPredictions } from "./schema";
+import { WrongPredictions, WrongPredictionsEth } from "./schema";
 import { ImageURLs } from "./schema";
 import { desc } from "drizzle-orm";
 
@@ -24,6 +24,29 @@ const db = drizzle(sqlConnection);
  * Stores a new image URL for a wallet address.
  * Each entry gets a timestamp automatically.
  */
+
+const getTableFromType = (tableType: string) => {
+  switch (tableType) {
+    case 'bitcoin':
+      return BitcoinBets;
+    case 'ethereum':
+      return EthereumBets;
+    default:
+      return BitcoinBets;
+  }
+};
+
+const getWrongPredictionsTableFromType = (tableType: string) => {
+  switch (tableType) {
+    case 'bitcoin':
+      return WrongPredictions;
+    case 'ethereum':
+      return WrongPredictionsEth;
+    default:
+      return WrongPredictions;
+  }
+};
+
 export async function saveImageUrl(walletAddress: string, imageUrl: string) {
   try {
     const result = await db
@@ -146,15 +169,16 @@ export async function getAllMessages(address: string) {
  * Only allows one bet per wallet per day.
  */
 
-export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative') {
+export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'bitcoin') {
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-
+    const betsTable = getTableFromType(typeTable);
+    const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
     // 1. Check if the user is blocked due to wrong prediction
     const isBlocked = await db
       .select()
-      .from(WrongPredictions)
-      .where(eq(WrongPredictions.walletAddress, walletAddress))
+      .from(wrongPredictionTable)
+      .where(eq(wrongPredictionTable.walletAddress, walletAddress))
       .limit(1);
 
     if (isBlocked.length > 0) {
@@ -164,33 +188,33 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     // 2. Check if the user already placed a bet today
     const existingBet = await db
       .select()
-      .from(BitcoinBets)
+      .from(betsTable)
       .where(and(
-        eq(BitcoinBets.walletAddress, walletAddress),
-        eq(BitcoinBets.betDate, today)
+        eq(betsTable.walletAddress, walletAddress),
+        eq(betsTable.betDate, today)
       ))
       .limit(1);
 
     if (existingBet.length > 0) {
       // 3. If a bet exists, update the prediction
       await db
-        .update(BitcoinBets)
+        .update(betsTable)
         .set({ prediction })
         .where(and(
-          eq(BitcoinBets.walletAddress, walletAddress),
-          eq(BitcoinBets.betDate, today)
+          eq(betsTable.walletAddress, walletAddress),
+          eq(betsTable.betDate, today)
         ));
       return { updated: true };
     }
 
     // 4. Otherwise, delete all previous bets for this wallet and insert new bet
 await db
-  .delete(BitcoinBets)
-  .where(eq(BitcoinBets.walletAddress, walletAddress))
+  .delete(betsTable)
+  .where(eq(betsTable.walletAddress, walletAddress))
   .execute();
 
 return db
-  .insert(BitcoinBets)
+  .insert(betsTable)
   .values({
     walletAddress,
     prediction,
@@ -209,16 +233,16 @@ return db
 /**
  * Gets the user's bet for today (if any).
  */
-export async function getTodaysBet(walletAddress: string) {
+export async function getTodaysBet(walletAddress: string, tableType: string = 'bitcoin') {
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    
+    const betsTable = getTableFromType(tableType);
     const result = await db
       .select()
-      .from(BitcoinBets)
+      .from(betsTable)
       .where(and(
-        eq(BitcoinBets.walletAddress, walletAddress),
-        eq(BitcoinBets.betDate, today)
+        eq(betsTable.walletAddress, walletAddress),
+        eq(betsTable.betDate, today)
       ))
       .limit(1);
 
@@ -232,12 +256,13 @@ export async function getTodaysBet(walletAddress: string) {
 /**
  * Gets all bets for a specific date.
  */
-export async function getBetsForDate(date: string) {
+export async function getBetsForDate(date: string, typeTable: string = 'bitcoin') {
   try {
+    const betsTable = getTableFromType(typeTable);
     return db
       .select()
-      .from(BitcoinBets)
-      .where(eq(BitcoinBets.betDate, date));
+      .from(betsTable)
+      .where(eq(betsTable.betDate, date));
   } catch (error) {
     console.error("Error fetching bets for date:", error);
     throw new Error("Failed to fetch bets for date");

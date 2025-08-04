@@ -4,10 +4,17 @@ import { useAccount, useWriteContract, useReadContract, useWaitForTransactionRec
 import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
-import { setDailyOutcome, determineWinners, clearWrongPredictions } from './OwnerActions'; // Adjust path as needed
-import { WrongPredictions, BitcoinBets } from "../Database/schema";
+import { setDailyOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
 
 
+
+// Define table identifiers instead of passing table objects
+const tableMapping = {
+  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "bitcoin",
+  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "ethereum",
+} as const;
+
+type TableType = typeof tableMapping[keyof typeof tableMapping];
 // Updated Contract ABI for PredictionPot (reflecting modified contract)
 const PREDICTION_POT_ABI = [
   {
@@ -101,7 +108,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [message, setMessage] = useState<string>('');
   const [winnerAddresses, setWinnerAddresses] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
-
+  const [selectedTableType, setSelectedTableType] = useState<TableType>('bitcoin');
   
 
   // Wait for transaction receipt
@@ -130,6 +137,13 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     
     if (savedContract) {
       setContractAddress(savedContract);
+      const tableType = tableMapping[savedContract as keyof typeof tableMapping];
+      if (tableType) {
+        setSelectedTableType(tableType);
+      } else {
+        setSelectedTableType('bitcoin'); // Default fallback
+      }
+
     } else {
       // Fallback to bitcoin contract if no cookie is found
       
@@ -159,7 +173,7 @@ useEffect(() => {
       const finishProcessing = async () => {
         try {
           showMessage("Step 3/3: Clearing wrong predictions...");
-          await clearWrongPredictions();
+          await clearWrongPredictions(selectedTableType);
           showMessage("🎉 Winners processed successfully! Pot distributed and wrong predictions cleared!");
           setTimeout(() => {
             window.location.reload();
@@ -214,7 +228,7 @@ useEffect(() => {
     query: { enabled: !!contractAddress }
   }) as { data: string | undefined };
 
-  const entryAmount = BigInt(20000); // 0.02 USDC (6 decimals: 0.10 * 10^6 = 100,000)
+  const entryAmount = BigInt(10000); // 0.01 USDC (6 decimals: 0.10 * 10^6 = 100,000)
 
   const { data: userUsdcBalance } = useReadContract({
     address: usdcAddress as `0x${string}`,
@@ -516,7 +530,7 @@ useEffect(() => {
           }
           setIsLoading(true);
           try {
-            await setDailyOutcome(outcomeInput as "positive" | "negative");
+            await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType);
             showMessage("Today's outcome set successfully!");
             setOutcomeInput("");
           } catch (error) {
@@ -546,7 +560,7 @@ useEffect(() => {
           try {
             // Step 1: Determine winners
             showMessage("Step 1/3: Determining winners...");
-            const winnersString = await determineWinners();
+            const winnersString = await determineWinners(selectedTableType);
             
             if (!winnersString || winnersString.trim() === "") {
               showMessage("No winners found for this round", true);
@@ -574,7 +588,7 @@ useEffect(() => {
             // Note: The transaction confirmation will be handled by the existing useEffect
             // We'll show the final message there, but for now show the interim message
             showMessage("Pot distribution transaction submitted! Step 3/3 will happen after confirmation...");
-            
+            await clearWrongPredictions(selectedTableType);
           } catch (error) {
             console.error("Error in combined winner processing:", error);
             showMessage("Failed to process winners and distribute pot", true);

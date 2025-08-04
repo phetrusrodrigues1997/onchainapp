@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { WrongPredictions, BitcoinBets } from "../Database/schema";
+import { WrongPredictions, WrongPredictionsEth, BitcoinBets, EthereumBets } from "../Database/schema";
 import { eq, inArray } from "drizzle-orm";
 
 // Database setup
@@ -14,11 +14,36 @@ const db = drizzle(sqlConnection);
  * @param outcome - Either "positive" or "negative".
  * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
  */
+
+const getTableFromType = (tableType: string) => {
+  switch (tableType) {
+    case 'bitcoin':
+      return BitcoinBets;
+    case 'ethereum':
+      return EthereumBets;
+    default:
+      return BitcoinBets;
+  }
+};
+
+const getWrongPredictionsTableFromType = (tableType: string) => {
+  switch (tableType) {
+    case 'bitcoin':
+      return WrongPredictions;
+    case 'ethereum':
+      return WrongPredictionsEth;
+    default:
+      return WrongPredictions;
+  }
+};
+
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
-  betsTable = BitcoinBets, wrongPredictionTable = WrongPredictions
+  tableType: string = 'bitcoin'
 ) {
   const opposite = outcome === "positive" ? "negative" : "positive";
+  const betsTable = getTableFromType(tableType);
+  const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
 
   try {
     const wrongBets = await db
@@ -53,8 +78,10 @@ export async function setDailyOutcome(
  */
 export async function canUserBet(
   address: string,
-  betsTable = BitcoinBets, wrongPredictionTable = WrongPredictions
+  typeTable: string = 'bitcoin'
 ): Promise<boolean> {
+  const betsTable = getTableFromType(typeTable);
+  const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
   const [alreadyBet, isWrong] = await Promise.all([
     db.select().from(betsTable).where(eq(betsTable.walletAddress, address)),
     db.select().from(wrongPredictionTable).where(eq(wrongPredictionTable.walletAddress, address)),
@@ -66,12 +93,17 @@ export async function canUserBet(
 /**
  * Clears all wrong predictions.
  */
-export async function clearWrongPredictions(wrongPredictionTable = WrongPredictions) {
+export async function clearWrongPredictions(tableType: string = 'bitcoin') {
   try {
+    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType); // Default to Bitcoin
+    const betsTable = getTableFromType(tableType);
     await db.delete(wrongPredictionTable);
     console.log("Cleared wrong_predictions table");
+    await db.delete(betsTable);
+    console.log("Cleared bets table");
+
   } catch (err) {
-    console.error("Failed to clear wrong_predictions table", err);
+    console.error("Failed to clear tables", err);
     throw new Error("Could not clear wrong predictions");
   }
 }
@@ -80,8 +112,9 @@ export async function clearWrongPredictions(wrongPredictionTable = WrongPredicti
  * Gets the wallet addresses of users who are still in the game.
  * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
  */
-export async function determineWinners(betsTable = BitcoinBets) {
+export async function determineWinners(typeTable: string = 'bitcoin') {
   try {
+    const betsTable = getTableFromType(typeTable);
     const winners = await db
       .select({ walletAddress: betsTable.walletAddress })
       .from(betsTable);
