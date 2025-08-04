@@ -6,10 +6,10 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
-  title: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || 'Foresight - Survival of the Brightest',
-  description: 'Focused on building the best stablecoin products and services.',
+  title: 'Foresight - Survival of the Brightest',
+  description: 'Focused on building the best prediction market services.',
   icons: {
-    icon: '/favicon.jpg',
+    icon: '/logoF2_2.png',
   },
 };
 
