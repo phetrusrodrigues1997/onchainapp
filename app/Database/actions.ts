@@ -2,9 +2,9 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import {  Messages, BitcoinBets, EthereumBets } from "./schema"; // Import the schema
+import {  Messages, FeaturedBets, CryptoBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
-import { WrongPredictions, WrongPredictionsEth } from "./schema";
+import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ImageURLs } from "./schema";
 import { desc } from "drizzle-orm";
 
@@ -27,21 +27,21 @@ const db = drizzle(sqlConnection);
 
 const getTableFromType = (tableType: string) => {
   switch (tableType) {
-    case 'bitcoin':
-      return BitcoinBets;
-    case 'ethereum':
-      return EthereumBets;
+    case 'featured':
+      return FeaturedBets;
+    case 'crypto':
+      return CryptoBets;
     default:
-      return BitcoinBets;
+      return FeaturedBets;
   }
 };
 
 const getWrongPredictionsTableFromType = (tableType: string) => {
   switch (tableType) {
-    case 'bitcoin':
+    case 'featured':
       return WrongPredictions;
-    case 'ethereum':
-      return WrongPredictionsEth;
+    case 'crypto':
+      return WrongPredictionsCrypto;
     default:
       return WrongPredictions;
   }

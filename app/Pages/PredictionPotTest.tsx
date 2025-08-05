@@ -10,8 +10,8 @@ import { setDailyOutcome, determineWinners, clearWrongPredictions } from '../Dat
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "bitcoin",
-  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "ethereum",
+  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "featured",
+  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
@@ -108,7 +108,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [message, setMessage] = useState<string>('');
   const [winnerAddresses, setWinnerAddresses] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
-  const [selectedTableType, setSelectedTableType] = useState<TableType>('bitcoin');
+  const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
   
 
   // Wait for transaction receipt
@@ -141,7 +141,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       if (tableType) {
         setSelectedTableType(tableType);
       } else {
-        setSelectedTableType('bitcoin'); // Default fallback
+        setSelectedTableType('featured'); // Default fallback
       }
 
     } else {

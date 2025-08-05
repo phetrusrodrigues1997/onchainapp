@@ -3,12 +3,11 @@ import { useAccount, useReadContract } from 'wagmi';
 import { placeBitcoinBet, getTodaysBet } from '../Database/actions';
 import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
 import Cookies from 'js-cookie';
-import { WrongPredictions, BitcoinBets, EthereumBets } from "../Database/schema";
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "bitcoin",
-  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "ethereum",
+  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "featured",
+  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
@@ -39,7 +38,7 @@ export default function BitcoinBetting() {
   const [todaysBet, setTodaysBet] = useState<TodaysBet | null>(null);
   const [isBetLoading, setIsBetLoading] = useState<boolean>(true);
   const [contractAddress, setContractAddress] = useState<string>('');
-  const [selectedTableType, setSelectedTableType] = useState<TableType>('bitcoin');
+  const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
 
   // Add useEffect to handle cookie retrieval
   useEffect(() => {
@@ -52,12 +51,12 @@ export default function BitcoinBetting() {
       if (tableType) {
         setSelectedTableType(tableType);
       } else {
-        setSelectedTableType('bitcoin'); // Default fallback
+        setSelectedTableType('featured'); // Default fallback
       }
     } else {
       // Fallback to bitcoin contract if no cookie is found
       setContractAddress('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
-      setSelectedTableType('bitcoin');
+      setSelectedTableType('crypto');
       console.log('No cookie found, using default bitcoin contract');
     }
   }, []);
@@ -111,8 +110,8 @@ export default function BitcoinBetting() {
       // Pass the table type string instead of the table object
       await placeBitcoinBet(address, prediction, selectedTableType);
       
-      const marketName = selectedTableType === 'bitcoin' ? 'Bitcoin' : 'Ethereum';
-      showMessage(`Bet placed successfully! You predicted ${marketName} will end ${prediction} today.`);
+      
+      showMessage(`Bet placed successfully! `);
       await loadTodaysBet(); // Reload to show the new bet
     } catch (error: any) {
       console.error('Error placing bet:', error);
@@ -166,7 +165,7 @@ export default function BitcoinBetting() {
               <Shield className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Access Required</h1>
-            <p className="text-gray-600 mb-8 text-lg">Join the {selectedTableType === 'bitcoin' ? 'Bitcoin' : 'Ethereum'} Pot first</p>
+            <p className="text-gray-600 mb-8 text-lg">You must join the pot first</p>
             <button className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300">
               Enter Pot
             </button>

@@ -10,7 +10,7 @@ export const Messages = pgTable("Messages", {
   datetime: text("datetime").notNull(), // Timestamp of when the message was sent
 });
 
-export const BitcoinBets = pgTable("bitcoin_bets", {
+export const FeaturedBets = pgTable("featured_bets", {
   id: serial("id").primaryKey(), // Auto-incrementing ID as primary key
   walletAddress: text("wallet_address").notNull(), // Bettor's wallet address
   prediction: text("prediction").notNull(), // "positive" or "negative"
@@ -21,7 +21,7 @@ export const BitcoinBets = pgTable("bitcoin_bets", {
 export const WrongPredictions = pgTable("wrong_Predictions", {
   walletAddress: text("walletAddress").notNull(),});
 
-  export const WrongPredictionsEth = pgTable("wrong_predictions_ethereum", {
+  export const WrongPredictionsCrypto = pgTable("wrong_predictions_crypto", {
   walletAddress: text("walletAddress").notNull(),});
 
   export const ImageURLs = pgTable("image_urls", {
@@ -31,7 +31,7 @@ export const WrongPredictions = pgTable("wrong_Predictions", {
   createdAt: timestamp("created_at").defaultNow().notNull(), // Timestamp for when the image was added
 });
 
-export const EthereumBets = pgTable("ethereum_bets", {
+export const CryptoBets = pgTable("crypto_bets", {
   id: serial("id").primaryKey(), // Auto-incrementing ID as primary key
   walletAddress: text("wallet_address").notNull(), // Bettor's wallet address
   prediction: text("prediction").notNull(), // "positive" or "negative"

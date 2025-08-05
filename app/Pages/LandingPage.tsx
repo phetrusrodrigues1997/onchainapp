@@ -12,8 +12,8 @@ interface LandingPageProps {
 }
 
 const contractAddresses = {
-  bitcoin: '0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794',
-  ethereum: '0xD4B6F1CF1d063b760628952DDf32a44974129697',
+  Featured: '0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794',
+  Crypto: '0xD4B6F1CF1d063b760628952DDf32a44974129697',
   solana: '0xSolanaAddress...'
 } as const;
 
@@ -24,7 +24,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const availableMarkets = ["bitcoin", "ethereum"];
+  const availableMarkets = ["featured - random topics", "crypto"];
 
 
 
@@ -289,8 +289,13 @@ const handleMarketClick = (marketId: string) => {
     {/* Stats Footer */}
     <div className="flex justify-between items-center pt-4 border-t border-gray-100">
       <div className="flex items-center space-x-2">
-        <div className={`w-2.5 h-2.5 rounded-full ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'bg-green-500' : 'bg-red-500'}`}></div>
-        <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
+<div
+  className={`w-2.5 h-2.5 rounded-full ${
+    availableMarkets.includes(markets[0].name.toLowerCase())
+      ? 'bg-green-500 animate-pulse'
+      : 'bg-red-500'
+  }`}
+></div>        <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
           {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Live' : 'Soon'}
         </span>
       </div>
