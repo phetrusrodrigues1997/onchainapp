@@ -116,9 +116,9 @@ export default function App() {
           {activeSection === "activity" && <Activity />}
           {/* {activeSection === "notifications" && <CreateMessage />} */}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "home" && <LandingPage setActiveSection={setActiveSection} />}
+          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
-          {activeSection === "markets" && <Markets setActiveSection={setActiveSection}/>}
+          {activeSection === "markets" && <Markets activeSection={activeSection} setActiveSection={setActiveSection}/>}
           {/* Add more sections as needed */}
         
       </main>

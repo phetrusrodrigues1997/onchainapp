@@ -8,10 +8,11 @@ import { getMarkets } from '../Constants/allMarkets';
 
 
 interface MarketsProps {
+  activeSection: string;
   setActiveSection: (section: string) => void;
 }
 
-const Markets = ({ setActiveSection }: MarketsProps) => {
+const Markets = ({ activeSection, setActiveSection }: MarketsProps) => {
   const [isVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentLanguage] = useState<Language>(() => {

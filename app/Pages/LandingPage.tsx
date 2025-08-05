@@ -7,6 +7,7 @@ import { Language, getTranslation, supportedLanguages } from '../Languages/langu
 import { getMarkets } from '../Constants/markets';
 
 interface LandingPageProps {
+  activeSection: string;
   setActiveSection: (section: string) => void;
 }
 
@@ -16,7 +17,7 @@ const contractAddresses = {
   solana: '0xSolanaAddress...'
 } as const;
 
-const LandingPage = ({ setActiveSection }: LandingPageProps) => {
+const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [selectedMarket, setSelectedMarket] = useState('Featured');
