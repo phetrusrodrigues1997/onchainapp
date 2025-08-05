@@ -30,11 +30,10 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     { id: 'home', label: 'Home' },
     { id: 'markets', label: 'Search' },
     { id: 'profile', label: 'Profile' },
-    { id: 'wallet', label: 'Wallet' },
-    { id: 'buy', label: 'Purchase' },
+    { id: 'wallet', label: 'Receive USDC' },
+    { id: 'buy', label: 'Purchase USDC' },
     { id: 'discord', label: 'Discord' },
     
-    { id: 'placeHolder', label: 'PlaceHold' },
   ];
 
   return (
@@ -61,7 +60,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               className={`font-medium ${
                 activeSection === item.id
                   ? 'text-black text-base font-semibold'
-                  : 'text-[#666666] hover:text-black hover:font-semibold'
+                  : 'text-gray-500 hover:text-black hover:font-semibold'
               }`}
             >
               {item.label}

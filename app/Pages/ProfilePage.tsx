@@ -157,66 +157,66 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
         </div>
 
         {/* Leaderboard */}
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Global Leaderboard</h2>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[500px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trader</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Pots Won</th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accuracy</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {leaderboard.map((user) => (
-                  <tr 
-                    key={user.rank} 
-                    className={`${user.isCurrentUser ? 'bg-gray-50 border-l-2 border-gray-400' : ''} hover:bg-gray-50 transition-colors`}
-                  >
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="text-sm font-semibold text-gray-900">#{user.rank}</span>
-                        {user.rank <= 3 && (
-                          <Crown className={`w-3 h-3 ml-1 ${user.rank === 1 ? 'text-yellow-500' : user.rank === 2 ? 'text-gray-400' : 'text-amber-600'}`} />
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap">
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <span className={`text-sm font-medium ${user.isCurrentUser ? 'text-gray-900' : 'text-gray-800'}`}>
-                          {user.name}
-                        </span>
-                        {user.isCurrentUser && (
-                          <span className="text-xs text-gray-500 uppercase tracking-wide sm:ml-2">You</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
-                      {user.earnings}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-800 hidden sm:table-cell">
-                      {user.potsWon}
-                    </td>
-                    <td className="px-3 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-800">
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <span>{user.accuracy}</span>
-                        <span className="text-xs text-gray-500 sm:hidden mt-1">
-                          {user.potsWon} pots
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+<div className="bg-white rounded-lg border border-gray-200">
+  <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
+    <h2 className="text-lg font-semibold text-gray-900">Global Leaderboard</h2>
+  </div>
+  
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm">
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trader</th>
+          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Earnings</th>
+          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Pots Won</th>
+          <th className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accuracy</th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-100">
+        {leaderboard.map((user) => (
+          <tr 
+            key={user.rank} 
+            className={`${user.isCurrentUser ? 'bg-gray-50 border-l-2 border-gray-400' : ''} hover:bg-gray-50 transition-colors`}
+          >
+            <td className="px-2 sm:px-6 py-3 whitespace-nowrap">
+              <div className="flex items-center">
+                <span className="text-sm font-semibold text-gray-900">#{user.rank}</span>
+                {user.rank <= 3 && (
+                  <Crown className={`w-3 h-3 ml-1 ${user.rank === 1 ? 'text-yellow-500' : user.rank === 2 ? 'text-gray-400' : 'text-amber-600'}`} />
+                )}
+              </div>
+            </td>
+            <td className="px-2 sm:px-6 py-3">
+              <div className="flex flex-col">
+                <span className={`text-sm font-medium truncate max-w-[80px] sm:max-w-none ${user.isCurrentUser ? 'text-gray-900' : 'text-gray-800'}`}>
+                  {user.name}
+                </span>
+                {user.isCurrentUser && (
+                  <span className="text-xs text-gray-500 uppercase tracking-wide">You</span>
+                )}
+              </div>
+            </td>
+            <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+              {user.earnings}
+            </td>
+            <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-800 hidden sm:table-cell">
+              {user.potsWon}
+            </td>
+            <td className="px-2 sm:px-6 py-3">
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-800">{user.accuracy}</span>
+                <span className="text-xs text-gray-500 sm:hidden">
+                  {user.potsWon} pots
+                </span>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
       </div>
     </div>
   );
