@@ -113,10 +113,10 @@ export const translations: Record<Language, Translations> = {
     noMarketsFound: "No markets found. Please try a different search.",
 
     // PredictionPotTest specific
-    bitcoinPotTitle: 'The ₿itcoin Pot',
+    bitcoinPotTitle: 'Pot Details',
     connectWalletPrompt: 'Please connect your wallet to interact with the contract.',
     alreadyInPot: "🎉 You're in the Pot!",
-    enteredPotMessage: "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!",
+    enteredPotMessage: "You've successfully entered the pot. You can now place your predictions!",
     goToBetting: 'Go to Betting Page',
     entryAmount: 'Entry Amount',
     amountBalance: 'Pot Balance', // Added for consistency with other sections
@@ -190,10 +190,10 @@ export const translations: Record<Language, Translations> = {
     noMarketsFound: "Nenhum mercado encontrado. Por favor, tente uma pesquisa diferente.",
 
     // PredictionPotTest specific
-    bitcoinPotTitle: 'O Pote ₿itcoin',
+    bitcoinPotTitle: 'Detalhes do Pote',
     connectWalletPrompt: 'Por favor, conecte sua carteira para interagir com o contrato.',
     alreadyInPot: "🎉 Você está no Pote!",
-    enteredPotMessage: "Você entrou com sucesso no Pote Bitcoin. Agora pode fazer suas previsões diárias do preço do Bitcoin!",
+    enteredPotMessage: "Você entrou com sucesso no pote. Agora pode fazer suas previsões!",
     goToBetting: 'Ir para a Página de Apostas',
     entryAmount: 'Valor de Entrada',
     amountBalance: 'Saldo do Pote', // Added for consistency with other sections

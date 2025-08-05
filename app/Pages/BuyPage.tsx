@@ -82,6 +82,7 @@ const BuySection: React.FC = () => {
           border: none !important;
           font-size: 18px !important;
           font-weight: 600 !important;
+          box-shadow: none !important;
         }
 
         input[data-testid="ockTextInput_Input"]:focus {

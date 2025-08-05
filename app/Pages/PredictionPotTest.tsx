@@ -5,7 +5,7 @@ import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { setDailyOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
-
+import { useQueryClient } from '@tanstack/react-query';
 
 
 // Define table identifiers instead of passing table objects
@@ -151,48 +151,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   }, []);
 
-useEffect(() => {
-  if (isConfirmed) {
-    if (lastAction === 'approve') {
-      setIsLoading(false);
-      showMessage('USDC approval confirmed! You can now enter the pot.');
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } else if (lastAction === 'enterPot') {
-      setIsLoading(false);
-      showMessage('Successfully entered the pot! Redirecting to betting page...');
-    } else if (lastAction === 'distributePot') {
-      setIsLoading(false);
-      showMessage('Pot distributed successfully!');
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } else if (lastAction === 'processWinners') {
-      // This handles the combined action - pot distribution is confirmed, now clear wrong predictions
-      const finishProcessing = async () => {
-        try {
-          showMessage("Step 3/3: Clearing wrong predictions...");
-          await clearWrongPredictions(selectedTableType);
-          showMessage("🎉 Winners processed successfully! Pot distributed and wrong predictions cleared!");
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        } catch (error) {
-          showMessage("Pot distributed but failed to clear wrong predictions. Please clear manually.", true);
-        } finally {
-          setIsLoading(false);
-          setLastAction('');
-        }
-      };
-      
-      finishProcessing();
-      return; // Don't execute the common cleanup below
-    }
-    
-    setLastAction('');
-  }
-}, [isConfirmed, lastAction]);
+  
 
   // Reset loading state if transaction fails
   useEffect(() => {
@@ -369,6 +328,57 @@ useEffect(() => {
       return false;
     }
   })();
+
+  const queryClient = useQueryClient();
+useEffect(() => {
+  if (isConfirmed) {
+    if (lastAction === 'approve') {
+      setIsLoading(false);
+      showMessage('USDC approval confirmed! You can now enter the pot.');
+      setTimeout(() => {
+  // Force refetch of all contract data
+  queryClient.invalidateQueries({ queryKey: ['readContract'] });
+}, 1000);
+    } else if (lastAction === 'enterPot') {
+      setIsLoading(false);
+      showMessage('Successfully entered the pot! Redirecting to betting page...');
+      setTimeout(() => {
+  // Force refetch of all contract data
+  queryClient.invalidateQueries({ queryKey: ['readContract'] });
+}, 2000);
+    } else if (lastAction === 'distributePot') {
+      setIsLoading(false);
+      showMessage('Pot distributed successfully!');
+      setTimeout(() => {
+  // Force refetch of all contract data
+  queryClient.invalidateQueries({ queryKey: ['readContract'] });
+}, 1000);
+    } else if (lastAction === 'processWinners') {
+      // This handles the combined action - pot distribution is confirmed, now clear wrong predictions
+      const finishProcessing = async () => {
+        try {
+          showMessage("Step 3/3: Clearing wrong predictions...");
+          await clearWrongPredictions(selectedTableType);
+          showMessage("🎉 Winners processed successfully! Pot distributed and wrong predictions cleared!");
+          setTimeout(() => {
+  // Force refetch of all contract data
+  queryClient.invalidateQueries({ queryKey: ['readContract'] });
+}, 2000);
+        } catch (error) {
+          showMessage("Pot distributed but failed to clear wrong predictions. Please clear manually.", true);
+        } finally {
+          setIsLoading(false);
+          setLastAction('');
+        }
+      };
+      
+      finishProcessing();
+      return; // Don't execute the common cleanup below
+    }
+    
+    setLastAction('');
+  }
+}, [isConfirmed, lastAction]);
 
   return (
     <div className="min-h-screen bg-invisible p-4">
