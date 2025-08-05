@@ -207,33 +207,12 @@ body::before {
   display:none !important;
 }
 
-[data-testid="ockTextInput_Input"] {
-  color: white !important; /* Tailwind's green-500 */
-}
 
 [data-testid="ockIdentity_Text"] {
   color: #000000 !important; /* Tailwind's green-500 */
 }
 
-[data-testid="ockTransactionButton_Button"] {
-  background:white !important; /* green-500 */
-  color: black !important;
-  font-style: bold !important; /* Tailwind's font-semibold */
-  border-radius: 0.75rem !important; /* Tailwind's rounded-sm */
-  padding-top: 0.5rem !important; /* Tailwind's py-2 */
-  padding-bottom: 0.5rem !important;
-  padding-left: 1rem !important; /* Tailwind's px-4 */
-  padding-right: 1rem !important;
-  width: 100% !important;
-  transition: background-color 150ms ease-in-out !important;
-  border: none !important; /* Remove any default border */
-  opacity: 1 !important; /* Override the disabled opacity */
-  pointer-events: auto !important; /* Override pointer-events-none if needed */
-}
 
-[data-testid="ockTransactionButton_Button"]:hover {
-  background:#0000ff !important; /* green-600 */
-}
 .ock-font-family.text-sm.ock-text-foreground-muted {
   color: gray !important;
 }

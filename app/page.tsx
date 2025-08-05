@@ -17,7 +17,7 @@ import DiscordXSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import Markets from './Pages/Markets';
-// import WalletPage from './Pages/WalletPage';
+import WalletPage from './Pages/WalletPage';
 // import UsernameSetup from './Pages/UsernameSetup';
 // import CreateMessage from './Pages/MessagesPage';
 
@@ -119,12 +119,12 @@ export default function App() {
           {activeSection === "buy" && <BuySection />}
           {activeSection === "profile" && <ProfilePage/>}
           {activeSection === "discord" && <DiscordXSection />}
-          {/* {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />} */}
+          {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {/* {activeSection === "notifications" && <CreateMessage />} */}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "bitcoinBetting" && <BitcoinBetting contractAddress="0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794" /> }
+          {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
           {activeSection === "markets" && <Markets activeSection={activeSection} setActiveSection={setActiveSection}/>}
           {/* Add more sections as needed */}
         

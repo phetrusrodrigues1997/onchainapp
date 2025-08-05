@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Buy } from '@coinbase/onchainkit/buy'; 
 import type { Token } from '@coinbase/onchainkit/token';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCreditCard } from '@fortawesome/free-solid-svg-icons'
+import { CreditCard, Wallet, ArrowRight } from 'lucide-react';
 
 const USDCToken: Token = {
   address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -22,21 +21,6 @@ const BuySection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currencyIndex, setCurrencyIndex] = useState(0);
 
-  const currencies = [
-    { name: "pound", symbol: "£" },
-    { name: "yen", symbol: "¥" },
-    { name: "real", symbol: "R$" },
-    { name: "peso", symbol: "$" },
-    { name: "euro", symbol: "€" },
-    { name: "franc", symbol: "Fr" },
-    { name: "rupee", symbol: "₹" },
-    { name: "won", symbol: "₩" },
-    { name: "lira", symbol: "₺" },
-    { name: "krona", symbol: "kr" },
-    { name: "rand", symbol: "R" },
-    { name: "ruble", symbol: "₽" }
-  ];
-
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -45,15 +29,6 @@ const BuySection: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrencyIndex((prev) => (prev + 1) % currencies.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-
 
   useEffect(() => {
     const styleId = 'custom-button-style';
@@ -66,33 +41,60 @@ const BuySection: React.FC = () => {
         document.head.appendChild(styleTag);
       }
 
-      // Always re-set the CSS content (in case it was removed or overwritten)
       styleTag.innerHTML = `
         [data-testid="ockBuyButton_Button"],
         [data-testid="ockSwapButton_Button"] {
-          background-color: #6A5ACD !important;
+          background-color: #000000 !important;
+          border: 2px solid #e5e7eb !important;
+          border-radius: 12px !important;
+          transition: all 0.2s ease !important;
+        }
+
+        [data-testid="ockBuyButton_Button"]:hover,
+        [data-testid="ockSwapButton_Button"]:hover {
+          background-color: #1f2937 !important;
+          border-color: #9ca3af !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         }
 
         [data-testid="ockBuyButton_Button"] span,
         [data-testid="ockSwapButton_Button"] span {
-          color: black !important;
+          color: white !important;
+          font-weight: 600 !important;
+          font-size: 16px !important;
+        }
+
+        .ock-bg-default {
+          background-color: white !important;
+          border: 2px solid #e5e7eb !important;
+          border-radius: 16px !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .ock-text-foreground {
+          color: #111827 !important;
+        }
+
+        input[data-testid="ockTextInput_Input"] {
+          color: #111827 !important;
+          background-color: transparent !important;
+          border: none !important;
+          font-size: 18px !important;
+          font-weight: 600 !important;
+        }
+
+        input[data-testid="ockTextInput_Input"]:focus {
+          outline: none !important;
+          box-shadow: none !important;
         }
       `;
     };
 
-    // Inject immediately
     injectStyle();
-
-    // Re-apply styles after a delay in case components are rendered late
-    const timeout = setTimeout(() => {
-      injectStyle();
-    }, 1000); // 1 second delay just to be safe
-
-    // Optional: Observe DOM changes too
-    const observer = new MutationObserver(() => {
-      injectStyle();
-    });
-
+    const timeout = setTimeout(injectStyle, 1000);
+    
+    const observer = new MutationObserver(injectStyle);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -105,50 +107,30 @@ const BuySection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const spanElement = document.querySelector('span.ock-font-family.font-semibold') as HTMLElement | null;
-    if (spanElement) {
-      spanElement.style.color = 'black';
-      spanElement.style.fontWeight = 'bold';
-    }
-  }, []);
-
-  useEffect(() => {
     const setInputStyles = () => {
       const inputField = document.querySelector('input[data-testid="ockTextInput_Input"]') as HTMLInputElement | null;
       if (inputField) {
-        // Set multiple style properties to ensure text is black
-        inputField.style.setProperty("color", "black", "important");
-        inputField.style.caretColor = "black";
-        inputField.style.backgroundColor = "white"; // Optional: ensures contrast
-        // Force style recalculation
+        inputField.style.setProperty("color", "#111827", "important");
+        inputField.style.caretColor = "#111827";
+        inputField.style.backgroundColor = "transparent";
         inputField.style.display = 'none';
-        inputField.offsetHeight; // Trigger reflow
+        inputField.offsetHeight;
         inputField.style.display = '';
       }
     };
   
-    // Initial application
     const timeoutId = setTimeout(setInputStyles, 100);
-    
-  
-    // Create an observer to watch for changes
     const observer = new MutationObserver(setInputStyles);
     observer.observe(document.body, { 
       childList: true, 
       subtree: true 
     });
   
-    // Cleanup
     return () => {
       clearTimeout(timeoutId);
       observer.disconnect();
     };
   }, []);
-
-
-  
-  
-  
 
   const getContainerWidth = () => {
     if (windowWidth < 640) return 'w-full max-w-sm';
@@ -165,37 +147,80 @@ const BuySection: React.FC = () => {
   });
 
   return (
-    <div className="mt-28">
-      <div className="w-full max-w-sm mx-auto p-4">
-  {/* Icon row */}
-  <div className="flex justify-center mb-8">
-    <FontAwesomeIcon icon={faCreditCard} className="text-[#111111] text-8xl" />
-  </div>
+    <div className="min-h-screen bg-[#fefefe]">
+      <div className="pt-20 pb-12">
+        
 
-  <p className="text-xl sm:text-xl font-bold text-black text-center mb-4 sm:mb-6">
-    Buy USDC, swap it for the{' '}
-    <span className="inline-block transition-all duration-300 ease-in-out">
-      {currencies[currencyIndex].symbol} {currencies[currencyIndex].name}.
-    </span>
-  </p>
-</div>
+        {/* Main Buy Section */}
+        <div className={`${getContainerWidth()} mx-auto px-4`}>
+          {filteredTokens.length > 0 ? (
+            <div className="space-y-6">
+              {filteredTokens.map((item) => (
+                <div
+                  key={item.token.symbol}
+                  className="bg-white rounded-2xl border-2 border-gray-200 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-300"
+                >
+                  {/* Token Info Header */}
+                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                        <img 
+                          src={item.token.image ?? ""} 
+                          alt={item.token.symbol}
+                          className="w-8 h-8 rounded-full"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">{item.token.symbol}</h3>
+                        <p className="text-gray-500 text-sm">{item.token.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Wallet className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4" />
+                      <CreditCard className="w-4 h-4" />
+                    </div>
+                  </div>
 
-      <div className={`${getContainerWidth()} mx-auto p-4 bg-transparent rounded-lg rounded-2xl`}>
-
-        {filteredTokens.length > 0 ? (
-          <div className="space-y-3 sm:space-y-4">
-            {filteredTokens.map((item) => (
-              <div
-                key={item.token.symbol}
-                className="flex items-center justify-between p-3 sm:p-4 rounded-lg"
-              >
-                <Buy toToken={item.token} />
+                  {/* Buy Component */}
+                  <div className="buy-component-wrapper">
+                    <Buy toToken={item.token} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="w-8 h-8 text-gray-400" />
               </div>
-            ))}
+              <p className="text-gray-500 text-lg">No tokens found</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Info */}
+        <div className="max-w-2xl mx-auto mt-16 px-4">
+          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Secure & Fast</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Secure</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Instant processing</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span>Low fees</span>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <p className="text-center text-gray-400">No tokens found.</p>
-        )}
+        </div>
       </div>
     </div>
   );
