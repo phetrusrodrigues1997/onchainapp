@@ -454,7 +454,6 @@ useEffect(() => {
           {/* User Actions - Only show if not yet a participant */}
           {isConnected && contractAddress && !isParticipant && (
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">User Actions</h2>
               <div className="space-y-4">
                 
                 {/* Approve USDC */}
