@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'Foresight - Survival of the Brightest',
   description: 'Focused on building the best prediction market services.',
   icons: {
-    icon: '/logoF2_2.png',
+    icon: '/logoF2_2_updated.png',
   },
 };
 

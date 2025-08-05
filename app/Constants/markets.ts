@@ -195,6 +195,17 @@ useEffect(() => {
 
   else if (category === 'options') {
     return [
+      {
+    id: 'Featured',
+    name: 'Featured',
+    symbol: '★',
+    color: '#FF5733',
+    question: '',
+    icon: '★',
+    currentPrice: '$100',
+    participants: 50,
+    potSize: '$500',
+  },
   {
     id: 'crypto',
     name: 'Crypto',
@@ -399,6 +410,21 @@ useEffect(() => {
   }
 ]
 
+ }
+
+ else if (category === 'Featured') {
+  return [{
+  id: 'highlighted',
+  name: '🎯 Featured Pot — Random Topics',
+  symbol: '',
+  color: '#1DB954',
+  question: 'Will Elon Musk talk about Trump tomorrow?',
+  icon: 'https://media.vanityfair.com/photos/688e40e223964725a3e575a1/master/w_1920,c_limit/2217854935',
+  currentPrice: '$150',
+  participants: 42,
+  potSize: '$420',
+}
+]
  }
 
  else if (category === 'music') {
