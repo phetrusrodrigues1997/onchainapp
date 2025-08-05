@@ -73,7 +73,7 @@ export async function saveImageUrl(walletAddress: string, imageUrl: string) {
 //         target: userPoints.walletAddress,
 //         set: { username: newUsername },
 //       });
-//   } catch (error: any) {
+//   } catch (error: unknown) {
 //     if (error.code === '23505' && error.constraint === 'user_points_username_key') {
 //       throw new Error('Username is already taken');
 //     } else {
@@ -223,9 +223,9 @@ return db
   .returning();
 
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error placing Bitcoin bet:", error);
-    throw new Error(error.message || "Failed to place Bitcoin bet");
+    throw new Error(error instanceof Error ? error.message : "Failed to place Bitcoin bet");
   }
 }
 

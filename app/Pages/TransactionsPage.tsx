@@ -123,7 +123,7 @@ const Activity: React.FC = () => {
         const tokenData = await tokenResp.json();
 
         let nativeTxs: Transaction[] = nativeData.status === "1" && nativeData.result ? nativeData.result : [];
-        let tokenTxs: Transaction[] = tokenData.status === "1" && tokenData.result ? tokenData.result.map((tx: any) => ({
+        let tokenTxs: Transaction[] = tokenData.status === "1" && tokenData.result ? tokenData.result.map((tx: Record<string, unknown>) => ({
           ...tx,
           tokenSymbol: tx.tokenSymbol,
           tokenDecimal: tx.tokenDecimal
@@ -207,15 +207,15 @@ const Activity: React.FC = () => {
         // Sort filtered transactions by timestamp (descending)
         filteredTxs.sort((a, b) => Number(b.timeStamp) - Number(a.timeStamp));
         setMergedTxs(filteredTxs);
-      } catch (err: any) {
-        setError(err.message || 'Error fetching transactions');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Error fetching transactions');
       } finally {
         setLoading(false);
       }
     };
 
     fetchTransactions();
-  }, [address]);
+  }, [address, tokenList]);
 
   return (
     <div

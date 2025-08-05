@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { CADCToken, BRZToken, EURCToken } from '../Constants/coins';
 
 
@@ -75,11 +76,12 @@ export default function LiveCryptoPrices() {
                 className="p-2 rounded-lg flex items-center space-x-2 space-y-4 w-28"
                 
               >
-                <img
+                <Image
                   src={token.image || 'https://via.placeholder.com/32'}
                   alt={token.name}
+                  width={24}
+                  height={24}
                   className="w-6 h-6"
-                  onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/32')}
                 />
                 <div>
                   <p className="font-semibold text-white text-sm">{token.symbol}</p>

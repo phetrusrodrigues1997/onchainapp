@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { placeBitcoinBet, getTodaysBet } from '../Database/actions';
 import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
@@ -74,14 +74,7 @@ export default function BitcoinBetting() {
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
 
-  // Load today's bet on component mount and when address changes
-  useEffect(() => {
-    if (address && isParticipant) {
-      loadTodaysBet();
-    }
-  }, [address, isParticipant, selectedTableType]);
-
-  const loadTodaysBet = async () => {
+  const loadTodaysBet = useCallback(async () => {
     if (!address) return;
 
     setIsBetLoading(true);
@@ -95,9 +88,16 @@ export default function BitcoinBetting() {
     } finally {
       setIsBetLoading(false);
     }
-  };
+  }, [address, selectedTableType]);
 
-  const showMessage = (msg: string, isError = false) => {
+  // Load today's bet on component mount and when address changes
+  useEffect(() => {
+    if (address && isParticipant) {
+      loadTodaysBet();
+    }
+  }, [address, isParticipant, selectedTableType, loadTodaysBet]);
+
+  const showMessage = (msg: string) => {
     setMessage(msg);
     setTimeout(() => setMessage(''), 5000);
   };
@@ -113,9 +113,9 @@ export default function BitcoinBetting() {
       
       showMessage(`Bet placed successfully! `);
       await loadTodaysBet(); // Reload to show the new bet
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error placing bet:', error);
-      showMessage(error.message || 'Failed to place bet. Please try again.', true);
+      showMessage(error instanceof Error ? error.message : 'Failed to place bet. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
 
 interface LandingPageProps {
-  activeSection: string;
   setActiveSection: (section: string) => void;
 }
 
@@ -17,7 +16,7 @@ const contractAddresses = {
   solana: '0xSolanaAddress...'
 } as const;
 
-const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
+const LandingPage = ({ setActiveSection }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [selectedMarket, setSelectedMarket] = useState('Featured');

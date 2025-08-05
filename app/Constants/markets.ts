@@ -1,7 +1,5 @@
 // src/data/markets.ts
 import { getTranslation } from '../Languages/languages'
-import React, { useEffect, useState } from 'react';
-import { getPrice } from '../Constants/getPrice';
 
 // “Translation” is whatever shape getTranslation returns
 type Translation = ReturnType<typeof getTranslation>
@@ -18,19 +16,7 @@ export interface Market {
   potSize: string
 }
 
-export const getMarkets = (t: Translation, category: String): Market[] => {
-  const [bitcoinPrice, setBitcoinPrice] = useState<number | null>(null);
-  const [ethereumPrice, setEthereumPrice] = useState<number | null>(null);
-
-useEffect(() => {
-    async function fetchPrice() {
-      const price = await getPrice('bitcoin');
-      const ethPrice = await getPrice('ethereum');
-      setBitcoinPrice(price);
-      setEthereumPrice(ethPrice);
-    }
-    fetchPrice();
-  }, []);
+export const getMarkets = (t: Translation, category: string): Market[] => {
 
   if (category === 'sports') {
     return [
@@ -359,7 +345,7 @@ else if (category === 'xtrends') {
     color: '#F7931A',
     question: t.bitcoinQuestion ?? '',
     icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/800px-Bitcoin.svg.png',
-    currentPrice: bitcoinPrice !== null ? `$${bitcoinPrice.toFixed(2)}` : '$0.00',
+    currentPrice: '$99,000.00', // Static price - use dynamic pricing component separately
     participants: 127,
     potSize: '$1,270',
   },

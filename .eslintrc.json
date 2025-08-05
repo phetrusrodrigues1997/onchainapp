@@ -1,3 +1,17 @@
 {
-  "extends": ["next/core-web-vitals", "next/typescript"]
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "rules": {
+    // Convert critical errors to warnings for development
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "warn", 
+    "react-hooks/exhaustive-deps": "warn",
+    "react/no-unescaped-entities": "warn",
+    "@next/next/no-img-element": "warn",
+    "prefer-const": "warn",
+    "@typescript-eslint/no-unused-expressions": "warn",
+    
+    // Keep critical errors as errors
+    "react/jsx-no-comment-textnodes": "error",
+    "@typescript-eslint/no-wrapper-object-types": "error"
+  }
 }

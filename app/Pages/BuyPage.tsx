@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Image from 'next/image';
 import { Buy } from '@coinbase/onchainkit/buy'; 
 import type { Token } from '@coinbase/onchainkit/token';
 import { CreditCard, Wallet, ArrowRight } from 'lucide-react';
@@ -18,8 +19,7 @@ const tokens = [
 
 const BuySection: React.FC = () => {
   const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [currencyIndex, setCurrencyIndex] = useState(0);
+  const [searchQuery] = useState<string>(''); // Keep searchQuery as it's used in filtering
 
   useEffect(() => {
     const handleResize = () => {
@@ -115,7 +115,7 @@ const BuySection: React.FC = () => {
         inputField.style.caretColor = "#111827";
         inputField.style.backgroundColor = "transparent";
         inputField.style.display = 'none';
-        inputField.offsetHeight;
+        void inputField.offsetHeight; // Force reflow
         inputField.style.display = '';
       }
     };
@@ -165,9 +165,11 @@ const BuySection: React.FC = () => {
                   <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                        <img 
-                          src={item.token.image ?? ""} 
+                        <Image 
+                          src={item.token.image ?? "/placeholder-token.png"} 
                           alt={item.token.symbol}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full"
                         />
                       </div>

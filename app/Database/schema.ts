@@ -1,4 +1,4 @@
-import { pgTable, text, integer, boolean, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, serial, timestamp } from "drizzle-orm/pg-core";
 
 
 export const Messages = pgTable("Messages", {

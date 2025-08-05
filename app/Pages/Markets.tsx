@@ -2,20 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { Star, ArrowRight, Search } from 'lucide-react';
+import { ArrowRight, Search } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/allMarkets';
 
 
 interface MarketsProps {
-  activeSection: string;
   setActiveSection: (section: string) => void;
 }
 
-const Markets = ({ activeSection, setActiveSection }: MarketsProps) => {
-  const [isVisible, setIsVisible] = useState(true);
+const Markets = ({ setActiveSection }: MarketsProps) => {
+  const [isVisible] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
+  const [currentLanguage] = useState<Language>(() => {
   const savedLang = Cookies.get('language');
 
   if (savedLang && supportedLanguages.some(lang => lang.code === savedLang)) {

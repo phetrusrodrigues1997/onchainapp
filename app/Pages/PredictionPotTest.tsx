@@ -512,7 +512,7 @@ useEffect(() => {
           )}
 
           {/* Owner Actions */}
-          /* Replace your entire Owner Actions section with this combined version */
+          {/* Replace your entire Owner Actions section with this combined version */}
 
 {isOwner && contractAddress && (
   <div className="mb-6">

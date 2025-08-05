@@ -1,15 +1,15 @@
 // App.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAccount,useSendTransaction } from 'wagmi';
+import React, { useState } from 'react';
+// import { useAccount, useSendTransaction } from 'wagmi';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
 import BitcoinBetting from './Pages/BitcoinBetting';
 import ProfilePage from './Pages/ProfilePage';
 // import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import BuySection from "./Pages/BuyPage";
-import CurrencyDisplay from './Pages/Charts';
+// import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
@@ -27,16 +27,9 @@ import WalletPage from './Pages/WalletPage';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('home'); // Default section
-  const [toastMessage, setToastMessage] = useState('');
-  const [showToast, setShowToast] = useState(false);
-  // const [swappableTokensList, setSwappableTokensList] = useState<Token[]>(stablecoinTokens); // Default to Stablecoins
-  const [isMounted, setIsMounted] = useState(false);
-  const [points, setPoints] = useState<number | null>(null);
-  const [showSwapButton, setShowSwapButton] = useState(true);
-  const [selectedOption, setSelectedOption] = useState<"Stablecoins" | "Crypto">("Stablecoins");
-  const { address } = useAccount();
-  const { sendTransaction } = useSendTransaction();
-  const feeRecipient = '0x1Ac08E56c4d95bD1B8a937C6EB626cFEd9967D67';
+  const [toastMessage] = useState('');
+  const [showToast] = useState(false);
+  // Removed unused state variables for cleaner code
 
   
 
@@ -123,9 +116,9 @@ export default function App() {
           {activeSection === "activity" && <Activity />}
           {/* {activeSection === "notifications" && <CreateMessage />} */}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "home" && <LandingPage setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
-          {activeSection === "markets" && <Markets activeSection={activeSection} setActiveSection={setActiveSection}/>}
+          {activeSection === "markets" && <Markets setActiveSection={setActiveSection}/>}
           {/* Add more sections as needed */}
         
       </main>
