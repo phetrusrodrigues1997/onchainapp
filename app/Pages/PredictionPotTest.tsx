@@ -392,7 +392,7 @@ useEffect(() => {
           </div>
 
           {!isConnected && (
-            <div className="text-center text-[#F5F5F5] mb-6">
+            <div className="text-center text-bold text-[#111111] mb-6">
               {t.connectWalletPrompt || 'Please connect your wallet to interact with the contract.'}
             </div>
           )}

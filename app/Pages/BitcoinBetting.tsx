@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
-import { placeBitcoinBet, getTodaysBet } from '../Database/actions';
+import { placeBitcoinBet, getTomorrowsBet, getTodaysBet } from '../Database/actions';
 import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
 import Cookies from 'js-cookie';
 
@@ -35,6 +35,7 @@ export default function BitcoinBetting() {
   const { address, isConnected } = useAccount();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
+  const [tomorrowsBet, setTomorrowsBet] = useState<TodaysBet | null>(null);
   const [todaysBet, setTodaysBet] = useState<TodaysBet | null>(null);
   const [isBetLoading, setIsBetLoading] = useState<boolean>(true);
   const [contractAddress, setContractAddress] = useState<string>('');
@@ -74,28 +75,34 @@ export default function BitcoinBetting() {
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
 
-  const loadTodaysBet = useCallback(async () => {
+  const loadBets = useCallback(async () => {
     if (!address) return;
 
     setIsBetLoading(true);
     try {
-      // Pass the table type string instead of the table object
-      const bet = await getTodaysBet(address, selectedTableType);
-      setTodaysBet(bet);
+      // Load both tomorrow's bet (for betting interface) and today's bet (for results display)
+      const [tomorrowBet, todayBet] = await Promise.all([
+        getTomorrowsBet(address, selectedTableType),
+        getTodaysBet(address, selectedTableType)
+      ]);
+      
+      setTomorrowsBet(tomorrowBet);
+      setTodaysBet(todayBet);
     } catch (error) {
-      console.error("Error loading today's bet:", error);
+      console.error("Error loading bets:", error);
+      setTomorrowsBet(null);
       setTodaysBet(null);
     } finally {
       setIsBetLoading(false);
     }
   }, [address, selectedTableType]);
 
-  // Load today's bet on component mount and when address changes
+  // Load bets on component mount and when address changes
   useEffect(() => {
     if (address && isParticipant) {
-      loadTodaysBet();
+      loadBets();
     }
-  }, [address, isParticipant, selectedTableType, loadTodaysBet]);
+  }, [address, isParticipant, selectedTableType, loadBets]);
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -111,8 +118,11 @@ export default function BitcoinBetting() {
       await placeBitcoinBet(address, prediction, selectedTableType);
       
       
-      showMessage(`Bet placed successfully! `);
-      await loadTodaysBet(); // Reload to show the new bet
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowFormatted = tomorrow.toLocaleDateString();
+      showMessage(`Bet placed successfully for ${tomorrowFormatted}!`);
+      await loadBets(); // Reload to show the new bet
     } catch (error: unknown) {
       console.error('Error placing bet:', error);
       showMessage(error instanceof Error ? error.message : 'Failed to place bet. Please try again.');
@@ -192,43 +202,67 @@ export default function BitcoinBetting() {
               <span className="font-medium">Loading your bet...</span>
             </div>
           </div>
-        ) : todaysBet ? (
-          // Enhanced bet display with premium feel
-          <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
-            {/* Subtle pattern overlay */}
-            <div className="absolute inset-0 opacity-5">
-              <div className={`absolute inset-0 ${
-                todaysBet.prediction === 'positive' 
-                  ? 'bg-gradient-to-br from-green-500/20 to-transparent' 
-                  : 'bg-gradient-to-br from-red-500/20 to-transparent'
-              }`}></div>
-            </div>
-            
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-6 px-10 py-8 rounded-3xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-xl">
-                {todaysBet.prediction === 'positive' ? (
-                  <div className="p-4 bg-[#00dd00] rounded-2xl shadow-lg">
-                    <TrendingUp className="w-12 h-12 text-white " />
-                  </div>
-                ) : (
-                  <div className="p-4 bg-[#dd0000] rounded-2xl shadow-lg">
-                    <TrendingDown className="w-12 h-12 text-white" />
-                  </div>
-                )}
-                <div className="text-left">
-                  <div className="text-4xl font-black text-gray-900 tracking-tight mb-1">
-                    {todaysBet.prediction === 'positive' ? 'YES' : 'NO'}
-                  </div>
-                  <div className="text-gray-500 text-sm font-medium">
-                    {new Date(todaysBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+        ) : (
+          <>
+            {/* Today's Bet Results (if any) */}
+            {todaysBet && (
+              <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 mb-6 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
+                <div className="relative z-10">
+                  <h3 className="text-lg font-bold text-gray-700 mb-4">Today's Prediction Results</h3>
+                  <div className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-lg">
+                    {todaysBet.prediction === 'positive' ? (
+                      <div className="p-3 bg-[#00dd00] rounded-xl shadow-md">
+                        <TrendingUp className="w-8 h-8 text-white" />
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-[#dd0000] rounded-xl shadow-md">
+                        <TrendingDown className="w-8 h-8 text-white" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <div className="text-2xl font-black text-gray-900 tracking-tight">
+                        {todaysBet.prediction === 'positive' ? 'YES' : 'NO'}
+                      </div>
+                      <div className="text-gray-500 text-xs font-medium">
+                        Awaiting results...
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <p className="text-gray-500 text-lg mt-8 font-medium">Come back tomorrow!</p>
-            </div>
-          </div>
-        ) : (
-          // Premium betting interface
+            )}
+
+            {/* Tomorrow's Bet Interface */}
+            {tomorrowsBet ? (
+              <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold text-gray-700 mb-6">Tomorrow's Prediction</h3>
+                  <div className="inline-flex items-center gap-6 px-10 py-8 rounded-3xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-xl">
+                    {tomorrowsBet.prediction === 'positive' ? (
+                      <div className="p-4 bg-[#00dd00] rounded-2xl shadow-lg">
+                        <TrendingUp className="w-12 h-12 text-white" />
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-[#dd0000] rounded-2xl shadow-lg">
+                        <TrendingDown className="w-12 h-12 text-white" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <div className="text-4xl font-black text-gray-900 tracking-tight mb-1">
+                        {tomorrowsBet.prediction === 'positive' ? 'YES' : 'NO'}
+                      </div>
+                      <div className="text-gray-500 text-sm font-medium">
+                        {new Date(tomorrowsBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-gray-500 text-lg mt-6 font-medium">
+                    Prediction set for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              // Premium betting interface
           <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
             {/* Subtle animated background */}
             <div className="absolute inset-0 opacity-10">
@@ -237,7 +271,10 @@ export default function BitcoinBetting() {
             
             <div className="relative z-10">
               <div className="text-center mb-10">
-                <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">Your Call?</h2>
+                <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Your Call?</h2>
+                <p className="text-gray-600 text-lg mb-4">
+                  Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
+                </p>
                 <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>
               </div>
 
@@ -293,8 +330,10 @@ export default function BitcoinBetting() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
-          </div>
+            )}
+          </>
         )}
 
         {/* Enhanced Status Message */}
@@ -316,7 +355,7 @@ export default function BitcoinBetting() {
           </div>
           
           <div className="relative z-10 text-gray-700 text-sm font-bold tracking-wide">
-            One prediction per day • Pot participants only
+            Predict tomorrow's outcome • One prediction per day • Pot participants only
           </div>
         </div>
       </div>

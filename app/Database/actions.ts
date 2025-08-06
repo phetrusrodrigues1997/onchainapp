@@ -165,15 +165,20 @@ export async function getAllMessages(address: string) {
 }
 
 /**
- * Places a Bitcoin price prediction bet for today.
- * Only allows one bet per wallet per day.
+ * Places a Bitcoin price prediction bet for the next day.
+ * Only allows one bet per wallet per prediction day.
  */
 
 export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'bitcoin') {
   try {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    // Get tomorrow's date for the prediction
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const predictionDate = tomorrow.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
     const betsTable = getTableFromType(typeTable);
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
+    
     // 1. Check if the user is blocked due to wrong prediction
     const isBlocked = await db
       .select()
@@ -185,13 +190,13 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
       throw new Error('You are temporarily blocked from betting due to an incorrect prediction.');
     }
 
-    // 2. Check if the user already placed a bet today
+    // 2. Check if the user already placed a bet for tomorrow
     const existingBet = await db
       .select()
       .from(betsTable)
       .where(and(
         eq(betsTable.walletAddress, walletAddress),
-        eq(betsTable.betDate, today)
+        eq(betsTable.betDate, predictionDate)
       ))
       .limit(1);
 
@@ -202,26 +207,22 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
         .set({ prediction })
         .where(and(
           eq(betsTable.walletAddress, walletAddress),
-          eq(betsTable.betDate, today)
+          eq(betsTable.betDate, predictionDate)
         ));
-      return { updated: true };
+      return { updated: true, predictionDate };
     }
 
-    // 4. Otherwise, delete all previous bets for this wallet and insert new bet
-await db
-  .delete(betsTable)
-  .where(eq(betsTable.walletAddress, walletAddress))
-  .execute();
+    // 4. Otherwise, insert new bet for tomorrow
+    const result = await db
+      .insert(betsTable)
+      .values({
+        walletAddress,
+        prediction,
+        betDate: predictionDate,
+      })
+      .returning();
 
-return db
-  .insert(betsTable)
-  .values({
-    walletAddress,
-    prediction,
-    betDate: today,
-  })
-  .returning();
-
+    return { ...result[0], predictionDate };
 
   } catch (error: unknown) {
     console.error("Error placing Bitcoin bet:", error);
@@ -231,7 +232,33 @@ return db
 
 
 /**
- * Gets the user's bet for today (if any).
+ * Gets the user's bet for tomorrow (the active prediction).
+ */
+export async function getTomorrowsBet(walletAddress: string, tableType: string = 'bitcoin') {
+  try {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const predictionDate = tomorrow.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    const betsTable = getTableFromType(tableType);
+    const result = await db
+      .select()
+      .from(betsTable)
+      .where(and(
+        eq(betsTable.walletAddress, walletAddress),
+        eq(betsTable.betDate, predictionDate)
+      ))
+      .limit(1);
+
+    return result.length > 0 ? { ...result[0], predictionDate } : null;
+  } catch (error) {
+    console.error("Error fetching tomorrow's bet:", error);
+    throw new Error("Failed to fetch tomorrow's bet");
+  }
+}
+
+/**
+ * Gets the user's bet for today (for display purposes).
  */
 export async function getTodaysBet(walletAddress: string, tableType: string = 'bitcoin') {
   try {
