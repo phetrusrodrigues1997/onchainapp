@@ -233,7 +233,7 @@ const handleMarketClick = (marketId: string) => {
           </div>
 
           
-<div className={`max-w-xl mx-auto ${selectedMarket === 'Featured' ? '-translate-y-12' : ''}`}>
+<div className="max-w-xl mx-auto -translate-y-12" >
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}

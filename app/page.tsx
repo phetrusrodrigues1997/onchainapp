@@ -76,9 +76,9 @@ export default function App() {
           </div>
           <div className="wallet-container">
             <Wallet>
-<ConnectWallet className='dark:bg-[#e1e1e1]'>
+<ConnectWallet className='dark:bg-[#e1e1e1] !flex !items-center !justify-center !text-center'>
                 <Avatar className="h-6 w-6" />
-                <Name />
+                <span className="text-sm font-bold mr-2">Connected</span>
               </ConnectWallet>
               <WalletDropdown>
                 <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
