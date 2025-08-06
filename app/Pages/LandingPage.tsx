@@ -142,7 +142,7 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fefefe] text-[#111111] overflow-hidden -mt-32">
+    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden -mt-32">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -237,7 +237,7 @@ const handleMarketClick = (marketId: string) => {
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}
-    className="group bg-[#fdfdfd] rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
+    className="group bg-[#ffffff] rounded-xl p-6 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
   >
     
     {/* Background Gradient Accent */}
@@ -246,14 +246,14 @@ const handleMarketClick = (marketId: string) => {
     {/* Header with Icon and Price */}
     <div className="flex flex-col items-center mb-4">
       <div className="flex items-center justify-center mb-3">
-        <div className={`rounded-xl bg-transparent flex items-center justify-center ${
-  selectedMarket === 'Featured' ? 'w-60 h-48' : 'w-32 h-24'
+        <div className={`rounded-xl bg-[#ffffff] flex items-center justify-center ${
+  selectedMarket === 'Featured' ? 'w-60 h-48' : 'w-38 h-24'
 }`}>
   {markets[0].icon?.slice(0, 4) === 'http' ? (
     <img 
       src={markets[0].icon} 
       alt={`${markets[0].name} Icon`} 
-      className={selectedMarket === 'Featured' ? 'w-56 h-44 object-contain' : 'w-28 h-20 object-contain'} 
+      className={selectedMarket === 'Featured' ? 'w-62 h-44 object-contain' : 'w-38 h-24 object-contain'} 
     />
   ) : (
     <span className="text-lg text-white">{markets[0].icon}</span>

@@ -444,18 +444,18 @@ useEffect(() => {
           {/* User Actions - Show different content if already a participant */}
           {isConnected && contractAddress && isParticipant && (
             <div className="mb-6">
-              <div className="bg-[#191919] rounded-2xl border border-gray-200 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-300 text-center">
-                <div className="text-[#d3c81a] text-xl font-semibold mb-3">
-                  {t.alreadyInPot || "🎉 You're in the Pot!"}
+              <div className="bg-white rounded-xl border border-gray-200 p-8 hover:border-gray-300 transition-all duration-300 text-center">
+                <div className="text-2xl font-light text-gray-900 mb-3">
+                  {t.alreadyInPot || "✓ You're in the Pot"}
                 </div>
-                <div className="font-bold text-[#f0f0f0] mb-4">
+                <div className="text-gray-600 font-light mb-6 leading-relaxed">
                   {t.enteredPotMessage || "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!"}
                 </div>
                 <button
                   onClick={() => setActiveSection('bitcoinBetting')}
-                  className="bg-[#c4b517] text-black font-bold px-6 py-3 rounded-md hover:bg-white transition-colors"
+                  className="px-8 py-3 bg-gray-900 text-white font-medium rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105"
                 >
-                  {t.goToBetting || 'Go to Betting Page'}
+                  {t.goToBetting || 'Start Betting'}
                 </button>
               </div>
             </div>

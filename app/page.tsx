@@ -62,7 +62,7 @@ export default function App() {
      <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
       
       {/* Dark green header */}
-      <header className="z-50 bg-white px-4 py-3 shadow-md sticky top-0">
+      <header className="z-50 bg-[#fbfbfb] px-4 py-3 shadow-md sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -78,7 +78,7 @@ export default function App() {
             <Wallet>
 <ConnectWallet className='dark:bg-[#e1e1e1] !flex !items-center !justify-center !text-center'>
                 <Avatar className="h-6 w-6" />
-                <span className="text-sm font-bold mr-2">Connected</span>
+                <span className="text-md font-bold mr-1">Connected</span>
               </ConnectWallet>
               <WalletDropdown>
                 <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
