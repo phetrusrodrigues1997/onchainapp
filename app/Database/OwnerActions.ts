@@ -64,6 +64,15 @@ export async function setDailyOutcome(
       await db
         .delete(betsTable)
         .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
+
+       // Remove predictions placed yesterday
+    const today = new Date();
+    today.setDate(today.getDate());
+    const todayISO = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    
+    await db
+      .delete(betsTable)
+      .where(eq(betsTable.betDate, todayISO));
     }
   } catch (error) {
     console.error("Error processing outcome:", error);
@@ -119,14 +128,7 @@ export async function determineWinners(typeTable: string = 'bitcoin') {
       .select({ walletAddress: betsTable.walletAddress })
       .from(betsTable);
 
-    // Remove predictions placed yesterday
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate());
-    const yesterdayISO = yesterday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    
-    await db
-      .delete(betsTable)
-      .where(eq(betsTable.betDate, yesterdayISO));
+  
 
     return winners.map(w => w.walletAddress).join(",");
   } catch (error) {
