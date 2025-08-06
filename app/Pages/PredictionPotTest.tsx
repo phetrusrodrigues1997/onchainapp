@@ -38,6 +38,13 @@ const PREDICTION_POT_ABI = [
     "type": "function"
   },
   {
+    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
+    "name": "enterPotFree",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [{"internalType": "address[]", "name": "winners", "type": "address[]"}],
     "name": "distributePot",
     "outputs": [],
@@ -262,10 +269,10 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  const getParticipantCount = (): number => {
-    if (!participants || !Array.isArray(participants)) return 0;
-    return participants.length;
-  };
+  // const getParticipantCount = (): number => {
+  //   if (!participants || !Array.isArray(participants)) return 0;
+  //   return participants.length;
+  // };
 
   const showMessage = (msg: string, isError = false) => {
     setMessage(msg);
@@ -304,7 +311,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     setLastAction('enterPot');
     
     try {
-      // If using free entry, check and consume it
+      // If using free entry, check and consume it from database
       if (useFree) {
         const freeEntryUsed = await consumeFreeEntry(address!);
         if (!freeEntryUsed) {
@@ -313,26 +320,36 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
           setLastAction('');
           return;
         }
-      }
-      
-      // Handle referral code if provided
-      if (inputReferralCode.trim() && !useFree) {
-        try {
-          await recordReferral(inputReferralCode.trim().toUpperCase(), address!);
-          showMessage('Referral recorded successfully!');
-        } catch (error) {
-          console.log('Referral recording failed:', error);
-          // Don't stop the pot entry if referral fails
+        
+        // Use the new enterPotFree contract function
+        await writeContract({
+          address: contractAddress as `0x${string}`,
+          abi: PREDICTION_POT_ABI,
+          functionName: 'enterPotFree',
+          args: [address], // Pass user's address
+        });
+        showMessage('Free entry submitted! Waiting for confirmation...');
+      } else {
+        // Handle referral code if provided for paid entries
+        if (inputReferralCode.trim()) {
+          try {
+            await recordReferral(inputReferralCode.trim().toUpperCase(), address!);
+            showMessage('Referral recorded successfully!');
+          } catch (error) {
+            console.log('Referral recording failed:', error);
+            // Don't stop the pot entry if referral fails
+          }
         }
+        
+        // Use the original enterPot function for paid entries
+        await writeContract({
+          address: contractAddress as `0x${string}`,
+          abi: PREDICTION_POT_ABI,
+          functionName: 'enterPot',
+          args: [entryAmount], // Pass the hardcoded entryAmount
+        });
+        showMessage('Enter pot transaction submitted! Waiting for confirmation...');
       }
-      
-      await writeContract({
-        address: contractAddress as `0x${string}`,
-        abi: PREDICTION_POT_ABI,
-        functionName: 'enterPot',
-        args: [entryAmount], // Pass the hardcoded entryAmount
-      });
-      showMessage(useFree ? 'Free entry submitted! Waiting for confirmation...' : 'Enter pot transaction submitted! Waiting for confirmation...');
     } catch (error) {
       console.error('Enter pot failed:', error);
       showMessage('Enter pot failed. Check console for details.', true);
@@ -408,24 +425,28 @@ useEffect(() => {
       setIsLoading(false);
       showMessage('Successfully entered the pot! Redirecting to betting page...');
       
-      // Confirm referral pot entry if this was a referred user
-      if (address) {
-        const handleReferralConfirmation = async () => {
-          try {
-            await confirmReferralPotEntry(address);
-            // Reload referral data to update stats
-            loadReferralData();
-          } catch (error) {
-            console.error('Error confirming referral:', error);
-          }
-        };
-        handleReferralConfirmation();
-      }
-      
+      // Always force refetch of contract data first (same as before referral system)
       setTimeout(() => {
-  // Force refetch of all contract data
-  queryClient.invalidateQueries({ queryKey: ['readContract'] });
-}, 2000);
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+      }, 2000);
+      
+      // Handle referral confirmation in background (completely isolated)
+      if (address) {
+        // Use a separate timeout to ensure it doesn't interfere with contract refresh
+        setTimeout(() => {
+          const handleReferralConfirmation = async () => {
+            try {
+              await confirmReferralPotEntry(address);
+              // Reload referral data to update stats
+              loadReferralData();
+            } catch (error) {
+              console.error('Error confirming referral:', error);
+              // Silently fail - don't let referral issues affect main app flow
+            }
+          };
+          handleReferralConfirmation();
+        }, 3000); // Run after contract refresh completes
+      }
     } else if (lastAction === 'distributePot') {
       setIsLoading(false);
       showMessage('Pot distributed successfully!');
@@ -618,11 +639,9 @@ useEffect(() => {
                 
                 {/* Free Entry Option */}
                 {freeEntriesAvailable > 0 && (
-                  <div className="bg-green-900/20 p-4 rounded-lg border border-green-500">
-                    <h3 className="text-green-300 font-medium mb-2">🎉 Free Entry Available!</h3>
-                    <p className="text-green-200 text-sm mb-3">
-                      You have {freeEntriesAvailable} free entries available from referrals
-                    </p>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h3 className="text-black font-bold mb-2">🎉 Free Entry Available!</h3>
+                    
                     <button
                       onClick={() => handleEnterPot(true)}
                       disabled={isActuallyLoading}
