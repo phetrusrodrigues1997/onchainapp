@@ -3,7 +3,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets } from "../Database/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, lt } from "drizzle-orm";
 
 // Database setup
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -118,6 +118,15 @@ export async function determineWinners(typeTable: string = 'bitcoin') {
     const winners = await db
       .select({ walletAddress: betsTable.walletAddress })
       .from(betsTable);
+
+    // Remove predictions placed yesterday
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayISO = yesterday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    
+    await db
+      .delete(betsTable)
+      .where(eq(betsTable.betDate, yesterdayISO));
 
     return winners.map(w => w.walletAddress).join(",");
   } catch (error) {
