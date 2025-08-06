@@ -312,7 +312,7 @@ const handleMarketClick = (marketId: string) => {
         </div>
       </section>
 
-      <section id="how-it-works" className="relative z-10 px-6 ">
+      <section id="how-it-works" className="relative z-10 px-6 mt-16 ">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">{t.howItWorksTitle}</h2>

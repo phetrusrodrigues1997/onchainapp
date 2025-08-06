@@ -42,7 +42,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMobile && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 text-black bg-white rounded-md md:hidden border border-[#aaaaaa] hover:border-[#3D9DF6]  "
+          className="p-2 text-black bg-white rounded-md md:hidden border border-[#666666] hover:border-[#3D9DF6]  "
           aria-label="Toggle menu"
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
