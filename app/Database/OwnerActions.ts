@@ -121,7 +121,7 @@ export async function determineWinners(typeTable: string = 'bitcoin') {
 
     // Remove predictions placed yesterday
     const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setDate(yesterday.getDate());
     const yesterdayISO = yesterday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
     
     await db
