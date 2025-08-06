@@ -244,34 +244,32 @@ const handleMarketClick = (marketId: string) => {
     <div className="absolute top-0 left-0 right-0 h-1 "></div>
     
     {/* Header with Icon and Price */}
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center space-x-3">
+    <div className="flex flex-col items-center mb-4">
+      <div className="flex items-center justify-center mb-3">
         <div className={`rounded-xl bg-transparent flex items-center justify-center ${
-  selectedMarket === 'Featured' ? 'w-36 h-36' : 'w-18 h-18'
+  selectedMarket === 'Featured' ? 'w-60 h-48' : 'w-32 h-24'
 }`}>
   {markets[0].icon?.slice(0, 4) === 'http' ? (
     <img 
       src={markets[0].icon} 
       alt={`${markets[0].name} Icon`} 
-      className={selectedMarket === 'Featured' ? 'w-34 h-34' : 'w-16 h-16'} 
+      className={selectedMarket === 'Featured' ? 'w-56 h-44 object-contain' : 'w-28 h-20 object-contain'} 
     />
   ) : (
     <span className="text-lg text-white">{markets[0].icon}</span>
   )}
 </div>
-
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">{markets[0].name}</h2>
-          <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
-        </div>
       </div>
-      
-    
+
+      <div className="text-center">
+        <h2 className="text-xl font-bold text-gray-900">{markets[0].name}</h2>
+        <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
+      </div>
     </div>
 
     {/* Question */}
     <div className="mb-6">
-      <p className="text-lg font-semibold text-gray-800 leading-snug">
+      <p className="text-lg font-semibold text-gray-800 leading-snug text-center">
         {markets[0].question}
       </p>
     </div>
