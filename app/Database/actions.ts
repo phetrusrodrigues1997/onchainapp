@@ -529,7 +529,7 @@ export async function getAvailableFreeEntries(walletAddress: string): Promise<nu
 /**
  * Uses a free entry for pot entry
  */
-export async function useFreeEntry(walletAddress: string): Promise<boolean> {
+export async function consumeFreeEntry(walletAddress: string): Promise<boolean> {
   try {
     const availableEntries = await getAvailableFreeEntries(walletAddress);
     

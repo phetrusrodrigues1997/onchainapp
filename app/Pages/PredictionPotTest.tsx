@@ -11,7 +11,7 @@ import {
   recordReferral, 
   confirmReferralPotEntry, 
   getAvailableFreeEntries, 
-  useFreeEntry, 
+  consumeFreeEntry, 
   getReferralStats 
 } from '../Database/actions';
 
@@ -306,7 +306,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     try {
       // If using free entry, check and consume it
       if (useFree) {
-        const freeEntryUsed = await useFreeEntry(address!);
+        const freeEntryUsed = await consumeFreeEntry(address!);
         if (!freeEntryUsed) {
           showMessage('No free entries available', true);
           setIsLoading(false);
