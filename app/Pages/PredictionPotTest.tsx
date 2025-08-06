@@ -397,13 +397,13 @@ useEffect(() => {
           {/* Contract Info */}
           {contractAddress && (
             <div className="mb-6">
-              <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
-                <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
+              <div className="grid md:grid-cols-1 lg:grid-cols-1">
+                {/* <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
                   <div className="text-sm font-semibold text-[#111111]">{t.entryAmount || 'Entry Amount'}</div>
                   <div className="text-[#666666] font-semibold">
                     {formatBigIntValue(entryAmount)} USDC
                   </div>
-                </div>
+                </div> */}
                 <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
                   <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Amount Balance'}</div>
                   <div className="text-[#666666] font-semibold">
@@ -444,16 +444,16 @@ useEffect(() => {
           {/* User Actions - Show different content if already a participant */}
           {isConnected && contractAddress && isParticipant && (
             <div className="mb-6">
-              <div className="bg-[#2C2C47] p-6 rounded-lg text-center">
+              <div className="bg-[#191919] rounded-2xl border border-gray-200 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-300 text-center">
                 <div className="text-[#d3c81a] text-xl font-semibold mb-3">
                   {t.alreadyInPot || "🎉 You're in the Pot!"}
                 </div>
-                <div className="text-[#F5F5F5] mb-4">
+                <div className="font-bold text-[#f0f0f0] mb-4">
                   {t.enteredPotMessage || "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!"}
                 </div>
                 <button
                   onClick={() => setActiveSection('bitcoinBetting')}
-                  className="bg-[#6A5ACD] text-black px-6 py-3 rounded-md font-medium hover:bg-[#c4b517] transition-colors"
+                  className="bg-[#c4b517] text-black font-bold px-6 py-3 rounded-md hover:bg-white transition-colors"
                 >
                   {t.goToBetting || 'Go to Betting Page'}
                 </button>

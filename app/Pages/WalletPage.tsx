@@ -94,19 +94,25 @@ const WalletPage: React.FC<ReceivePageProps> = ({ activeSection, setActiveSectio
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Receive</h1>
           
           <div className="flex items-center justify-center mb-6">
-            <div className="w-10 h-10 rounded-full overflow-hidden mr-4">
+            {/* <div className="w-10 h-10 rounded-full overflow-hidden mr-4">
               <img 
                 src={USDCToken.image} 
                 alt="USDC"
                 className="w-10 h-10 object-cover"
               />
-            </div>
+            </div> */}
             <div className="text-center">
-              <h2 className="text-md font-bold text-gray-900">
-                {usdcBalance.data ? parseFloat(usdcBalance.data.formatted).toFixed(2) : '0.00'}
-              </h2>
-              <p className="text-gray-600 font-medium">USDC Balance</p>
-            </div>
+  <h2 className="text-md font-bold text-gray-900 flex items-center justify-center gap-2">
+    <img 
+      src={USDCToken.image} 
+      alt="USDC"
+      className="w-6 h-6 object-cover" // match approx. text-md size (~1.25rem = 20px)
+    />
+    {usdcBalance.data ? parseFloat(usdcBalance.data.formatted).toFixed(2) : '0.00'}
+  </h2>
+  <p className="text-gray-600 font-medium">USDC Balance</p>
+</div>
+
           </div>
         </div>
 

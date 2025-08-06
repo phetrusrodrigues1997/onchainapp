@@ -159,7 +159,7 @@ const BuySection: React.FC = () => {
               {filteredTokens.map((item) => (
                 <div
                   key={item.token.symbol}
-                  className="bg-white rounded-2xl border-2 border-gray-200 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-300"
+                  className="bg-white rounded-2xl border border-gray-200 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-300"
                 >
                   {/* Token Info Header */}
                   <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
@@ -204,21 +204,21 @@ const BuySection: React.FC = () => {
 
         {/* Footer Info */}
         <div className="max-w-2xl mx-auto mt-16 px-4">
-          <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+          <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-4 text-center">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Secure & Fast</h3>
+              <h3 className="flex items-center justify-center gap-2 text-blue-700 text-lg font-semibold mb-2">Secure & Fast</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Secure</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-blue-600">Secure</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Instant processing</span>
+                  <span className="text-blue-600">Instant processing</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Low fees</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-blue-600">Low fees</span>
                 </div>
               </div>
             </div>
