@@ -6,6 +6,14 @@ import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { setDailyOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
+import { 
+  generateReferralCode, 
+  recordReferral, 
+  confirmReferralPotEntry, 
+  getAvailableFreeEntries, 
+  useFreeEntry, 
+  getReferralStats 
+} from '../Database/actions';
 
 
 // Define table identifiers instead of passing table objects
@@ -110,6 +118,13 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [lastAction, setLastAction] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
   
+  // Referral system state
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [inputReferralCode, setInputReferralCode] = useState<string>('');
+  const [referralStats, setReferralStats] = useState<any>(null);
+  const [freeEntriesAvailable, setFreeEntriesAvailable] = useState<number>(0);
+  const [showReferralSection, setShowReferralSection] = useState<boolean>(false);
+  
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -150,6 +165,33 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       console.log('No cookie found, using default bitcoin contract');
     }
   }, []);
+
+  // Load referral data when wallet connects
+  useEffect(() => {
+    if (address) {
+      loadReferralData();
+    }
+  }, [address]);
+
+  const loadReferralData = async () => {
+    if (!address) return;
+    
+    try {
+      // Generate referral code if doesn't exist
+      const code = await generateReferralCode(address);
+      setReferralCode(code);
+      
+      // Load referral stats
+      const stats = await getReferralStats(address);
+      setReferralStats(stats);
+      
+      // Load available free entries
+      const freeEntries = await getAvailableFreeEntries(address);
+      setFreeEntriesAvailable(freeEntries);
+    } catch (error) {
+      console.error("Error loading referral data:", error);
+    }
+  };
 
   
 
@@ -255,19 +297,42 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  const handleEnterPot = async () => {
+  const handleEnterPot = async (useFree: boolean = false) => {
     if (!contractAddress) return;
     
     setIsLoading(true);
     setLastAction('enterPot');
+    
     try {
+      // If using free entry, check and consume it
+      if (useFree) {
+        const freeEntryUsed = await useFreeEntry(address!);
+        if (!freeEntryUsed) {
+          showMessage('No free entries available', true);
+          setIsLoading(false);
+          setLastAction('');
+          return;
+        }
+      }
+      
+      // Handle referral code if provided
+      if (inputReferralCode.trim() && !useFree) {
+        try {
+          await recordReferral(inputReferralCode.trim().toUpperCase(), address!);
+          showMessage('Referral recorded successfully!');
+        } catch (error) {
+          console.log('Referral recording failed:', error);
+          // Don't stop the pot entry if referral fails
+        }
+      }
+      
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
         args: [entryAmount], // Pass the hardcoded entryAmount
       });
-      showMessage('Enter pot transaction submitted! Waiting for confirmation...');
+      showMessage(useFree ? 'Free entry submitted! Waiting for confirmation...' : 'Enter pot transaction submitted! Waiting for confirmation...');
     } catch (error) {
       console.error('Enter pot failed:', error);
       showMessage('Enter pot failed. Check console for details.', true);
@@ -342,6 +407,21 @@ useEffect(() => {
     } else if (lastAction === 'enterPot') {
       setIsLoading(false);
       showMessage('Successfully entered the pot! Redirecting to betting page...');
+      
+      // Confirm referral pot entry if this was a referred user
+      if (address) {
+        const handleReferralConfirmation = async () => {
+          try {
+            await confirmReferralPotEntry(address);
+            // Reload referral data to update stats
+            loadReferralData();
+          } catch (error) {
+            console.error('Error confirming referral:', error);
+          }
+        };
+        handleReferralConfirmation();
+      }
+      
       setTimeout(() => {
   // Force refetch of all contract data
   queryClient.invalidateQueries({ queryKey: ['readContract'] });
@@ -444,6 +524,73 @@ useEffect(() => {
             </div>
           )}
 
+          {/* Referral System Section */}
+          {isConnected && address && (
+            <div className="mb-6">
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">Referral Program</h2>
+                  <button
+                    onClick={() => setShowReferralSection(!showReferralSection)}
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    {showReferralSection ? '−' : '+'}
+                  </button>
+                </div>
+                
+                {showReferralSection && (
+                  <div className="space-y-4">
+                    {/* Your Referral Code */}
+                    <div>
+                      <h3 className="text-md font-medium text-gray-800 mb-2">Your Referral Code</h3>
+                      <div className="flex items-center space-x-2">
+                        <code className="bg-gray-100 px-3 py-2 rounded text-lg text-black font-bold">
+                          {referralCode || 'Loading...'}
+                        </code>
+                        {referralCode && (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(referralCode);
+                              showMessage('Referral code copied to clipboard!');
+                            }}
+                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                          >
+                            Copy
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Share this code with friends. When 3 friends enter the pot with your code, you get a free entry!
+                      </p>
+                    </div>
+
+                    {/* Referral Stats */}
+                    {referralStats && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-gray-900">{referralStats.totalReferrals}</div>
+                          <div className="text-sm text-gray-600">Total Referrals</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">{referralStats.confirmedReferrals}</div>
+                          <div className="text-sm text-gray-600">Confirmed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">{referralStats.freeEntriesEarned}</div>
+                          <div className="text-sm text-gray-600">Free Entries Earned</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">{freeEntriesAvailable}</div>
+                          <div className="text-sm text-gray-600">Available</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* User Actions - Show different content if already a participant */}
           {isConnected && contractAddress && isParticipant && (
             <div className="mb-6">
@@ -469,47 +616,87 @@ useEffect(() => {
             <div className="mb-6">
               <div className="space-y-4">
                 
-                {/* Approve USDC */}
-                <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
-                  <p className="text-[#A0A0B0] text-sm mb-3">
-                    {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
-                  </p>
-                  <button
-                    onClick={handleApprove}
-                    disabled={isActuallyLoading || hasEnoughAllowance}
-                    className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isActuallyLoading && lastAction === 'approve'
-                      ? t.approveProcessing
-                      : hasEnoughAllowance
-                      ? t.alreadyApproved
-                      : t.approveUSDC}
-                  </button>
-                </div>
+                {/* Free Entry Option */}
+                {freeEntriesAvailable > 0 && (
+                  <div className="bg-green-900/20 p-4 rounded-lg border border-green-500">
+                    <h3 className="text-green-300 font-medium mb-2">🎉 Free Entry Available!</h3>
+                    <p className="text-green-200 text-sm mb-3">
+                      You have {freeEntriesAvailable} free entries available from referrals
+                    </p>
+                    <button
+                      onClick={() => handleEnterPot(true)}
+                      disabled={isActuallyLoading}
+                      className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isActuallyLoading && lastAction === 'enterPot'
+                        ? 'Using Free Entry...'
+                        : 'Use Free Entry'}
+                    </button>
+                  </div>
+                )}
+                
+                {/* Approve USDC - Only show if no free entries available */}
+                {freeEntriesAvailable === 0 && (
+                  <div className="bg-[#2C2C47] p-4 rounded-lg">
+                    <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
+                    <p className="text-[#A0A0B0] text-sm mb-3">
+                      {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
+                    </p>
+                    <button
+                      onClick={handleApprove}
+                      disabled={isActuallyLoading || hasEnoughAllowance}
+                      className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isActuallyLoading && lastAction === 'approve'
+                        ? t.approveProcessing
+                        : hasEnoughAllowance
+                        ? t.alreadyApproved
+                        : t.approveUSDC}
+                    </button>
+                  </div>
+                )}
 
-                {/* Enter Pot */}
-                <div className="bg-[#2C2C47] p-4 rounded-lg">
-                  <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
-                  <p className="text-[#A0A0B0] text-sm mb-3">
-                    {t.pay10USDC || 'Pay 0.10 USDC to enter the pot. Make sure you have approved USDC spending first.'}
-                  </p>
-                  <button
-                    onClick={handleEnterPot}
-                    disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
-                    className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isActuallyLoading && lastAction === 'enterPot'
-                      ? t.enterPotProcessing
-                      : t.enterPotButton}
-                  </button>
-                  {!hasEnoughBalance && (
-                    <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>
-                  )}
-                  {!hasEnoughAllowance && hasEnoughBalance && (
-                    <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
-                  )}
-                </div>
+                {/* Enter Pot - Only show if no free entries available */}
+                {freeEntriesAvailable === 0 && (
+                  <div className="bg-[#2C2C47] p-4 rounded-lg">
+                    <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
+                    <p className="text-[#A0A0B0] text-sm mb-3">
+                      {t.pay10USDC || 'Pay 0.10 USDC to enter the pot. Make sure you have approved USDC spending first.'}
+                    </p>
+                    
+                    {/* Referral Code Input */}
+                    <div className="mb-3">
+                      <label className="text-[#F5F5F5] text-sm mb-1 block">Referral Code (Optional)</label>
+                      <input
+                        type="text"
+                        placeholder="Enter friend's referral code"
+                        value={inputReferralCode}
+                        onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
+                        className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a]"
+                        maxLength={8}
+                      />
+                      <p className="text-[#A0A0B0] text-xs mt-1">
+                        Help a friend earn free entries
+                      </p>
+                    </div>
+                    
+                    <button
+                      onClick={() => handleEnterPot(false)}
+                      disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
+                      className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isActuallyLoading && lastAction === 'enterPot'
+                        ? t.enterPotProcessing
+                        : t.enterPotButton}
+                    </button>
+                    {!hasEnoughBalance && (
+                      <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>
+                    )}
+                    {!hasEnoughAllowance && hasEnoughBalance && (
+                      <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

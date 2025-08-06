@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, serial, timestamp, integer } from "drizzle-orm/pg-core";
 
 
 export const Messages = pgTable("Messages", {
@@ -37,4 +37,31 @@ export const CryptoBets = pgTable("crypto_bets", {
   prediction: text("prediction").notNull(), // "positive" or "negative"
   betDate: text("bet_date").notNull(), // Date of the bet (YYYY-MM-DD format)
   createdAt: timestamp("created_at").defaultNow().notNull(), // When the bet was placed
+});
+
+// Referral system tables
+export const ReferralCodes = pgTable("referral_codes", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(),
+  referralCode: text("referral_code").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const Referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  referrerWallet: text("referrer_wallet").notNull(), // who referred
+  referredWallet: text("referred_wallet").notNull(), // who was referred  
+  referralCode: text("referral_code").notNull(),
+  potEntryConfirmed: boolean("pot_entry_confirmed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  confirmedAt: timestamp("confirmed_at"),
+});
+
+export const FreeEntries = pgTable("free_entries", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(),
+  earnedFromReferrals: integer("earned_from_referrals").default(0).notNull(),
+  usedEntries: integer("used_entries").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
