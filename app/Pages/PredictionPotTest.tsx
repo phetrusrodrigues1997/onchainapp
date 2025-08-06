@@ -384,9 +384,12 @@ useEffect(() => {
     <div className="min-h-screen bg-invisible p-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-invisible rounded-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-[#111111] mb-6 text-center">
-            {t.bitcoinPotTitle || 'The ₿itcoin Pot'}
-          </h1>
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">
+              {t.bitcoinPotTitle || 'The ₿itcoin Pot'}
+            </h1>
+            <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>
+          </div>
 
           {!isConnected && (
             <div className="text-center text-[#F5F5F5] mb-6">
