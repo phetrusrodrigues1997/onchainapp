@@ -142,7 +142,7 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden -mt-40">
+    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden -mt-32 md:-mt-40">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -234,7 +234,7 @@ const handleMarketClick = (marketId: string) => {
 
           
           
-<div className="max-w-md mx-auto -translate-y-12" >
+<div className={`max-w-md mx-auto ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-6' : '-translate-y-12'}`} >
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}

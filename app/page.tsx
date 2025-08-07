@@ -119,11 +119,9 @@ export default function App() {
           <div className="flex items-center space-x-4">
             {/* USDC Balance Display */}
             {isConnected && address && (
-              <div className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
-                <div className="text-sm">
-                  <span className="text-gray-600 font-medium">USDC:</span>
-                  <span className="text-black font-bold ml-1">{formatUsdcBalance(userUsdcBalance)}</span>
-                </div>
+              <div className="flex flex-col items-end">
+                <div className="text-xs text-gray-500 font-medium">Balance</div>
+                <div className="text-sm text-[#00aa00] font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
               </div>
             )}
             
