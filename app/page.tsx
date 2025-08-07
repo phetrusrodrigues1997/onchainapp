@@ -2,7 +2,9 @@
 'use client';
 
 import React, { useState } from 'react';
-// import { useAccount, useSendTransaction } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
+import { formatUnits } from 'viem';
+import { User } from 'lucide-react';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
 import BitcoinBetting from './Pages/BitcoinBetting';
@@ -25,11 +27,44 @@ import WalletPage from './Pages/WalletPage';
 
 
 
+// USDC Contract ABI (minimal)
+const USDC_ABI = [
+  {
+    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+    "name": "balanceOf",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+
 export default function App() {
+  const { address, isConnected } = useAccount();
   const [activeSection, setActiveSection] = useState('home'); // Default section
   const [toastMessage] = useState('');
   const [showToast] = useState(false);
   // Removed unused state variables for cleaner code
+
+  // Get USDC balance
+  const { data: userUsdcBalance } = useReadContract({
+    address: USDC_ADDRESS as `0x${string}`,
+    abi: USDC_ABI,
+    functionName: 'balanceOf',
+    args: [address],
+    query: { enabled: !!address && isConnected }
+  }) as { data: bigint | undefined };
+
+  // Format USDC balance
+  const formatUsdcBalance = (balance: bigint | undefined): string => {
+    if (!balance) return '0.00';
+    try {
+      return formatUnits(balance, 6);
+    } catch {
+      return '0.00';
+    }
+  };
 
   
 
@@ -81,11 +116,28 @@ export default function App() {
               <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
             </div>
           </div>
-          <div className="wallet-container">
-            <Wallet>
-<ConnectWallet className='dark:bg-black !flex !items-center !justify-center !text-center'>
-                <Avatar className="h-6 w-6" />
-                <span className="text-md font-bold mr-1">Connected</span>
+          <div className="flex items-center space-x-4">
+            {/* USDC Balance Display */}
+            {isConnected && address && (
+              <div className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
+                <div className="text-sm">
+                  <span className="text-gray-600 font-medium">USDC:</span>
+                  <span className="text-black font-bold ml-1">{formatUsdcBalance(userUsdcBalance)}</span>
+                </div>
+              </div>
+            )}
+            
+            <div className="wallet-container">
+              <Wallet>
+<ConnectWallet className={isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''}>
+                {isConnected && (
+                  <>
+                    <Avatar className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
+                    <div className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 bg-gray-100 flex items-center justify-center transition-all duration-200">
+                      <User className="h-4 w-4 text-gray-600" />
+                    </div>
+                  </>
+                )}
               </ConnectWallet>
               <WalletDropdown>
                 <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
@@ -105,7 +157,7 @@ export default function App() {
                 <WalletDropdownDisconnect />
               </WalletDropdown>
             </Wallet>
-          
+            </div>
           </div>
         </div>
 

@@ -142,7 +142,7 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden -mt-32">
+    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden -mt-40">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -233,20 +233,21 @@ const handleMarketClick = (marketId: string) => {
           </div>
 
           
-<div className="max-w-xl mx-auto -translate-y-12" >
+          
+<div className="max-w-md mx-auto -translate-y-12" >
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}
-    className="group bg-[#ffffff] rounded-xl p-6 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
+    className="group bg-white rounded-xl p-5 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
   >
     
     {/* Background Gradient Accent */}
     <div className="absolute top-0 left-0 right-0 h-1 "></div>
     
     {/* Header with Icon and Price */}
-    <div className="flex flex-col items-center mb-4">
-      <div className="flex items-center justify-center mb-3">
-        <div className={`rounded-xl bg-[#ffffff] flex items-center justify-center ${
+    <div className="flex flex-col items-center mb-3">
+      <div className="flex items-center justify-center mb-2">
+        <div className={`rounded-xl flex items-center justify-center ${
   selectedMarket === 'Featured' ? 'w-60 h-48' : 'w-38 h-24'
 }`}>
   {markets[0].icon?.slice(0, 4) === 'http' ? (
@@ -268,14 +269,14 @@ const handleMarketClick = (marketId: string) => {
     </div>
 
     {/* Question */}
-    <div className="mb-6">
+    <div className="mb-4">
       <p className="text-lg font-semibold text-gray-800 leading-snug text-center">
         {markets[0].question}
       </p>
     </div>
 
     {/* Trading Buttons */}
-    <div className="grid grid-cols-2 gap-3 mb-4">
+    <div className="grid grid-cols-2 gap-3 mb-3">
       <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
         YES
       </button>

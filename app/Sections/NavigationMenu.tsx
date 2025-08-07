@@ -41,7 +41,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {/* Mobile hamburger menu button */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="p-1 text-black rounded-md md:hidden hover:border-[#3D9DF6]  "
+        className="p-2 text-black bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-[#3D9DF6] transition-all duration-200 ease-in-out md:hidden"
         aria-label="Toggle menu"
       >
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}

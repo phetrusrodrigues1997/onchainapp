@@ -91,7 +91,7 @@ const WalletPage: React.FC<ReceivePageProps> = ({ activeSection, setActiveSectio
           <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
             <ArrowDown className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Receive</h1>
+          
           
           <div className="flex items-center justify-center mb-6">
             {/* <div className="w-10 h-10 rounded-full overflow-hidden mr-4">
@@ -121,7 +121,7 @@ const WalletPage: React.FC<ReceivePageProps> = ({ activeSection, setActiveSectio
         {/* Address Card */}
         <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 mb-6 shadow-2xl">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Your Address</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Receiver Address</h3>
             <p className="text-gray-600 text-sm">Share this address to receive USDC</p>
           </div>
 

@@ -174,7 +174,7 @@ const BuySection: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900">{item.token.symbol}</h3>
+                        <h3 className="text-xl font-bold text-gray-900">Purchase {item.token.symbol}</h3>
                         <p className="text-gray-500 text-sm">{item.token.name}</p>
                       </div>
                     </div>
