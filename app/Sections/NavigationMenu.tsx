@@ -28,7 +28,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   // Menu items for reusability
   const menuItems = [
     { id: 'home', label: 'Home' },
-    { id: 'markets', label: 'Search' },
+    { id: 'AI', label: 'Try our AI' },
     { id: 'profile', label: 'Profile' },
     { id: 'wallet', label: 'Receive USDC' },
     { id: 'buy', label: 'Purchase USDC' },
@@ -57,7 +57,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               className={`font-medium ${
                 activeSection === item.id
                   ? 'text-black text-base font-semibold'
-                  : 'text-gray-500 hover:text-black hover:font-semibold'
+                  : 'text-gray-500 hover:text-black hover:font-bold'
               }`}
             >
               {item.label}

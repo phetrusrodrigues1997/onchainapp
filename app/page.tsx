@@ -18,7 +18,7 @@ import ResponsiveLogo from './Sections/ResponsiveLogo';
 import DiscordXSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
-import Markets from './Pages/Markets';
+import AI from './Pages/AIPage';
 import WalletPage from './Pages/WalletPage';
 // import UsernameSetup from './Pages/UsernameSetup';
 // import CreateMessage from './Pages/MessagesPage';
@@ -119,7 +119,10 @@ export default function App() {
           <div className="flex items-center space-x-4">
             {/* USDC Balance Display */}
             {isConnected && address && (
-              <div className="flex flex-col items-end">
+              <div 
+                onClick={() => setActiveSection('buy')}
+                className="flex flex-col items-end cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              >
                 <div className="text-xs text-gray-500 font-medium">Balance</div>
                 <div className="text-sm text-[#00aa00] font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
               </div>
@@ -175,7 +178,7 @@ export default function App() {
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
-          {activeSection === "markets" && <Markets activeSection={activeSection} setActiveSection={setActiveSection}/>}
+          {activeSection === "AI" && <AI activeSection={activeSection} setActiveSection={setActiveSection}/>}
           {/* Add more sections as needed */}
         
       </main>
