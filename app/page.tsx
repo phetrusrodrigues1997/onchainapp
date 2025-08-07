@@ -60,7 +60,8 @@ export default function App() {
   const formatUsdcBalance = (balance: bigint | undefined): string => {
     if (!balance) return '0.00';
     try {
-      return formatUnits(balance, 6);
+      const formatted = formatUnits(balance, 6);
+      return parseFloat(formatted).toFixed(2);
     } catch {
       return '0.00';
     }
