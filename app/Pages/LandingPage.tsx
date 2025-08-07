@@ -234,7 +234,7 @@ const handleMarketClick = (marketId: string) => {
 
           
           
-<div className={`max-w-md mx-auto ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-6' : '-translate-y-12'}`} >
+<div className={`max-w-md mx-auto md:hidden ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-6' : '-translate-y-12'}`} >
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}
@@ -311,14 +311,121 @@ const handleMarketClick = (marketId: string) => {
         </div>
       </section>
 
-      <section id="how-it-works" className="relative z-10 px-6 mt-16 ">
+      {/* Desktop Two-Column Layout */}
+      <section className="relative z-10 px-6 -mt-8 pb-16 hidden md:block">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+            {/* Left Column - Market Card */}
+            <div className="flex justify-center">
+              <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-6' : '-translate-y-12'}`}>
+                <div 
+                  onClick={() => handleMarketClick(markets[0].id)}
+                  className={`group bg-white rounded-xl border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'p-6 max-w-lg' : 'p-4 max-w-md'}`}
+                >
+                  {/* Background Gradient Accent */}
+                  <div className="absolute top-0 left-0 right-0 h-1 "></div>
+                  
+                  {/* Header with Icon and Price */}
+                  <div className={`flex flex-col items-center ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-4' : 'mb-2'}`}>
+                    <div className={`flex items-center justify-center ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-3' : 'mb-1'}`}>
+                      <div className={`rounded-xl flex items-center justify-center ${
+                        selectedMarket === 'Featured' ? 'w-70 h-58' : 'w-38 h-24'
+                      }`}>
+                        {markets[0].icon?.slice(0, 4) === 'http' ? (
+                          <img 
+                            src={markets[0].icon} 
+                            alt={`${markets[0].name} Icon`} 
+                            className={selectedMarket === 'Featured' ? 'w-70 h-54 object-contain' : 'w-38 h-24 object-contain'} 
+                          />
+                        ) : (
+                          <span className="text-lg text-white">{markets[0].icon}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-center">
+                      <h2 className={`font-bold text-gray-900 ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'text-2xl' : 'text-xl'}`}>{markets[0].name}</h2>
+                      <p className={`text-gray-500 font-medium ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'text-base' : 'text-sm'}`}>{markets[0].symbol}</p>
+                    </div>
+                  </div>
+
+                  {/* Question */}
+                  <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-5' : 'mb-3'}`}>
+                    <p className={`font-semibold text-gray-800 leading-snug text-center ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'text-xl' : 'text-lg'}`}>
+                      {markets[0].question}
+                    </p>
+                  </div>
+
+                  {/* Trading Buttons */}
+                  <div className={`grid grid-cols-2 gap-3 ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-4' : 'mb-2'}`}>
+                    <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
+                      YES
+                    </button>
+                    <button className="bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-400 text-red-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
+                      NO
+                    </button>
+                  </div>
+
+                  {/* Stats Footer */}
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          availableMarkets.includes(markets[0].name.toLowerCase())
+                            ? 'bg-green-500 animate-pulse'
+                            : 'bg-red-500'
+                        }`}
+                      ></div>
+                      <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
+                        {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Live' : 'Soon'}
+                      </span>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="text-sm font-bold text-gray-900">{markets[0].potSize}</div>
+                      <div className="text-xs text-gray-400">Volume</div>
+                    </div>
+                    
+                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - How It Works */}
+            <div className="flex flex-col justify-center">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-3 text-gray-900">{t.howItWorksTitle}</h2>
+                <p className="text-base text-gray-600">{t.howItWorksSubtitle}</p>
+              </div>
+
+              <div className="space-y-6">
+                {[1, 2, 3].map((step) => (
+                  <div key={step} className="flex items-start space-x-3">
+                    <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+                      {step}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold mb-1 text-gray-900">{t[`step${step}Title` as keyof typeof t]}</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">{t[`step${step}Description` as keyof typeof t]}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Mobile Only (Desktop version is integrated above) */}
+      <section id="how-it-works" className="relative z-10 px-6 mt-16 md:hidden">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">{t.howItWorksTitle}</h2>
             <p className="text-xl text-[#666666]">{t.howItWorksSubtitle}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8">
             {[1, 2, 3].map((step) => (
               <div key={step} className="text-center">
                 <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
