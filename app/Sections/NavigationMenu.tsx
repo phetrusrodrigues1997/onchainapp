@@ -39,20 +39,17 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   return (
     <nav className="relative">
       {/* Mobile hamburger menu button */}
-      {isMobile && (
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-2 text-black bg-white rounded-md md:hidden border border-[#666666] hover:border-[#3D9DF6]  "
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      )}
+      <button
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        className="p-1 text-black rounded-md md:hidden hover:border-[#3D9DF6]  "
+        aria-label="Toggle menu"
+      >
+        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
       {/* Desktop menu */}
-      {!isMobile && (
-        <div className="flex space-x-10 ">
-        <div className="bg-white-400 ml-32 rounded-full py-2 flex space-x-10">
+      <div className="hidden md:flex space-x-10 ">
+        <div className=" ml-32 rounded-full py-2 flex space-x-10">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -68,7 +65,6 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
           ))}
         </div>
       </div>
-      )}
 
       {/* Mobile menu dropdown */}
       {isMobile && isMenuOpen && (

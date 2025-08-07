@@ -190,10 +190,12 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       
       // Load referral stats
       const stats = await getReferralStats(address);
+      console.log("Debug - referral stats:", stats);
       setReferralStats(stats);
       
       // Load available free entries
       const freeEntries = await getAvailableFreeEntries(address);
+      console.log("Debug - getAvailableFreeEntries returned:", freeEntries);
       setFreeEntriesAvailable(freeEntries);
     } catch (error) {
       console.error("Error loading referral data:", error);
@@ -236,7 +238,8 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     query: { enabled: !!contractAddress }
   }) as { data: string | undefined };
 
-  const entryAmount = BigInt(10000); // 0.01 USDC (6 decimals: 0.10 * 10^6 = 100,000)
+  // Dynamic entry amount: 0.02 USDC if user has free entries, 0.01 USDC otherwise
+  const entryAmount = freeEntriesAvailable > 0 ? BigInt(30000) : BigInt(10000); // 0.02 or 0.01 USDC (6 decimals)
 
   const { data: userUsdcBalance } = useReadContract({
     address: usdcAddress as `0x${string}`,
@@ -268,6 +271,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       return '0';
     }
   };
+
 
   // const getParticipantCount = (): number => {
   //   if (!participants || !Array.isArray(participants)) return 0;
@@ -304,52 +308,49 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  const handleEnterPot = async (useFree: boolean = false) => {
+  const handleEnterPot = async (useDiscounted: boolean = false) => {
     if (!contractAddress) return;
     
     setIsLoading(true);
     setLastAction('enterPot');
     
     try {
-      // If using free entry, check and consume it from database
-      if (useFree) {
+      // If using discounted entry, check and consume free entry from database
+      if (useDiscounted) {
         const freeEntryUsed = await consumeFreeEntry(address!);
         if (!freeEntryUsed) {
-          showMessage('No free entries available', true);
+          showMessage('No discounted entries available', true);
           setIsLoading(false);
           setLastAction('');
           return;
         }
-        
-        // Use the new enterPotFree contract function
-        await writeContract({
-          address: contractAddress as `0x${string}`,
-          abi: PREDICTION_POT_ABI,
-          functionName: 'enterPotFree',
-          args: [address], // Pass user's address
-        });
-        showMessage('Free entry submitted! Waiting for confirmation...');
-      } else {
-        // Handle referral code if provided for paid entries
-        if (inputReferralCode.trim()) {
-          try {
-            await recordReferral(inputReferralCode.trim().toUpperCase(), address!);
-            showMessage('Referral recorded successfully!');
-          } catch (error) {
-            console.log('Referral recording failed:', error);
-            // Don't stop the pot entry if referral fails
-          }
-        }
-        
-        // Use the original enterPot function for paid entries
-        await writeContract({
-          address: contractAddress as `0x${string}`,
-          abi: PREDICTION_POT_ABI,
-          functionName: 'enterPot',
-          args: [entryAmount], // Pass the hardcoded entryAmount
-        });
-        showMessage('Enter pot transaction submitted! Waiting for confirmation...');
       }
+      
+      // Handle referral code if provided for paid entries (run in background)
+      if (inputReferralCode.trim()) {
+        // Don't await this - run in background to avoid blocking pot entry
+        recordReferral(inputReferralCode.trim().toUpperCase(), address!)
+          .then(() => {
+            console.log('Referral recorded successfully');
+          })
+          .catch((error) => {
+            console.log('Referral recording failed:', error);
+            // Silently fail - don't let referral issues affect main app flow
+          });
+      }
+      
+      // Always use the regular enterPot function with dynamic amount
+      await writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: PREDICTION_POT_ABI,
+        functionName: 'enterPot',
+        args: [entryAmount], // Pass the dynamic entryAmount (0.02 if discounted, 0.01 if regular)
+      });
+      
+      const message = useDiscounted 
+        ? 'Discounted entry submitted! Waiting for confirmation...'
+        : 'Enter pot transaction submitted! Waiting for confirmation...';
+      showMessage(message);
     } catch (error) {
       console.error('Enter pot failed:', error);
       showMessage('Enter pot failed. Check console for details.', true);
@@ -432,18 +433,19 @@ useEffect(() => {
       
       // Handle referral confirmation in background (completely isolated)
       if (address) {
+        const handleReferralConfirmation = async () => {
+          try {
+            await confirmReferralPotEntry(address);
+            // Reload referral data to update stats
+            loadReferralData();
+          } catch (error) {
+            console.error('Error confirming referral:', error);
+            // Silently fail - don't let referral issues affect main app flow
+          }
+        };
+        
         // Use a separate timeout to ensure it doesn't interfere with contract refresh
         setTimeout(() => {
-          const handleReferralConfirmation = async () => {
-            try {
-              await confirmReferralPotEntry(address);
-              // Reload referral data to update stats
-              loadReferralData();
-            } catch (error) {
-              console.error('Error confirming referral:', error);
-              // Silently fail - don't let referral issues affect main app flow
-            }
-          };
           handleReferralConfirmation();
         }, 3000); // Run after contract refresh completes
       }
@@ -640,17 +642,38 @@ useEffect(() => {
                 {/* Free Entry Option */}
                 {freeEntriesAvailable > 0 && (
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
-                    <h3 className="text-black font-bold mb-2">🎉 Free Entry Available!</h3>
+                    <h3 className="text-black font-bold mb-2">🎉 Discounted Entry Available!</h3>
+                    <p className="text-gray-600 text-sm mb-3">
+                      Special price: {formatBigIntValue(entryAmount)} USDC (normally 0.01 USDC)
+                    </p>
                     
-                    <button
-                      onClick={() => handleEnterPot(true)}
-                      disabled={isActuallyLoading}
-                      className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isActuallyLoading && lastAction === 'enterPot'
-                        ? 'Using Free Entry...'
-                        : 'Use Free Entry'}
-                    </button>
+                    {!hasEnoughAllowance ? (
+                      <button
+                        onClick={handleApprove}
+                        disabled={isActuallyLoading}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mr-2"
+                      >
+                        {isActuallyLoading && lastAction === 'approve'
+                          ? 'Approving...'
+                          : `Approve ${formatBigIntValue(entryAmount)} USDC`}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleEnterPot(true)}
+                        disabled={isActuallyLoading || !hasEnoughBalance}
+                        className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isActuallyLoading && lastAction === 'enterPot'
+                          ? 'Using Discounted Entry...'
+                          : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
+                      </button>
+                    )}
+                    {!hasEnoughBalance && (
+                      <p className="text-red-400 text-sm mt-2">Insufficient USDC balance for discounted entry</p>
+                    )}
+                    {!hasEnoughAllowance && (
+                      <p className="text-yellow-400 text-sm mt-2">Need to approve {formatBigIntValue(entryAmount)} USDC first</p>
+                    )}
                   </div>
                 )}
                 
@@ -680,7 +703,7 @@ useEffect(() => {
                   <div className="bg-[#2C2C47] p-4 rounded-lg">
                     <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
                     <p className="text-[#A0A0B0] text-sm mb-3">
-                      {t.pay10USDC || 'Pay 0.10 USDC to enter the pot. Make sure you have approved USDC spending first.'}
+                      Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Make sure you have approved USDC spending first.
                     </p>
                     
                     {/* Referral Code Input */}
@@ -706,7 +729,7 @@ useEffect(() => {
                     >
                       {isActuallyLoading && lastAction === 'enterPot'
                         ? t.enterPotProcessing
-                        : t.enterPotButton}
+                        : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
                     </button>
                     {!hasEnoughBalance && (
                       <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>

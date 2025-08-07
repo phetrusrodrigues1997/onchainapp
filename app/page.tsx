@@ -64,19 +64,26 @@ export default function App() {
       {/* Dark green header */}
       <header className="z-50 bg-[#fbfbfb] px-4 py-3 shadow-md sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center">
+            {/* Mobile hamburger only - shows to left of logo on mobile */}
+            <div className="md:hidden ml-2">
+              <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+            </div>
+            
             {/* Logo */}
-            <div className="relative">
+            <div className="relative -ml-2">
               <div className="absolute -inset-1 rounded-full blur-md"></div>
               <ResponsiveLogo />
             </div>
             
-            {/* Navigation Menu */}
-            <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+            {/* Desktop menu - shows to right of logo on desktop */}
+            <div className="hidden md:block">
+              <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+            </div>
           </div>
           <div className="wallet-container">
             <Wallet>
-<ConnectWallet className='dark:bg-[#e1e1e1] !flex !items-center !justify-center !text-center'>
+<ConnectWallet className='dark:bg-black !flex !items-center !justify-center !text-center'>
                 <Avatar className="h-6 w-6" />
                 <span className="text-md font-bold mr-1">Connected</span>
               </ConnectWallet>
