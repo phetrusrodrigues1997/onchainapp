@@ -238,23 +238,23 @@ const handleMarketClick = (marketId: string) => {
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}
-    className="group bg-white rounded-xl p-5 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
+    className="group bg-white rounded-xl p-4 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden"
   >
     
     {/* Background Gradient Accent */}
     <div className="absolute top-0 left-0 right-0 h-1 "></div>
     
     {/* Header with Icon and Price */}
-    <div className="flex flex-col items-center mb-3">
-      <div className="flex items-center justify-center mb-2">
+    <div className="flex flex-col items-center mb-2">
+      <div className="flex items-center justify-center mb-1">
         <div className={`rounded-xl flex items-center justify-center ${
-  selectedMarket === 'Featured' ? 'w-60 h-48' : 'w-38 h-24'
+  selectedMarket === 'Featured' ? 'w-70 h-58' : 'w-38 h-24'
 }`}>
   {markets[0].icon?.slice(0, 4) === 'http' ? (
     <img 
       src={markets[0].icon} 
       alt={`${markets[0].name} Icon`} 
-      className={selectedMarket === 'Featured' ? 'w-62 h-44 object-contain' : 'w-38 h-24 object-contain'} 
+      className={selectedMarket === 'Featured' ? 'w-70 h-54 object-contain' : 'w-38 h-24 object-contain'} 
     />
   ) : (
     <span className="text-lg text-white">{markets[0].icon}</span>
@@ -269,14 +269,14 @@ const handleMarketClick = (marketId: string) => {
     </div>
 
     {/* Question */}
-    <div className="mb-4">
+    <div className="mb-3">
       <p className="text-lg font-semibold text-gray-800 leading-snug text-center">
         {markets[0].question}
       </p>
     </div>
 
     {/* Trading Buttons */}
-    <div className="grid grid-cols-2 gap-3 mb-3">
+    <div className="grid grid-cols-2 gap-3 mb-2">
       <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
         YES
       </button>
