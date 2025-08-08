@@ -30,8 +30,8 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     { id: 'home', label: 'Home' },
     { id: 'AI', label: 'Try our AI' },
     { id: 'profile', label: 'Profile' },
-    { id: 'wallet', label: 'Receive USDC' },
-    { id: 'buy', label: 'Purchase USDC' },
+    { id: 'wallet', label: 'Receive' },
+    { id: 'buy', label: 'Purchase' },
     { id: 'discord', label: 'Discord' },
     
   ];
@@ -41,15 +41,15 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {/* Mobile hamburger menu button */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="p-2 text-black bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-[#3D9DF6] transition-all duration-200 ease-in-out md:hidden"
+        className="p-2 rounded-lg md:hidden"
         aria-label="Toggle menu"
       >
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Desktop menu */}
-      <div className="hidden md:flex space-x-10 ">
-        <div className=" ml-32 rounded-full py-2 flex space-x-10">
+      <div className="hidden md:flex space-x-10">
+        <div className="rounded-full py-2 flex space-x-10">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -57,7 +57,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               className={`font-medium ${
                 activeSection === item.id
                   ? 'text-black text-base font-semibold'
-                  : 'text-gray-500 hover:text-black hover:font-bold'
+                  : 'text-gray-600 hover:text-black hover:font-bold'
               }`}
             >
               {item.label}

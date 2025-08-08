@@ -26,12 +26,13 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const availableMarkets = ["random topics", "crypto"];
   
-  // Countdown state for 24-hour refresh timer
+  // Countdown state for timer
   const [timeUntilMidnight, setTimeUntilMidnight] = useState<{
+    days: number;
     hours: number;
     minutes: number;
     seconds: number;
-  }>({ hours: 0, minutes: 0, seconds: 0 });
+  }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
 
 
@@ -45,6 +46,50 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     }
   };
 
+  // Get countdown label based on current day
+  const getCountdownLabel = (): string => {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    
+    if (day === 5) return 'Pot closes in:'; // Friday
+    if (day >= 2 && day <= 4) return 'Refreshes in:'; // Tuesday-Thursday
+    return 'Starts in:'; // Saturday-Monday
+  };
+
+  // Check if should use 24h countdown (Tue-Fri) or long countdown (Sat-Mon)
+  const isShortCountdown = (): boolean => {
+    const now = new Date();
+    const day = now.getDay();
+    return day >= 2 && day <= 5; // Tuesday-Friday use 24h countdown
+  };
+
+  // Function to get next Wednesday midnight (pot closes)
+  const getNextWednesdayMidnight = (): Date => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    let daysUntilWednesday;
+    
+    if (currentDay === 6) {
+      // Saturday - this Wednesday
+      daysUntilWednesday = 4;
+    } else if (currentDay <= 2) {
+      // Sunday (0), Monday (1), Tuesday (2) - this Wednesday
+      if (currentDay === 0) {
+        daysUntilWednesday = 3; // Sunday to Wednesday
+      } else {
+        daysUntilWednesday = 3 - currentDay; // Monday/Tuesday to Wednesday
+      }
+    } else {
+      // Wednesday (3), Thursday (4), Friday (5) - next Wednesday (next week)
+      daysUntilWednesday = 7 - currentDay + 3;
+    }
+    
+    const nextWednesday = new Date(now);
+    nextWednesday.setDate(now.getDate() + daysUntilWednesday);
+    nextWednesday.setHours(0, 0, 0, 0); // Midnight
+    return nextWednesday;
+  };
+
   // Function to get next midnight
   const getNextMidnight = (): Date => {
     const now = new Date();
@@ -56,17 +101,18 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   // Function to update countdown
   const updateCountdown = () => {
     const now = new Date();
-    const target = getNextMidnight();
+    const target = isShortCountdown() ? getNextMidnight() : getNextWednesdayMidnight();
     const difference = target.getTime() - now.getTime();
 
     if (difference > 0) {
-      const hours = Math.floor(difference / (1000 * 60 * 60));
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
       
-      setTimeUntilMidnight({ hours, minutes, seconds });
+      setTimeUntilMidnight({ days, hours, minutes, seconds });
     } else {
-      setTimeUntilMidnight({ hours: 0, minutes: 0, seconds: 0 });
+      setTimeUntilMidnight({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     }
   };
 
@@ -283,15 +329,17 @@ const handleMarketClick = (marketId: string) => {
     {/* Background Gradient Accent */}
     <div className="absolute top-0 left-0 right-0 h-1 "></div>
     
-    {/* Countdown Timer - Top Right */}
-    <div className="absolute top-2 right-2 text-xs text-gray-500 font-medium">
-      <div className="text-center">
-        <div className="text-[10px] text-gray-400 mb-0.5">Refreshes in:</div>
-        <div className="flex space-x-1 text-[11px] font-bold">
-          <span>{timeUntilMidnight.hours.toString().padStart(2, '0')}H</span>
-          <span>{timeUntilMidnight.minutes.toString().padStart(2, '0')}M</span>
-          <span>{timeUntilMidnight.seconds.toString().padStart(2, '0')}S</span>
-        </div>
+    {/* Countdown Timer - Above image */}
+    <div className="flex justify-end mb-2">
+      <div className="text-xs text-gray-500 font-medium whitespace-nowrap">
+        <span className="text-[10px] text-gray-400 mr-1">{getCountdownLabel()}</span>
+        <span className="text-[11px] font-bold">
+          {isShortCountdown() ? (
+            `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
+          ) : (
+            `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
+          )}
+        </span>
       </div>
     </div>
     
@@ -374,15 +422,17 @@ const handleMarketClick = (marketId: string) => {
                   {/* Background Gradient Accent */}
                   <div className="absolute top-0 left-0 right-0 h-1 "></div>
                   
-                  {/* Countdown Timer - Top Right */}
-                  <div className="absolute top-3 right-3 text-sm text-gray-300 font-medium">
-                    <div className="text-center">
-                      <div className="text-xs text-gray-400 mb-1">Refreshes in:</div>
-                      <div className="flex space-x-1 text-sm font-bold text-white">
-                        <span>{timeUntilMidnight.hours.toString().padStart(2, '0')}H</span>
-                        <span>{timeUntilMidnight.minutes.toString().padStart(2, '0')}M</span>
-                        <span>{timeUntilMidnight.seconds.toString().padStart(2, '0')}S</span>
-                      </div>
+                  {/* Countdown Timer - Above image */}
+                  <div className="flex justify-end mb-3">
+                    <div className="text-sm text-gray-300 font-medium whitespace-nowrap">
+                      <span className="text-xs text-gray-400 mr-2">{getCountdownLabel()}</span>
+                      <span className="text-sm font-bold text-white">
+                        {isShortCountdown() ? (
+                          `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
+                        ) : (
+                          `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
+                        )}
+                      </span>
                     </div>
                   </div>
                   

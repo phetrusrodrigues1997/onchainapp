@@ -112,11 +112,11 @@ export default function App() {
               <div className="absolute -inset-1 rounded-full blur-md"></div>
               <ResponsiveLogo />
             </div>
-            
-            {/* Desktop menu - shows to right of logo on desktop */}
-            <div className="hidden md:block">
-              <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-            </div>
+          </div>
+          
+          {/* Desktop menu - centered in header */}
+          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
+            <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
           </div>
           <div className="flex items-center space-x-4">
             {/* USDC Balance Display */}

@@ -255,12 +255,27 @@ body::before {
 
 
 button[aria-label="Toggle menu"] {
-  background-color: white !important;
-  transform: translateX(-14px) !important; /* Adjusted for better alignment */
+  background-color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  transform: translateX(-14px) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+button[aria-label="Toggle menu"]:hover {
+  background-color: #1a1a1a !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateX(-14px) translateY(-1px) !important;
 }
 
 button[aria-label="Toggle menu"] svg {
-  stroke: black !important;
+  stroke: #ffffff !important;
+  stroke-width: 2 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+button[aria-label="Toggle menu"]:hover svg {
+  stroke: #f9fafb !important;
 }
 
 
