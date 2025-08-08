@@ -775,36 +775,36 @@ useEffect(() => {
                   </div>
                   
                   <div className="bg-gray-900 rounded-lg p-8 mb-8">
-                    <div className="grid grid-cols-4 gap-6">
+                    <div className="grid grid-cols-4 gap-2 sm:gap-6">
                       <div className="text-center">
-                        <div className="text-4xl font-black text-white mb-2">
+                        <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
                           {timeUntilWednesday.days.toString().padStart(2, '0')}
                         </div>
-                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                        <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           Days
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-4xl font-black text-white mb-2">
+                        <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
                           {timeUntilWednesday.hours.toString().padStart(2, '0')}
                         </div>
-                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                        <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           Hours
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-4xl font-black text-white mb-2">
+                        <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
                           {timeUntilWednesday.minutes.toString().padStart(2, '0')}
                         </div>
-                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                        <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           Minutes
                         </div>
                       </div>
                       <div className="text-center">
-                        <div className="text-4xl font-black text-white mb-2">
+                        <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
                           {timeUntilWednesday.seconds.toString().padStart(2, '0')}
                         </div>
-                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                        <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           Seconds
                         </div>
                       </div>
@@ -835,10 +835,10 @@ useEffect(() => {
                       </p>
                     </div>
                     
-                    <div className="bg-red-900 rounded-lg p-4 mb-4">
-                      <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-red-900 rounded-lg p-2 sm:p-4 mb-4">
+                      <div className="grid grid-cols-4 gap-2 sm:gap-4">
                         <div className="text-center">
-                          <div className="text-2xl font-black text-white mb-1">
+                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
                             {timeUntilDeadline.days.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
@@ -846,7 +846,7 @@ useEffect(() => {
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-black text-white mb-1">
+                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
                             {timeUntilDeadline.hours.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
@@ -854,7 +854,7 @@ useEffect(() => {
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-black text-white mb-1">
+                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
                             {timeUntilDeadline.minutes.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
@@ -862,7 +862,7 @@ useEffect(() => {
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-black text-white mb-1">
+                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
                             {timeUntilDeadline.seconds.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
