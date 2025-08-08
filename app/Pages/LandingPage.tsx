@@ -110,7 +110,7 @@ const handleMarketClick = (marketId: string) => {
     
     // Optional: Add a small delay to ensure cookie is set before navigation
     setTimeout(() => {
-      setActiveSection('bitcoinPot');
+      setActiveSection('tutorial');
     }, 200);
     
     console.log('Set cookie selectedMarket:', contractAddress); // Debug log

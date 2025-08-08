@@ -9,6 +9,7 @@ import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
 import BitcoinBetting from './Pages/BitcoinBetting';
 import ProfilePage from './Pages/ProfilePage';
+import TutorialBridge from './Pages/TutorialBridge';
 // import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import BuySection from "./Pages/BuyPage";
 // import CurrencyDisplay from './Pages/Charts';
@@ -176,6 +177,7 @@ export default function App() {
           {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {/* {activeSection === "notifications" && <CreateMessage />} */}
+          {activeSection === "tutorial" && <TutorialBridge activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }

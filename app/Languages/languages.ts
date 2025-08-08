@@ -34,6 +34,23 @@ export interface Translations {
   searchPlaceholder: string;
   noMarketsFound: string;
 
+  // Tutorial Section
+  tutorialStep1Title: string;
+  tutorialStep1Description: string;
+  tutorialStep2Title: string;
+  tutorialStep2Description: string;
+  tutorialStep3Title: string;
+  tutorialStep3Description: string;
+  tutorialStep4Title: string;
+  tutorialStep4Description: string;
+  tutorialStep5Title: string;
+  tutorialStep5Description: string;
+  skipTutorial: string;
+  previous: string;
+  next: string;
+  startPlaying: string;
+  tutorialTip: string;
+
   // PredictionPotTest specific
   bitcoinPotTitle: string;
   connectWalletPrompt: string;
@@ -102,15 +119,32 @@ export const translations: Record<Language, Translations> = {
     
     // How It Works Section
     howItWorksTitle: 'How It Works',
-    howItWorksSubtitle: 'Simple 3-step process to start winning',
-    step1Title: 'Choose Your Market',
-    step1Description: 'Pick from Bitcoin, Ethereum, Tesla, and more. Each market has its own daily pot.',
+    howItWorksSubtitle: 'Join prediction markets with real rewards and consequences',
+    step1Title: 'Enter the Pot',
+    step1Description: 'Join weekly prediction markets. Each market has its own growing pot of participants.',
     step2Title: 'Make Your Prediction',
-    step2Description: 'Will it end higher or lower? Pay the entry fee and lock in your prediction for the day.',
-    step3Title: 'Win or Lose',
-    step3Description: 'If your prediction is correct, you share the pot with other winners. Wrong guess? Try again tomorrow.',
+    step2Description: 'Predict tomorrow\'s outcome - will Bitcoin go up or down? Lock in your prediction before the deadline.',
+    step3Title: 'Winners Take All',
+    step3Description: 'Correct predictors at the end of the week split the entire pot equally. Wrong predictors get temporarily blocked from betting until next week.',
     searchPlaceholder: "Search markets...",
     noMarketsFound: "No markets found. Please try a different search.",
+
+    // Tutorial Section
+    tutorialStep1Title: 'Welcome to Prediction Markets',
+    tutorialStep1Description: 'Join thousands of players in daily prediction competitions where skill and strategy win real rewards.',
+    tutorialStep2Title: 'Enter the Pot',
+    tutorialStep2Description: 'Pay 0.01 USDC to join the daily prediction pot. Each participant increases the total prize pool.',
+    tutorialStep3Title: 'Make Your Prediction',
+    tutorialStep3Description: 'Will Bitcoin go up or down tomorrow? Choose wisely - your prediction determines your fate.',
+    tutorialStep4Title: 'Winners Take All',
+    tutorialStep4Description: 'Correct predictors split the entire pot equally. Wrong predictors get temporarily blocked from the next round.',
+    tutorialStep5Title: 'Ready to Play?',
+    tutorialStep5Description: 'You now understand the rules. Connect your wallet and make your first prediction to start winning!',
+    skipTutorial: 'Skip Tutorial',
+    previous: 'Previous',
+    next: 'Next',
+    startPlaying: 'Start Playing',
+    tutorialTip: 'The more accurate your predictions, the more you\'ll win!',
 
     // PredictionPotTest specific
     bitcoinPotTitle: 'Pot Details',
@@ -179,15 +213,32 @@ export const translations: Record<Language, Translations> = {
     
     // How It Works Section
     howItWorksTitle: 'Como Funciona',
-    howItWorksSubtitle: 'Processo simples de 3 passos para começar a ganhar',
-    step1Title: 'Escolha Seu Mercado',
-    step1Description: 'Escolha entre Bitcoin, Ethereum, Tesla e muito mais. Cada mercado tem seu próprio pote diário.',
+    howItWorksSubtitle: 'Participe de mercados de previsão com recompensas e consequências reais',
+    step1Title: 'Entre no Pote',
+    step1Description: 'Pague 0.01 USDC para participar dos mercados de previsão diários. Cada mercado tem seu próprio pote crescente de participantes.',
     step2Title: 'Faça Sua Previsão',
-    step2Description: 'Vai terminar em alta ou baixa? Pague a taxa de entrada e confirme sua previsão para o dia.',
-    step3Title: 'Ganhe ou Perca',
-    step3Description: 'Se sua previsão estiver correta, você divide o pote com outros vencedores. Errou? Tente novamente amanhã.',
+    step2Description: 'Preveja o resultado de amanhã - Bitcoin vai subir ou descer? Confirme sua previsão antes do prazo.',
+    step3Title: 'Vencedores Levam Tudo',
+    step3Description: 'Preditores corretos dividem todo o pote igualmente. Preditores errados ficam temporariamente bloqueados de apostar até a próxima rodada.',
     searchPlaceholder: "Pesquisar mercados...",
     noMarketsFound: "Nenhum mercado encontrado. Por favor, tente uma pesquisa diferente.",
+
+    // Tutorial Section
+    tutorialStep1Title: 'Bem-vindo aos Mercados de Previsão',
+    tutorialStep1Description: 'Junte-se a milhares de jogadores em competições diárias de previsão onde habilidade e estratégia ganham recompensas reais.',
+    tutorialStep2Title: 'Entre no Pote',
+    tutorialStep2Description: 'Pague 0.01 USDC para participar do pote de previsão diário. Cada participante aumenta o prêmio total.',
+    tutorialStep3Title: 'Faça Sua Previsão',
+    tutorialStep3Description: 'Bitcoin vai subir ou descer amanhã? Escolha sabiamente - sua previsão determina seu destino.',
+    tutorialStep4Title: 'Vencedores Levam Tudo',
+    tutorialStep4Description: 'Preditores corretos dividem todo o pote igualmente. Preditores errados ficam temporariamente bloqueados da próxima rodada.',
+    tutorialStep5Title: 'Pronto para Jogar?',
+    tutorialStep5Description: 'Agora você entende as regras. Conecte sua carteira e faça sua primeira previsão para começar a ganhar!',
+    skipTutorial: 'Pular Tutorial',
+    previous: 'Anterior',
+    next: 'Próximo',
+    startPlaying: 'Começar a Jogar',
+    tutorialTip: 'Quanto mais precisas suas previsões, mais você ganhará!',
 
     // PredictionPotTest specific
     bitcoinPotTitle: 'Detalhes do Pote',
