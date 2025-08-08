@@ -258,8 +258,8 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
  else if (category === 'Featured') {
   return [{
   id: 'Featured',
-  name: 'Featured - Random Topics',
-  symbol: '',
+  name: 'Random Topics',
+  symbol: 'Featured',
   color: '#1DB954',
   question: 'Will Elon tweet about Trump?',
   icon: 'https://static.euronews.com/articles/stories/09/31/79/83/1536x864_cmsv2_850c0067-ae2d-51b2-bd5f-752e1909c8ef-9317983.jpg',
