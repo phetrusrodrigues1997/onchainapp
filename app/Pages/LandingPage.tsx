@@ -24,7 +24,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const availableMarkets = ["featured - random topics", "crypto"];
+  const availableMarkets = ["random topics", "crypto"];
 
 
 
@@ -255,7 +255,7 @@ const handleMarketClick = (marketId: string) => {
       className="w-full h-full object-cover" 
     />
   ) : (
-    <span className="text-lg text-white">{markets[0].icon}</span>
+    <span className="text-lg text-gray-600">{markets[0].icon}</span>
   )}
 </div>
       </div>
@@ -318,7 +318,7 @@ const handleMarketClick = (marketId: string) => {
               <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-12' : '-translate-y-12'}`}>
                 <div 
                   onClick={() => handleMarketClick(markets[0].id)}
-                  className="group bg-gradient-to-br from-slate-50 to-gray-100/50 rounded-xl p-5 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[500px] flex flex-col"
+                  className="group bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-5 border border-gray-700 hover:border-gray-600 hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[500px] flex flex-col"
                 >
                   {/* Background Gradient Accent */}
                   <div className="absolute top-0 left-0 right-0 h-1 "></div>
@@ -326,7 +326,7 @@ const handleMarketClick = (marketId: string) => {
                   {/* Header with Icon and Price */}
                   <div className="flex flex-col items-center mb-4">
                     <div className="flex items-center justify-center mb-2">
-                      <div className="rounded-xl flex items-center justify-center w-80 h-44 bg-gray-50 overflow-hidden">
+                      <div className="rounded-xl flex items-center justify-center w-96 h-44 bg-gray-50 overflow-hidden">
                         {markets[0].icon?.slice(0, 4) === 'http' ? (
                           <img 
                             src={markets[0].icon} 
@@ -334,20 +334,20 @@ const handleMarketClick = (marketId: string) => {
                             className="w-full h-full object-cover" 
                           />
                         ) : (
-                          <span className="text-lg text-white">{markets[0].icon}</span>
+                          <span className="text-lg text-gray-600">{markets[0].icon}</span>
                         )}
                       </div>
                     </div>
 
                     <div className="text-center">
-                      <h2 className="text-xl font-bold text-gray-900">{markets[0].name}</h2>
-                      <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
+                      <h2 className="text-xl font-bold text-white">{markets[0].name}</h2>
+                      <p className="text-sm text-gray-300 font-medium">{markets[0].symbol}</p>
                     </div>
                   </div>
 
                   {/* Question */}
                   <div className="mb-4 flex-1 flex items-center justify-center">
-                    <p className="text-lg font-semibold text-gray-800 leading-snug text-center">
+                    <p className="text-lg font-semibold text-white leading-snug text-center">
                       {markets[0].question}
                     </p>
                   </div>
@@ -363,7 +363,7 @@ const handleMarketClick = (marketId: string) => {
                   </div>
 
                   {/* Stats Footer */}
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-600">
                     <div className="flex items-center space-x-2">
                       <div
                         className={`w-2.5 h-2.5 rounded-full ${
@@ -372,66 +372,84 @@ const handleMarketClick = (marketId: string) => {
                             : 'bg-red-500'
                         }`}
                       ></div>
-                      <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-400' : 'text-red-400'}`}>
                         {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Live' : 'Soon'}
                       </span>
                     </div>
                     
                     <div className="text-center">
-                      <div className="text-sm font-bold text-gray-900">{markets[0].potSize}</div>
-                      <div className="text-xs text-gray-400">Volume</div>
+                      <div className="text-sm font-bold text-white">{markets[0].potSize}</div>
+                      <div className="text-xs text-gray-300">Volume</div>
                     </div>
                     
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all duration-200" />
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-white group-hover:translate-x-1 transition-all duration-200" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column - How It Works */}
-            <div className="flex flex-col justify-center">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-3 text-gray-900">{t.howItWorksTitle}</h2>
-                <p className="text-base text-gray-600">{t.howItWorksSubtitle}</p>
+            {/* Right Column - Sleek Call to Action */}
+            <div className="flex flex-col justify-center items-center text-center h-full">
+              <div className="space-y-3 mb-16">
+                <h2 className="text-3xl font-light text-gray-900 tracking-tight">
+                  Thousands of players,
+                </h2>
+                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
+                  one weekly winner
+                </h3>
               </div>
-
-              <div className="space-y-6">
-                {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex items-start space-x-3">
-                    <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                      {step}
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold mb-1 text-gray-900">{t[`step${step}Title` as keyof typeof t]}</h3>
-                      <p className="text-sm text-gray-600 leading-relaxed">{t[`step${step}Description` as keyof typeof t]}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              
+              {/* Minimalist Entry Button */}
+              <button
+                onClick={() => handleMarketClick('Featured')}
+                className="group relative bg-white border-2 border-gray-900 text-gray-900 px-16 py-4 rounded-none font-light text-lg tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gray-900 hover:text-white overflow-hidden"
+              >
+                <span className="relative z-10">Enter</span>
+                
+                {/* Sliding fill effect */}
+                <div className="absolute inset-0 bg-gray-900 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+                
+                {/* Subtle arrows that appear on hover */}
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">
+                  <span className="text-white text-sm">→</span>
+                </div>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                  <span className="text-white text-sm">←</span>
+                </div>
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works - Mobile Only (Desktop version is integrated above) */}
-      <section id="how-it-works" className="relative z-10 px-6 mt-16 md:hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">{t.howItWorksTitle}</h2>
-            <p className="text-xl text-[#666666]">{t.howItWorksSubtitle}</p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-8">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="text-center">
-                <div className="bg-gradient-to-r from-purple-500 to-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                  {step}
-                </div>
-                <h3 className="text-xl font-bold mb-4">{t[`step${step}Title` as keyof typeof t]}</h3>
-                <p className="text-[#666666]">{t[`step${step}Description` as keyof typeof t]}</p>
-              </div>
-            ))}
-          </div>
+      {/* Sleek Call to Action - Mobile Only */}
+      <section id="call-to-action" className="relative z-10 px-6 mt-16 mb-16 md:hidden">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
+            Thousands of players,
+          </h2>
+          <h3 className="text-xl font-black text-gray-900 mb-10 tracking-tight">
+            one weekly winner
+          </h3>
+          
+          {/* Minimalist Entry Button - Mobile */}
+          <button
+            onClick={() => handleMarketClick('Featured')}
+            className="group relative bg-white border-2 border-gray-900 text-gray-900 px-12 py-4 rounded-none font-light text-base tracking-[0.2em] uppercase transition-all duration-300 hover:bg-gray-900 hover:text-white overflow-hidden mx-auto"
+          >
+            <span className="relative z-10">Enter</span>
+            
+            {/* Sliding fill effect */}
+            <div className="absolute inset-0 bg-gray-900 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+            
+            {/* Subtle arrows that appear on hover */}
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">
+              <span className="text-white text-xs">→</span>
+            </div>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+              <span className="text-white text-xs">←</span>
+            </div>
+          </button>
         </div>
       </section>
 

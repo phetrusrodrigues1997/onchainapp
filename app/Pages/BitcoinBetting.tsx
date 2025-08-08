@@ -41,6 +41,20 @@ export default function BitcoinBetting() {
   const [contractAddress, setContractAddress] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
 
+  // Check if betting is allowed (Tuesday, Wednesday, Thursday)
+  const isBettingAllowed = (): boolean => {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    return day === 2 || day === 3 || day === 4; // Tuesday, Wednesday, Thursday
+  };
+
+  // Check if today is Friday (results day)
+  const isResultsDay = (): boolean => {
+    const now = new Date();
+    const day = now.getDay();
+    return day === 5; // Friday
+  };
+
   // Add useEffect to handle cookie retrieval
   useEffect(() => {
     const savedContract = Cookies.get('selectedMarket');
@@ -261,6 +275,62 @@ export default function BitcoinBetting() {
                   </p>
                 </div>
               </div>
+            ) : isResultsDay() ? (
+              // Friday - Results Day message
+              <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 backdrop-blur-xl border-2 border-blue-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-blue-900/10 relative overflow-hidden">
+                <div className="text-center">
+                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                    <Zap className="w-12 h-12 text-white animate-pulse" />
+                  </div>
+                  <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Results Day! 🎉</h2>
+                  <p className="text-gray-700 text-lg mb-6 font-medium">
+                    Today is Friday - winners will be determined at midnight UTC
+                  </p>
+                  <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-2xl p-6 border border-blue-200 mb-6">
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-100"></div>
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-200"></div>
+                    </div>
+                    <p className="text-blue-800 font-bold text-lg">
+                      Sit tight and wait for the results!
+                    </p>
+                    <p className="text-blue-600 text-sm mt-2">
+                      Winners will be announced and pot distributed automatically
+                    </p>
+                  </div>
+                  <div className="text-gray-600 text-sm">
+                    <p className="mb-1">📊 Your predictions are locked in</p>
+                    <p>🏆 Check back after midnight for results</p>
+                  </div>
+                </div>
+              </div>
+            ) : !isBettingAllowed() ? (
+              // Weekend/Monday - Betting not available message
+              <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
+                <div className="text-center">
+                  <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                    <Shield className="w-12 h-12 text-gray-600" />
+                  </div>
+                  <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Betting Closed</h2>
+                  <p className="text-gray-600 text-lg mb-6">
+                    Predictions can only be placed Tuesday through Thursday
+                  </p>
+                  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <p className="text-gray-700 font-medium mb-2">Betting Schedule:</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Tuesday - Thursday:</span>
+                        <span className="text-green-600 font-bold">✓ Betting Open</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Friday - Monday:</span>
+                        <span className="text-red-600 font-bold">✗ Betting Closed</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ) : (
               // Premium betting interface
           <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
@@ -282,7 +352,7 @@ export default function BitcoinBetting() {
                 {/* Premium Bullish Button */}
                 <button
                   onClick={() => handlePlaceBet('positive')}
-                  disabled={isLoading}
+                  disabled={isLoading || !isBettingAllowed()}
                   className="group relative bg-gradient-to-br from-gray-900 via-gray-800 to-black hover:from-gray-800 hover:via-gray-700 hover:to-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-white p-6 sm:p-10 rounded-3xl font-black text-xl sm:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/25 overflow-hidden"
                 >
                   {/* Subtle shine effect */}
@@ -302,7 +372,7 @@ export default function BitcoinBetting() {
                 {/* Premium Bearish Button */}
                 <button
                   onClick={() => handlePlaceBet('negative')}
-                  disabled={isLoading}
+                  disabled={isLoading || !isBettingAllowed()}
                   className="group relative bg-gradient-to-br from-white via-gray-50 to-gray-100 hover:from-gray-50 hover:via-gray-100 hover:to-gray-200 border-2 border-gray-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 p-6 sm:p-10 rounded-3xl font-black text-xl sm:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/10 overflow-hidden"
                 >
                   {/* Subtle pattern overlay */}

@@ -4,14 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Foresight - Survival of the Brightest** is a sophisticated Next.js prediction market application that gamifies cryptocurrency forecasting through blockchain-based pot betting. Built on Base network with OnchainKit integration, users compete in daily Bitcoin price prediction tournaments where accuracy determines winners and losers face temporary betting restrictions.
+**Foresight - Survival of the Brightest** is a sophisticated Next.js prediction market application that gamifies cryptocurrency forecasting through blockchain-based pot betting. Built on Base network with OnchainKit integration, users compete in weekly Bitcoin price prediction cycles with structured timing for pot entry, betting periods, and results determination.
 
-### Core Concept
+### Core Concept & Weekly Schedule
 - Users pay **0.01 USDC** to enter prediction pots via smart contracts
-- Make daily **Bitcoin price predictions** (positive/negative movement)  
-- **Winners split the pot** equally at day's end based on actual price movement
+- **Structured weekly cycle** with specific timing for different activities:
+  - **Saturday-Tuesday**: Pot entry period (users can join with USDC)
+  - **Tuesday-Thursday**: Betting period (participants make Bitcoin predictions)
+  - **Friday**: Results day (winners determined at midnight UTC, pot distributed)
+- **Prediction Logic**: Users predict next day's Bitcoin price movement (positive/negative)
+- **Winners split the pot** equally based on actual price movement
 - **Wrong predictors get temporarily blocked** from future betting rounds
 - **Referral system** rewards users with free pot entries for bringing friends
+
+### Complete Weekly Flow
+| Day | Pot Entry | Betting | Status |
+|-----|-----------|---------|---------|
+| **Saturday** | ✅ Open | ❌ Closed | Weekend pot entry |
+| **Sunday** | ✅ Open | ❌ Closed | Weekend pot entry |
+| **Monday** | ✅ Open | ❌ Closed | Final pot entry day |
+| **Tuesday** | ✅ Open | ✅ **Opens** | Pot entry + betting begins |
+| **Wednesday** | ❌ **Closes** | ✅ Active | Betting continues |
+| **Thursday** | ❌ Closed | ✅ Active | Final betting day |
+| **Friday** | ❌ Closed | ❌ **Closes** | Results day + pot distribution |
 
 ## Development Commands
 
@@ -84,10 +99,14 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 ## Key Features
 
 ### Prediction Pot System (`PredictionPotTest.tsx`)
-- **Pot Entry**: Users pay 0.01 USDC to enter daily prediction competitions
+- **Weekly Pot Entry**: Users pay 0.01 USDC to enter prediction competitions (Saturday-Tuesday)
+- **Dynamic UI**: Shows countdown timers and status messages based on current day
 - **USDC Approval Flow**: Two-step process (approve → enter pot) for blockchain security
 - **Smart Contract Integration**: Automated pot distribution to winners via blockchain
 - **Participant Tracking**: Real-time display of pot balance and participant count
+- **Day-Based Logic**: 
+  - **Sat-Tue**: Shows pot entry interface + deadline countdown to Wednesday
+  - **Wed-Fri**: Shows "pot entry closed" countdown to next Saturday
 
 ### Referral Program (New Implementation)
 - **Unique Codes**: Each user gets an 8-character alphanumeric referral code
@@ -102,11 +121,22 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Wrong Prediction Clearing**: Removes temporary bans for next betting round
 - **Combined Operations**: Streamlined workflow for end-of-day settlement
 
-### Betting & Prediction Logic
+### Betting & Prediction Logic (`BitcoinBetting.tsx`)
+- **Weekly Betting Window**: Users can only place bets Tuesday-Thursday
 - **Tomorrow's Bets**: Users predict next day's Bitcoin price movement
 - **One Bet Per Day**: System prevents multiple bets, allows bet updates before cutoff
 - **Temporary Blocking**: Wrong predictors are temporarily banned from future rounds
+- **Day-Based UI Logic**:
+  - **Tuesday-Thursday**: Shows normal betting interface (YES/NO buttons)
+  - **Friday**: Shows special "Results Day" message with excitement and countdown
+  - **Saturday-Monday**: Shows "Betting Closed" with schedule information
 - **Multiple Markets**: Support for both Featured (Bitcoin) and Crypto prediction markets
+
+### Tutorial System (`TutorialBridge.tsx`)
+- **5-Step Tutorial**: Guides new users through the weekly game cycle
+- **Updated Content**: Reflects accurate timing and schedules for pot entry and betting
+- **Bilingual Support**: English and Portuguese translations
+- **Cookie-Based**: Remembers if user has completed tutorial
 
 ## Development Notes
 
@@ -116,3 +146,6 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Real-time Updates**: Integrates live crypto pricing via `Constants/getPrice.ts`
 - **Blockchain State Management**: Wagmi hooks for contract reads/writes and transaction monitoring
 - **Error Handling**: Comprehensive error states for failed transactions and network issues
+- **Day-Based Logic**: Core functionality changes based on current day of the week using JavaScript `Date.getDay()`
+- **Countdown Systems**: Multiple real-time countdowns for pot entry deadlines and reopening schedules
+- **Responsive UI**: Different interfaces and messages shown based on weekly schedule phases

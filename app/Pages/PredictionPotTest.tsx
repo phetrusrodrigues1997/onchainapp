@@ -132,6 +132,22 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [freeEntriesAvailable, setFreeEntriesAvailable] = useState<number>(0);
   const [showReferralSection, setShowReferralSection] = useState<boolean>(false);
   
+  // Countdown state
+  const [timeUntilWednesday, setTimeUntilWednesday] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  
+  // Pot entry deadline countdown state
+  const [timeUntilDeadline, setTimeUntilDeadline] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -179,6 +195,25 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       loadReferralData();
     }
   }, [address]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (isPotEntryBlocked()) {
+      updateCountdown();
+      const interval = setInterval(updateCountdown, 1000);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  // Pot entry deadline countdown effect
+  useEffect(() => {
+    if (!isPotEntryBlocked()) {
+      // On Saturday, Sunday, Monday, Tuesday - show deadline countdown
+      updateDeadlineCountdown();
+      const interval = setInterval(updateDeadlineCountdown, 1000);
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   const loadReferralData = async () => {
     if (!address) return;
@@ -277,6 +312,96 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   //   if (!participants || !Array.isArray(participants)) return 0;
   //   return participants.length;
   // };
+
+  // Utility functions for countdown
+  const isPotEntryBlocked = (): boolean => {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    return day === 3 || day === 4 || day === 5; // Wednesday, Thursday, Friday - pot entry blocked
+  };
+
+  const getNextSaturdayMidnight = (): Date => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    let daysUntilSaturday;
+    
+    if (currentDay >= 3 && currentDay <= 5) {
+      // Wednesday (3), Thursday (4), Friday (5) - next Saturday
+      daysUntilSaturday = 6 - currentDay;
+    } else {
+      // Saturday (6), Sunday (0), Monday (1), Tuesday (2) - next Saturday (next week)
+      if (currentDay === 6) {
+        daysUntilSaturday = 7; // Saturday to next Saturday
+      } else {
+        daysUntilSaturday = 6 - currentDay; // Sunday/Monday/Tuesday to Saturday
+      }
+    }
+    
+    const nextSaturday = new Date(now);
+    nextSaturday.setDate(now.getDate() + daysUntilSaturday);
+    nextSaturday.setUTCHours(0, 0, 0, 0); // Midnight UTC
+    return nextSaturday;
+  };
+
+  const getNextWednesdayMidnight = (): Date => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    let daysUntilWednesday;
+    
+    if (currentDay === 6) {
+      // Saturday - this Wednesday
+      daysUntilWednesday = 4;
+    } else if (currentDay <= 2) {
+      // Sunday (0), Monday (1), Tuesday (2) - this Wednesday
+      if (currentDay === 0) {
+        daysUntilWednesday = 3; // Sunday to Wednesday
+      } else {
+        daysUntilWednesday = 3 - currentDay; // Monday/Tuesday to Wednesday
+      }
+    } else {
+      // Wednesday (3), Thursday (4), Friday (5) - next Wednesday (next week)
+      daysUntilWednesday = 7 - currentDay + 3;
+    }
+    
+    const nextWednesday = new Date(now);
+    nextWednesday.setDate(now.getDate() + daysUntilWednesday);
+    nextWednesday.setUTCHours(0, 0, 0, 0); // Midnight UTC
+    return nextWednesday;
+  };
+
+  const updateCountdown = () => {
+    const now = new Date();
+    const target = getNextSaturdayMidnight();
+    const difference = target.getTime() - now.getTime();
+
+    if (difference > 0) {
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      
+      setTimeUntilWednesday({ days, hours, minutes, seconds });
+    } else {
+      setTimeUntilWednesday({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    }
+  };
+
+  const updateDeadlineCountdown = () => {
+    const now = new Date();
+    const target = getNextWednesdayMidnight();
+    const difference = target.getTime() - now.getTime();
+
+    if (difference > 0) {
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      
+      setTimeUntilDeadline({ days, hours, minutes, seconds });
+    } else {
+      setTimeUntilDeadline({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    }
+  };
 
   const showMessage = (msg: string, isError = false) => {
     setMessage(msg);
@@ -634,112 +759,226 @@ useEffect(() => {
             </div>
           )}
 
-          {/* User Actions - Only show if not yet a participant */}
+          {/* User Actions - Show countdown or pot entry based on day */}
           {isConnected && contractAddress && !isParticipant && (
             <div className="mb-6">
-              <div className="space-y-4">
-                
-                {/* Free Entry Option */}
-                {freeEntriesAvailable > 0 && (
-                  <div className="bg-white p-4 rounded-lg border border-gray-200">
-                    <h3 className="text-black font-bold mb-2">🎉 Discounted Entry Available!</h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      Special price: {formatBigIntValue(entryAmount)} USDC (normally 0.01 USDC)
+              {isPotEntryBlocked() ? (
+                /* Wednesday/Thursday/Friday Countdown */
+                <div className="bg-white rounded-xl border-2 border-gray-900 p-12 text-center">
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-black text-gray-900 mb-4">
+                      Pot Entry Closed
+                    </h2>
+                    <p className="text-gray-600 text-lg font-medium">
+                      New pot entries open every Saturday at midnight UTC
                     </p>
-                    
-                    {!hasEnoughAllowance ? (
-                      <button
-                        onClick={handleApprove}
-                        disabled={isActuallyLoading}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mr-2"
-                      >
-                        {isActuallyLoading && lastAction === 'approve'
-                          ? 'Approving...'
-                          : `Approve ${formatBigIntValue(entryAmount)} USDC`}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleEnterPot(true)}
-                        disabled={isActuallyLoading || !hasEnoughBalance}
-                        className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isActuallyLoading && lastAction === 'enterPot'
-                          ? 'Using Discounted Entry...'
-                          : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
-                      </button>
-                    )}
-                    {!hasEnoughBalance && (
-                      <p className="text-red-400 text-sm mt-2">Insufficient USDC balance for discounted entry</p>
-                    )}
-                    {!hasEnoughAllowance && (
-                      <p className="text-yellow-400 text-sm mt-2">Need to approve {formatBigIntValue(entryAmount)} USDC first</p>
-                    )}
                   </div>
-                )}
-                
-                {/* Approve USDC - Only show if no free entries available */}
-                {freeEntriesAvailable === 0 && (
-                  <div className="bg-[#2C2C47] p-4 rounded-lg">
-                    <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
-                    <p className="text-[#A0A0B0] text-sm mb-3">
-                      {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
-                    </p>
-                    <button
-                      onClick={handleApprove}
-                      disabled={isActuallyLoading || hasEnoughAllowance}
-                      className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isActuallyLoading && lastAction === 'approve'
-                        ? t.approveProcessing
-                        : hasEnoughAllowance
-                        ? t.alreadyApproved
-                        : t.approveUSDC}
-                    </button>
+                  
+                  <div className="bg-gray-900 rounded-lg p-8 mb-8">
+                    <div className="grid grid-cols-4 gap-6">
+                      <div className="text-center">
+                        <div className="text-4xl font-black text-white mb-2">
+                          {timeUntilWednesday.days.toString().padStart(2, '0')}
+                        </div>
+                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                          Days
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-4xl font-black text-white mb-2">
+                          {timeUntilWednesday.hours.toString().padStart(2, '0')}
+                        </div>
+                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                          Hours
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-4xl font-black text-white mb-2">
+                          {timeUntilWednesday.minutes.toString().padStart(2, '0')}
+                        </div>
+                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                          Minutes
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-4xl font-black text-white mb-2">
+                          {timeUntilWednesday.seconds.toString().padStart(2, '0')}
+                        </div>
+                        <div className="text-sm font-medium text-gray-300 uppercase tracking-wide">
+                          Seconds
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                {/* Enter Pot - Only show if no free entries available */}
-                {freeEntriesAvailable === 0 && (
-                  <div className="bg-[#2C2C47] p-4 rounded-lg">
-                    <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
-                    <p className="text-[#A0A0B0] text-sm mb-3">
-                      Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Make sure you have approved USDC spending first.
+                  
+                  <div className="text-gray-600">
+                    <p className="font-medium mb-2">
+                      ⏰ Pot entry resumes this weekend
                     </p>
-                    
-                    {/* Referral Code Input */}
-                    <div className="mb-3">
-                      <label className="text-[#F5F5F5] text-sm mb-1 block">Referral Code (Optional)</label>
-                      <input
-                        type="text"
-                        placeholder="Enter friend's referral code"
-                        value={inputReferralCode}
-                        onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
-                        className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a]"
-                        maxLength={8}
-                      />
-                      <p className="text-[#A0A0B0] text-xs mt-1">
-                        Help a friend earn free entries
+                    <p className="text-sm">
+                      Current participants can continue betting on their predictions
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Regular pot entry - Saturday, Sunday, Monday, Tuesday */
+                <div className="space-y-4">
+                  
+                  {/* Pot Entry Deadline Countdown */}
+                  <div className="bg-red-50 rounded-lg border-2 border-red-200 p-6 text-center">
+                    <div className="mb-4">
+                      <h3 className="text-xl font-black text-red-900 mb-2">
+                        ⏰ Pot Entry Deadline
+                      </h3>
+                      <p className="text-red-700 font-medium">
+                        Pot entries close Wednesday at midnight UTC
                       </p>
                     </div>
                     
-                    <button
-                      onClick={() => handleEnterPot(false)}
-                      disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
-                      className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isActuallyLoading && lastAction === 'enterPot'
-                        ? t.enterPotProcessing
-                        : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
-                    </button>
-                    {!hasEnoughBalance && (
-                      <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>
-                    )}
-                    {!hasEnoughAllowance && hasEnoughBalance && (
-                      <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
-                    )}
+                    <div className="bg-red-900 rounded-lg p-4 mb-4">
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-black text-white mb-1">
+                            {timeUntilDeadline.days.toString().padStart(2, '0')}
+                          </div>
+                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
+                            Days
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-black text-white mb-1">
+                            {timeUntilDeadline.hours.toString().padStart(2, '0')}
+                          </div>
+                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
+                            Hours
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-black text-white mb-1">
+                            {timeUntilDeadline.minutes.toString().padStart(2, '0')}
+                          </div>
+                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
+                            Minutes
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-black text-white mb-1">
+                            {timeUntilDeadline.seconds.toString().padStart(2, '0')}
+                          </div>
+                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
+                            Seconds
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-red-600">
+                      Enter now to participate in the next prediction round!
+                    </p>
                   </div>
-                )}
-              </div>
+                  
+                  {/* Free Entry Option */}
+                  {freeEntriesAvailable > 0 && (
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h3 className="text-black font-bold mb-2">🎉 Discounted Entry Available!</h3>
+                      <p className="text-gray-600 text-sm mb-3">
+                        Special price: {formatBigIntValue(entryAmount)} USDC (normally 0.01 USDC)
+                      </p>
+                      
+                      {!hasEnoughAllowance ? (
+                        <button
+                          onClick={handleApprove}
+                          disabled={isActuallyLoading}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mr-2"
+                        >
+                          {isActuallyLoading && lastAction === 'approve'
+                            ? 'Approving...'
+                            : `Approve ${formatBigIntValue(entryAmount)} USDC`}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEnterPot(true)}
+                          disabled={isActuallyLoading || !hasEnoughBalance}
+                          className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isActuallyLoading && lastAction === 'enterPot'
+                            ? 'Using Discounted Entry...'
+                            : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
+                        </button>
+                      )}
+                      {!hasEnoughBalance && (
+                        <p className="text-red-400 text-sm mt-2">Insufficient USDC balance for discounted entry</p>
+                      )}
+                      {!hasEnoughAllowance && (
+                        <p className="text-yellow-400 text-sm mt-2">Need to approve {formatBigIntValue(entryAmount)} USDC first</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Approve USDC - Only show if no free entries available */}
+                  {freeEntriesAvailable === 0 && (
+                    <div className="bg-[#2C2C47] p-4 rounded-lg">
+                      <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
+                      <p className="text-[#A0A0B0] text-sm mb-3">
+                        {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
+                      </p>
+                      <button
+                        onClick={handleApprove}
+                        disabled={isActuallyLoading || hasEnoughAllowance}
+                        className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isActuallyLoading && lastAction === 'approve'
+                          ? t.approveProcessing
+                          : hasEnoughAllowance
+                          ? t.alreadyApproved
+                          : t.approveUSDC}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Enter Pot - Only show if no free entries available */}
+                  {freeEntriesAvailable === 0 && (
+                    <div className="bg-[#2C2C47] p-4 rounded-lg">
+                      <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
+                      <p className="text-[#A0A0B0] text-sm mb-3">
+                        Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Make sure you have approved USDC spending first.
+                      </p>
+                      
+                      {/* Referral Code Input */}
+                      <div className="mb-3">
+                        <label className="text-[#F5F5F5] text-sm mb-1 block">Referral Code (Optional)</label>
+                        <input
+                          type="text"
+                          placeholder="Enter friend's referral code"
+                          value={inputReferralCode}
+                          onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
+                          className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a]"
+                          maxLength={8}
+                        />
+                        <p className="text-[#A0A0B0] text-xs mt-1">
+                          Help a friend earn free entries
+                        </p>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleEnterPot(false)}
+                        disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
+                        className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isActuallyLoading && lastAction === 'enterPot'
+                          ? t.enterPotProcessing
+                          : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
+                      </button>
+                      {!hasEnoughBalance && (
+                        <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>
+                      )}
+                      {!hasEnoughAllowance && hasEnoughBalance && (
+                        <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
