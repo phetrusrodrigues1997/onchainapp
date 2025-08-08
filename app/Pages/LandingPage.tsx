@@ -142,7 +142,7 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbfbfb] text-[#111111] overflow-hidden -mt-32 md:-mt-40">
+    <div className="min-h-screen bg-[#fcfcfc] text-[#111111] overflow-hidden -mt-32 md:-mt-40">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -234,7 +234,7 @@ const handleMarketClick = (marketId: string) => {
 
           
           
-<div className={`max-w-md mx-auto md:hidden ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-6' : '-translate-y-12'}`} >
+<div className={'max-w-md mx-auto md:hidden -translate-y-12'} >
 
   <div 
     onClick={() => handleMarketClick(markets[0].id)}
@@ -247,14 +247,12 @@ const handleMarketClick = (marketId: string) => {
     {/* Header with Icon and Price */}
     <div className="flex flex-col items-center mb-2">
       <div className="flex items-center justify-center mb-1">
-        <div className={`rounded-xl flex items-center justify-center ${
-  selectedMarket === 'Featured' ? 'w-70 h-58' : 'w-38 h-24'
-}`}>
+        <div className="rounded-xl flex items-center justify-center w-70 h-58 bg-gray-50 overflow-hidden">
   {markets[0].icon?.slice(0, 4) === 'http' ? (
     <img 
       src={markets[0].icon} 
       alt={`${markets[0].name} Icon`} 
-      className={selectedMarket === 'Featured' ? 'w-70 h-54 object-contain' : 'w-38 h-24 object-contain'} 
+      className="w-full h-full object-cover" 
     />
   ) : (
     <span className="text-lg text-white">{markets[0].icon}</span>
@@ -317,25 +315,23 @@ const handleMarketClick = (marketId: string) => {
           <div className="grid md:grid-cols-2 gap-16 items-start">
             {/* Left Column - Market Card */}
             <div className="flex justify-center">
-              <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-6' : '-translate-y-12'}`}>
+              <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-12' : '-translate-y-12'}`}>
                 <div 
                   onClick={() => handleMarketClick(markets[0].id)}
-                  className={`group bg-white rounded-xl border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'p-6 max-w-lg' : 'p-4 max-w-md'}`}
+                  className="group bg-gradient-to-br from-slate-50 to-gray-100/50 rounded-xl p-5 border border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[500px] flex flex-col"
                 >
                   {/* Background Gradient Accent */}
                   <div className="absolute top-0 left-0 right-0 h-1 "></div>
                   
                   {/* Header with Icon and Price */}
-                  <div className={`flex flex-col items-center ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-4' : 'mb-2'}`}>
-                    <div className={`flex items-center justify-center ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-3' : 'mb-1'}`}>
-                      <div className={`rounded-xl flex items-center justify-center ${
-                        selectedMarket === 'Featured' ? 'w-70 h-58' : 'w-38 h-24'
-                      }`}>
+                  <div className="flex flex-col items-center mb-4">
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="rounded-xl flex items-center justify-center w-80 h-44 bg-gray-50 overflow-hidden">
                         {markets[0].icon?.slice(0, 4) === 'http' ? (
                           <img 
                             src={markets[0].icon} 
                             alt={`${markets[0].name} Icon`} 
-                            className={selectedMarket === 'Featured' ? 'w-70 h-54 object-contain' : 'w-38 h-24 object-contain'} 
+                            className="w-full h-full object-cover" 
                           />
                         ) : (
                           <span className="text-lg text-white">{markets[0].icon}</span>
@@ -344,20 +340,20 @@ const handleMarketClick = (marketId: string) => {
                     </div>
 
                     <div className="text-center">
-                      <h2 className={`font-bold text-gray-900 ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'text-2xl' : 'text-xl'}`}>{markets[0].name}</h2>
-                      <p className={`text-gray-500 font-medium ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'text-base' : 'text-sm'}`}>{markets[0].symbol}</p>
+                      <h2 className="text-xl font-bold text-gray-900">{markets[0].name}</h2>
+                      <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
                     </div>
                   </div>
 
                   {/* Question */}
-                  <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-5' : 'mb-3'}`}>
-                    <p className={`font-semibold text-gray-800 leading-snug text-center ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'text-xl' : 'text-lg'}`}>
+                  <div className="mb-4 flex-1 flex items-center justify-center">
+                    <p className="text-lg font-semibold text-gray-800 leading-snug text-center">
                       {markets[0].question}
                     </p>
                   </div>
 
                   {/* Trading Buttons */}
-                  <div className={`grid grid-cols-2 gap-3 ${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? 'mb-4' : 'mb-2'}`}>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
                     <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
                       YES
                     </button>

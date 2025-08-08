@@ -98,7 +98,7 @@ export default function App() {
      <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
       
       {/* Dark green header */}
-      <header className="z-50 bg-[#fbfbfb] px-4 py-3 shadow-md sticky top-0">
+      <header className="z-50 bg-[#fcfcfc] px-4 py-3 shadow-md sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center">
             {/* Mobile hamburger only - shows to left of logo on mobile */}
