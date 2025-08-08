@@ -191,7 +191,7 @@ const TutorialBridge = ({ activeSection, setActiveSection, selectedMarket }: Tut
             {/* Next/Start Button */}
             <button
               onClick={handleNext}
-              className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-6 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="flex items-center space-x-2 bg-transparent text-[#00aa00] px-6 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               {currentStep === tutorialSteps.length - 1 ? (
                 <>

@@ -781,7 +781,7 @@ useEffect(() => {
                           {timeUntilWednesday.days.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
-                          Days
+                          D
                         </div>
                       </div>
                       <div className="text-center">
@@ -789,7 +789,7 @@ useEffect(() => {
                           {timeUntilWednesday.hours.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
-                          Hours
+                          H
                         </div>
                       </div>
                       <div className="text-center">
@@ -797,7 +797,7 @@ useEffect(() => {
                           {timeUntilWednesday.minutes.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
-                          Minutes
+                          M
                         </div>
                       </div>
                       <div className="text-center">
@@ -805,7 +805,7 @@ useEffect(() => {
                           {timeUntilWednesday.seconds.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
-                          Seconds
+                          S
                         </div>
                       </div>
                     </div>
@@ -842,7 +842,7 @@ useEffect(() => {
                             {timeUntilDeadline.days.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            Days
+                            D
                           </div>
                         </div>
                         <div className="text-center">
@@ -850,7 +850,7 @@ useEffect(() => {
                             {timeUntilDeadline.hours.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            Hours
+                            H
                           </div>
                         </div>
                         <div className="text-center">
@@ -858,7 +858,7 @@ useEffect(() => {
                             {timeUntilDeadline.minutes.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            Minutes
+                            M
                           </div>
                         </div>
                         <div className="text-center">
@@ -866,7 +866,7 @@ useEffect(() => {
                             {timeUntilDeadline.seconds.toString().padStart(2, '0')}
                           </div>
                           <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            Seconds
+                            S
                           </div>
                         </div>
                       </div>
