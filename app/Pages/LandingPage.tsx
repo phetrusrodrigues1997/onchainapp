@@ -25,6 +25,13 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [showRightArrow, setShowRightArrow] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const availableMarkets = ["random topics", "crypto"];
+  
+  // Countdown state for 24-hour refresh timer
+  const [timeUntilMidnight, setTimeUntilMidnight] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ hours: 0, minutes: 0, seconds: 0 });
 
 
 
@@ -38,12 +45,44 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     }
   };
 
+  // Function to get next midnight
+  const getNextMidnight = (): Date => {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0); // Next midnight
+    return midnight;
+  };
+
+  // Function to update countdown
+  const updateCountdown = () => {
+    const now = new Date();
+    const target = getNextMidnight();
+    const difference = target.getTime() - now.getTime();
+
+    if (difference > 0) {
+      const hours = Math.floor(difference / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      
+      setTimeUntilMidnight({ hours, minutes, seconds });
+    } else {
+      setTimeUntilMidnight({ hours: 0, minutes: 0, seconds: 0 });
+    }
+  };
+
   useEffect(() => {
     const savedLang = Cookies.get('language') as Language | undefined;
     if (savedLang && supportedLanguages.some(lang => lang.code === savedLang)) {
       setCurrentLanguage(savedLang);
     }
     setIsVisible(true);
+  }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -244,6 +283,18 @@ const handleMarketClick = (marketId: string) => {
     {/* Background Gradient Accent */}
     <div className="absolute top-0 left-0 right-0 h-1 "></div>
     
+    {/* Countdown Timer - Top Right */}
+    <div className="absolute top-2 right-2 text-xs text-gray-500 font-medium">
+      <div className="text-center">
+        <div className="text-[10px] text-gray-400 mb-0.5">Refreshes in:</div>
+        <div className="flex space-x-1 text-[11px] font-bold">
+          <span>{timeUntilMidnight.hours.toString().padStart(2, '0')}H</span>
+          <span>{timeUntilMidnight.minutes.toString().padStart(2, '0')}M</span>
+          <span>{timeUntilMidnight.seconds.toString().padStart(2, '0')}S</span>
+        </div>
+      </div>
+    </div>
+    
     {/* Header with Icon and Price */}
     <div className="flex flex-col items-center mb-2">
       <div className="flex items-center justify-center mb-1">
@@ -322,6 +373,18 @@ const handleMarketClick = (marketId: string) => {
                 >
                   {/* Background Gradient Accent */}
                   <div className="absolute top-0 left-0 right-0 h-1 "></div>
+                  
+                  {/* Countdown Timer - Top Right */}
+                  <div className="absolute top-3 right-3 text-sm text-gray-300 font-medium">
+                    <div className="text-center">
+                      <div className="text-xs text-gray-400 mb-1">Refreshes in:</div>
+                      <div className="flex space-x-1 text-sm font-bold text-white">
+                        <span>{timeUntilMidnight.hours.toString().padStart(2, '0')}H</span>
+                        <span>{timeUntilMidnight.minutes.toString().padStart(2, '0')}M</span>
+                        <span>{timeUntilMidnight.seconds.toString().padStart(2, '0')}S</span>
+                      </div>
+                    </div>
+                  </div>
                   
                   {/* Header with Icon and Price */}
                   <div className="flex flex-col items-center mb-4">
