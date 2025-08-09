@@ -208,6 +208,13 @@ export async function processReEntry(walletAddress: string, typeTable: string = 
 
 export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'bitcoin') {
   try {
+    // Server-side schedule validation - betting only allowed Sunday-Friday
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    if (day === 6) {
+      throw new Error('Betting is not allowed on Saturdays (Results Day).');
+    }
+    
     // Get tomorrow's date for the prediction
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -415,11 +422,22 @@ export async function generateReferralCode(walletAddress: string): Promise<strin
  */
 export async function recordReferral(referralCode: string, referredWallet: string): Promise<boolean> {
   try {
+    // Input validation
+    if (!referralCode || typeof referralCode !== 'string') {
+      throw new Error("Invalid referral code format");
+    }
+    
+    // Sanitize referral code (alphanumeric only, max 10 chars)
+    const sanitizedCode = referralCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10);
+    if (sanitizedCode.length < 1) {
+      throw new Error("Invalid referral code");
+    }
+    
     // Find the referrer by their referral code
     const referrer = await db
       .select({ walletAddress: ReferralCodes.walletAddress })
       .from(ReferralCodes)
-      .where(eq(ReferralCodes.referralCode, referralCode))
+      .where(eq(ReferralCodes.referralCode, sanitizedCode))
       .limit(1);
 
     if (referrer.length === 0) {
@@ -448,7 +466,7 @@ export async function recordReferral(referralCode: string, referredWallet: strin
       .values({
         referrerWallet,
         referredWallet,
-        referralCode,
+        referralCode: sanitizedCode,
         potEntryConfirmed: false,
       });
 

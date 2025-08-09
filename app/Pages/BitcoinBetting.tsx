@@ -60,20 +60,16 @@ export default function BitcoinBetting() {
   useEffect(() => {
     const savedContract = Cookies.get('selectedMarket');
     
-    if (savedContract) {
+    // Validate contract address is in our allowed list
+    if (savedContract && tableMapping[savedContract as keyof typeof tableMapping]) {
       setContractAddress(savedContract);
-      // Set the table type based on contract address
       const tableType = tableMapping[savedContract as keyof typeof tableMapping];
-      if (tableType) {
-        setSelectedTableType(tableType);
-      } else {
-        setSelectedTableType('featured'); // Default fallback
-      }
+      setSelectedTableType(tableType);
     } else {
-      // Fallback to bitcoin contract if no cookie is found
+      // Fallback to default contract if no valid cookie is found
       setContractAddress('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
-      setSelectedTableType('crypto');
-      console.log('No cookie found, using default bitcoin contract');
+      setSelectedTableType('featured');
+      console.log('No valid contract cookie found, using default');
     }
   }, []);
 
