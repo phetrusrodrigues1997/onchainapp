@@ -828,17 +828,12 @@ useEffect(() => {
                   ⚠️ Re-entry Required
                 </div>
                 <div className="text-orange-700 font-medium mb-6 leading-relaxed">
-                  You made a wrong prediction and need to pay <span className="font-bold">{(reEntryFee / 10000).toFixed(2)} USDC</span> to re-enter the pot and continue betting.
+                  You made a wrong prediction and need to pay <span className="font-bold">{(reEntryFee / 10000).toFixed(2)} USDC</span> to re-enter this market and continue betting.
                 </div>
-                <div className="mb-6">
-                  <div className="bg-orange-100 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-orange-800 mb-2">💡 <strong>How it works:</strong></p>
-                    <p className="text-xs text-orange-700">
-                      • Wrong predictions require a re-entry fee to continue playing<br/>
-                      • Fee is based on the next day's entry price when you were eliminated<br/>
-                      • Once paid, you can bet normally again
-                    </p>
-                  </div>
+                <div className="bg-orange-100 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-orange-800 font-medium">
+                    💡 Pay the re-entry fee to resume betting
+                  </p>
                 </div>
                 <button
                   onClick={handleReEntry}
@@ -861,7 +856,7 @@ useEffect(() => {
                   {t.alreadyInPot || "✓ You're in the Pot"}
                 </div>
                 <div className="text-gray-600 font-light mb-6 leading-relaxed">
-                  {t.enteredPotMessage || "You've successfully entered the Bitcoin Pot. You can now place your daily Bitcoin price predictions!"}
+                  {t.enteredPotMessage || "You've successfully entered this prediction market. You can now place your daily predictions!"}
                 </div>
                 <button
                   onClick={() => setActiveSection('bitcoinBetting')}
@@ -946,9 +941,6 @@ useEffect(() => {
                       </h3>
                       <p className="text-red-700 font-medium">
                         Pot entries close Saturday at midnight UTC
-                      </p>
-                      <p className="text-red-600 text-sm mt-2">
-                        💡 Tip: Sundays have the lowest entry fee when the pot begins!
                       </p>
                     </div>
                     
@@ -1058,7 +1050,7 @@ useEffect(() => {
                     <div className="bg-[#2C2C47] p-4 rounded-lg">
                       <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
                       <p className="text-[#A0A0B0] text-sm mb-3">
-                        Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Price increases daily - enter early to save! Make sure you have approved USDC spending first.
+                        Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Approve USDC spending first.
                       </p>
                       
                       {/* Referral Code Input */}

@@ -229,24 +229,15 @@ export default function BitcoinBetting() {
               </div>
               <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Re-entry Required</h2>
               <p className="text-orange-700 text-lg mb-6 font-medium">
-                You made a wrong prediction and need to pay {(reEntryFee / 10000).toFixed(2)} USDC to re-enter the pot before you can bet again.
+                You made a wrong prediction and need to pay {(reEntryFee / 10000).toFixed(2)} USDC to re-enter this market before you can bet again.
               </p>
               <div className="bg-orange-100 rounded-2xl p-6 border border-orange-200 mb-6">
-                <div className="flex items-center justify-center gap-3 mb-3">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"></div>
-                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-100"></div>
-                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-200"></div>
-                </div>
-                <p className="text-orange-800 font-bold text-lg">
-                  Go back to the pot entry page to pay re-entry fee
+                <p className="text-orange-800 font-bold text-lg mb-2">
+                  Return to pot entry page to pay {(reEntryFee / 10000).toFixed(2)} USDC
                 </p>
-                <p className="text-orange-600 text-sm mt-2">
-                  Once paid, you can return here to place bets
+                <p className="text-orange-600 text-sm">
+                  Then come back here to resume betting
                 </p>
-              </div>
-              <div className="text-gray-600 text-sm">
-                <p className="mb-1">💰 Re-entry fee: {(reEntryFee / 10000).toFixed(2)} USDC</p>
-                <p>ℹ️ This helps maintain fair play in the prediction market</p>
               </div>
             </div>
           </div>
@@ -460,7 +451,7 @@ export default function BitcoinBetting() {
           </div>
           
           <div className="relative z-10 text-gray-700 text-sm font-bold tracking-wide">
-            Predict tomorrow's outcome • One prediction per day • Pot participants only
+            Predict tomorrow's outcome • Wrong predictions require re-entry fee
           </div>
         </div>
       </div>

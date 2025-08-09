@@ -91,11 +91,13 @@ export async function setDailyOutcome(
         .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
     }
     
-    // Remove all predictions for today after processing
-    const today = new Date().toISOString().split('T')[0];
+    // Remove all predictions that were just processed (yesterday's results)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayISO = yesterday.toISOString().split('T')[0];
     await db
       .delete(betsTable)
-      .where(eq(betsTable.betDate, today));
+      .where(eq(betsTable.betDate, yesterdayISO));
       
   } catch (error) {
     console.error("Error processing outcome:", error);
