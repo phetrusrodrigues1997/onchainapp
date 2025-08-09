@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
-import { placeBitcoinBet, getTomorrowsBet, getTodaysBet } from '../Database/actions';
+import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee } from '../Database/actions';
 import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
 import Cookies from 'js-cookie';
 
@@ -40,19 +40,20 @@ export default function BitcoinBetting() {
   const [isBetLoading, setIsBetLoading] = useState<boolean>(true);
   const [contractAddress, setContractAddress] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
+  const [reEntryFee, setReEntryFee] = useState<number | null>(null);
 
-  // Check if betting is allowed (Tuesday, Wednesday, Thursday)
+  // Check if betting is allowed (Sunday through Friday)
   const isBettingAllowed = (): boolean => {
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
-    return day === 2 || day === 3 || day === 4; // Tuesday, Wednesday, Thursday
+    return day !== 6; // All days except Saturday
   };
 
-  // Check if today is Friday (results day)
+  // Check if today is Saturday (results day)
   const isResultsDay = (): boolean => {
     const now = new Date();
     const day = now.getDay();
-    return day === 5; // Friday
+    return day === 6; // Saturday
   };
 
   // Add useEffect to handle cookie retrieval
@@ -95,17 +96,20 @@ export default function BitcoinBetting() {
     setIsBetLoading(true);
     try {
       // Load both tomorrow's bet (for betting interface) and today's bet (for results display)
-      const [tomorrowBet, todayBet] = await Promise.all([
+      const [tomorrowBet, todayBet, reEntryAmount] = await Promise.all([
         getTomorrowsBet(address, selectedTableType),
-        getTodaysBet(address, selectedTableType)
+        getTodaysBet(address, selectedTableType),
+        getReEntryFee(address, selectedTableType)
       ]);
       
       setTomorrowsBet(tomorrowBet);
       setTodaysBet(todayBet);
+      setReEntryFee(reEntryAmount);
     } catch (error) {
       console.error("Error loading bets:", error);
       setTomorrowsBet(null);
       setTodaysBet(null);
+      setReEntryFee(null);
     } finally {
       setIsBetLoading(false);
     }
@@ -216,6 +220,36 @@ export default function BitcoinBetting() {
               <span className="font-medium">Loading your bet...</span>
             </div>
           </div>
+        ) : reEntryFee ? (
+          // Re-entry Required Message
+          <div className="bg-orange-50/80 backdrop-blur-xl border-2 border-orange-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-orange-900/10 relative overflow-hidden">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                <Shield className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Re-entry Required</h2>
+              <p className="text-orange-700 text-lg mb-6 font-medium">
+                You made a wrong prediction and need to pay {(reEntryFee / 10000).toFixed(2)} USDC to re-enter the pot before you can bet again.
+              </p>
+              <div className="bg-orange-100 rounded-2xl p-6 border border-orange-200 mb-6">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce"></div>
+                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-100"></div>
+                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-bounce delay-200"></div>
+                </div>
+                <p className="text-orange-800 font-bold text-lg">
+                  Go back to the pot entry page to pay re-entry fee
+                </p>
+                <p className="text-orange-600 text-sm mt-2">
+                  Once paid, you can return here to place bets
+                </p>
+              </div>
+              <div className="text-gray-600 text-sm">
+                <p className="mb-1">💰 Re-entry fee: {(reEntryFee / 10000).toFixed(2)} USDC</p>
+                <p>ℹ️ This helps maintain fair play in the prediction market</p>
+              </div>
+            </div>
+          </div>
         ) : (
           <>
             {/* Today's Bet Results (if any) */}
@@ -276,7 +310,7 @@ export default function BitcoinBetting() {
                 </div>
               </div>
             ) : isResultsDay() ? (
-              // Friday - Results Day message
+              // Saturday - Results Day message
               <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 backdrop-blur-xl border-2 border-blue-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-blue-900/10 relative overflow-hidden">
                 <div className="text-center">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
@@ -284,7 +318,7 @@ export default function BitcoinBetting() {
                   </div>
                   <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Results Day! 🎉</h2>
                   <p className="text-gray-700 text-lg mb-6 font-medium">
-                    Today is Friday - winners will be determined at midnight UTC
+                    Today is Saturday - winners are being determined!
                   </p>
                   <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-2xl p-6 border border-blue-200 mb-6">
                     <div className="flex items-center justify-center gap-3 mb-3">
@@ -306,7 +340,8 @@ export default function BitcoinBetting() {
                 </div>
               </div>
             ) : !isBettingAllowed() ? (
-              // Weekend/Monday - Betting not available message
+              // This case should never happen now since betting is only closed on Saturday (which is Results Day)
+              // But keeping this as a fallback
               <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
                 <div className="text-center">
                   <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
@@ -314,18 +349,18 @@ export default function BitcoinBetting() {
                   </div>
                   <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Betting Closed</h2>
                   <p className="text-gray-600 text-lg mb-6">
-                    Predictions can only be placed Tuesday through Thursday
+                    Predictions can be placed Sunday through Friday
                   </p>
                   <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                     <p className="text-gray-700 font-medium mb-2">Betting Schedule:</p>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Tuesday - Thursday:</span>
+                        <span className="text-gray-600">Sunday - Friday:</span>
                         <span className="text-green-600 font-bold">✓ Betting Open</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Friday - Monday:</span>
-                        <span className="text-red-600 font-bold">✗ Betting Closed</span>
+                        <span className="text-gray-600">Saturday:</span>
+                        <span className="text-red-600 font-bold">✗ Results Day</span>
                       </div>
                     </div>
                   </div>

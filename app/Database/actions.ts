@@ -169,6 +169,43 @@ export async function getAllMessages(address: string) {
  * Only allows one bet per wallet per prediction day.
  */
 
+/**
+ * Gets re-entry fee for a wallet address if they need to pay to re-enter
+ */
+export async function getReEntryFee(walletAddress: string, typeTable: string = 'bitcoin'): Promise<number | null> {
+  try {
+    const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
+    const result = await db
+      .select({ reEntryFeeUsdc: wrongPredictionTable.reEntryFeeUsdc })
+      .from(wrongPredictionTable)
+      .where(eq(wrongPredictionTable.walletAddress, walletAddress))
+      .limit(1);
+    
+    return result.length > 0 ? result[0].reEntryFeeUsdc : null;
+  } catch (error) {
+    console.error("Error getting re-entry fee:", error);
+    return null;
+  }
+}
+
+/**
+ * Processes re-entry payment and removes user from wrong predictions
+ */
+export async function processReEntry(walletAddress: string, typeTable: string = 'bitcoin'): Promise<boolean> {
+  try {
+    const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
+    const result = await db
+      .delete(wrongPredictionTable)
+      .where(eq(wrongPredictionTable.walletAddress, walletAddress))
+      .returning();
+    
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error processing re-entry:", error);
+    return false;
+  }
+}
+
 export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'bitcoin') {
   try {
     // Get tomorrow's date for the prediction
@@ -179,15 +216,16 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     const betsTable = getTableFromType(typeTable);
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
     
-    // 1. Check if the user is blocked due to wrong prediction
-    const isBlocked = await db
+    // 1. Check if the user has wrong predictions (but don't block - they can re-enter)
+    const wrongPrediction = await db
       .select()
       .from(wrongPredictionTable)
       .where(eq(wrongPredictionTable.walletAddress, walletAddress))
       .limit(1);
 
-    if (isBlocked.length > 0) {
-      throw new Error('You are temporarily blocked from betting due to an incorrect prediction.');
+    if (wrongPrediction.length > 0) {
+      const reEntryFee = wrongPrediction[0].reEntryFeeUsdc;
+      throw new Error(`You need to pay ${(reEntryFee / 10000).toFixed(2)} USDC to re-enter after your wrong prediction. Please pay the re-entry fee first.`);
     }
 
     // 2. Check if the user already placed a bet for tomorrow

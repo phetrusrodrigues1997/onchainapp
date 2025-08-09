@@ -37,6 +37,26 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
   }
 };
 
+// Helper function to get next day's entry fee
+const getNextDayEntryFee = (): number => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const day = tomorrow.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  // Dynamic pricing: Sunday 0.01 to Friday 0.06 USDC (in micros - 6 decimals)
+  const basePrices = {
+    0: 10000, // Sunday: 0.01 USDC
+    1: 20000, // Monday: 0.02 USDC  
+    2: 30000, // Tuesday: 0.03 USDC
+    3: 40000, // Wednesday: 0.04 USDC
+    4: 50000, // Thursday: 0.05 USDC
+    5: 60000, // Friday: 0.06 USDC
+    6: 10000, // Saturday: Fallback to Sunday price
+  };
+  
+  return basePrices[day as keyof typeof basePrices];
+};
+
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
   tableType: string = 'bitcoin'
@@ -51,11 +71,16 @@ export async function setDailyOutcome(
       .from(betsTable)
       .where(eq(betsTable.prediction, opposite));
 
-    const wrongAddresses = wrongBets.map(bet => ({
-      walletAddress: bet.walletAddress,
-    }));
+    if (wrongBets.length > 0) {
+      const nextDayFee = getNextDayEntryFee();
+      const today = new Date().toISOString().split('T')[0];
+      
+      const wrongAddresses = wrongBets.map(bet => ({
+        walletAddress: bet.walletAddress,
+        reEntryFeeUsdc: nextDayFee,
+        wrongPredictionDate: today,
+      }));
 
-    if (wrongAddresses.length > 0) {
       await db
         .insert(wrongPredictionTable)
         .values(wrongAddresses)
@@ -64,16 +89,14 @@ export async function setDailyOutcome(
       await db
         .delete(betsTable)
         .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
-
-       // Remove predictions placed yesterday
-    const today = new Date();
-    today.setDate(today.getDate());
-    const todayISO = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    }
     
+    // Remove all predictions for today after processing
+    const today = new Date().toISOString().split('T')[0];
     await db
       .delete(betsTable)
-      .where(eq(betsTable.betDate, todayISO));
-    }
+      .where(eq(betsTable.betDate, today));
+      
   } catch (error) {
     console.error("Error processing outcome:", error);
     throw new Error("Failed to set daily outcome");

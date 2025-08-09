@@ -51,43 +51,36 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
     
-    if (day === 5) return 'Pot closes in:'; // Friday
-    if (day >= 2 && day <= 4) return 'Refreshes in:'; // Tuesday-Thursday
-    return 'Starts in:'; // Saturday-Monday
+    if (day === 6) return 'Results day! New pot starts in:'; // Saturday
+    if (day >= 0 && day <= 5) return 'Refreshes in:'; // Sunday-Friday
+    return 'Pot opens in:'; // Fallback
   };
 
-  // Check if should use 24h countdown (Tue-Fri) or long countdown (Sat-Mon)
+  // Check if should use 24h countdown (Sunday-Friday) or long countdown (Saturday only)
   const isShortCountdown = (): boolean => {
     const now = new Date();
     const day = now.getDay();
-    return day >= 2 && day <= 5; // Tuesday-Friday use 24h countdown
+    return day >= 0 && day <= 5; // Sunday-Friday use 24h countdown to next midnight
   };
 
-  // Function to get next Wednesday midnight (pot closes)
-  const getNextWednesdayMidnight = (): Date => {
+  // Function to get next Saturday midnight (pot closes)
+  const getNextSaturdayMidnight = (): Date => {
     const now = new Date();
     const currentDay = now.getDay();
-    let daysUntilWednesday;
+    let daysUntilSaturday;
     
     if (currentDay === 6) {
-      // Saturday - this Wednesday
-      daysUntilWednesday = 4;
-    } else if (currentDay <= 2) {
-      // Sunday (0), Monday (1), Tuesday (2) - this Wednesday
-      if (currentDay === 0) {
-        daysUntilWednesday = 3; // Sunday to Wednesday
-      } else {
-        daysUntilWednesday = 3 - currentDay; // Monday/Tuesday to Wednesday
-      }
+      // Saturday - next Saturday (next week)
+      daysUntilSaturday = 7;
     } else {
-      // Wednesday (3), Thursday (4), Friday (5) - next Wednesday (next week)
-      daysUntilWednesday = 7 - currentDay + 3;
+      // Sunday (0) to Friday (5) - this Saturday
+      daysUntilSaturday = 6 - currentDay;
     }
     
-    const nextWednesday = new Date(now);
-    nextWednesday.setDate(now.getDate() + daysUntilWednesday);
-    nextWednesday.setHours(0, 0, 0, 0); // Midnight
-    return nextWednesday;
+    const nextSaturday = new Date(now);
+    nextSaturday.setDate(now.getDate() + daysUntilSaturday);
+    nextSaturday.setHours(0, 0, 0, 0); // Midnight UTC
+    return nextSaturday;
   };
 
   // Function to get next midnight
@@ -101,7 +94,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   // Function to update countdown
   const updateCountdown = () => {
     const now = new Date();
-    const target = isShortCountdown() ? getNextMidnight() : getNextWednesdayMidnight();
+    const target = isShortCountdown() ? getNextMidnight() : getNextMidnight(); // Always use next midnight for consistency
     const difference = target.getTime() - now.getTime();
 
     if (difference > 0) {
@@ -505,7 +498,7 @@ const handleMarketClick = (marketId: string) => {
             <div className="flex flex-col justify-center items-center text-center h-full">
               <div className="space-y-3 mb-16">
                 <h2 className="text-3xl font-light text-gray-900 tracking-tight">
-                  Thousands of players,
+                  <span style={{ color: 'red' }}>Thousands</span> of players,
                 </h2>
                 <h3 className="text-2xl font-black text-gray-900 tracking-tight">
                   one weekly winner
@@ -539,7 +532,7 @@ const handleMarketClick = (marketId: string) => {
       <section id="call-to-action" className="relative z-10 px-6 mt-16 mb-16 md:hidden">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
-            Thousands of players,
+            <span style={{ color: 'red' }}>Thousands</span> of players,
           </h2>
           <h3 className="text-xl font-black text-gray-900 mb-10 tracking-tight">
             one weekly winner

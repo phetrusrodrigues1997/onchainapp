@@ -12,7 +12,9 @@ import {
   confirmReferralPotEntry, 
   getAvailableFreeEntries, 
   consumeFreeEntry, 
-  getReferralStats 
+  getReferralStats,
+  getReEntryFee,
+  processReEntry
 } from '../Database/actions';
 
 
@@ -131,9 +133,10 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [referralStats, setReferralStats] = useState<any>(null);
   const [freeEntriesAvailable, setFreeEntriesAvailable] = useState<number>(0);
   const [showReferralSection, setShowReferralSection] = useState<boolean>(false);
+  const [reEntryFee, setReEntryFee] = useState<number | null>(null);
   
-  // Countdown state
-  const [timeUntilWednesday, setTimeUntilWednesday] = useState<{
+  // Countdown state for when pot reopens (Sunday)
+  const [timeUntilReopening, setTimeUntilReopening] = useState<{
     days: number;
     hours: number;
     minutes: number;
@@ -208,7 +211,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   // Pot entry deadline countdown effect
   useEffect(() => {
     if (!isPotEntryBlocked()) {
-      // On Saturday, Sunday, Monday, Tuesday - show deadline countdown
+      // On Sunday through Friday - show deadline countdown
       updateDeadlineCountdown();
       const interval = setInterval(updateDeadlineCountdown, 1000);
       return () => clearInterval(interval);
@@ -232,6 +235,11 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       const freeEntries = await getAvailableFreeEntries(address);
       console.log("Debug - getAvailableFreeEntries returned:", freeEntries);
       setFreeEntriesAvailable(freeEntries);
+      
+      // Check if user needs to pay re-entry fee
+      const reEntryAmount = await getReEntryFee(address, selectedTableType);
+      setReEntryFee(reEntryAmount);
+      
     } catch (error) {
       console.error("Error loading referral data:", error);
     }
@@ -273,8 +281,34 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     query: { enabled: !!contractAddress }
   }) as { data: string | undefined };
 
-  // Dynamic entry amount: 0.02 USDC if user has free entries, 0.01 USDC otherwise
-  const entryAmount = freeEntriesAvailable > 0 ? BigInt(30000) : BigInt(10000); // 0.02 or 0.01 USDC (6 decimals)
+  // Get current day name
+  const getCurrentDayName = (): string => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[new Date().getDay()];
+  };
+  
+  // Get dynamic entry amount based on day of week
+  const getDynamicEntryAmount = (): bigint => {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    
+    // Dynamic pricing: Sunday 0.01 to Friday 0.06 USDC
+    const basePrices = {
+      0: 10000, // Sunday: 0.01 USDC
+      1: 20000, // Monday: 0.02 USDC  
+      2: 30000, // Tuesday: 0.03 USDC
+      3: 40000, // Wednesday: 0.04 USDC
+      4: 50000, // Thursday: 0.05 USDC
+      5: 60000, // Friday: 0.06 USDC
+      6: 10000, // Saturday: Closed (fallback to Sunday price)
+    };
+    
+    return BigInt(basePrices[day as keyof typeof basePrices]);
+  };
+  
+  // Current entry amount based on day and free entries
+  const baseEntryAmount = getDynamicEntryAmount();
+  const entryAmount = freeEntriesAvailable > 0 ? BigInt(20000) : baseEntryAmount; // Fixed 0.02 USDC if using free entry, otherwise daily price
 
   const { data: userUsdcBalance } = useReadContract({
     address: usdcAddress as `0x${string}`,
@@ -317,7 +351,26 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const isPotEntryBlocked = (): boolean => {
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
-    return day === 3 || day === 4 || day === 5; // Wednesday, Thursday, Friday - pot entry blocked
+    return day === 6; // Saturday only - pot entry blocked (winner determination day)
+  };
+
+  const getNextSundayMidnight = (): Date => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    let daysUntilSunday;
+    
+    if (currentDay === 6) {
+      // Saturday - next Sunday is tomorrow
+      daysUntilSunday = 1;
+    } else {
+      // Sunday (0) to Friday (5) - next Sunday
+      daysUntilSunday = 7 - currentDay;
+    }
+    
+    const nextSunday = new Date(now);
+    nextSunday.setDate(now.getDate() + daysUntilSunday);
+    nextSunday.setUTCHours(0, 0, 0, 0); // Midnight UTC
+    return nextSunday;
   };
 
   const getNextSaturdayMidnight = (): Date => {
@@ -325,16 +378,12 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     const currentDay = now.getDay();
     let daysUntilSaturday;
     
-    if (currentDay >= 3 && currentDay <= 5) {
-      // Wednesday (3), Thursday (4), Friday (5) - next Saturday
-      daysUntilSaturday = 6 - currentDay;
+    if (currentDay === 6) {
+      // Saturday - next Saturday (next week)
+      daysUntilSaturday = 7;
     } else {
-      // Saturday (6), Sunday (0), Monday (1), Tuesday (2) - next Saturday (next week)
-      if (currentDay === 6) {
-        daysUntilSaturday = 7; // Saturday to next Saturday
-      } else {
-        daysUntilSaturday = 6 - currentDay; // Sunday/Monday/Tuesday to Saturday
-      }
+      // Sunday (0) to Friday (5) - this Saturday
+      daysUntilSaturday = 6 - currentDay;
     }
     
     const nextSaturday = new Date(now);
@@ -343,35 +392,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     return nextSaturday;
   };
 
-  const getNextWednesdayMidnight = (): Date => {
-    const now = new Date();
-    const currentDay = now.getDay();
-    let daysUntilWednesday;
-    
-    if (currentDay === 6) {
-      // Saturday - this Wednesday
-      daysUntilWednesday = 4;
-    } else if (currentDay <= 2) {
-      // Sunday (0), Monday (1), Tuesday (2) - this Wednesday
-      if (currentDay === 0) {
-        daysUntilWednesday = 3; // Sunday to Wednesday
-      } else {
-        daysUntilWednesday = 3 - currentDay; // Monday/Tuesday to Wednesday
-      }
-    } else {
-      // Wednesday (3), Thursday (4), Friday (5) - next Wednesday (next week)
-      daysUntilWednesday = 7 - currentDay + 3;
-    }
-    
-    const nextWednesday = new Date(now);
-    nextWednesday.setDate(now.getDate() + daysUntilWednesday);
-    nextWednesday.setUTCHours(0, 0, 0, 0); // Midnight UTC
-    return nextWednesday;
-  };
-
   const updateCountdown = () => {
     const now = new Date();
-    const target = getNextSaturdayMidnight();
+    const target = getNextSundayMidnight();
     const difference = target.getTime() - now.getTime();
 
     if (difference > 0) {
@@ -380,15 +403,15 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
       
-      setTimeUntilWednesday({ days, hours, minutes, seconds });
+      setTimeUntilReopening({ days, hours, minutes, seconds });
     } else {
-      setTimeUntilWednesday({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      setTimeUntilReopening({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     }
   };
 
   const updateDeadlineCountdown = () => {
     const now = new Date();
-    const target = getNextWednesdayMidnight();
+    const target = getNextSaturdayMidnight();
     const difference = target.getTime() - now.getTime();
 
     if (difference > 0) {
@@ -484,6 +507,30 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
+  const handleReEntry = async () => {
+    if (!contractAddress || !reEntryFee) return;
+    
+    setIsLoading(true);
+    setLastAction('reEntry');
+    
+    try {
+      // Process re-entry payment using the smart contract with re-entry fee amount
+      await writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: PREDICTION_POT_ABI,
+        functionName: 'enterPot',
+        args: [BigInt(reEntryFee)],
+      });
+      
+      showMessage('Re-entry payment submitted! Waiting for confirmation...');
+    } catch (error) {
+      console.error('Re-entry payment failed:', error);
+      showMessage('Re-entry payment failed. Check console for details.', true);
+      setLastAction('');
+      setIsLoading(false);
+    }
+  };
+
   const handleDistributePot = async () => {
     if (!contractAddress || !winnerAddresses.trim()) return;
 
@@ -574,6 +621,34 @@ useEffect(() => {
           handleReferralConfirmation();
         }, 3000); // Run after contract refresh completes
       }
+    } else if (lastAction === 'reEntry') {
+      // Handle re-entry confirmation
+      const completeReEntry = async () => {
+        try {
+          // Remove user from wrong predictions table
+          const success = await processReEntry(address!, selectedTableType);
+          if (success) {
+            setIsLoading(false);
+            showMessage('Re-entry successful! You can now bet again.');
+            setReEntryFee(null); // Clear re-entry fee
+            // Refresh contract data and referral data
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['readContract'] });
+              loadReferralData();
+            }, 1000);
+          } else {
+            setIsLoading(false);
+            showMessage('Re-entry payment processed but database update failed. Please contact support.', true);
+          }
+        } catch (error) {
+          setIsLoading(false);
+          showMessage('Re-entry payment processed but database update failed. Please contact support.', true);
+        }
+      };
+      
+      completeReEntry();
+      setLastAction('');
+      return; // Don't execute common cleanup below
     } else if (lastAction === 'distributePot') {
       setIsLoading(false);
       showMessage('Pot distributed successfully!');
@@ -628,17 +703,23 @@ useEffect(() => {
           {/* Contract Info */}
           {contractAddress && (
             <div className="mb-6">
-              <div className="grid md:grid-cols-1 lg:grid-cols-1">
-                {/* <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
-                  <div className="text-sm font-semibold text-[#111111]">{t.entryAmount || 'Entry Amount'}</div>
-                  <div className="text-[#666666] font-semibold">
-                    {formatBigIntValue(entryAmount)} USDC
-                  </div>
-                </div> */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
                 <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
-                  <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Amount Balance'}</div>
-                  <div className="text-[#666666] font-semibold">
+                  <div className="text-sm font-semibold text-[#111111]">Today's Entry Price</div>
+                  <div className="text-[#666666] font-semibold text-lg">
+                    {formatBigIntValue(baseEntryAmount)} USDC
+                  </div>
+                  <div className="text-xs text-[#888888] mt-1">
+                    {getCurrentDayName()} • Lowest on Sundays
+                  </div>
+                </div>
+                <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
+                  <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Pot Balance'}</div>
+                  <div className="text-[#666666] font-semibold text-lg">
                     {formatBigIntValue(potBalance)} USDC
+                  </div>
+                  <div className="text-xs text-[#888888] mt-1">
+                    Total pool amount
                   </div>
                 </div>
               </div>
@@ -739,8 +820,41 @@ useEffect(() => {
             </div>
           )}
 
+          {/* Re-entry Payment Section - Show if user has re-entry fee */}
+          {isConnected && contractAddress && reEntryFee && (
+            <div className="mb-6">
+              <div className="bg-orange-50 rounded-xl border-2 border-orange-200 p-8 text-center">
+                <div className="text-3xl font-black text-orange-900 mb-4">
+                  ⚠️ Re-entry Required
+                </div>
+                <div className="text-orange-700 font-medium mb-6 leading-relaxed">
+                  You made a wrong prediction and need to pay <span className="font-bold">{(reEntryFee / 10000).toFixed(2)} USDC</span> to re-enter the pot and continue betting.
+                </div>
+                <div className="mb-6">
+                  <div className="bg-orange-100 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-orange-800 mb-2">💡 <strong>How it works:</strong></p>
+                    <p className="text-xs text-orange-700">
+                      • Wrong predictions require a re-entry fee to continue playing<br/>
+                      • Fee is based on the next day's entry price when you were eliminated<br/>
+                      • Once paid, you can bet normally again
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleReEntry}
+                  disabled={isActuallyLoading}
+                  className="px-8 py-3 bg-orange-600 text-white font-bold rounded-full hover:bg-orange-700 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isActuallyLoading && lastAction === 'reEntry'
+                    ? 'Processing Re-entry...'
+                    : `Pay ${(reEntryFee / 10000).toFixed(2)} USDC to Re-enter`}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* User Actions - Show different content if already a participant */}
-          {isConnected && contractAddress && isParticipant && (
+          {isConnected && contractAddress && isParticipant && !reEntryFee && (
             <div className="mb-6">
               <div className="bg-white rounded-xl border border-gray-200 p-8 hover:border-gray-300 transition-all duration-300 text-center">
                 <div className="text-2xl font-light text-gray-900 mb-3">
@@ -760,17 +874,17 @@ useEffect(() => {
           )}
 
           {/* User Actions - Show countdown or pot entry based on day */}
-          {isConnected && contractAddress && !isParticipant && (
+          {isConnected && contractAddress && !isParticipant && !reEntryFee && (
             <div className="mb-6">
               {isPotEntryBlocked() ? (
-                /* Wednesday/Thursday/Friday Countdown */
+                /* Saturday Countdown */
                 <div className="bg-white rounded-xl border-2 border-gray-900 p-12 text-center">
                   <div className="mb-8">
                     <h2 className="text-3xl font-black text-gray-900 mb-4">
-                      Pot Entry Closed
+                      Winner Determination Day
                     </h2>
                     <p className="text-gray-600 text-lg font-medium">
-                      New pot entries open every Saturday at midnight UTC
+                      Pot entries reopen every Sunday at midnight UTC
                     </p>
                   </div>
                   
@@ -778,7 +892,7 @@ useEffect(() => {
                     <div className="grid grid-cols-4 gap-2 sm:gap-6">
                       <div className="text-center">
                         <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
-                          {timeUntilWednesday.days.toString().padStart(2, '0')}
+                          {timeUntilReopening.days.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           D
@@ -786,7 +900,7 @@ useEffect(() => {
                       </div>
                       <div className="text-center">
                         <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
-                          {timeUntilWednesday.hours.toString().padStart(2, '0')}
+                          {timeUntilReopening.hours.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           H
@@ -794,7 +908,7 @@ useEffect(() => {
                       </div>
                       <div className="text-center">
                         <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
-                          {timeUntilWednesday.minutes.toString().padStart(2, '0')}
+                          {timeUntilReopening.minutes.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           M
@@ -802,7 +916,7 @@ useEffect(() => {
                       </div>
                       <div className="text-center">
                         <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white mb-1 sm:mb-2">
-                          {timeUntilWednesday.seconds.toString().padStart(2, '0')}
+                          {timeUntilReopening.seconds.toString().padStart(2, '0')}
                         </div>
                         <div className="text-xs sm:text-sm font-medium text-gray-300 uppercase tracking-wide">
                           S
@@ -813,15 +927,15 @@ useEffect(() => {
                   
                   <div className="text-gray-600">
                     <p className="font-medium mb-2">
-                      ⏰ Pot entry resumes this weekend
+                      🏆 Winners being determined today
                     </p>
                     <p className="text-sm">
-                      Current participants can continue betting on their predictions
+                      Pot entries reopen tomorrow (Sunday)
                     </p>
                   </div>
                 </div>
               ) : (
-                /* Regular pot entry - Saturday, Sunday, Monday, Tuesday */
+                /* Regular pot entry - Sunday through Friday */
                 <div className="space-y-4">
                   
                   {/* Pot Entry Deadline Countdown */}
@@ -831,7 +945,10 @@ useEffect(() => {
                         ⏰ Pot Entry Deadline
                       </h3>
                       <p className="text-red-700 font-medium">
-                        Pot entries close Wednesday at midnight UTC
+                        Pot entries close Saturday at midnight UTC
+                      </p>
+                      <p className="text-red-600 text-sm mt-2">
+                        💡 Tip: Sundays have the lowest entry fee when the pot begins!
                       </p>
                     </div>
                     
@@ -882,7 +999,7 @@ useEffect(() => {
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <h3 className="text-black font-bold mb-2">🎉 Discounted Entry Available!</h3>
                       <p className="text-gray-600 text-sm mb-3">
-                        Special price: {formatBigIntValue(entryAmount)} USDC (normally 0.01 USDC)
+                        Discounted price: {formatBigIntValue(entryAmount)} USDC (regular: {formatBigIntValue(baseEntryAmount)} USDC)
                       </p>
                       
                       {!hasEnoughAllowance ? (
@@ -941,7 +1058,7 @@ useEffect(() => {
                     <div className="bg-[#2C2C47] p-4 rounded-lg">
                       <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
                       <p className="text-[#A0A0B0] text-sm mb-3">
-                        Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Make sure you have approved USDC spending first.
+                        Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Price increases daily - enter early to save! Make sure you have approved USDC spending first.
                       </p>
                       
                       {/* Referral Code Input */}
