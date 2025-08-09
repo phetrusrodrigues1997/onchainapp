@@ -874,7 +874,7 @@ useEffect(() => {
                 <div className="bg-white rounded-xl border-2 border-gray-900 p-12 text-center">
                   <div className="mb-8">
                     <h2 className="text-3xl font-black text-gray-900 mb-4">
-                      Winner Determination Day
+                      Results Day
                     </h2>
                     <p className="text-gray-600 text-lg font-medium">
                       Pot entries reopen every Sunday at midnight UTC
