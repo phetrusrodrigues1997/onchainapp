@@ -10,6 +10,7 @@ import LandingPage from './Pages/LandingPage';
 import BitcoinBetting from './Pages/BitcoinBetting';
 import ProfilePage from './Pages/ProfilePage';
 import TutorialBridge from './Pages/TutorialBridge';
+import ReferralProgram from './Pages/ReferralProgram';
 // import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import BuySection from "./Pages/BuyPage";
 // import CurrencyDisplay from './Pages/Charts';
@@ -166,7 +167,7 @@ export default function App() {
 
       </header>
 
-      <main className="flex-grow flex items-center justify-center bg-[#fefefe]">
+      <main className="flex-grow bg-[#fefefe]">
         
           
           
@@ -179,6 +180,7 @@ export default function App() {
           {/* {activeSection === "notifications" && <CreateMessage />} */}
           {activeSection === "tutorial" && <TutorialBridge activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
           {activeSection === "AI" && <AI activeSection={activeSection} setActiveSection={setActiveSection}/>}

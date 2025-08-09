@@ -7,12 +7,10 @@ import { Language, getTranslation, supportedLanguages } from '../Languages/langu
 import { setDailyOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
 import { 
-  generateReferralCode, 
   recordReferral, 
   confirmReferralPotEntry, 
   getAvailableFreeEntries, 
   consumeFreeEntry, 
-  getReferralStats,
   getReEntryFee,
   processReEntry
 } from '../Database/actions';
@@ -127,12 +125,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [lastAction, setLastAction] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
   
-  // Referral system state
-  const [referralCode, setReferralCode] = useState<string>('');
+  // Referral system state (simplified for navigation button)
   const [inputReferralCode, setInputReferralCode] = useState<string>('');
-  const [referralStats, setReferralStats] = useState<any>(null);
   const [freeEntriesAvailable, setFreeEntriesAvailable] = useState<number>(0);
-  const [showReferralSection, setShowReferralSection] = useState<boolean>(false);
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
   
   // Countdown state for when pot reopens (Sunday)
@@ -220,15 +215,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     if (!address) return;
     
     try {
-      // Generate referral code if doesn't exist
-      const code = await generateReferralCode(address);
-      setReferralCode(code);
-      
-      // Load referral stats
-      const stats = await getReferralStats(address);
-      console.log("Debug - referral stats:", stats);
-      setReferralStats(stats);
-      
       // Load available free entries
       const freeEntries = await getAvailableFreeEntries(address);
       console.log("Debug - getAvailableFreeEntries returned:", freeEntries);
@@ -702,22 +688,44 @@ useEffect(() => {
           {contractAddress && (
             <div className="mb-6">
               <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
-                <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
-                  <div className="text-sm font-semibold text-[#111111]">Today's Entry Price</div>
-                  <div className="text-[#666666] font-semibold text-lg">
-                    {formatBigIntValue(baseEntryAmount)} USDC
-                  </div>
-                  <div className="text-xs text-[#888888] mt-1">
-                    {getCurrentDayName()} • Lowest on Sundays
+                <div className="relative">
+                  {/* Referral link - visible on mobile only - above the box */}
+                  {isConnected && address && (
+                    <button
+                      onClick={() => setActiveSection('referralProgram')}
+                      className="absolute -top-6 right-0 text-xs text-gray-600 hover:text-gray-800 md:hidden z-10"
+                    >
+                      Referrals →
+                    </button>
+                  )}
+                  <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
+                    <div className="text-sm font-semibold text-[#111111]">Today's Entry Price</div>
+                    <div className="text-[#666666] font-semibold text-lg">
+                      {formatBigIntValue(baseEntryAmount)} USDC
+                    </div>
+                    <div className="text-xs text-[#888888] mt-1">
+                      {getCurrentDayName()} • Lowest on Sundays
+                    </div>
                   </div>
                 </div>
-                <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
-                  <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Pot Balance'}</div>
-                  <div className="text-[#666666] font-semibold text-lg">
-                    {formatBigIntValue(potBalance)} USDC
-                  </div>
-                  <div className="text-xs text-[#888888] mt-1">
-                    Total pool amount
+                <div className="relative">
+                  {/* Referral link - visible on desktop only - above the box */}
+                  {isConnected && address && (
+                    <button
+                      onClick={() => setActiveSection('referralProgram')}
+                      className="absolute -top-6 right-0 text-xs text-gray-600 hover:text-gray-800 hidden md:block z-10"
+                    >
+                      Referrals →
+                    </button>
+                  )}
+                  <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
+                    <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Pot Balance'}</div>
+                    <div className="text-[#666666] font-semibold text-lg">
+                      {formatBigIntValue(potBalance)} USDC
+                    </div>
+                    <div className="text-xs text-[#888888] mt-1">
+                      Total pool amount
+                    </div>
                   </div>
                 </div>
               </div>
@@ -751,72 +759,6 @@ useEffect(() => {
             </div>
           )}
 
-          {/* Referral System Section */}
-          {isConnected && address && (
-            <div className="mb-6">
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900">Referral Program</h2>
-                  <button
-                    onClick={() => setShowReferralSection(!showReferralSection)}
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    {showReferralSection ? '−' : '+'}
-                  </button>
-                </div>
-                
-                {showReferralSection && (
-                  <div className="space-y-4">
-                    {/* Your Referral Code */}
-                    <div>
-                      <h3 className="text-md font-medium text-gray-800 mb-2">Your Referral Code</h3>
-                      <div className="flex items-center space-x-2">
-                        <code className="bg-gray-100 px-3 py-2 rounded text-lg text-black font-bold">
-                          {referralCode || 'Loading...'}
-                        </code>
-                        {referralCode && (
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(referralCode);
-                              showMessage('Referral code copied to clipboard!');
-                            }}
-                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                          >
-                            Copy
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Share this code with friends. When 3 friends enter the pot with your code, you get a free entry!
-                      </p>
-                    </div>
-
-                    {/* Referral Stats */}
-                    {referralStats && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-gray-900">{referralStats.totalReferrals}</div>
-                          <div className="text-sm text-gray-600">Total Referrals</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">{referralStats.confirmedReferrals}</div>
-                          <div className="text-sm text-gray-600">Confirmed</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">{referralStats.freeEntriesEarned}</div>
-                          <div className="text-sm text-gray-600">Free Entries Earned</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-purple-600">{freeEntriesAvailable}</div>
-                          <div className="text-sm text-gray-600">Available</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Re-entry Payment Section - Show if user has re-entry fee */}
           {isConnected && contractAddress && reEntryFee && (
