@@ -157,6 +157,23 @@ const TutorialBridge = ({ activeSection, setActiveSection, selectedMarket }: Tut
             {currentTutorialStep.description}
           </p>
 
+          {/* Step 2 - Buy Tokens Button */}
+          {currentStep === 1 && (
+            <div className="mb-6">
+              <button
+                onClick={() => setActiveSection('buy')}
+                className="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                🛒 {currentLanguage === 'en' ? 'Buy Tokens' : 'Comprar Tokens'}
+              </button>
+              <p className="text-sm text-gray-500 mt-2">
+                {currentLanguage === 'en' 
+                  ? 'You can come back to this tutorial after purchasing'
+                  : 'Você pode voltar a este tutorial após comprar'}
+              </p>
+            </div>
+          )}
+
           {/* Navigation */}
           <div className="flex items-center justify-between">
             {/* Previous Button */}

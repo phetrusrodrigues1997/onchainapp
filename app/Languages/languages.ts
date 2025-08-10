@@ -132,8 +132,8 @@ export const translations: Record<Language, Translations> = {
     // Tutorial Section
     tutorialStep1Title: 'Weekly Prediction Markets',
     tutorialStep1Description: 'Survive the week by making correct predictions across crypto, stocks, sports and more. Entry fees increase daily (Sun $0.01 → Fri $0.06).',
-    tutorialStep2Title: 'Enter the Pot (Sunday-Friday)',
-    tutorialStep2Description: 'Pay the daily entry fee to join any prediction market. Sundays are cheapest at $0.01 USDC. Use referral codes for discounts!',
+    tutorialStep2Title: 'Get Your Tokens & Enter the Pot',
+    tutorialStep2Description: 'You need USDC (for pot entries) and ETH (for gas fees ~$0.01). Buy them on our Buy page or receive from any wallet. Then pay the daily entry fee to join any prediction market. Sundays are cheapest at $0.01 USDC!',
     tutorialStep3Title: 'Daily Predictions (Sunday-Friday)',
     tutorialStep3Description: 'Every day, predict tomorrow\'s outcome in your chosen market. Wrong predictions require a re-entry fee to continue playing.',
     tutorialStep4Title: 'Saturday Results & New Pot',
@@ -226,8 +226,8 @@ export const translations: Record<Language, Translations> = {
     // Tutorial Section
     tutorialStep1Title: 'Bem-vindo aos Mercados de Previsão',
     tutorialStep1Description: 'Junte-se a milhares de jogadores em competições diárias de previsão onde habilidade e estratégia ganham recompensas reais.',
-    tutorialStep2Title: 'Entre no Pote (Fins de Semana-Terça)',
-    tutorialStep2Description: 'Pague 0.01 USDC para participar do pote de previsão. Entrada no pote está aberta de sábado a terça-feira. Convide amigos com seu código de referência para ganhar entradas grátis!',
+    tutorialStep2Title: 'Obtenha Tokens e Entre no Pote',
+    tutorialStep2Description: 'Você precisa de USDC (para entradas) e ETH (para taxas de gás ~$0.01). Compre na nossa página ou receba de qualquer carteira. Depois pague a taxa diária para entrar no mercado de previsão. Domingos custam apenas $0.01 USDC!',
     tutorialStep3Title: 'Faça Suas Previsões (Ter-Qui)',
     tutorialStep3Description: 'Previsões abrem de terça a quinta-feira. Preveja se Bitcoin vai subir ou descer no próximo dia. Escolha sabiamente - sua previsão determina seu destino.',
     tutorialStep4Title: 'Dia dos Resultados Sexta',

@@ -21,7 +21,7 @@ import DiscordXSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import AI from './Pages/AIPage';
-import WalletPage from './Pages/WalletPage';
+import WalletPage from './Pages/ReceivePage';
 // import UsernameSetup from './Pages/UsernameSetup';
 // import CreateMessage from './Pages/MessagesPage';
 
