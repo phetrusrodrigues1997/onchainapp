@@ -17,7 +17,7 @@ import BuySection from "./Pages/BuyPage";
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
-import DiscordXSection from './Pages/Discord';
+import HowItWorksSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import AI from './Pages/AIPage';
@@ -189,7 +189,7 @@ export default function App() {
           {/* {activeSection === "usernamePage" && <UsernameSetup />} */}
           {activeSection === "buy" && <BuySection activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "profile" && <ProfilePage/>}
-          {activeSection === "discord" && <DiscordXSection />}
+          {activeSection === "discord" && <HowItWorksSection />}
           {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}
           {/* {activeSection === "notifications" && <CreateMessage />} */}
