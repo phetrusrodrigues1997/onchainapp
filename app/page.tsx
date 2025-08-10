@@ -187,7 +187,7 @@ export default function App() {
           
           
           {/* {activeSection === "usernamePage" && <UsernameSetup />} */}
-          {activeSection === "buy" && <BuySection />}
+          {activeSection === "buy" && <BuySection activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "profile" && <ProfilePage/>}
           {activeSection === "discord" && <DiscordXSection />}
           {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}

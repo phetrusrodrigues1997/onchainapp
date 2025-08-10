@@ -157,19 +157,27 @@ const TutorialBridge = ({ activeSection, setActiveSection, selectedMarket }: Tut
             {currentTutorialStep.description}
           </p>
 
-          {/* Step 2 - Buy Tokens Button */}
+          {/* Step 2 - Token Actions */}
           {currentStep === 1 && (
             <div className="mb-6">
-              <button
-                onClick={() => setActiveSection('buy')}
-                className="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                🛒 {currentLanguage === 'en' ? 'Buy Tokens' : 'Comprar Tokens'}
-              </button>
-              <p className="text-sm text-gray-500 mt-2">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={() => setActiveSection('buy')}
+                  className="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  🛒 {currentLanguage === 'en' ? 'Buy Tokens' : 'Comprar Tokens'}
+                </button>
+                <button
+                  onClick={() => setActiveSection('wallet')}
+                  className="bg-white text-gray-900 border-2 border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg hover:shadow-xl"
+                >
+                  📥 {currentLanguage === 'en' ? 'Receive Tokens' : 'Receber Tokens'}
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-3 text-center">
                 {currentLanguage === 'en' 
-                  ? 'You can come back to this tutorial after purchasing'
-                  : 'Você pode voltar a este tutorial após comprar'}
+                  ? 'You can come back to this tutorial after getting tokens'
+                  : 'Você pode voltar a este tutorial após obter tokens'}
               </p>
             </div>
           )}
