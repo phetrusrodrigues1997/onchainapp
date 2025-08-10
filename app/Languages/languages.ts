@@ -125,7 +125,7 @@ export const translations: Record<Language, Translations> = {
     step2Title: 'Make Your Prediction',
     step2Description: 'Predict tomorrow\'s outcome - will Bitcoin go up or down? Lock in your prediction before the deadline.',
     step3Title: 'Winners Take All',
-    step3Description: 'Correct predictors at the end of the week split the entire pot equally. Wrong predictors get temporarily blocked from betting until next week.',
+    step3Description: 'Correct predictors at the end of the week split the entire pot equally. Wrong predictors get temporarily blocked from predicting until next week.',
     searchPlaceholder: "Search markets...",
     noMarketsFound: "No markets found. Please try a different search.",
 
@@ -151,7 +151,7 @@ export const translations: Record<Language, Translations> = {
     connectWalletPrompt: 'Please connect your wallet to interact with the contract.',
     alreadyInPot: "🎉 You're in the Pot!",
     enteredPotMessage: "You've successfully entered the pot. You can now place your predictions!",
-    goToBetting: 'Go to Betting Page',
+    goToBetting: 'Go to Prediction Page',
     entryAmount: 'Entry Amount',
     amountBalance: 'Pot Balance', // Added for consistency with other sections
     approveSpending: '1. Approve USDC Spending',
@@ -187,7 +187,7 @@ export const translations: Record<Language, Translations> = {
     
 
     // Footer
-    footerText: 'Foresight Markets — All rights reserved.',
+    footerText: 'PrediWin.com — All rights reserved.',
   },
   'pt-BR': {
     // Hero Section
@@ -219,7 +219,7 @@ export const translations: Record<Language, Translations> = {
     step2Title: 'Faça Sua Previsão',
     step2Description: 'Preveja o resultado de amanhã - Bitcoin vai subir ou descer? Confirme sua previsão antes do prazo.',
     step3Title: 'Vencedores Levam Tudo',
-    step3Description: 'Preditores corretos dividem todo o pote igualmente. Preditores errados ficam temporariamente bloqueados de apostar até a próxima rodada.',
+    step3Description: 'Preditores corretos dividem todo o pote igualmente. Preditores errados ficam temporariamente bloqueados de fazer previsões até a próxima rodada.',
     searchPlaceholder: "Pesquisar mercados...",
     noMarketsFound: "Nenhum mercado encontrado. Por favor, tente uma pesquisa diferente.",
 
@@ -229,7 +229,7 @@ export const translations: Record<Language, Translations> = {
     tutorialStep2Title: 'Entre no Pote (Fins de Semana-Terça)',
     tutorialStep2Description: 'Pague 0.01 USDC para participar do pote de previsão. Entrada no pote está aberta de sábado a terça-feira. Convide amigos com seu código de referência para ganhar entradas grátis!',
     tutorialStep3Title: 'Faça Suas Previsões (Ter-Qui)',
-    tutorialStep3Description: 'Apostas abrem de terça a quinta-feira. Preveja se Bitcoin vai subir ou descer no próximo dia. Escolha sabiamente - sua previsão determina seu destino.',
+    tutorialStep3Description: 'Previsões abrem de terça a quinta-feira. Preveja se Bitcoin vai subir ou descer no próximo dia. Escolha sabiamente - sua previsão determina seu destino.',
     tutorialStep4Title: 'Dia dos Resultados Sexta',
     tutorialStep4Description: 'Vencedores são determinados sexta à meia-noite UTC. Preditores corretos dividem o pote igualmente. Preditores errados ficam temporariamente bloqueados da próxima rodada.',
     tutorialStep5Title: 'Pronto para Jogar?',
@@ -245,7 +245,7 @@ export const translations: Record<Language, Translations> = {
     connectWalletPrompt: 'Por favor, conecte sua carteira para interagir com o contrato.',
     alreadyInPot: "🎉 Você está no Pote!",
     enteredPotMessage: "Você entrou com sucesso no pote. Agora pode fazer suas previsões!",
-    goToBetting: 'Ir para a Página de Apostas',
+    goToBetting: 'Ir para a Página de Predições',
     entryAmount: 'Valor de Entrada',
     amountBalance: 'Saldo do Pote', // Added for consistency with other sections
     approveSpending: '1. Aprovar gastos de USDC',
@@ -279,7 +279,7 @@ export const translations: Record<Language, Translations> = {
     chainlinkQuestion: 'O Chainlink vai terminar o dia em alta?',
 
     // Footer
-    footerText: 'Foresight Markets — Todos os direitos reservados.',
+    footerText: 'PrediWin.com — Todos os direitos reservados.',
   },
 };
 

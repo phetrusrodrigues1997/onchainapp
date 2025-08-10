@@ -122,7 +122,7 @@ const WalletPage: React.FC<ReceivePageProps> = ({ activeSection, setActiveSectio
         <div className="bg-white/90 backdrop-blur-xl border border-gray-200 rounded-3xl p-8 mb-6 shadow-2xl">
           <div className="text-center mb-6">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Receiver Address</h3>
-            <p className="text-gray-600 text-sm">Share this address to receive USDC</p>
+            <p className="text-gray-600 text-sm">Share this address to receive USDC on the Base network.</p>
           </div>
 
           {/* Address Display */}

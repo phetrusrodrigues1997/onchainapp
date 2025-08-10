@@ -146,7 +146,7 @@ const AI = ({ activeSection, setActiveSection }: MarketsProps) => {
 
       {/* Footer - Clean */}
       <footer className="relative z-10 px-6 py-16 text-center text-gray-500 text-sm">
-        <p className="font-light">&copy; {new Date().getFullYear()} Foresight - Survival of the Brightest</p>
+        <p className="font-light">&copy; {new Date().getFullYear()} PrediWin.com - Predict, Win, Repeat</p>
         <p className="mt-2 text-xs font-light text-gray-400">
           Prediction markets for entertainment purposes only. Please predict responsibly.
         </p>

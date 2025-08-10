@@ -37,11 +37,10 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
   }
 };
 
-// Helper function to get next day's entry fee
+// Helper function to get current day's entry fee for re-entry
 const getNextDayEntryFee = (): number => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const day = tomorrow.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc. (use today, not tomorrow)
   
   // Dynamic pricing: Sunday 0.01 to Friday 0.06 USDC (in micros - 6 decimals)
   const basePrices = {

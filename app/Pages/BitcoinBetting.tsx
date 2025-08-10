@@ -225,14 +225,14 @@ export default function BitcoinBetting() {
               </div>
               <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Re-entry Required</h2>
               <p className="text-orange-700 text-lg mb-6 font-medium">
-                You made a wrong prediction and need to pay {(reEntryFee / 10000).toFixed(2)} USDC to re-enter this market before you can bet again.
+                You made a wrong prediction and need to pay today's entry fee to re-enter this market before you can predict again.
               </p>
               <div className="bg-orange-100 rounded-2xl p-6 border border-orange-200 mb-6">
                 <p className="text-orange-800 font-bold text-lg mb-2">
-                  Return to pot entry page to pay {(reEntryFee / 10000).toFixed(2)} USDC
+                  Return to pot entry page to pay today's entry fee
                 </p>
                 <p className="text-orange-600 text-sm">
-                  Then come back here to resume betting
+                  Then come back here to resume predicting
                 </p>
               </div>
             </div>
@@ -334,16 +334,16 @@ export default function BitcoinBetting() {
                   <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
                     <Shield className="w-12 h-12 text-gray-600" />
                   </div>
-                  <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Betting Closed</h2>
+                  <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Predictions Closed</h2>
                   <p className="text-gray-600 text-lg mb-6">
                     Predictions can be placed Sunday through Friday
                   </p>
                   <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                    <p className="text-gray-700 font-medium mb-2">Betting Schedule:</p>
+                    <p className="text-gray-700 font-medium mb-2">Prediction Schedule:</p>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Sunday - Friday:</span>
-                        <span className="text-green-600 font-bold">✓ Betting Open</span>
+                        <span className="text-green-600 font-bold">✓ Predictions Open</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Saturday:</span>

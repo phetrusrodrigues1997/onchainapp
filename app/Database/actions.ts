@@ -28,6 +28,7 @@ const db = drizzle(sqlConnection);
 const getTableFromType = (tableType: string) => {
   switch (tableType) {
     case 'featured':
+    case 'bitcoin':
       return FeaturedBets;
     case 'crypto':
       return CryptoBets;
@@ -39,6 +40,7 @@ const getTableFromType = (tableType: string) => {
 const getWrongPredictionsTableFromType = (tableType: string) => {
   switch (tableType) {
     case 'featured':
+    case 'bitcoin':
       return WrongPredictions;
     case 'crypto':
       return WrongPredictionsCrypto;
@@ -206,7 +208,7 @@ export async function processReEntry(walletAddress: string, typeTable: string = 
   }
 }
 
-export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'bitcoin') {
+export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'featured') {
   try {
     // Server-side schedule validation - betting only allowed Sunday-Friday
     const now = new Date();
@@ -232,7 +234,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
 
     if (wrongPrediction.length > 0) {
       const reEntryFee = wrongPrediction[0].reEntryFeeUsdc;
-      throw new Error(`You need to pay ${(reEntryFee / 10000).toFixed(2)} USDC to re-enter after your wrong prediction. Please pay the re-entry fee first.`);
+      throw new Error(`You need to pay today's entry fee to re-enter after your wrong prediction. Please pay the re-entry fee first.`);
     }
 
     // 2. Check if the user already placed a bet for tomorrow
@@ -270,8 +272,8 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     return { ...result[0], predictionDate };
 
   } catch (error: unknown) {
-    console.error("Error placing Bitcoin bet:", error);
-    throw new Error(error instanceof Error ? error.message : "Failed to place Bitcoin bet");
+    console.error("Error placing Bitcoin prediction:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to place Bitcoin prediction");
   }
 }
 

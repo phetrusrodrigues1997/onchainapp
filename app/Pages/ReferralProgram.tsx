@@ -172,7 +172,7 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <button
                     onClick={() => {
-                      const text = `Join me on Foresight prediction markets! Use my referral code ${referralCode} when entering your first pot. https://foresight-app.vercel.app`;
+                      const text = `Join me on PrediWin prediction markets! Use my referral code ${referralCode} when entering your first pot. https://prediwin.com`;
                       navigator.clipboard.writeText(text);
                       showMessage('Share message copied to clipboard!');
                     }}
@@ -183,7 +183,7 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
                   </button>
                   
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me on Foresight prediction markets! Use my referral code ${referralCode} when entering your first pot.`)}&url=https://foresight-app.vercel.app`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me on PrediWin prediction markets! Use my referral code ${referralCode} when entering your first pot.`)}&url=https://prediwin.com`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300"
@@ -194,10 +194,10 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
                   
                   <button
                     onClick={() => {
-                      const text = `Join me on Foresight prediction markets! Use my referral code ${referralCode} when entering your first pot. https://foresight-app.vercel.app`;
+                      const text = `Join me on PrediWin prediction markets! Use my referral code ${referralCode} when entering your first pot. https://prediwin.com`;
                       if (navigator.share) {
                         navigator.share({
-                          title: 'Foresight Referral',
+                          title: 'PrediWin Referral',
                           text: text,
                         });
                       } else {

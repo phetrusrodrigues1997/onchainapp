@@ -6,7 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
-  title: 'Foresight - Survival of the Brightest',
+  title: 'PrediWin.com - Predict, Win, Repeat',
   description: 'Focused on building the best prediction market services.',
   icons: {
     icon: '/favicon.png',

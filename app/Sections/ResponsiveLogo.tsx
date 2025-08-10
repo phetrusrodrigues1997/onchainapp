@@ -26,7 +26,7 @@ const ResponsiveLogo = () => {
       <span className="relative inline-block font-sans">
         {isMobile ? (
           // Mobile version - just the eagle emoji with smaller text
-          <span className="text-xl font-bold tracking-tight text-[#000000]">Foresight
+          <span className="text-xl font-bold tracking-tight text-[#000000]">PrediWin.com
           <Image
       src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
       alt="Icon"
@@ -39,7 +39,7 @@ const ResponsiveLogo = () => {
         ) : (
           <span className="text-3xl">
   <span className="text-3xl font-bold tracking-tight bg-clip-text text-[#000000]">
-    Foresight
+    PrediWin.com
     <Image
       src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
       alt="Icon"

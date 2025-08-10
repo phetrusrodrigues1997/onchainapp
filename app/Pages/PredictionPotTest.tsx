@@ -491,6 +491,27 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
+  const handleReEntryApprove = async () => {
+    if (!contractAddress || !reEntryFee) return;
+    
+    setIsLoading(true);
+    setLastAction('approveReEntry');
+    try {
+      await writeContract({
+        address: usdcAddress as `0x${string}`,
+        abi: USDC_ABI,
+        functionName: 'approve',
+        args: [contractAddress, reEntryAmount],
+      });
+      showMessage('USDC approval for re-entry submitted! Waiting for confirmation...');
+    } catch (error) {
+      console.error('Re-entry approval failed:', error);
+      showMessage('Re-entry approval failed. Check console for details.', true);
+      setLastAction('');
+      setIsLoading(false);
+    }
+  };
+
   const handleReEntry = async () => {
     if (!contractAddress || !reEntryFee) return;
     
@@ -499,11 +520,13 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     
     try {
       // Process re-entry payment using the smart contract with re-entry fee amount
+      // Convert to BigInt the same way as normal pot entry
+      const reEntryAmount = BigInt(reEntryFee);
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
-        args: [BigInt(reEntryFee)],
+        args: [reEntryAmount],
       });
       
       showMessage('Re-entry payment submitted! Waiting for confirmation...');
@@ -568,6 +591,27 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   })();
 
+  // Re-entry allowance and balance checks
+  const reEntryAmount = reEntryFee ? BigInt(reEntryFee) : BigInt(0);
+  
+  const hasEnoughReEntryAllowance = (() => {
+    if (!allowance || !reEntryFee) return false;
+    try {
+      return allowance >= reEntryAmount;
+    } catch {
+      return false;
+    }
+  })();
+  
+  const hasEnoughReEntryBalance = (() => {
+    if (!userUsdcBalance || !reEntryFee) return false;
+    try {
+      return userUsdcBalance >= reEntryAmount;
+    } catch {
+      return false;
+    }
+  })();
+
   const queryClient = useQueryClient();
 useEffect(() => {
   if (isConfirmed) {
@@ -580,7 +624,7 @@ useEffect(() => {
 }, 1000);
     } else if (lastAction === 'enterPot') {
       setIsLoading(false);
-      showMessage('Successfully entered the pot! Redirecting to betting page...');
+      showMessage('Successfully entered the pot! Redirecting to prediction page...');
       
       // Always force refetch of contract data first (same as before referral system)
       setTimeout(() => {
@@ -605,6 +649,13 @@ useEffect(() => {
           handleReferralConfirmation();
         }, 3000); // Run after contract refresh completes
       }
+    } else if (lastAction === 'approveReEntry') {
+      setIsLoading(false);
+      showMessage('USDC approval for re-entry confirmed! You can now pay the re-entry fee.');
+      setTimeout(() => {
+        // Force refetch of all contract data to update allowance
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+      }, 1000);
     } else if (lastAction === 'reEntry') {
       // Handle re-entry confirmation
       const completeReEntry = async () => {
@@ -613,7 +664,7 @@ useEffect(() => {
           const success = await processReEntry(address!, selectedTableType);
           if (success) {
             setIsLoading(false);
-            showMessage('Re-entry successful! You can now bet again.');
+            showMessage('Re-entry successful! You can now predict again.');
             setReEntryFee(null); // Clear re-entry fee
             // Refresh contract data and referral data
             setTimeout(() => {
@@ -763,27 +814,43 @@ useEffect(() => {
           {/* Re-entry Payment Section - Show if user has re-entry fee */}
           {isConnected && contractAddress && reEntryFee && (
             <div className="mb-6">
-              <div className="bg-orange-50 rounded-xl border-2 border-orange-200 p-8 text-center">
-                <div className="text-3xl font-black text-orange-900 mb-4">
+              <div className="bg-white rounded-xl border border-gray-200 p-8 hover:border-gray-300 transition-all duration-300 text-center">
+                <div className="text-2xl font-light text-gray-900 mb-3">
                   ⚠️ Re-entry Required
                 </div>
-                <div className="text-orange-700 font-medium mb-6 leading-relaxed">
-                  You made a wrong prediction and need to pay <span className="font-bold">{(reEntryFee / 10000).toFixed(2)} USDC</span> to re-enter this market and continue betting.
+                <div className="text-gray-600 font-light mb-6 leading-relaxed">
+                  You made a wrong prediction and need to pay <span className="font-medium">today's entry fee</span> to re-enter this market and continue predicting.
                 </div>
-                <div className="bg-orange-100 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-orange-800 font-medium">
-                    💡 Pay the re-entry fee to resume betting
-                  </p>
+                <div className="text-gray-500 text-sm mb-6 font-light">
+                  {hasEnoughReEntryAllowance ? 'Pay the re-entry fee to resume predicting' : 'Approve USDC spending first, then pay re-entry fee'}
                 </div>
-                <button
-                  onClick={handleReEntry}
-                  disabled={isActuallyLoading}
-                  className="px-8 py-3 bg-orange-600 text-white font-bold rounded-full hover:bg-orange-700 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isActuallyLoading && lastAction === 'reEntry'
-                    ? 'Processing Re-entry...'
-                    : `Pay ${(reEntryFee / 10000).toFixed(2)} USDC to Re-enter`}
-                </button>
+                
+                {!hasEnoughReEntryAllowance ? (
+                  <button
+                    onClick={handleReEntryApprove}
+                    disabled={isActuallyLoading || !hasEnoughReEntryBalance}
+                    className="px-8 py-3 bg-gray-900 text-white font-light rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isActuallyLoading && lastAction === 'approveReEntry'
+                      ? 'Approving...'
+                      : `Approve ${(reEntryFee / 1000000).toFixed(2)} USDC`}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleReEntry}
+                    disabled={isActuallyLoading || !hasEnoughReEntryBalance}
+                    className="px-8 py-3 bg-gray-900 text-white font-light rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isActuallyLoading && lastAction === 'reEntry'
+                      ? 'Processing Re-entry...'
+                      : `Pay ${(reEntryFee / 1000000).toFixed(2)} USDC to Re-enter`}
+                  </button>
+                )}
+                
+                {!hasEnoughReEntryBalance && (
+                  <p className="text-gray-400 text-sm mt-3 font-light">Insufficient USDC balance for re-entry</p>
+                )}
+                
               </div>
             </div>
           )}
@@ -873,58 +940,7 @@ useEffect(() => {
                 /* Regular pot entry - Sunday through Friday */
                 <div className="space-y-4">
                   
-                  {/* Pot Entry Deadline Countdown */}
-                  <div className="bg-red-50 rounded-lg border-2 border-red-200 p-6 text-center">
-                    <div className="mb-4">
-                      <h3 className="text-xl font-black text-red-900 mb-2">
-                        ⏰ Pot Entry Deadline
-                      </h3>
-                      <p className="text-red-700 font-medium">
-                        Pot entries close Saturday at midnight UTC
-                      </p>
-                    </div>
-                    
-                    <div className="bg-red-900 rounded-lg p-2 sm:p-4 mb-4">
-                      <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                        <div className="text-center">
-                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
-                            {timeUntilDeadline.days.toString().padStart(2, '0')}
-                          </div>
-                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            D
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
-                            {timeUntilDeadline.hours.toString().padStart(2, '0')}
-                          </div>
-                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            H
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
-                            {timeUntilDeadline.minutes.toString().padStart(2, '0')}
-                          </div>
-                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            M
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg sm:text-xl md:text-2xl font-black text-white mb-1">
-                            {timeUntilDeadline.seconds.toString().padStart(2, '0')}
-                          </div>
-                          <div className="text-xs font-medium text-red-200 uppercase tracking-wide">
-                            S
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-red-600">
-                      Enter now to participate in the next prediction round!
-                    </p>
-                  </div>
+                  
                   
                   {/* Free Entry Option */}
                   {freeEntriesAvailable > 0 && (

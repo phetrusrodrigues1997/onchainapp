@@ -1,34 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Image from 'next/image';
 import { Buy } from '@coinbase/onchainkit/buy'; 
-import type { Token } from '@coinbase/onchainkit/token';
-import { CreditCard, Wallet, ArrowRight } from 'lucide-react';
-
-const USDCToken: Token = {
-  address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  chainId: 8453,
-  decimals: 6,
-  name: "USDC",
-  symbol: "USDC",
-  image: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
-};
+import { ETHToken, USDCToken } from '../Constants/coins';
 
 const tokens = [
-  { name: "USDC", token: USDCToken },
+  { name: "USDC", token: USDCToken, description: "For pot entries", usage: "For your predictions" },
+  { name: "ETH", token: ETHToken, description: "For gas fees", usage: "For gas fees (~$0.01-0.05)" },
 ];
 
 const BuySection: React.FC = () => {
-  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  const [searchQuery] = useState<string>(''); // Keep searchQuery as it's used in filtering
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const [selectedTokenIndex, setSelectedTokenIndex] = useState<number>(0);
+  const selectedToken = tokens[selectedTokenIndex];
 
   useEffect(() => {
     const styleId = 'custom-button-style';
@@ -89,6 +71,51 @@ const BuySection: React.FC = () => {
           outline: none !important;
           box-shadow: none !important;
         }
+
+        /* Fix dropdown overflow issues */
+        .ock-dropdown,
+        [role="listbox"],
+        [role="menu"],
+        [data-testid*="dropdown"],
+        [data-testid*="select"],
+        .ock-select-dropdown,
+        .ock-buy-dropdown {
+          max-height: 300px !important;
+          overflow-y: auto !important;
+          z-index: 9999 !important;
+          position: absolute !important;
+        }
+
+        /* Custom scrollbar for dropdown */
+        .ock-dropdown::-webkit-scrollbar,
+        [role="listbox"]::-webkit-scrollbar,
+        [data-testid*="dropdown"]::-webkit-scrollbar,
+        [data-testid*="select"]::-webkit-scrollbar {
+          width: 6px !important;
+        }
+
+        .ock-dropdown::-webkit-scrollbar-track,
+        [role="listbox"]::-webkit-scrollbar-track,
+        [data-testid*="dropdown"]::-webkit-scrollbar-track,
+        [data-testid*="select"]::-webkit-scrollbar-track {
+          background: #f1f5f9 !important;
+          border-radius: 3px !important;
+        }
+
+        .ock-dropdown::-webkit-scrollbar-thumb,
+        [role="listbox"]::-webkit-scrollbar-thumb,
+        [data-testid*="dropdown"]::-webkit-scrollbar-thumb,
+        [data-testid*="select"]::-webkit-scrollbar-thumb {
+          background: #cbd5e1 !important;
+          border-radius: 3px !important;
+        }
+
+        .ock-dropdown::-webkit-scrollbar-thumb:hover,
+        [role="listbox"]::-webkit-scrollbar-thumb:hover,
+        [data-testid*="dropdown"]::-webkit-scrollbar-thumb:hover,
+        [data-testid*="select"]::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8 !important;
+        }
       `;
     };
 
@@ -133,96 +160,57 @@ const BuySection: React.FC = () => {
     };
   }, []);
 
-  const getContainerWidth = () => {
-    if (windowWidth < 640) return 'w-full max-w-sm';
-    if (windowWidth < 768) return 'w-full max-w-md';
-    if (windowWidth < 1024) return 'w-full max-w-lg';
-    return 'w-full max-w-xl';
-  };
-
-  const filteredTokens = tokens.filter(item => {
-    const query = searchQuery.trim().toLowerCase();
-    const symbol = item.token.symbol.toLowerCase();
-    const name = item.token.name.toLowerCase();
-    return symbol.includes(query) || name.includes(query);
-  });
-
   return (
-    <div className="min-h-screen bg-[#fefefe]">
-      <div className="pt-20 pb-12">
+    <div className="min-h-screen bg-white" style={{ minHeight: 'calc(100vh + 400px)' }}>
+      <div className="pt-20 pb-24">
         
 
-        {/* Main Buy Section */}
-        <div className={`${getContainerWidth()} mx-auto px-4`}>
-          {filteredTokens.length > 0 ? (
-            <div className="space-y-6">
-              {filteredTokens.map((item) => (
-                <div
-                  key={item.token.symbol}
-                  className="bg-white rounded-2xl border border-gray-200 p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-gray-300"
-                >
-                  {/* Token Info Header */}
-                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Image 
-                          src={item.token.image ?? "/placeholder-token.png"} 
-                          alt={item.token.symbol}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 rounded-full"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900">Purchase {item.token.symbol}</h3>
-                        <p className="text-gray-500 text-sm">{item.token.name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <Wallet className="w-4 h-4" />
-                      <ArrowRight className="w-4 h-4" />
-                      <CreditCard className="w-4 h-4" />
-                    </div>
-                  </div>
-
-                  {/* Buy Component */}
-                  <div className="buy-component-wrapper">
-                    <Buy toToken={item.token} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CreditCard className="w-8 h-8 text-gray-400" />
-              </div>
-              <p className="text-gray-500 text-lg">No tokens found</p>
-            </div>
-          )}
+        {/* Token Toggle */}
+        <div className="max-w-lg mx-auto px-4 mb-8">
+          <div className="flex bg-gray-50 rounded-lg p-1">
+            {tokens.map((token, index) => (
+              <button
+                key={token.name}
+                onClick={() => setSelectedTokenIndex(index)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-light transition-all duration-200 ${
+                  selectedTokenIndex === index
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Image 
+                  src={token.token.image ?? "/placeholder-token.png"} 
+                  alt={token.token.symbol}
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                {token.token.symbol}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Footer Info */}
-        <div className="max-w-2xl mx-auto mt-16 px-4">
-          <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-4 text-center">
-            <div className="text-center">
-              <h3 className="flex items-center justify-center gap-2 text-blue-700 text-lg font-semibold mb-2">Secure & Fast</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-blue-600">Secure</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-blue-600">Instant processing</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-blue-600">Low fees</span>
-                </div>
-              </div>
-            </div>
+        
+
+        {/* Buy Component */}
+        <div className="max-w-lg mx-auto px-4">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-gray-300 transition-all duration-300">
+            <Buy toToken={selectedToken.token} />
           </div>
+        </div>
+        {/* Selected Token Info */}
+        <div className="max-w-lg mx-auto px-4 mb-8 text-center">
+          
+          <p className="text-invisible font-light text-sm mb-1">{selectedToken.description}</p>
+          <p className="text-gray-400 font-light text-xs">{selectedToken.usage}</p>
+        </div>
+        {/* Header */}
+        <div className="max-w-2xl mx-auto px-4 mb-12 text-center">
+          
+          <p className="text-gray-600 font-light mt-20">
+            Buy the tokens you need to participate in prediction markets
+          </p>
         </div>
       </div>
     </div>
