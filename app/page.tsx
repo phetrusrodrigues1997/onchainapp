@@ -1,7 +1,7 @@
 // App.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { formatUnits } from 'viem';
 import { User } from 'lucide-react';
@@ -47,7 +47,19 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home'); // Default section
   const [toastMessage] = useState('');
   const [showToast] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // Removed unused state variables for cleaner code
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Get USDC balance
   const { data: userUsdcBalance } = useReadContract({
@@ -134,10 +146,9 @@ export default function App() {
             <div className="wallet-container">
               <Wallet>
 <ConnectWallet 
+                  text={isMobile ? " Connect " : "Connect Wallet"}
                   className={isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''}
                 >
-                  <span className="hidden md:inline">Connect Wallet</span>
-                  <span className="inline md:hidden">Connect</span>
                 {isConnected && (
                   <>
                     <Avatar className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
