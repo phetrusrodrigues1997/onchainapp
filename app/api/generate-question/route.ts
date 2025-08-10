@@ -15,6 +15,7 @@ const topics = [
 
 export async function POST(request: NextRequest) {
   try {
+
     // Select a random topic
     const randomTopic = topics[Math.floor(Math.random() * topics.length)];
 

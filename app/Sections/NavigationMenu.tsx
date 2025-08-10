@@ -38,7 +38,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
   return (
     <nav className="relative">
-      {/* Mobile hamburger menu button */}
+      {/* Mobile hamburger menu button mate*/}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className="p-2 rounded-lg md:hidden"
