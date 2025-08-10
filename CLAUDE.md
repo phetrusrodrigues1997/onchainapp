@@ -79,6 +79,9 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - `Referrals`: Tracks referral relationships and confirmation status (referrerWallet, referredWallet, referralCode, potEntryConfirmed, confirmedAt)
 - `FreeEntries`: Manages earned/used free pot entries (walletAddress, earnedFromReferrals, usedEntries)
 
+#### AI Trivia System Tables
+- `TriviaStats`: Tracks AI trivia game statistics (walletAddress, correctAnswers, totalQuestions, currentStreak, bestStreak, discountEarned)
+
 #### User Management
 - `Messages`: User messaging system
 - `ImageURLs`: User profile images
@@ -96,6 +99,7 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - Webpack configuration includes externals for WalletConnect compatibility
 - Drizzle ORM is used for database operations
 - Python script for token launching in `LaunchToken/newtoken.py`
+- **OpenAI Integration**: Uses `OPENAI_API_KEY` environment variable for AI trivia question generation
 
 ## Key Features
 
@@ -157,6 +161,21 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Database Cleanup**: Removes user from wrong predictions table upon successful payment
 - **UI Integration**: Minimalist design matching the "You're in the Pot" aesthetic
 - **Clear Messaging**: Uses "today's entry fee" instead of specific amounts for cleaner UX
+
+### AI Trivia Game System (`AIPage.tsx`)
+- **OpenAI Integration**: Uses GPT-3.5-turbo model for dynamic question generation across 25+ categories
+- **Minimalistic Design**: Black and white UI design with clean typography and responsive layout
+- **Statistics Tracking**: Comprehensive stats including correct answers, accuracy, current streak, and best streak
+- **100 Answer Milestone**: Users earn 0.01 USDC discount after answering 100 questions correctly
+- **Hybrid Storage System**: 
+  - **Database Storage**: Connected wallet users get persistent stats in PostgreSQL via Drizzle ORM
+  - **localStorage Fallback**: Non-connected users use browser storage with seamless migration on wallet connect
+- **Database Functions**: `getTriviaStats()`, `updateTriviaStats()`, `resetTriviaStats()` with error handling
+- **Real-time Updates**: Immediate stat updates after each question with database synchronization
+- **Mobile Responsive**: Optimized grid layouts and touch-friendly interface
+- **Question Categories**: Science, History, Geography, Literature, Math, Sports, Technology, Art, Music, Movies, etc.
+- **Fallback System**: Built-in fallback questions if OpenAI API fails
+- **Progress Tracking**: Visual progress bar showing advancement toward 100 correct answers goal
 
 ## Development Notes
 

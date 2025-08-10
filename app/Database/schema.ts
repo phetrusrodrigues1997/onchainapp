@@ -75,3 +75,15 @@ export const FreeEntries = pgTable("free_entries", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const TriviaStats = pgTable("trivia_stats", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(),
+  correctAnswers: integer("correct_answers").default(0).notNull(),
+  totalQuestions: integer("total_questions").default(0).notNull(),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  bestStreak: integer("best_streak").default(0).notNull(),
+  discountEarned: boolean("discount_earned").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

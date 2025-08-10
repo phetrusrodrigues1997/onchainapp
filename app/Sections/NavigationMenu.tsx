@@ -28,7 +28,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   // Menu items for reusability
   const menuItems = [
     { id: 'home', label: 'Home' },
-    { id: 'AI', label: 'Try our AI' },
+    { id: 'AI', label: 'AI Games' },
     { id: 'profile', label: 'Profile' },
     { id: 'wallet', label: 'Receive' },
     { id: 'buy', label: 'Purchase' },

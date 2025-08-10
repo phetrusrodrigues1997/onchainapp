@@ -20,7 +20,7 @@ import ResponsiveLogo from './Sections/ResponsiveLogo';
 import HowItWorksSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
-import AI from './Pages/AIPage';
+import AITriviaGame from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
 // import UsernameSetup from './Pages/UsernameSetup';
 // import CreateMessage from './Pages/MessagesPage';
@@ -198,7 +198,7 @@ export default function App() {
           {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
-          {activeSection === "AI" && <AI activeSection={activeSection} setActiveSection={setActiveSection}/>}
+          {activeSection === "AI" && <AITriviaGame activeSection={activeSection} setActiveSection={setActiveSection}/>}
           {/* Add more sections as needed */}
         
       </main>
