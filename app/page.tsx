@@ -131,12 +131,12 @@ export default function App() {
           <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
             <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             {/* USDC Balance Display */}
             {isConnected && address && (
               <div 
                 onClick={() => setActiveSection('buy')}
-                className="flex flex-col items-end cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                className="flex flex-col items-end cursor-pointer hover:opacity-80 transition-opacity duration-200 mr-2"
               >
                 <div className="text-xs text-gray-500 font-medium">Balance</div>
                 <div className="text-sm text-[#00aa00] font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
