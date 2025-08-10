@@ -146,7 +146,7 @@ export default function App() {
             <div className="wallet-container">
               <Wallet>
 <ConnectWallet 
-                  text={isMobile ? " Connect Wallet" : "Connect Wallet"}
+                  text={isMobile ? "Log In" : "Connect Wallet"}
                   className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? '!px-4 !py-2 !min-w-0' : ''}`}
                 >
                 {isConnected && (
