@@ -133,7 +133,11 @@ export default function App() {
             
             <div className="wallet-container">
               <Wallet>
-<ConnectWallet className={isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''}>
+<ConnectWallet 
+                  className={isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''}
+                >
+                  <span className="hidden md:inline">Connect Wallet</span>
+                  <span className="inline md:hidden">Connect</span>
                 {isConnected && (
                   <>
                     <Avatar className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
