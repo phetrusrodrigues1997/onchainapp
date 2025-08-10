@@ -1,15 +1,83 @@
-import React, { useState } from 'react';
-import { Upload, Trophy, Award, Crown } from 'lucide-react';
-import { useAccount } from 'wagmi';
-import { saveImageUrl } from '../Database/actions';
-import { getLatestImageUrl } from '../Database/actions'; // adjust path
-import { useEffect } from 'react'; // Add to top
+import React, { useState, useEffect } from 'react';
+import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap } from 'lucide-react';
+import { useAccount, useReadContract, useBalance } from 'wagmi';
+import { formatUnits } from 'viem';
+import { saveImageUrl, getLatestImageUrl } from '../Database/actions';
 
+
+// USDC Contract ABI (minimal)
+const USDC_ABI = [
+  {
+    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+    "name": "balanceOf",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
 const ProfilePage = () => {
   const [profileImage, setProfileImage] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center');
 
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
+
+  // Get USDC balance
+  const { data: userUsdcBalance } = useReadContract({
+    address: USDC_ADDRESS as `0x${string}`,
+    abi: USDC_ABI,
+    functionName: 'balanceOf',
+    args: [address],
+    query: { enabled: !!address && isConnected }
+  }) as { data: bigint | undefined };
+
+  // Get ETH balance
+  const { data: ethBalance } = useBalance({
+    address: address as `0x${string}`,
+    query: { enabled: !!address && isConnected }
+  });
+
+  // State for ETH price
+  const [ethPrice, setEthPrice] = useState<number>(0);
+
+  // Fetch ETH price on mount
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const data = await response.json();
+        setEthPrice(data.ethereum?.usd || 0);
+      } catch (error) {
+        console.error('Error fetching ETH price:', error);
+        setEthPrice(3500); // Fallback price
+      }
+    };
+    fetchEthPrice();
+  }, []);
+
+  // Format USDC balance
+  const formatUsdcBalance = (balance: bigint | undefined): string => {
+    if (!balance) return '0.00';
+    try {
+      const formatted = formatUnits(balance, 6);
+      return parseFloat(formatted).toFixed(2);
+    } catch {
+      return '0.00';
+    }
+  };
+
+  // Format ETH balance in USD
+  const formatEthBalanceUSD = (): string => {
+    if (!ethBalance?.value || !ethPrice) return '$0.00';
+    try {
+      const ethAmount = parseFloat(formatUnits(ethBalance.value, 18));
+      const usdValue = ethAmount * ethPrice;
+      return `$${usdValue.toFixed(2)}`;
+    } catch {
+      return '$0.00';
+    }
+  };
   useEffect(() => {
   const fetchImage = async () => {
     if (address) {
@@ -90,6 +158,54 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
     <div className="min-h-screen bg-[#fdfdfd] py-4 sm:py-6">
       <div className="max-w-7xl mx-auto px-3 sm:px-4">
         
+        {/* Wallet Balance Section */}
+        {isConnected && address && (
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-6 mb-6 text-white shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-bold">Wallet Balance</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* USDC Balance */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <DollarSign className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-300">USDC Balance</div>
+                    <div className="text-2xl font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-400 mt-2">
+                  For your predictions
+                </div>
+              </div>
+              
+              {/* ETH Balance */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-300">ETH Balance</div>
+                    <div className="text-2xl font-bold">{formatEthBalanceUSD()}</div>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-400 mt-2">
+                  For gas fees
+                </div>
+              </div>
+            </div>
+            
+           
+          </div>
+        )}
+
         {/* Profile Header */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
@@ -119,19 +235,19 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
               
               {/* Stats Grid - Responsive Layout */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-                <div className="text-center sm:text-left">
+                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
                   <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.totalEarnings}</div>
                   <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Total Earnings</div>
                 </div>
-                <div className="text-center sm:text-left">
+                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
                   <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.potsWon}</div>
                   <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Pots Won</div>
                 </div>
-                <div className="text-center sm:text-left">
+                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
                   <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.accuracy}</div>
                   <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Accuracy</div>
                 </div>
-                <div className="text-center sm:text-left">
+                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
                   <div className="text-xl sm:text-2xl font-semibold text-gray-900">#{userStats.rank}</div>
                   <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Global Rank</div>
                 </div>
