@@ -220,7 +220,7 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] text-[#111111] overflow-hidden -mt-32 md:-mt-40">
+    <div className="min-h-screen bg-[#fdfdfd] text-[#111111] overflow-hidden -mt-32 md:-mt-40">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
