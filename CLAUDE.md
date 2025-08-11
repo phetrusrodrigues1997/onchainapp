@@ -176,6 +176,7 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Question Categories**: Science, History, Geography, Literature, Math, Sports, Technology, Art, Music, Movies, etc.
 - **Fallback System**: Built-in fallback questions if OpenAI API fails
 - **Progress Tracking**: Visual progress bar showing advancement toward 100 correct answers goal
+- **Database Optimization**: Currently updates database immediately per question; future optimization could batch updates on page unload/inactivity for better performance
 
 ## Development Notes
 

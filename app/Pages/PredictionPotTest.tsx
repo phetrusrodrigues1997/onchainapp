@@ -12,7 +12,10 @@ import {
   getAvailableFreeEntries, 
   consumeFreeEntry, 
   getReEntryFee,
-  processReEntry
+  processReEntry,
+  getAllReEntryFees,
+  debugWrongPredictions,
+  clearWrongPredictionsForWallet
 } from '../Database/actions';
 
 
@@ -129,6 +132,8 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [inputReferralCode, setInputReferralCode] = useState<string>('');
   const [freeEntriesAvailable, setFreeEntriesAvailable] = useState<number>(0);
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
+  const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   
   // Countdown state for when pot reopens (Sunday)
   const [timeUntilReopening, setTimeUntilReopening] = useState<{
@@ -185,12 +190,21 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   }, []);
 
-  // Load referral data when wallet connects
+  // Load referral data when wallet connects or market changes
   useEffect(() => {
-    if (address) {
+    if (address && selectedTableType) {
       loadReferralData();
     }
-  }, [address]);
+  }, [address, selectedTableType]);
+
+  // Initial loading screen effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+    }, 2000); // 2 seconds loading screen
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Countdown timer effect
   useEffect(() => {
@@ -215,14 +229,30 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     if (!address) return;
     
     try {
+      console.log("=== DEBUG loadReferralData ===");
+      console.log("Contract Address:", contractAddress);
+      console.log("Selected Table Type:", selectedTableType);
+      
+      // Debug wrong predictions tables
+      await debugWrongPredictions(address);
+      
       // Load available free entries
       const freeEntries = await getAvailableFreeEntries(address);
       console.log("Debug - getAvailableFreeEntries returned:", freeEntries);
       setFreeEntriesAvailable(freeEntries);
       
-      // Check if user needs to pay re-entry fee
+      // Check if user needs to pay re-entry fee for current market
+      console.log("Calling getReEntryFee with:", address, selectedTableType);
       const reEntryAmount = await getReEntryFee(address, selectedTableType);
+      console.log("getReEntryFee returned:", reEntryAmount);
       setReEntryFee(reEntryAmount);
+      
+      // Get all markets that need re-entry (for informational purposes)
+      const allReEntries = await getAllReEntryFees(address);
+      console.log("getAllReEntryFees returned:", allReEntries);
+      setAllReEntryFees(allReEntries);
+      
+      console.log("=== END DEBUG loadReferralData ===");
       
     } catch (error) {
       console.error("Error loading referral data:", error);
@@ -501,7 +531,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
         address: usdcAddress as `0x${string}`,
         abi: USDC_ABI,
         functionName: 'approve',
-        args: [contractAddress, reEntryAmount],
+        args: [contractAddress, entryAmount],
       });
       showMessage('USDC approval for re-entry submitted! Waiting for confirmation...');
     } catch (error) {
@@ -521,12 +551,12 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     try {
       // Process re-entry payment using the smart contract with re-entry fee amount
       // Convert to BigInt the same way as normal pot entry
-      const reEntryAmount = BigInt(reEntryFee);
+      
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
-        args: [reEntryAmount],
+        args: [entryAmount],
       });
       
       showMessage('Re-entry payment submitted! Waiting for confirmation...');
@@ -718,6 +748,49 @@ useEffect(() => {
   }
 }, [isConfirmed, lastAction]);
 
+  // Show loading screen for first 2 seconds
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-invisible p-4 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gray-900 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-gray-700 rounded-full blur-2xl animate-pulse delay-500"></div>
+            </div>
+            
+            <div className="relative z-10">
+              {/* Bitcoin icon with rotation animation */}
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-gray-900/25 animate-spin">
+                <span className="text-3xl font-black text-white drop-shadow-lg">₿</span>
+              </div>
+              
+              <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
+                Loading Prediction Pot
+              </h1>
+              
+              {/* Loading dots animation */}
+              <div className="flex items-center justify-center gap-2 mb-6">
+                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce delay-100"></div>
+                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce delay-200"></div>
+              </div>
+              
+              <p className="text-gray-600 text-sm">
+                Preparing your markets...
+              </p>
+            </div>
+            
+            {/* Subtle pulse indicator */}
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full animate-ping"></div>
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-invisible p-4">
       <div className="max-w-4xl mx-auto">
@@ -818,11 +891,14 @@ useEffect(() => {
                 <div className="text-2xl font-light text-gray-900 mb-3">
                   ⚠️ Re-entry Required
                 </div>
-                <div className="text-gray-600 font-light mb-6 leading-relaxed">
-                  You made a wrong prediction and need to pay <span className="font-medium">today's entry fee</span> to re-enter this market and continue predicting.
+                <div className="text-gray-600 font-light mb-4 leading-relaxed">
+                  You made a wrong prediction in <span className="font-medium">{selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}</span> and need to pay <span className="font-medium">today's entry fee</span> to re-enter this specific market.
                 </div>
+                
+                
+                
                 <div className="text-gray-500 text-sm mb-6 font-light">
-                  {hasEnoughReEntryAllowance ? 'Pay the re-entry fee to resume predicting' : 'Approve USDC spending first, then pay re-entry fee'}
+                  {hasEnoughReEntryAllowance ? 'Pay the re-entry fee to resume predicting in this market' : 'Approve USDC spending first, then pay re-entry fee'}
                 </div>
                 
                 {!hasEnoughReEntryAllowance ? (
@@ -833,7 +909,7 @@ useEffect(() => {
                   >
                     {isActuallyLoading && lastAction === 'approveReEntry'
                       ? 'Approving...'
-                      : `Approve ${(reEntryFee / 1000000).toFixed(2)} USDC`}
+                      : `Approve ${(Number(entryAmount) / 1000000).toFixed(2)} USDC`}
                   </button>
                 ) : (
                   <button
@@ -843,7 +919,7 @@ useEffect(() => {
                   >
                     {isActuallyLoading && lastAction === 'reEntry'
                       ? 'Processing Re-entry...'
-                      : `Pay ${(reEntryFee / 1000000).toFixed(2)} USDC to Re-enter`}
+                      : `Pay ${(Number(entryAmount) / 1000000).toFixed(2)} USDC to Re-enter`}
                   </button>
                 )}
                 
@@ -1149,6 +1225,44 @@ useEffect(() => {
       </button>
     </div>
 
+    
+    {/* DEBUG SECTION - Clear Specific Wallet */}
+    <div className="bg-red-900/20 border border-red-500 p-4 rounded-lg mb-4">
+      <h3 className="text-red-400 font-medium mb-2">🚨 DEBUG: Clear Wrong Predictions for Wallet</h3>
+      <p className="text-red-300 text-sm mb-3">
+        Clear all wrong predictions for a specific wallet (useful if data got corrupted by old logic)
+      </p>
+      <input
+        type="text"
+        placeholder="Enter wallet address"
+        value={winnerAddresses}
+        onChange={(e) => setWinnerAddresses(e.target.value)}
+        className="w-full px-3 py-2 bg-black/50 border border-red-500 rounded-md text-red-300 placeholder-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 mb-3"
+      />
+      <button
+        onClick={async () => {
+          if (!winnerAddresses.trim()) {
+            showMessage("Please enter a wallet address", true);
+            return;
+          }
+          setIsLoading(true);
+          try {
+            await clearWrongPredictionsForWallet(winnerAddresses.trim());
+            showMessage("Wrong predictions cleared for wallet!");
+            setWinnerAddresses("");
+            loadReferralData(); // Refresh data
+          } catch (error) {
+            showMessage("Failed to clear wrong predictions", true);
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+        disabled={isActuallyLoading}
+        className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActuallyLoading ? "Clearing..." : "Clear Wrong Predictions"}
+      </button>
+    </div>
     
   </div>
 )}

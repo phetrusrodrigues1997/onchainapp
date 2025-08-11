@@ -22,7 +22,7 @@ const getTableFromType = (tableType: string) => {
     case 'crypto':
       return CryptoBets;
     default:
-      return FeaturedBets;
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured' or 'crypto'`);
   }
 };
 
@@ -33,7 +33,7 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
     case 'crypto':
       return WrongPredictionsCrypto;
     default:
-      return WrongPredictions;
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured' or 'crypto'`);
   }
 };
 
@@ -58,7 +58,7 @@ const getNextDayEntryFee = (): number => {
 
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
-  tableType: string = 'bitcoin'
+  tableType: string
 ) {
   const opposite = outcome === "positive" ? "negative" : "positive";
   const betsTable = getTableFromType(tableType);
@@ -111,7 +111,7 @@ export async function setDailyOutcome(
  */
 export async function canUserBet(
   address: string,
-  typeTable: string = 'bitcoin'
+  typeTable: string
 ): Promise<boolean> {
   const betsTable = getTableFromType(typeTable);
   const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
@@ -126,9 +126,9 @@ export async function canUserBet(
 /**
  * Clears all wrong predictions.
  */
-export async function clearWrongPredictions(tableType: string = 'bitcoin') {
+export async function clearWrongPredictions(tableType: string) {
   try {
-    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType); // Default to Bitcoin
+    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
     const betsTable = getTableFromType(tableType);
     await db.delete(wrongPredictionTable);
     console.log("Cleared wrong_predictions table");
@@ -145,7 +145,7 @@ export async function clearWrongPredictions(tableType: string = 'bitcoin') {
  * Gets the wallet addresses of users who are still in the game.
  * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
  */
-export async function determineWinners(typeTable: string = 'bitcoin') {
+export async function determineWinners(typeTable: string) {
   try {
     const betsTable = getTableFromType(typeTable);
     const winners = await db

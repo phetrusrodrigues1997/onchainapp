@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
-import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee } from '../Database/actions';
+import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, getAllReEntryFees } from '../Database/actions';
 import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
 import Cookies from 'js-cookie';
 
@@ -41,6 +41,7 @@ export default function BitcoinBetting() {
   const [contractAddress, setContractAddress] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
+  const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
 
   // Check if betting is allowed (Sunday through Friday)
   const isBettingAllowed = (): boolean => {
@@ -92,15 +93,17 @@ export default function BitcoinBetting() {
     setIsBetLoading(true);
     try {
       // Load both tomorrow's bet (for betting interface) and today's bet (for results display)
-      const [tomorrowBet, todayBet, reEntryAmount] = await Promise.all([
+      const [tomorrowBet, todayBet, reEntryAmount, allReEntries] = await Promise.all([
         getTomorrowsBet(address, selectedTableType),
         getTodaysBet(address, selectedTableType),
-        getReEntryFee(address, selectedTableType)
+        getReEntryFee(address, selectedTableType),
+        getAllReEntryFees(address)
       ]);
       
       setTomorrowsBet(tomorrowBet);
       setTodaysBet(todayBet);
       setReEntryFee(reEntryAmount);
+      setAllReEntryFees(allReEntries);
     } catch (error) {
       console.error("Error loading bets:", error);
       setTomorrowsBet(null);
@@ -224,15 +227,36 @@ export default function BitcoinBetting() {
                 <Shield className="w-12 h-12 text-white" />
               </div>
               <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Re-entry Required</h2>
-              <p className="text-orange-700 text-lg mb-6 font-medium">
-                You made a wrong prediction and need to pay today's entry fee to re-enter this market before you can predict again.
+              <p className="text-orange-700 text-lg mb-4 font-medium">
+                You made a wrong prediction in <span className="font-bold">{selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}</span> and need to pay today's entry fee to re-enter this specific market.
               </p>
+              
+              {/* Show info about other markets if they also need re-entry */}
+              {allReEntryFees.length > 1 && (
+                <div className="bg-orange-100 rounded-2xl p-4 border border-orange-200 mb-4">
+                  <div className="text-sm font-bold text-orange-900 mb-2">📋 All markets requiring re-entry:</div>
+                  <div className="space-y-1 text-sm text-orange-800">
+                    {allReEntryFees.map((entry) => (
+                      <div key={entry.market} className="flex justify-between">
+                        <span>{entry.market === 'featured' ? '₿ Featured Market' : '🪙 Crypto Market'}</span>
+                        <span className={entry.market === selectedTableType ? 'font-bold text-orange-900' : ''}>
+                          {(entry.fee / 1000000).toFixed(2)} USDC {entry.market === selectedTableType ? '← Current' : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-xs text-orange-700 mt-2 italic">
+                    💡 Each market requires separate re-entry. You can re-enter them individually.
+                  </div>
+                </div>
+              )}
+              
               <div className="bg-orange-100 rounded-2xl p-6 border border-orange-200 mb-6">
                 <p className="text-orange-800 font-bold text-lg mb-2">
-                  Return to pot entry page to pay today's entry fee
+                  Return to pot entry page to pay today's entry fee for this market
                 </p>
                 <p className="text-orange-600 text-sm">
-                  Then come back here to resume predicting
+                  Then come back here to resume predicting in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}
                 </p>
               </div>
             </div>

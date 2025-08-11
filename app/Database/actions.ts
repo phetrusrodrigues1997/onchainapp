@@ -28,24 +28,22 @@ const db = drizzle(sqlConnection);
 const getTableFromType = (tableType: string) => {
   switch (tableType) {
     case 'featured':
-    case 'bitcoin':
       return FeaturedBets;
     case 'crypto':
       return CryptoBets;
     default:
-      return FeaturedBets;
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured' or 'crypto'`);
   }
 };
 
 const getWrongPredictionsTableFromType = (tableType: string) => {
   switch (tableType) {
     case 'featured':
-    case 'bitcoin':
       return WrongPredictions;
     case 'crypto':
       return WrongPredictionsCrypto;
     default:
-      return WrongPredictions;
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured' or 'crypto'`);
   }
 };
 
@@ -174,15 +172,19 @@ export async function getAllMessages(address: string) {
 /**
  * Gets re-entry fee for a wallet address if they need to pay to re-enter
  */
-export async function getReEntryFee(walletAddress: string, typeTable: string = 'bitcoin'): Promise<number | null> {
+export async function getReEntryFee(walletAddress: string, typeTable: string): Promise<number | null> {
   try {
+    console.log(`getReEntryFee called with: ${walletAddress}, ${typeTable}`);
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
+    console.log(`Using table:`, wrongPredictionTable);
+    
     const result = await db
       .select({ reEntryFeeUsdc: wrongPredictionTable.reEntryFeeUsdc })
       .from(wrongPredictionTable)
       .where(eq(wrongPredictionTable.walletAddress, walletAddress))
       .limit(1);
     
+    console.log(`getReEntryFee result:`, result);
     return result.length > 0 ? result[0].reEntryFeeUsdc : null;
   } catch (error) {
     console.error("Error getting re-entry fee:", error);
@@ -191,9 +193,109 @@ export async function getReEntryFee(walletAddress: string, typeTable: string = '
 }
 
 /**
+ * Gets all markets that require re-entry for a wallet address
+ */
+export async function getAllReEntryFees(walletAddress: string): Promise<{market: string, fee: number}[]> {
+  try {
+    const results = [];
+    
+    // Check featured market
+    const featuredResult = await db
+      .select({ reEntryFeeUsdc: WrongPredictions.reEntryFeeUsdc })
+      .from(WrongPredictions)
+      .where(eq(WrongPredictions.walletAddress, walletAddress))
+      .limit(1);
+    
+    if (featuredResult.length > 0) {
+      results.push({ market: 'featured', fee: featuredResult[0].reEntryFeeUsdc });
+    }
+    
+    // Check crypto market
+    const cryptoResult = await db
+      .select({ reEntryFeeUsdc: WrongPredictionsCrypto.reEntryFeeUsdc })
+      .from(WrongPredictionsCrypto)
+      .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress))
+      .limit(1);
+    
+    if (cryptoResult.length > 0) {
+      results.push({ market: 'crypto', fee: cryptoResult[0].reEntryFeeUsdc });
+    }
+    
+    return results;
+  } catch (error) {
+    console.error("Error getting all re-entry fees:", error);
+    return [];
+  }
+}
+
+/**
+ * Debug function to check wrong predictions table usage
+ */
+export async function debugWrongPredictions(walletAddress: string): Promise<void> {
+  try {
+    console.log(`=== DEBUG: Wrong Predictions for ${walletAddress} ===`);
+    
+    // Check featured market (WrongPredictions table)
+    const featuredResult = await db
+      .select()
+      .from(WrongPredictions)
+      .where(eq(WrongPredictions.walletAddress, walletAddress));
+    
+    console.log(`Featured Market (WrongPredictions table): ${featuredResult.length} entries`);
+    featuredResult.forEach((entry, i) => {
+      console.log(`  ${i+1}. Fee: ${entry.reEntryFeeUsdc}, Date: ${entry.wrongPredictionDate}`);
+    });
+    
+    // Check crypto market (WrongPredictionsCrypto table)  
+    const cryptoResult = await db
+      .select()
+      .from(WrongPredictionsCrypto)
+      .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress));
+    
+    console.log(`Crypto Market (WrongPredictionsCrypto table): ${cryptoResult.length} entries`);
+    cryptoResult.forEach((entry, i) => {
+      console.log(`  ${i+1}. Fee: ${entry.reEntryFeeUsdc}, Date: ${entry.wrongPredictionDate}`);
+    });
+    
+    console.log('=== END DEBUG ===');
+  } catch (error) {
+    console.error("Error in debugWrongPredictions:", error);
+  }
+}
+
+/**
+ * ADMIN FUNCTION: Clear wrong predictions for a specific wallet across all markets
+ * This can help fix data that was created with the old buggy logic
+ */
+export async function clearWrongPredictionsForWallet(walletAddress: string): Promise<void> {
+  try {
+    console.log(`Clearing wrong predictions for wallet: ${walletAddress}`);
+    
+    // Clear from featured market table
+    const featuredDeleted = await db
+      .delete(WrongPredictions)
+      .where(eq(WrongPredictions.walletAddress, walletAddress))
+      .returning();
+    
+    // Clear from crypto market table  
+    const cryptoDeleted = await db
+      .delete(WrongPredictionsCrypto)
+      .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress))
+      .returning();
+    
+    console.log(`Cleared ${featuredDeleted.length} entries from Featured market`);
+    console.log(`Cleared ${cryptoDeleted.length} entries from Crypto market`);
+    
+  } catch (error) {
+    console.error("Error clearing wrong predictions for wallet:", error);
+    throw error;
+  }
+}
+
+/**
  * Processes re-entry payment and removes user from wrong predictions
  */
-export async function processReEntry(walletAddress: string, typeTable: string = 'bitcoin'): Promise<boolean> {
+export async function processReEntry(walletAddress: string, typeTable: string): Promise<boolean> {
   try {
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
     const result = await db
@@ -208,7 +310,7 @@ export async function processReEntry(walletAddress: string, typeTable: string = 
   }
 }
 
-export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string = 'featured') {
+export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string) {
   try {
     // Server-side schedule validation - betting only allowed Sunday-Friday
     const now = new Date();
@@ -281,7 +383,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
 /**
  * Gets the user's bet for tomorrow (the active prediction).
  */
-export async function getTomorrowsBet(walletAddress: string, tableType: string = 'bitcoin') {
+export async function getTomorrowsBet(walletAddress: string, tableType: string) {
   try {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -307,7 +409,7 @@ export async function getTomorrowsBet(walletAddress: string, tableType: string =
 /**
  * Gets the user's bet for today (for display purposes).
  */
-export async function getTodaysBet(walletAddress: string, tableType: string = 'bitcoin') {
+export async function getTodaysBet(walletAddress: string, tableType: string) {
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     const betsTable = getTableFromType(tableType);
@@ -330,7 +432,7 @@ export async function getTodaysBet(walletAddress: string, tableType: string = 'b
 /**
  * Gets all bets for a specific date.
  */
-export async function getBetsForDate(date: string, typeTable: string = 'bitcoin') {
+export async function getBetsForDate(date: string, typeTable: string) {
   try {
     const betsTable = getTableFromType(typeTable);
     return db
@@ -770,6 +872,62 @@ export async function updateTriviaStats(
   } catch (error) {
     console.error("Error updating trivia stats:", error);
     throw new Error("Failed to update trivia stats");
+  }
+}
+
+/**
+ * Updates trivia stats with specific values (for batch updates)
+ */
+export async function batchUpdateTriviaStats(
+  walletAddress: string,
+  stats: {
+    correctAnswers: number;
+    totalQuestions: number;
+    currentStreak: number;
+    bestStreak: number;
+  }
+) {
+  try {
+    const discountEarned = stats.correctAnswers >= 100;
+
+    // Check if record exists
+    const existingRecord = await db
+      .select({ id: TriviaStats.id })
+      .from(TriviaStats)
+      .where(eq(TriviaStats.walletAddress, walletAddress))
+      .limit(1);
+
+    if (existingRecord.length === 0) {
+      // Insert new record
+      await db
+        .insert(TriviaStats)
+        .values({
+          walletAddress,
+          correctAnswers: stats.correctAnswers,
+          totalQuestions: stats.totalQuestions,
+          currentStreak: stats.currentStreak,
+          bestStreak: stats.bestStreak,
+          discountEarned,
+        });
+    } else {
+      // Update existing record
+      await db
+        .update(TriviaStats)
+        .set({
+          correctAnswers: stats.correctAnswers,
+          totalQuestions: stats.totalQuestions,
+          currentStreak: stats.currentStreak,
+          bestStreak: stats.bestStreak,
+          discountEarned,
+          updatedAt: new Date(),
+        })
+        .where(eq(TriviaStats.walletAddress, walletAddress));
+    }
+
+    return { ...stats, discountEarned };
+  } catch (error) {
+    console.error("Error batch updating trivia stats:", error);
+    throw new Error("Failed to batch update trivia stats");
   }
 }
 
