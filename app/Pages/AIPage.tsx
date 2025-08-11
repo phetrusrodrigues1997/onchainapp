@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Brain, Check, X, RotateCcw, Trophy, Zap, Clock } from 'lucide-react';
-import { useAccount } from 'wagmi';
-import { getTriviaStats, updateTriviaStats, resetTriviaStats } from '../Database/actions';
 import { getRandomQuestion } from '../Constants/triviaQuestions';
 
 interface AIPageProps {
@@ -26,7 +24,6 @@ interface GameStats {
 }
 
 const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
-  const { address, isConnected } = useAccount();
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -39,115 +36,81 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     bestStreak: 0
   });
   const [gameStarted, setGameStarted] = useState(false);
-  const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [timeRemaining, setTimeRemaining] = useState(15);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(18);
   const [timerActive, setTimerActive] = useState(false);
+  const [congratulationsShown, setCongratulationsShown] = useState(false);
   
-  // Delayed save system
-  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const pendingStatsRef = useRef<{ isCorrect: boolean } | null>(null);
   const questionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<Date>(new Date());
 
-  // Load stats from database on mount and when wallet connects
+  // Load stats from localStorage only
   useEffect(() => {
-    if (isConnected && address) {
-      loadStatsFromDatabase();
+    const savedStats = localStorage.getItem('prediwin-trivia-stats');
+    if (savedStats) {
+      try {
+        const parsedStats = JSON.parse(savedStats);
+        setGameStats(parsedStats);
+        // Check if user already hit 100 milestone
+        if (parsedStats.correctAnswers >= 100) {
+          setCongratulationsShown(true);
+        }
+      } catch (error) {
+        console.error('Error parsing saved stats:', error);
+      }
+    }
+  }, []);
+
+  // Inactivity timer - reset stats after 10 minutes of inactivity
+  const resetInactivityTimer = useCallback(() => {
+    lastActivityRef.current = new Date();
+    
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+    }
+    
+    inactivityTimerRef.current = setTimeout(() => {
+      // Reset stats due to inactivity
+      const freshStats = {
+        correctAnswers: 0,
+        totalQuestions: 0,
+        currentStreak: 0,
+        bestStreak: 0
+      };
+      setGameStats(freshStats);
+      setCongratulationsShown(false);
+      localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
+      
+      // Return to menu
+      setGameStarted(false);
+      setCurrentQuestion(null);
+      setShowResult(false);
+    }, 10 * 60 * 1000); // 10 minutes
+  }, []);
+
+  // Start inactivity timer when game starts
+  useEffect(() => {
+    if (gameStarted) {
+      resetInactivityTimer();
     } else {
-      // Load from localStorage if no wallet connected
-      const savedStats = localStorage.getItem('prediwin-trivia-stats');
-      if (savedStats) {
-        setGameStats(JSON.parse(savedStats));
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
       }
-      setIsLoadingStats(false);
     }
-  }, [isConnected, address]);
+  }, [gameStarted, resetInactivityTimer]);
 
-  // Load stats from database
-  const loadStatsFromDatabase = async () => {
-    if (!address) return;
-    
-    setIsLoadingStats(true);
-    try {
-      const stats = await getTriviaStats(address);
-      setGameStats({
-        correctAnswers: stats.correctAnswers,
-        totalQuestions: stats.totalQuestions,
-        currentStreak: stats.currentStreak,
-        bestStreak: stats.bestStreak
-      });
-    } catch (error) {
-      console.error('Error loading trivia stats:', error);
-    } finally {
-      setIsLoadingStats(false);
-    }
-  };
-
-  // Delayed database save function
-  const saveToDatabase = useCallback(async () => {
-    if (!pendingStatsRef.current || !isConnected || !address) {
-      return;
-    }
-
-    try {
-      await updateTriviaStats(address, pendingStatsRef.current.isCorrect);
-      pendingStatsRef.current = null;
-      console.log('Stats saved to database');
-    } catch (error) {
-      console.error('Error saving stats:', error);
-    }
-  }, [isConnected, address]);
-
-  // Schedule delayed save
-  const scheduleDelayedSave = useCallback((isCorrect: boolean) => {
-    // Store the result for delayed processing
-    pendingStatsRef.current = { isCorrect };
-    
-    // Clear any existing timer
-    if (saveTimerRef.current) {
-      clearTimeout(saveTimerRef.current);
-    }
-    
-    // Save after 3 seconds of inactivity
-    saveTimerRef.current = setTimeout(() => {
-      saveToDatabase();
-    }, 3000);
-  }, [saveToDatabase]);
-
-  // Page unload and visibility change handlers
+  // Clean up timers on unmount
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (pendingStatsRef.current) {
-        saveToDatabase();
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden && pendingStatsRef.current) {
-        saveToDatabase();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-      }
       if (questionTimerRef.current) {
         clearTimeout(questionTimerRef.current);
       }
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
     };
-  }, [saveToDatabase]);
-
-  // Save pending updates when activeSection changes (user navigates away)
-  useEffect(() => {
-    if (activeSection !== 'AI' && pendingStatsRef.current) {
-      saveToDatabase();
-    }
-  }, [activeSection, saveToDatabase]);
+  }, []);
 
   // Handle when timer expires
   const handleTimeExpired = useCallback(() => {
@@ -157,24 +120,21 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     setIsCorrect(false);
     setTimerActive(false);
     
-    // Calculate new stats for timeout (treated as incorrect)
-    const newStats = {
-      ...gameStats,
-      totalQuestions: gameStats.totalQuestions + 1,
-      currentStreak: 0, // Reset streak on timeout
-      bestStreak: gameStats.bestStreak
+    // Reset all stats to zero on timeout (treated as wrong answer)
+    const freshStats = {
+      correctAnswers: 0,
+      totalQuestions: 0,
+      currentStreak: 0,
+      bestStreak: 0
     };
 
     // Update UI immediately
-    setGameStats(newStats);
+    setGameStats(freshStats);
+    setCongratulationsShown(false);
 
-    // Handle persistence
-    if (isConnected && address) {
-      scheduleDelayedSave(false);
-    } else {
-      localStorage.setItem('prediwin-trivia-stats', JSON.stringify(newStats));
-    }
-  }, [currentQuestion, showResult, gameStats, isConnected, address, scheduleDelayedSave]);
+    // Save to localStorage
+    localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
+  }, [currentQuestion, showResult]);
 
   // Timer logic for questions
   useEffect(() => {
@@ -196,6 +156,9 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
 
   // Generate a new question from offline questions
   const generateQuestion = () => {
+    // Reset inactivity timer on user activity
+    resetInactivityTimer();
+    
     setIsLoading(true);
     setTimerActive(false);
     
@@ -211,7 +174,7 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
       setSelectedAnswer(null);
       setShowResult(false);
       setIsLoading(false);
-      setTimeRemaining(15);
+      setTimeRemaining(18);
       setTimerActive(true);
     }, 500);
   };
@@ -219,6 +182,9 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
   // Check answer
   const checkAnswer = (selectedIndex: number) => {
     if (!currentQuestion || showResult) return;
+
+    // Reset inactivity timer on user activity
+    resetInactivityTimer();
 
     // Stop the timer
     setTimerActive(false);
@@ -231,28 +197,39 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     setIsCorrect(correct);
     setShowResult(true);
 
-    // Calculate new stats immediately for UI
+    // If wrong answer, reset all stats to zero
+    if (!correct) {
+      const freshStats = {
+        correctAnswers: 0,
+        totalQuestions: 0,
+        currentStreak: 0,
+        bestStreak: 0
+      };
+      setGameStats(freshStats);
+      setCongratulationsShown(false);
+      localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
+      return;
+    }
+
+    // Calculate new stats for correct answer
     const newStats = {
       ...gameStats,
       totalQuestions: gameStats.totalQuestions + 1,
-      correctAnswers: correct ? gameStats.correctAnswers + 1 : gameStats.correctAnswers,
-      currentStreak: correct ? gameStats.currentStreak + 1 : 0,
-      bestStreak: correct 
-        ? Math.max(gameStats.bestStreak, gameStats.currentStreak + 1)
-        : gameStats.bestStreak
+      correctAnswers: gameStats.correctAnswers + 1,
+      currentStreak: gameStats.currentStreak + 1,
+      bestStreak: Math.max(gameStats.bestStreak, gameStats.currentStreak + 1)
     };
 
     // Update UI immediately
     setGameStats(newStats);
 
-    // Handle persistence
-    if (isConnected && address) {
-      // For connected users: schedule delayed database save
-      scheduleDelayedSave(correct);
-    } else {
-      // For non-connected users: continue using localStorage immediately
-      localStorage.setItem('prediwin-trivia-stats', JSON.stringify(newStats));
+    // Check if user just hit 100 correct answers milestone
+    if (newStats.correctAnswers === 100 && !congratulationsShown) {
+      setCongratulationsShown(true);
     }
+
+    // Save to localStorage
+    localStorage.setItem('prediwin-trivia-stats', JSON.stringify(newStats));
   };
 
   // Start the game
@@ -274,11 +251,11 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     setSelectedAnswer(null);
     setShowResult(false);
     setIsCorrect(false);
-    setTimeRemaining(15);
+    setTimeRemaining(18);
   };
 
   // Reset stats
-  const resetStats = async () => {
+  const resetStats = () => {
     const freshStats = {
       correctAnswers: 0,
       totalQuestions: 0,
@@ -288,22 +265,10 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
 
     // Update UI immediately
     setGameStats(freshStats);
+    setCongratulationsShown(false);
 
-    if (isConnected && address) {
-      try {
-        // Save any pending changes first, then reset
-        if (pendingStatsRef.current) {
-          await saveToDatabase();
-        }
-        await resetTriviaStats(address);
-      } catch (error) {
-        console.error('Error resetting database stats:', error);
-        // Fallback to localStorage
-        localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
-      }
-    } else {
-      localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
-    }
+    // Save to localStorage
+    localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
   };
 
   // Calculate accuracy
@@ -327,6 +292,19 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
             <p className="text-xl text-gray-600 font-light">
               Test your knowledge with curated trivia questions
             </p>
+          </div>
+
+          {/* Challenge Rules Warning */}
+          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 mb-8">
+            <div className="text-center">
+              <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Challenge Rules</div>
+              <div className="text-red-700 space-y-2">
+                <p><strong>Goal:</strong> Answer 100 questions correctly in a row</p>
+                <p><strong>⚡ ONE wrong answer</strong> → All progress resets to zero</p>
+                <p><strong>⏱️ 10 minutes inactive</strong> → All progress resets to zero</p>
+                <p><strong>⏰ 18 seconds per question</strong> → Time up = wrong answer</p>
+              </div>
+            </div>
           </div>
 
           {/* Stats Overview */}
@@ -364,11 +342,17 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              {gameStats.correctAnswers >= 100 && (
-                <div className="mt-4 p-4 bg-black text-white rounded-lg">
-                  <div className="flex items-center justify-center gap-2">
-                    <Trophy className="w-5 h-5" />
-                    <span>Congratulations! You've earned a 0.01 USDC discount!</span>
+              {congratulationsShown && gameStats.correctAnswers >= 100 && (
+                <div className="mt-4 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg">
+                  <div className="text-center">
+                    <Trophy className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
+                    <h3 className="text-2xl font-bold text-yellow-800 mb-2">🎉 Congratulations! 🎉</h3>
+                    <p className="text-lg text-yellow-700 mb-2">
+                      You've successfully answered <strong>100 questions correctly</strong> in a single session!
+                    </p>
+                    <p className="text-yellow-600">
+                      Amazing dedication to knowledge! 🧠✨
+                    </p>
                   </div>
                 </div>
               )}

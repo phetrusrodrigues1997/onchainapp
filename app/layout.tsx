@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'PrediWin.com - Predict, Win, Repeat',
   description: 'Focused on building the best prediction market services.',
   icons: {
-    icon: '/favicon.png',
+    icon: '/favicon.jpg',
   },
 };
 
