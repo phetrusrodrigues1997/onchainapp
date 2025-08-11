@@ -18,6 +18,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Referral system** rewards users with free pot entries for bringing friends
 - **Re-entry System**: Users who made wrong predictions can pay today's entry fee to re-enter markets
 
+### Private Pot Creation System (New)
+- **Create Custom Pots**: Users can deploy their own private prediction markets on any topic
+- **Factory Contract**: `0xeE44be339B390726865aAC73435B96552C0697d3` enables cheap EIP-1167 cloning of prediction pots
+- **User-Owned Markets**: Each created pot is owned and controlled by the creator
+- **Flexible Topics**: Crypto prices, sports outcomes, world events, or any custom prediction
+- **Gas-Efficient**: Users pay minimal Base network gas fees (~$0.01-0.05) for pot creation
+- **Social Viral Growth**: Every pot creator brings their friend group to the platform
+- **Creator Control**: Pot owners decide winners and distribute funds to participants
+- **Full Lifecycle Implemented**: Create → Join → Predict → Distribute → Database Cleanup (all working)
+- **⚠️ Design Improvement Needed**: Core functionality works but UI/UX requires significant design enhancement
+
 ### Complete Weekly Flow
 | Day | Pot Entry | Predictions | Status & Fees |
 |-----|-----------|-------------|---------------|
@@ -58,7 +69,7 @@ npm run lint
 - **State Management**: React hooks and Wagmi for blockchain state
 
 ### Key Directories
-- `app/Pages/`: Main application pages (LandingPage, Markets, BitcoinBetting, etc.)
+- `app/Pages/`: Main application pages (LandingPage, Markets, BitcoinBetting, createPotPage, etc.)
 - `app/Sections/`: Reusable UI components (NavigationMenu, ResponsiveLogo)
 - `app/Database/`: Database schema and actions using Drizzle ORM
 - `app/Constants/`: Configuration files for markets, coins, and pricing
@@ -88,6 +99,8 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 
 ### Blockchain Integration
 - **Smart Contracts**: PredictionPot contracts handle USDC pot entry and winner distribution
+- **Factory Contract**: `PredictionPotWithCloning` at `0xeE44be339B390726865aAC73435B96552C0697d3` enables users to create private pots
+- **EIP-1167 Cloning**: Gas-efficient deployment of new prediction pots using minimal proxy pattern
 - **OnchainKit & Wagmi**: Wallet connections, transaction handling, and Base network integration
 - **USDC Payments**: Users approve and spend USDC for pot entries (0.01-0.06 USDC based on day)
 - **ConnectWallet**: Integrated in header for seamless wallet connectivity
@@ -161,6 +174,18 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Database Cleanup**: Removes user from wrong predictions table upon successful payment
 - **UI Integration**: Minimalist design matching the "You're in the Pot" aesthetic
 - **Clear Messaging**: Uses "today's entry fee" instead of specific amounts for cleaner UX
+
+### Private Pot Creation System (`createPotPage.tsx`)
+- **Factory Contract Integration**: Uses deployed `PredictionPotWithCloning` at `0xeE44be339B390726865aAC73435B96552C0697d3`
+- **Three-State UI Flow**: Landing page → Create form → Success confirmation
+- **Custom Pot Details**: Users input pot name and description for their prediction market
+- **EIP-1167 Cloning**: Creates cheap proxy contracts (~$0.01-0.05 gas on Base)
+- **Real-time Transaction Status**: Shows "Creating..." and "Confirming..." states during deployment
+- **Success Handling**: Displays new pot contract address with copy-to-clipboard functionality
+- **User Ownership**: Each created pot is owned and controlled by the creator
+- **Wallet Integration**: Requires wallet connection, handles transaction states and errors
+- **Social Viral Mechanism**: Every pot creator becomes a distribution point bringing friend groups
+- **Gas-Efficient Deployment**: Users pay minimal Base network fees for their own pot creation
 
 ### AI Trivia Game System (`AIPage.tsx`)
 - **OpenAI Integration**: Uses GPT-3.5-turbo model for dynamic question generation across 25+ categories
