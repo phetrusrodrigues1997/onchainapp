@@ -296,8 +296,7 @@ export async function cleanupPotTables(contractAddress: string) {
     const tables = [
       getTableName(contractAddress, 'predictions'),
       getTableName(contractAddress, 'participants'), 
-      getTableName(contractAddress, 'wrong_predictions'),
-      getTableName(contractAddress, 'messages')
+      getTableName(contractAddress, 'wrong_predictions')
     ];
 
     // Drop all tables for this contract
