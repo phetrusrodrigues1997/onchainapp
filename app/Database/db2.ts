@@ -6,7 +6,7 @@ const sqlConnection = neon('postgresql://neondb_owner:npg_Ecmjs83owBzR@ep-restle
 export const db2 = drizzle(sqlConnection);
 
 // Helper function to create table name from contract address
-export function getTableName(contractAddress: string, tableType: 'predictions' | 'participants' | 'wrong_predictions' | 'messages'): string {
+export function getTableName(contractAddress: string, tableType: 'predictions' | 'participants' | 'wrong_predictions' ): string {
   const cleanAddress = contractAddress.toLowerCase().replace('0x', '');
   return `pot_${cleanAddress}_${tableType}`;
 }

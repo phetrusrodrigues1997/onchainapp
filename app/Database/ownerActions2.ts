@@ -203,68 +203,7 @@ export async function getWrongPredictors(contractAddress: string) {
   }
 }
 
-/**
- * Add message to pot (creator announcements, etc.)
- */
-export async function addPotMessage(
-  contractAddress: string,
-  fromAddress: string,
-  message: string,
-  toAddress?: string
-) {
-  try {
-    const messagesTable = getTableName(contractAddress, 'messages');
-    const datetime = new Date().toISOString();
 
-    await db2.execute(sql`
-      INSERT INTO ${sql.identifier(messagesTable)} 
-      (from_address, to_address, message, datetime)
-      VALUES (${fromAddress.toLowerCase()}, ${toAddress?.toLowerCase() || null}, ${message}, ${datetime})
-    `);
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error adding pot message:", error);
-    return { success: false, error: "Failed to add message" };
-  }
-}
-
-/**
- * Get messages for a pot
- */
-export async function getPotMessages(
-  contractAddress: string,
-  walletAddress?: string
-) {
-  try {
-    const messagesTable = getTableName(contractAddress, 'messages');
-
-    let query;
-    if (walletAddress) {
-      // Get messages for specific user (public messages + messages to them)
-      query = sql`
-        SELECT * FROM ${sql.identifier(messagesTable)} 
-        WHERE to_address IS NULL OR to_address = ${walletAddress.toLowerCase()}
-        ORDER BY datetime DESC
-        LIMIT 50
-      `;
-    } else {
-      // Get all public messages
-      query = sql`
-        SELECT * FROM ${sql.identifier(messagesTable)} 
-        WHERE to_address IS NULL
-        ORDER BY datetime DESC
-        LIMIT 50
-      `;
-    }
-
-    const result = await db2.execute(query);
-    return result.rows;
-  } catch (error) {
-    console.error("Error getting pot messages:", error);
-    return [];
-  }
-}
 
 /**
  * Update pot entry amount (creator only)

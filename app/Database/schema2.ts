@@ -55,16 +55,4 @@ export function createPotWrongPredictionsTable(contractAddress: string) {
   });
 }
 
-// Messages table specific to each pot for participant communication
-export function createPotMessagesTable(contractAddress: string) {
-  const tableName = `pot_${contractAddress.toLowerCase().slice(2)}_messages`;
-  
-  return pgTable(tableName, {
-    id: serial("id").primaryKey(),
-    from: text("from").notNull(), // Sender's wallet address
-    to: text("to"), // Recipient (null for public messages)
-    message: text("message").notNull(),
-    read: boolean("read").default(false).notNull(),
-    datetime: text("datetime").notNull(),
-  });
-}
+

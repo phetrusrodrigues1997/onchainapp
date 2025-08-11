@@ -75,17 +75,7 @@ export async function createPotTables(contractAddress: string) {
       )
     `);
 
-    // Create messages table
-    await db2.execute(sql`
-      CREATE TABLE IF NOT EXISTS ${sql.identifier(`pot_${cleanAddress}_messages`)} (
-        id SERIAL PRIMARY KEY,
-        from_address TEXT NOT NULL,
-        to_address TEXT,
-        message TEXT NOT NULL,
-        read BOOLEAN DEFAULT FALSE,
-        datetime TEXT NOT NULL
-      )
-    `);
+    
 
     return { success: true };
   } catch (error) {
@@ -295,5 +285,39 @@ export async function isParticipant(contractAddress: string, walletAddress: stri
   } catch (error) {
     console.error("Error checking participant:", error);
     return false;
+  }
+}
+
+/**
+ * Clean up all tables for a completed pot (after distribution)
+ */
+export async function cleanupPotTables(contractAddress: string) {
+  try {
+    const tables = [
+      getTableName(contractAddress, 'predictions'),
+      getTableName(contractAddress, 'participants'), 
+      getTableName(contractAddress, 'wrong_predictions'),
+      getTableName(contractAddress, 'messages')
+    ];
+
+    // Drop all tables for this contract
+    for (const tableName of tables) {
+      try {
+        await db2.execute(sql`DROP TABLE IF EXISTS ${sql.identifier(tableName)}`);
+        console.log(`Dropped table: ${tableName}`);
+      } catch (error) {
+        console.warn(`Failed to drop table ${tableName}:`, error);
+        // Continue dropping other tables even if one fails
+      }
+    }
+
+    // Remove from PrivatePots registry
+    await db2.delete(PrivatePots).where(eq(PrivatePots.contractAddress, contractAddress));
+    console.log(`Cleaned up pot: ${contractAddress}`);
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error cleaning up pot tables:", error);
+    return { success: false, error: error.message };
   }
 }

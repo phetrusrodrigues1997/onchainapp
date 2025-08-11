@@ -197,7 +197,7 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
  */
 export async function getAllReEntryFees(walletAddress: string): Promise<{market: string, fee: number}[]> {
   try {
-    const results = [];
+    const results: {market: string, fee: number}[] = [];
     
     // Check featured market
     const featuredResult = await db
