@@ -22,7 +22,8 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import AITriviaGame from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
-import CreatePotPage from './Pages/CreatePotPage';
+import CreatePotPage from './Pages/createPotPage';
+import PrivatePotInterface from './Pages/PrivatePotInterface';
 // import UsernameSetup from './Pages/UsernameSetup';
 // import CreateMessage from './Pages/MessagesPage';
 
@@ -46,6 +47,13 @@ const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 export default function App() {
   const { address, isConnected } = useAccount();
   const [activeSection, setActiveSection] = useState('home'); // Default section
+  const [privatePotAddress, setPrivatePotAddress] = useState<string>(''); // For routing to private pots
+
+  // Function to navigate to a private pot
+  const navigateToPrivatePot = (contractAddress: string) => {
+    setPrivatePotAddress(contractAddress);
+    setActiveSection('privatePot');
+  };
   const [toastMessage] = useState('');
   const [showToast] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -200,7 +208,16 @@ export default function App() {
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
           {activeSection === "AI" && <AITriviaGame activeSection={activeSection} setActiveSection={setActiveSection}/>}
-          {activeSection === "createPot" && <CreatePotPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "createPot" && <CreatePotPage activeSection={activeSection} setActiveSection={setActiveSection} navigateToPrivatePot={navigateToPrivatePot} />}
+          {activeSection === "privatePot" && privatePotAddress && (
+            <PrivatePotInterface 
+              contractAddress={privatePotAddress} 
+              onBack={() => {
+                setActiveSection('home');
+                setPrivatePotAddress('');
+              }} 
+            />
+          )}
           {/* Add more sections as needed */}
         
       </main>
