@@ -581,31 +581,31 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-8">
+      <div className="bg-white border-b border-gray-200 p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
           <button
             onClick={onBack}
-            className="text-gray-600 hover:text-black mb-6 flex items-center gap-2 font-light transition-colors"
+            className="text-gray-600 hover:text-black mb-4 sm:mb-6 flex items-center gap-2 font-light transition-colors"
           >
             ← Back to Create Pot
           </button>
           
-          <div className="flex justify-between items-start">
-            <div className="max-w-3xl">
-              <h1 className="text-5xl font-light text-black mb-4">{potDetails.potName}</h1>
-              <p className="text-xl text-gray-600 mb-6 leading-relaxed">{potDetails.description}</p>
-              <div className="grid grid-cols-3 gap-6 text-center">
-                <div className="p-4 bg-gray-50 border border-gray-200">
-                  <div className="text-2xl font-light text-black">{potStateNames[Number(potState) || 0]}</div>
-                  <div className="text-sm text-gray-500">Status</div>
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+            <div className="max-w-3xl flex-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-5xl font-light text-black mb-3 sm:mb-4">{potDetails.potName}</h1>
+              <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-4 sm:mb-6 leading-relaxed">{potDetails.description}</p>
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
+                <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potStateNames[Number(potState) || 0]}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">Status</div>
                 </div>
-                <div className="p-4 bg-gray-50 border border-gray-200">
-                  <div className="text-2xl font-light text-black">{formatUSDC(potBalance)}</div>
-                  <div className="text-sm text-gray-500">USDC Balance</div>
+                <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{formatUSDC(potBalance)}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">USDC Balance</div>
                 </div>
-                <div className="p-4 bg-gray-50 border border-gray-200">
-                  <div className="text-2xl font-light text-black">{potParticipants?.length || 0}</div>
-                  <div className="text-sm text-gray-500">Participants</div>
+                <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potParticipants?.length || 0}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">Participants</div>
                 </div>
               </div>
             </div>
@@ -613,24 +613,24 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             {isCreator && (
               <button
                 onClick={() => setShowCreatorPanel(!showCreatorPanel)}
-                className="bg-black text-white px-6 py-3 rounded-none hover:bg-gray-900 font-light transition-colors"
+                className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
               >
-                {showCreatorPanel ? 'Hide' : 'Show'} Creator Panel
+                {showCreatorPanel ? 'Hide' : 'Settings ⚙'}
               </button>
             )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-4 sm:p-8">
         {/* Creator Panel */}
         {isCreator && showCreatorPanel && (
-          <div className="bg-white border border-gray-200 rounded-none p-8 mb-6">
-            <h2 className="text-2xl font-light text-black mb-6">Creator Panel</h2>
+          <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 mb-6">
+            <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Creator Panel</h2>
             
-            <div className="grid md:grid-cols-3 gap-6 mb-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <div>
-                <label className="block text-sm font-medium text-black mb-3">Entry Amount (USDC)</label>
+                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Entry Amount (USDC)</label>
                 {/* <div className="mb-2 p-2 bg-transparent text-sm text-gray-600">
                   Current: ${(potDetails?.entryAmount / 1_000_000).toFixed(2)}
                 </div> */}
@@ -639,24 +639,24 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                   placeholder="0.01"
                   value={newEntryAmount}
                   onChange={(e) => setNewEntryAmount(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-none focus:border-black focus:outline-none mb-3"
+                  className="w-full p-2 sm:p-3 border border-gray-200 rounded-none focus:border-black focus:outline-none mb-2 sm:mb-3 text-sm sm:text-base"
                   style={{ color: '#000000', backgroundColor: '#ffffff' }}
                 />
                 <button
                   onClick={handleUpdateEntryAmount}
                   disabled={!newEntryAmount}
-                  className="w-full bg-blue-600 text-white py-3 rounded-none hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-light"
+                  className="w-full bg-blue-600 text-white py-2 sm:py-3 rounded-none hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-light text-sm sm:text-base"
                 >
                   Update Entry Amount
                 </button>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black mb-3">Set Outcome</label>
+                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Set Outcome</label>
                 <select
                   value={outcomeToSet}
                   onChange={(e) => setOutcomeToSet(e.target.value as 'positive' | 'negative')}
-                  className="w-full p-3 border border-gray-200 rounded-none focus:border-black focus:outline-none"
+                  className="w-full p-2 sm:p-3 border border-gray-200 rounded-none focus:border-black focus:outline-none text-sm sm:text-base"
                   style={{ color: '#000000', backgroundColor: '#ffffff' }}
                 >
                   <option value="positive">Positive</option>
@@ -664,21 +664,21 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 </select>
                 <button
                   onClick={handleSetOutcome}
-                  className="w-full mt-3 bg-black text-white py-3 rounded-none hover:bg-gray-900 transition-colors font-light"
+                  className="w-full mt-2 sm:mt-3 bg-black text-white py-2 sm:py-3 rounded-none hover:bg-gray-900 transition-colors font-light text-sm sm:text-base"
                 >
                   Set Outcome
                 </button>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-black mb-3">Pot Management</label>
-                <div className="space-y-3">
+              <div className="sm:col-span-2 lg:col-span-1">
+                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Pot Management</label>
+                <div className="space-y-2 sm:space-y-3">
                   
                   
                   <button
                     onClick={handleDistributePot}
                     disabled={isLoading || isPending || isConfirming}
-                    className="w-full bg-green-600 text-white py-3 rounded-none hover:bg-green-700 disabled:bg-gray-400 transition-colors font-light"
+                    className="w-full bg-green-600 text-white py-2 sm:py-3 rounded-none hover:bg-green-700 disabled:bg-gray-400 transition-colors font-light text-sm sm:text-base"
                   >
                     {(isLoading && lastAction === 'distributePot') || isPending || isConfirming 
                       ? 'Processing Distribution...' 
@@ -690,15 +690,15 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
             {potStats && (
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-light text-black mb-4">Statistics</h3>
-                <div className="grid grid-cols-2 gap-6 text-sm text-gray-600">
-                  <div className="text-center p-4 border border-gray-200">
-                    <div className="text-2xl font-light text-black">{potStats.totalParticipants}</div>
-                    <div>Participants</div>
+                <h3 className="text-base sm:text-lg font-light text-black mb-3 sm:mb-4">Statistics</h3>
+                <div className="grid grid-cols-2 gap-3 sm:gap-6 text-sm text-gray-600">
+                  <div className="text-center p-3 sm:p-4 border border-gray-200">
+                    <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potStats.totalParticipants}</div>
+                    <div className="text-xs sm:text-sm">Participants</div>
                   </div>
-                  <div className="text-center p-4 border border-gray-200">
-                    <div className="text-2xl font-light text-black">{(potStats.totalPotValue / 1_000_000).toFixed(2)}</div>
-                    <div>USDC Total</div>
+                  <div className="text-center p-3 sm:p-4 border border-gray-200">
+                    <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{(potStats.totalPotValue / 1_000_000).toFixed(2)}</div>
+                    <div className="text-xs sm:text-sm">USDC Total</div>
                   </div>
                 </div>
               </div>
@@ -707,35 +707,35 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         )}
 
         {/* User Interface */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Enter Pot */}
           {!userParticipant && potState === 0 && (
-            <div className="bg-white border border-gray-200 rounded-none p-8">
-              <h2 className="text-2xl font-light text-black mb-6">Enter Pot</h2>
+            <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Enter Pot</h2>
               
-              <div className="mb-6 p-4 bg-gray-50 border border-gray-200">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="font-medium text-black">Entry Amount:</span>
-                  <span className="text-2xl font-light text-black">${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC</span>
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 border border-gray-200">
+                <div className="flex justify-between items-center mb-2 sm:mb-3">
+                  <span className="font-medium text-black text-sm sm:text-base">Entry Amount:</span>
+                  <span className="text-lg sm:text-xl lg:text-2xl font-light text-black">${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Your USDC Balance:</span>
-                  <span className="font-medium text-black">{formatUSDC(usdcBalance)} USDC</span>
+                  <span className="text-sm sm:text-base">Your USDC Balance:</span>
+                  <span className="font-medium text-black text-sm sm:text-base">{formatUSDC(usdcBalance)} USDC</span>
                 </div>
               </div>
 
               {!usdcApproved ? (
                 // STEP 1: FORCE USDC APPROVAL FIRST
                 <div>
-                  <div className="mb-6 p-4 bg-orange-50 border border-orange-200">
-                    <h3 className="text-sm font-medium text-black mb-2">⚠️ Step 1: Approve USDC</h3>
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-orange-50 border border-orange-200">
+                    <h3 className="text-xs sm:text-sm font-medium text-black mb-2">⚠️ Step 1: Approve USDC</h3>
                     <p className="text-xs text-orange-700">You must approve USDC spending before entering any pot.</p>
                   </div>
 
                   <button
                     onClick={handleApprove}
                     disabled={!potDetails?.entryAmount || isPending || isConfirming}
-                    className="w-full bg-orange-600 text-white py-4 rounded-none hover:bg-orange-700 disabled:bg-gray-400 transition-colors font-light text-lg"
+                    className="w-full bg-black text-white py-3 sm:py-4 rounded-none hover:bg-orange-700 disabled:bg-gray-400 transition-colors font-light text-base sm:text-lg"
                   >
                     {isPending || isConfirming ? (
                       <div className="flex items-center justify-center gap-3">
@@ -754,15 +754,15 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               ) : (
                 // STEP 2: ENTER POT (ONLY AFTER APPROVAL)
                 <div>
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200">
-                    <h3 className="text-sm font-medium text-black mb-2">✅ Step 2: Enter Pot</h3>
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200">
+                    <h3 className="text-xs sm:text-sm font-medium text-black mb-2">✅ Step 2: Enter Pot</h3>
                     <p className="text-xs text-green-700">USDC approved! Now you can enter the pot.</p>
                   </div>
 
                   <button
                     onClick={handleEnterPot}
                     disabled={!potDetails?.entryAmount || isPending || isConfirming}
-                    className="w-full bg-black text-white py-4 rounded-none hover:bg-gray-900 disabled:bg-gray-400 transition-colors font-light text-lg"
+                    className="w-full bg-black text-white py-3 sm:py-4 rounded-none hover:bg-gray-900 disabled:bg-gray-400 transition-colors font-light text-base sm:text-lg"
                   >
                     {isPending || isConfirming ? (
                       <div className="flex items-center justify-center gap-3">
@@ -784,15 +784,15 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
           {/* Make Prediction */}
           {userParticipant && (
-            <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
+            <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
               {/* Subtle animated background */}
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 animate-pulse"></div>
               </div>
               
               <div className="relative z-10">
-                <div className="text-center mb-10">
-                  <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Your Call?</h2>
+                <div className="text-center mb-6 sm:mb-10">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2 tracking-tight">Your Call?</h2>
                   {/* <p className="text-gray-600 text-lg mb-4">
                     {new Date(predictionDate).toLocaleDateString()}
                   </p> */}
@@ -800,24 +800,24 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 </div>
 
                 {userPrediction ? (
-                  <div className="mb-8 p-6 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl text-center">
-                    <h3 className="text-lg font-bold text-green-800 mb-2">✅ Prediction Submitted</h3>
-                    <p className="text-green-700">You predicted: <span className="font-black">{userPrediction.prediction === 'positive' ? 'YES' : 'NO'}</span></p>
-                    <p className="text-sm text-green-600 mt-1">Your prediction has been recorded.</p>
+                  <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl text-center">
+                    <h3 className="text-base sm:text-lg font-bold text-green-800 mb-2">✅ Prediction Submitted</h3>
+                    <p className="text-sm sm:text-base text-green-700">You predicted: <span className="font-black">{userPrediction.prediction === 'positive' ? 'YES' : 'NO'}</span></p>
+                    <p className="text-xs sm:text-sm text-green-600 mt-1">Your prediction has been recorded.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {/* Premium Positive Button */}
                     <button
                       onClick={() => handleMakePrediction('positive')}
-                      className="group relative bg-gradient-to-br from-gray-900 via-gray-800 to-black hover:from-gray-800 hover:via-gray-700 hover:to-gray-900 text-white p-6 sm:p-10 rounded-3xl font-black text-xl sm:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/25 overflow-hidden"
+                      className="group relative bg-gradient-to-br from-gray-900 via-gray-800 to-black hover:from-gray-800 hover:via-gray-700 hover:to-gray-900 text-white p-4 sm:p-6 lg:p-10 rounded-3xl font-black text-lg sm:text-xl lg:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/25 overflow-hidden"
                     >
                       {/* Subtle shine effect */}
                       <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       
                       <div className="relative z-10 flex flex-col items-center justify-center">
-                        <div className="p-2 sm:p-3 bg-white/10 rounded-2xl mb-4 sm:mb-6 backdrop-blur-sm flex items-center justify-center">
-                          <TrendingUp className="w-10 h-10 sm:w-14 sm:h-14 group-hover:scale-110 transition-transform duration-300" />
+                        <div className="p-2 sm:p-3 bg-white/10 rounded-2xl mb-3 sm:mb-4 lg:mb-6 backdrop-blur-sm flex items-center justify-center">
+                          <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 group-hover:scale-110 transition-transform duration-300" />
                         </div>
                         <div className="tracking-wide">YES</div>
                       </div>
@@ -829,14 +829,14 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                     {/* Premium Negative Button */}
                     <button
                       onClick={() => handleMakePrediction('negative')}
-                      className="group relative bg-gradient-to-br from-white via-gray-50 to-gray-100 hover:from-gray-50 hover:via-gray-100 hover:to-gray-200 border-2 border-gray-200 hover:border-gray-300 text-gray-900 p-6 sm:p-10 rounded-3xl font-black text-xl sm:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/10 overflow-hidden"
+                      className="group relative bg-gradient-to-br from-white via-gray-50 to-gray-100 hover:from-gray-50 hover:via-gray-100 hover:to-gray-200 border-2 border-gray-200 hover:border-gray-300 text-gray-900 p-4 sm:p-6 lg:p-10 rounded-3xl font-black text-lg sm:text-xl lg:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/10 overflow-hidden"
                     >
                       {/* Subtle pattern overlay */}
                       <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       
                       <div className="relative z-10 flex flex-col items-center justify-center">
-                        <div className="p-2 sm:p-3 bg-gray-900/10 rounded-2xl mb-4 sm:mb-6 backdrop-blur-sm flex items-center justify-center">
-                          <TrendingDown className="w-10 h-10 sm:w-14 sm:h-14 group-hover:scale-110 transition-transform duration-300" />
+                        <div className="p-2 sm:p-3 bg-gray-900/10 rounded-2xl mb-3 sm:mb-4 lg:mb-6 backdrop-blur-sm flex items-center justify-center">
+                          <TrendingDown className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 group-hover:scale-110 transition-transform duration-300" />
                         </div>
                         <div className="tracking-wide">NO</div>
                       </div>
@@ -849,11 +849,11 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
           {/* Status */}
           {userParticipant && (
-            <div className="bg-white border border-gray-200 rounded-none p-8">
-              <h2 className="text-2xl font-light text-black mb-4">You're In!</h2>
-              <p className="text-gray-600">You've successfully joined this prediction pot.</p>
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-500">You can now make predictions and compete with other participants.</p>
+            <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-light text-black mb-3 sm:mb-4">You're In!</h2>
+              <p className="text-sm sm:text-base text-gray-600">You've successfully joined this prediction pot.</p>
+              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                <p className="text-xs sm:text-sm text-gray-500">You can now make predictions and compete with other participants.</p>
               </div>
             </div>
           )}

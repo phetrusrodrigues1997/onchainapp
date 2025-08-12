@@ -497,11 +497,11 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
         <div className="max-w-4xl w-full">
           
           {/* Header Section */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-2 pt-8">
             <div className="inline-flex items-center justify-center w-24 h-24 bg-black rounded-full mb-8">
               <Users className="w-12 h-12 text-white" />
             </div>
-            <h1 className="text-6xl font-light text-black mb-6">Create Pot</h1>
+            {/* <h1 className="text-6xl font-light text-black mb-6">Create Pot</h1> */}
             <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
               Start your own prediction market and invite friends to compete in forecasting the future
             </p>
@@ -540,44 +540,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             </div>
           </div>
 
-          {/* How It Works */}
-          <div className="bg-gray-50 rounded-lg p-12 mb-16">
-            <h2 className="text-3xl font-light text-black text-center mb-12">How It Works</h2>
-            
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-light">
-                  1
-                </div>
-                <h4 className="text-lg font-medium text-black mb-2">Set Topic</h4>
-                <p className="text-sm text-gray-600">Choose what your friends will predict</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-light">
-                  2
-                </div>
-                <h4 className="text-lg font-medium text-black mb-2">Invite Friends</h4>
-                <p className="text-sm text-gray-600">Share your pot with friends to join</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-light">
-                  3
-                </div>
-                <h4 className="text-lg font-medium text-black mb-2">Collect Predictions</h4>
-                <p className="text-sm text-gray-600">Everyone makes their forecasts</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-light">
-                  4
-                </div>
-                <h4 className="text-lg font-medium text-black mb-2">Determine Winners</h4>
-                <p className="text-sm text-gray-600">Most accurate predictions win the pot</p>
-              </div>
-            </div>
-          </div>
+         
 
           
         </div>

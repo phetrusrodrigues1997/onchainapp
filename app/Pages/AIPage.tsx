@@ -295,15 +295,15 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
           </div>
 
           {/* Challenge Rules Warning */}
-          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 mb-8">
+          <div className="bg-[#f2f2f2]  rounded-lg p-6 mb-8">
             <div className="text-center">
-              <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Challenge Rules</div>
-              <div className="text-red-700 space-y-2">
+               <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Win a free entry for any pot, by correctly answering 100 questions in a row.</div>
+             {/* <div className="text-red-700 space-y-2">
                 <p><strong>Goal:</strong> Answer 100 questions correctly in a row</p>
                 <p><strong>⚡ ONE wrong answer</strong> → All progress resets to zero</p>
                 <p><strong>⏱️ 10 minutes inactive</strong> → All progress resets to zero</p>
                 <p><strong>⏰ 18 seconds per question</strong> → Time up = wrong answer</p>
-              </div>
+              </div> */}
             </div>
           </div>
 
