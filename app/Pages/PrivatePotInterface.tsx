@@ -156,7 +156,9 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   const [pendingTransactionType, setPendingTransactionType] = useState<'approval' | 'potEntry' | null>(null); // Track what transaction is pending
   const [isInitialLoading, setIsInitialLoading] = useState(true); // Loading screen state
   const [isLoading, setIsLoading] = useState(false); // Transaction loading state
+  const [isPotLoading, setIsPotLoading] = useState(true); // Pot details loading state
   const [lastAction, setLastAction] = useState(''); // Track transaction types
+  const [shareUrlCopied, setShareUrlCopied] = useState(false); // Track if share URL was copied
 
   const { address } = useAccount();
   const queryClient = useQueryClient();
@@ -216,13 +218,17 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   // Load pot details and user data
   useEffect(() => {
     const loadData = async () => {
-      if (!address) return;
+      console.log('Loading pot details for address:', contractAddress);
+      setIsPotLoading(true);
 
-      // Get pot details from database
+      // Get pot details from database (this works without wallet connection)
       const details = await getPotDetails(contractAddress);
+      console.log('Pot details result:', details);
       setPotDetails(details);
+      setIsPotLoading(false);
 
-      if (details) {
+      // Only load user-specific data if wallet is connected
+      if (details && address) {
         // Check if user is the creator
         setIsCreator(details.creatorAddress.toLowerCase() === address.toLowerCase());
         
@@ -233,17 +239,19 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             setPotStats(stats.stats);
           }
         }
+
+        // Check if user is participant
+        const participant = await isParticipant(contractAddress, address);
+        setUserParticipant(participant);
+
+        // Get user's prediction for today
+        const today = new Date().toISOString().split('T')[0];
+        const userPred = await getUserPrediction(contractAddress, address, today);
+        setUserPrediction(userPred);
+        setPredictionDate(today);
+      } else if (!details) {
+        console.error('Pot not found in database for address:', contractAddress);
       }
-
-      // Check if user is participant
-      const participant = await isParticipant(contractAddress, address);
-      setUserParticipant(participant);
-
-      // Get user's prediction for today
-      const today = new Date().toISOString().split('T')[0];
-      const userPred = await getUserPrediction(contractAddress, address, today);
-      setUserPrediction(userPred);
-      setPredictionDate(today);
     };
 
     loadData();
@@ -516,6 +524,24 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
+  // Generate shareable URL for this pot
+  const generateShareUrl = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}?pot=${contractAddress}`;
+  };
+
+  // Copy share URL to clipboard
+  const copyShareUrl = async () => {
+    try {
+      const shareUrl = generateShareUrl();
+      await navigator.clipboard.writeText(shareUrl);
+      setShareUrlCopied(true);
+      setTimeout(() => setShareUrlCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy share URL:', err);
+    }
+  };
+
   const formatUSDC = (amount: bigint | undefined) => {
     if (!amount) return '0.00';
     return (Number(amount) / 1_000_000).toFixed(2);
@@ -567,12 +593,42 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     );
   }
 
-  if (!potDetails) {
+  // Show loading while pot details are being fetched
+  if (isPotLoading && !isInitialLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading pot details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if pot doesn't exist after loading attempt
+  if (!potDetails && !isPotLoading && !isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center p-8">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-light text-black mb-4">Pot Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            This prediction pot doesn't exist or hasn't been registered in our system yet.
+          </p>
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500">Contract Address:</p>
+            <code className="block text-xs bg-gray-100 p-2 rounded break-all">{contractAddress}</code>
+          </div>
+          <button
+            onClick={onBack}
+            className="mt-6 bg-black text-white px-6 py-3 rounded hover:bg-gray-900 transition-colors"
+          >
+            Go Back
+          </button>
         </div>
       </div>
     );
@@ -628,6 +684,39 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 mb-6">
             <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Creator Panel</h2>
             
+            {/* Share Link Section */}
+            <div className="bg-gray-50 border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-medium text-black mb-3">Share This Pot</h3>
+              <p className="text-sm text-gray-600 mb-4">Share this link with friends so they can join your prediction pot directly:</p>
+              
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={generateShareUrl()}
+                  readOnly
+                  className="flex-1 p-2 sm:p-3 border border-gray-200 rounded-none bg-white text-xs sm:text-sm text-gray-800"
+                />
+                <button
+                  onClick={copyShareUrl}
+                  className="bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-none hover:bg-blue-700 transition-colors font-light text-sm flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  {shareUrlCopied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              
+              {shareUrlCopied && (
+                <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Link copied to clipboard!
+                </p>
+              )}
+            </div>
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Entry Amount (USDC)</label>

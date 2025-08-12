@@ -53,6 +53,19 @@ export default function App() {
     setPrivatePotAddress(contractAddress);
     setActiveSection('privatePot');
   };
+
+  // Check for pot parameter in URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const potAddress = urlParams.get('pot');
+    
+    if (potAddress && potAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
+      navigateToPrivatePot(potAddress);
+      
+      // Clean up URL without refreshing the page
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
   const [toastMessage] = useState('');
   const [showToast] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
