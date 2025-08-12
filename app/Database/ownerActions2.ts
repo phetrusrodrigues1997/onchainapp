@@ -151,8 +151,8 @@ export async function setPotOutcome(
       try {
         await db2.execute(sql`
           INSERT INTO ${sql.identifier(wrongPredictionsTable)} 
-          (wallet_address, re_entry_fee, wrong_prediction_date)
-          VALUES (${walletAddress}, 10000, ${predictionDate})
+          (wallet_address, re_entry_fee)
+          VALUES (${walletAddress}, 10000)
         `);
       } catch (insertError) {
         // Ignore duplicate errors, user already has wrong prediction for this date

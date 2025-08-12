@@ -152,7 +152,6 @@ export async function createPotTables(contractAddress: string) {
         id SERIAL PRIMARY KEY,
         wallet_address TEXT NOT NULL,
         re_entry_fee INTEGER NOT NULL,
-        wrong_prediction_date TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       )
     `);

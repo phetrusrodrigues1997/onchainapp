@@ -50,7 +50,6 @@ export function createPotWrongPredictionsTable(contractAddress: string) {
     id: serial("id").primaryKey(),
     walletAddress: text("wallet_address").notNull(),
     reEntryFee: integer("re_entry_fee").notNull(), // Re-entry fee in USDC micros
-    wrongPredictionDate: text("wrong_prediction_date").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   });
 }
