@@ -544,7 +544,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           setPotStats(stats.stats);
         }
       } else {
-        showAlert(result.error, 'error', 'Error');
+        showAlert(result.error || 'Failed to set outcome', 'error', 'Error');
       }
     } catch (error) {
       console.error('Error setting outcome:', error);
@@ -567,7 +567,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         setPotDetails(details);
         setNewEntryAmount('');
       } else {
-        showAlert(result.error, 'error', 'Error');
+        showAlert(result.error || 'Operation failed', 'error', 'Error');
       }
     } catch (error) {
       console.error('Error updating entry amount:', error);
@@ -595,7 +595,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         setEditingPotName('');
         setEditingDescription('');
       } else {
-        showAlert(result.error, 'error', 'Error');
+        showAlert(result.error || 'Operation failed', 'error', 'Error');
       }
     } catch (error) {
       console.error('Error updating pot details:', error);
