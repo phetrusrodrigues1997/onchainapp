@@ -69,7 +69,7 @@ npm run lint
 - **State Management**: React hooks and Wagmi for blockchain state
 
 ### Key Directories
-- `app/Pages/`: Main application pages (LandingPage, Markets, BitcoinBetting, createPotPage, etc.)
+- `app/Pages/`: Main application pages (LandingPage, Markets, MakePredictionPage, createPotPage, etc.)
 - `app/Sections/`: Reusable UI components (NavigationMenu, ResponsiveLogo)
 - `app/Database/`: Database schema and actions using Drizzle ORM
 - `app/Constants/`: Configuration files for markets, coins, and pricing
@@ -147,7 +147,7 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Wrong Prediction Management**: Tracks incorrect predictions and manages re-entry fees
 - **Combined Operations**: Streamlined workflow for weekly settlement cycles
 
-### Prediction Logic (`BitcoinBetting.tsx`)
+### Prediction Logic (`MakePredictionsPage.tsx`)
 - **Weekly Prediction Window**: Users can make predictions Sunday-Friday
 - **Tomorrow's Predictions**: Users forecast next day's asset price movements
 - **One Prediction Per Day**: System prevents multiple predictions, allows updates before cutoff

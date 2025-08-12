@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Brain, Check, X, RotateCcw, Trophy, Zap, Clock } from 'lucide-react';
+import { Brain, Check, X, RotateCcw, Trophy, Zap, Clock, Gamepad2, Grid3X3, Lock, Star } from 'lucide-react';
 import { getRandomQuestion } from '../Constants/triviaQuestions';
 import { useAccount } from 'wagmi';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
 import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
+import Wordle from './wordlePage';
 
 interface AIPageProps {
   activeSection: string;
@@ -26,7 +27,18 @@ interface GameStats {
   bestStreak: number;
 }
 
-const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
+// *** CONFIGURABLE SETTING: Questions required for free entry ***
+// Change this value to adjust difficulty:
+// 50 = easier (50, 100, 150... questions)
+// 100 = current (100, 200, 300... questions) 
+// 200 = harder (200, 400, 600... questions)
+const QUESTIONS_PER_FREE_ENTRY = 5;
+
+const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
+  // Game selection state
+  const [selectedGame, setSelectedGame] = useState<'hub' | 'trivia' | 'wordle'>('hub');
+  
+  // Trivia game states
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -43,6 +55,8 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
   const [timeRemaining, setTimeRemaining] = useState(18);
   const [timerActive, setTimerActive] = useState(false);
   const [congratulationsShown, setCongratulationsShown] = useState(false);
+  const [currentMilestone, setCurrentMilestone] = useState(QUESTIONS_PER_FREE_ENTRY);
+  const [triviaFreeEntries, setTriviaFreeEntries] = useState(0);
   
   const questionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,22 +75,43 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     isEmailCollected: hookEmailCollected
   } = useEmailCollection(address);
 
-  // Load stats from localStorage only
+  // Load stats from localStorage and set current milestone
   useEffect(() => {
     const savedStats = localStorage.getItem('prediwin-trivia-stats');
     if (savedStats) {
       try {
         const parsedStats = JSON.parse(savedStats);
         setGameStats(parsedStats);
-        // Check if user already hit 100 milestone
-        if (parsedStats.correctAnswers >= 100) {
-          setCongratulationsShown(true);
-        }
       } catch (error) {
         console.error('Error parsing saved stats:', error);
       }
     }
-  }, []);
+    
+    // Load current milestone based on user's free entries
+    if (address) {
+      loadCurrentMilestone();
+    }
+  }, [address]);
+
+  // Function to load the current milestone target based on trivia-specific free entries
+  const loadCurrentMilestone = async () => {
+    if (!address) return;
+    
+    try {
+      const freeEntriesResponse = await fetch(`/api/user/free-entries?address=${address}&detailed=true`);
+      const freeEntriesData = await freeEntriesResponse.json();
+      const triviaEntries = freeEntriesData.fromTrivia || 0;
+      setTriviaFreeEntries(triviaEntries);
+      
+      // Calculate milestone based ONLY on trivia free entries earned
+      const milestone = (triviaEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+      setCurrentMilestone(milestone);
+    } catch (error) {
+      console.error('Error loading milestone:', error);
+      setCurrentMilestone(QUESTIONS_PER_FREE_ENTRY); // Default to first milestone
+      setTriviaFreeEntries(0);
+    }
+  };
 
   // Email collection logic - trigger 2 seconds after wallet connects
   useEffect(() => {
@@ -190,12 +225,16 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
       setCongratulationsShown(false);
       localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
       
+      // Reset milestone to appropriate level based on current trivia free entries
+      const resetMilestone = (triviaFreeEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+      setCurrentMilestone(resetMilestone);
+      
       // Return to menu
       setGameStarted(false);
       setCurrentQuestion(null);
       setShowResult(false);
     }, 10 * 60 * 1000); // 10 minutes
-  }, []);
+  }, [triviaFreeEntries]);
 
   // Start inactivity timer when game starts
   useEffect(() => {
@@ -240,9 +279,13 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     setGameStats(freshStats);
     setCongratulationsShown(false);
 
+    // Reset milestone to appropriate level based on current trivia free entries
+    const resetMilestone = (triviaFreeEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+    setCurrentMilestone(resetMilestone);
+
     // Save to localStorage
     localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
-  }, [currentQuestion, showResult]);
+  }, [currentQuestion, showResult, triviaFreeEntries]);
 
   // Timer logic for questions
   useEffect(() => {
@@ -316,6 +359,10 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
       setGameStats(freshStats);
       setCongratulationsShown(false);
       localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
+      
+      // Reset milestone to appropriate level based on current trivia free entries
+      const resetMilestone = (triviaFreeEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+      setCurrentMilestone(resetMilestone);
       return;
     }
 
@@ -331,13 +378,48 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     // Update UI immediately
     setGameStats(newStats);
 
-    // Check if user just hit 100 correct answers milestone
-    if (newStats.correctAnswers === 100 && !congratulationsShown) {
+    // Check if milestone reached (using current cached milestone, not API call)
+    if (newStats.correctAnswers === currentMilestone && !congratulationsShown) {
       setCongratulationsShown(true);
+      
+      // Award free entry for trivia victory
+      if (address) {
+        awardTriviaFreeEntry(address).then(() => {
+          // Update milestone for next reward after awarding
+          const nextMilestone = currentMilestone + QUESTIONS_PER_FREE_ENTRY;
+          setCurrentMilestone(nextMilestone);
+          setTriviaFreeEntries(prev => prev + 1);
+        });
+      }
+      
+      // Reset the game after awarding entry
+      setTimeout(() => {
+        resetGame();
+        setCongratulationsShown(false);
+      }, 5000); // Show congratulations for 5 seconds, then reset
     }
 
     // Save to localStorage
     localStorage.setItem('prediwin-trivia-stats', JSON.stringify(newStats));
+  }
+
+  // Function to award trivia free entry via API
+  const awardTriviaFreeEntry = async (walletAddress: string) => {
+    try {
+      const response = await fetch('/api/trivia/award-entry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress })
+      });
+      
+      if (response.ok) {
+        console.log('Free entry awarded for trivia victory!');
+      } else {
+        console.error('Failed to award free entry');
+      }
+    } catch (error) {
+      console.error('Error awarding free entry:', error);
+    }
   };
 
   // Start the game
@@ -384,13 +466,43 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     ? Math.round((gameStats.correctAnswers / gameStats.totalQuestions) * 100)
     : 0;
 
-  // Progress to 100 correct answers
-  const progress = Math.min((gameStats.correctAnswers / 100) * 100, 100);
+  // Progress to current milestone
+  const progress = Math.min((gameStats.correctAnswers / currentMilestone) * 100, 100);
 
-  if (!gameStarted) {
+  // Render different game views
+  if (selectedGame === 'wordle') {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="container mx-auto p-4">
+          <button
+            onClick={() => setSelectedGame('hub')}
+            className="mb-4 text-gray-600 hover:text-black transition-colors flex items-center gap-2"
+          >
+            ← Back to Games
+          </button>
+          <Wordle 
+            activeSection={activeSection} 
+            setActiveSection={setActiveSection}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedGame === 'trivia' && !gameStarted) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-2xl w-full text-center">
+          {/* Back Button */}
+          <div className="mb-8">
+            <button
+              onClick={() => setSelectedGame('hub')}
+              className="text-gray-600 hover:text-black transition-colors flex items-center gap-2 mx-auto"
+            >
+              ← Back to Games
+            </button>
+          </div>
+          
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
@@ -405,13 +517,14 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
           {/* Challenge Rules Warning */}
           <div className="bg-[#f2f2f2]  rounded-lg p-6 mb-8">
             <div className="text-center">
-               <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Win a free entry for any pot, by correctly answering 100 questions in a row.</div>
-             {/* <div className="text-red-700 space-y-2">
-                <p><strong>Goal:</strong> Answer 100 questions correctly in a row</p>
-                <p><strong>⚡ ONE wrong answer</strong> → All progress resets to zero</p>
-                <p><strong>⏱️ 10 minutes inactive</strong> → All progress resets to zero</p>
-                <p><strong>⏰ 18 seconds per question</strong> → Time up = wrong answer</p>
-              </div> */}
+               <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Win free pot entries by answering questions correctly in a row!</div>
+               <div className="text-gray-700 space-y-2 text-sm">
+                <p><strong>🎯 1st Free Entry:</strong> {QUESTIONS_PER_FREE_ENTRY} correct answers</p>
+                <p><strong>🎯 2nd Free Entry:</strong> {QUESTIONS_PER_FREE_ENTRY * 2} correct answers</p>
+                <p><strong>🎯 3rd Free Entry:</strong> {QUESTIONS_PER_FREE_ENTRY * 3} correct answers (and so on...)</p>
+                <p className="text-red-600"><strong>⚡ ONE wrong answer</strong> → All progress resets to zero</p>
+                <p className="text-red-600"><strong>⏱️ 10 minutes inactive</strong> → All progress resets to zero</p>
+              </div>
             </div>
           </div>
 
@@ -441,8 +554,8 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
           {gameStats.correctAnswers > 0 && (
             <div className="mb-12">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-600">Progress to 100 correct answers</span>
-                <span className="text-sm text-black font-medium">{gameStats.correctAnswers}/100</span>
+                <span className="text-sm text-gray-600">Progress to next free entry</span>
+                <span className="text-sm text-black font-medium">{gameStats.correctAnswers}/{currentMilestone}</span>
               </div>
               <div className="w-full bg-gray-200 h-2 rounded-full">
                 <div 
@@ -450,17 +563,28 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              {congratulationsShown && gameStats.correctAnswers >= 100 && (
+              {congratulationsShown && gameStats.correctAnswers >= QUESTIONS_PER_FREE_ENTRY && (
                 <div className="mt-4 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg">
                   <div className="text-center">
                     <Trophy className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
                     <h3 className="text-2xl font-bold text-yellow-800 mb-2">🎉 Congratulations! 🎉</h3>
                     <p className="text-lg text-yellow-700 mb-2">
-                      You've successfully answered <strong>100 questions correctly</strong> in a single session!
+                      You've successfully answered <strong>{gameStats.correctAnswers} questions correctly</strong> in a single session!
                     </p>
-                    <p className="text-yellow-600">
+                    <p className="text-yellow-600 mb-2">
                       Amazing dedication to knowledge! 🧠✨
                     </p>
+                    <div className="bg-green-100 border border-green-300 rounded-lg p-3 mt-3">
+                      <p className="text-green-800 font-medium">
+                        🎁 <strong>Free Pot Entry Earned!</strong>
+                      </p>
+                      <p className="text-green-700 text-sm">
+                        You can now enter any prediction pot for free!
+                      </p>
+                      <p className="text-green-600 text-xs mt-2">
+                        Game will reset in 5 seconds... Next milestone: {currentMilestone + QUESTIONS_PER_FREE_ENTRY} correct answers!
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -500,17 +624,21 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <button
-            onClick={resetGame}
-            className="text-gray-500 hover:text-black transition-colors mb-4 flex items-center gap-2 mx-auto"
-          >
-            ← Back to Menu
-          </button>
+  if (selectedGame === 'trivia' && gameStarted) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="max-w-4xl w-full">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <button
+              onClick={() => {
+                resetGame();
+                setSelectedGame('hub');
+              }}
+              className="text-gray-500 hover:text-black transition-colors mb-4 flex items-center gap-2 mx-auto"
+            >
+              ← Back to Games
+            </button>
           
           {/* Stats Bar */}
           <div className="flex justify-center gap-8 mb-6 text-sm">
@@ -535,7 +663,7 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="text-xs text-gray-500 mt-1">{gameStats.correctAnswers}/100 to earn discount</div>
+          <div className="text-xs text-gray-500 mt-1">{gameStats.correctAnswers}/{currentMilestone} to earn free entry</div>
         </div>
 
         {/* Question Section */}
@@ -635,17 +763,115 @@ const AITriviaGame = ({ activeSection, setActiveSection }: AIPageProps) => {
             </button>
           </div>
         )}
+        </div>
+        
+        {/* Email Collection Modal */}
+        <EmailCollectionModal
+          isOpen={showEmailModal}
+          onClose={hideEmailModal}
+          onSubmit={handleEmailSubmit}
+          sourcePage="AI"
+        />
       </div>
-      
-      {/* Email Collection Modal */}
-      <EmailCollectionModal
-        isOpen={showEmailModal}
-        onClose={hideEmailModal}
-        onSubmit={handleEmailSubmit}
-        sourcePage="AI"
-      />
+    );
+  }
+
+  // Main Games Hub Interface
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full text-center">
+        {/* Header */}
+        <div className="mb-16">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-black rounded-full mb-8">
+            <Gamepad2 className="w-12 h-12 text-white" />
+          </div>
+          <h1 className="text-6xl font-light text-black mb-6">Games Hub</h1>
+          <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto">
+            Challenge your mind with our collection of engaging games
+          </p>
+        </div>
+
+        {/* Available Games */}
+        <div className="grid md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
+          
+
+          {/* Wordle Game */}
+          <div className="bg-white border-2 border-gray-100 rounded-xl p-8 hover:border-black transition-all group cursor-pointer"
+               onClick={() => setSelectedGame('wordle')}>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <Grid3X3 className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-light text-black mb-3">Wordle</h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Guess the 5-letter word in 6 attempts. Be the first to solve today's puzzle and earn a free pot entry!
+              </p>
+              <div className="flex items-center text-sm text-green-600 font-medium">
+                <Star className="w-4 h-4 mr-2" />
+                🎁 Free pot entry reward
+              </div>
+            </div>
+          </div>
+
+          {/* AI Trivia Game */}
+          <div className="bg-white border-2 border-gray-100 rounded-xl p-8 hover:border-black transition-all group cursor-pointer"
+               onClick={() => setSelectedGame('trivia')}>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-light text-black mb-3">AI Trivia</h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Test your knowledge across 25+ categories. First milestone: {QUESTIONS_PER_FREE_ENTRY} correct answers. Each additional free entry requires {QUESTIONS_PER_FREE_ENTRY} more correct answers!
+              </p>
+              <div className="flex items-center text-sm text-green-600 font-medium">
+                <Trophy className="w-4 h-4 mr-2" />
+                🎁 Free pot entry reward
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Coming Soon Section */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-12 max-w-3xl mx-auto">
+          <h2 className="text-3xl font-light text-black mb-6">More Games Coming Soon</h2>
+          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+            We're working on exciting new games to expand your gaming experience
+          </p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {/* Coming Soon Game Cards */}
+            {[
+              { name: 'Chess Puzzles', icon: '♟️' },
+              { name: 'Math Challenge', icon: '🔢' },
+              { name: 'Memory Game', icon: '🧠' },
+              { name: 'Word Search', icon: '🔍' }
+            ].map((game, index) => (
+              <div key={index} className="bg-white rounded-lg p-6 border border-gray-200 relative">
+                <div className="absolute top-2 right-2">
+                  <Lock className="w-4 h-4 text-gray-400" />
+                </div>
+                <div className="text-3xl mb-3">{game.icon}</div>
+                <h4 className="text-sm font-medium text-gray-600">{game.name}</h4>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-8 text-sm text-gray-500">
+            Stay tuned for updates and new game releases!
+          </div>
+        </div>
+        
+        {/* Email Collection Modal */}
+        <EmailCollectionModal
+          isOpen={showEmailModal}
+          onClose={hideEmailModal}
+          onSubmit={handleEmailSubmit}
+          sourcePage="AI"
+        />
+      </div>
     </div>
   );
 };
 
-export default AITriviaGame;
+export default GamesHub;

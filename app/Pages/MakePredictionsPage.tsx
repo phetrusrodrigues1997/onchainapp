@@ -31,7 +31,7 @@ interface TodaysBet {
   createdAt: Date;
 }
 
-export default function BitcoinBetting() {
+export default function MakePredicitions() {
   const { address, isConnected } = useAccount();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');

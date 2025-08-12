@@ -71,6 +71,8 @@ export const FreeEntries = pgTable("free_entries", {
   id: serial("id").primaryKey(),
   walletAddress: text("wallet_address").notNull(),
   earnedFromReferrals: integer("earned_from_referrals").default(0).notNull(),
+  earnedFromTrivia: integer("earned_from_trivia").default(0).notNull(),
+  earnedFromWordle: integer("earned_from_wordle").default(0).notNull(),
   usedEntries: integer("used_entries").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

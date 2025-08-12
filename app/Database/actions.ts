@@ -662,13 +662,69 @@ async function checkAndUpdateFreeEntries(referrerWallet: string): Promise<void> 
 }
 
 /**
+ * Gets detailed free entries breakdown for a wallet
+ */
+export async function getFreeEntriesBreakdown(walletAddress: string): Promise<{
+  total: number;
+  fromReferrals: number;
+  fromTrivia: number;
+  fromWordle: number;
+  used: number;
+}> {
+  try {
+    const result = await db
+      .select({
+        earnedFromReferrals: FreeEntries.earnedFromReferrals,
+        earnedFromTrivia: FreeEntries.earnedFromTrivia,
+        earnedFromWordle: FreeEntries.earnedFromWordle,
+        used: FreeEntries.usedEntries,
+      })
+      .from(FreeEntries)
+      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .limit(1);
+
+    if (result.length === 0) {
+      return {
+        total: 0,
+        fromReferrals: 0,
+        fromTrivia: 0,
+        fromWordle: 0,
+        used: 0,
+      };
+    }
+
+    const { earnedFromReferrals, earnedFromTrivia, earnedFromWordle, used } = result[0];
+    const total = earnedFromReferrals + earnedFromTrivia + earnedFromWordle;
+    
+    return {
+      total: Math.max(0, total - used),
+      fromReferrals: earnedFromReferrals,
+      fromTrivia: earnedFromTrivia,
+      fromWordle: earnedFromWordle,
+      used,
+    };
+  } catch (error) {
+    console.error("Error getting free entries breakdown:", error);
+    return {
+      total: 0,
+      fromReferrals: 0,
+      fromTrivia: 0,
+      fromWordle: 0,
+      used: 0,
+    };
+  }
+}
+
+/**
  * Gets the available free entries for a wallet
  */
 export async function getAvailableFreeEntries(walletAddress: string): Promise<number> {
   try {
     const result = await db
       .select({
-        earned: FreeEntries.earnedFromReferrals,
+        earnedFromReferrals: FreeEntries.earnedFromReferrals,
+        earnedFromTrivia: FreeEntries.earnedFromTrivia,
+        earnedFromWordle: FreeEntries.earnedFromWordle,
         used: FreeEntries.usedEntries,
       })
       .from(FreeEntries)
@@ -679,10 +735,92 @@ export async function getAvailableFreeEntries(walletAddress: string): Promise<nu
       return 0;
     }
 
-    return Math.max(0, result[0].earned - result[0].used);
+    const { earnedFromReferrals, earnedFromTrivia, earnedFromWordle, used } = result[0];
+    const totalEarned = earnedFromReferrals + earnedFromTrivia + earnedFromWordle;
+    return Math.max(0, totalEarned - used);
   } catch (error) {
     console.error("Error getting available free entries:", error);
     return 0;
+  }
+}
+
+/**
+ * Awards a free entry for trivia game victory (100 correct answers)
+ */
+export async function awardTriviaFreeEntry(walletAddress: string): Promise<boolean> {
+  try {
+    const existingRecord = await db
+      .select()
+      .from(FreeEntries)
+      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .limit(1);
+
+    if (existingRecord.length === 0) {
+      // Create new record
+      await db
+        .insert(FreeEntries)
+        .values({
+          walletAddress,
+          earnedFromReferrals: 0,
+          earnedFromTrivia: 1,
+          earnedFromWordle: 0,
+          usedEntries: 0,
+        });
+    } else {
+      // Update existing record
+      await db
+        .update(FreeEntries)
+        .set({
+          earnedFromTrivia: sql`${FreeEntries.earnedFromTrivia} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(FreeEntries.walletAddress, walletAddress));
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error awarding trivia free entry:", error);
+    return false;
+  }
+}
+
+/**
+ * Awards a free entry for wordle game victory
+ */
+export async function awardWordleFreeEntry(walletAddress: string): Promise<boolean> {
+  try {
+    const existingRecord = await db
+      .select()
+      .from(FreeEntries)
+      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .limit(1);
+
+    if (existingRecord.length === 0) {
+      // Create new record
+      await db
+        .insert(FreeEntries)
+        .values({
+          walletAddress,
+          earnedFromReferrals: 0,
+          earnedFromTrivia: 0,
+          earnedFromWordle: 1,
+          usedEntries: 0,
+        });
+    } else {
+      // Update existing record
+      await db
+        .update(FreeEntries)
+        .set({
+          earnedFromWordle: sql`${FreeEntries.earnedFromWordle} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(FreeEntries.walletAddress, walletAddress));
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error awarding wordle free entry:", error);
+    return false;
   }
 }
 
@@ -739,22 +877,34 @@ export async function getReferralStats(walletAddress: string) {
     // Get free entries info
     const freeEntriesResult = await db
       .select({
-        earned: FreeEntries.earnedFromReferrals,
+        earnedFromReferrals: FreeEntries.earnedFromReferrals,
+        earnedFromTrivia: FreeEntries.earnedFromTrivia,
+        earnedFromWordle: FreeEntries.earnedFromWordle,
         used: FreeEntries.usedEntries,
       })
       .from(FreeEntries)
       .where(eq(FreeEntries.walletAddress, walletAddress))
       .limit(1);
 
-    const freeEntries = freeEntriesResult.length > 0 ? freeEntriesResult[0] : { earned: 0, used: 0 };
+    const freeEntries = freeEntriesResult.length > 0 ? freeEntriesResult[0] : { 
+      earnedFromReferrals: 0, 
+      earnedFromTrivia: 0, 
+      earnedFromWordle: 0, 
+      used: 0 
+    };
+
+    const totalEarned = freeEntries.earnedFromReferrals + freeEntries.earnedFromTrivia + freeEntries.earnedFromWordle;
 
     return {
       referralCode: codeResult.length > 0 ? codeResult[0].referralCode : null,
       totalReferrals,
       confirmedReferrals,
-      freeEntriesEarned: freeEntries.earned,
+      freeEntriesEarned: totalEarned,
+      freeEntriesFromReferrals: freeEntries.earnedFromReferrals,
+      freeEntriesFromTrivia: freeEntries.earnedFromTrivia,
+      freeEntriesFromWordle: freeEntries.earnedFromWordle,
       freeEntriesUsed: freeEntries.used,
-      freeEntriesAvailable: Math.max(0, freeEntries.earned - freeEntries.used),
+      freeEntriesAvailable: Math.max(0, totalEarned - freeEntries.used),
     };
   } catch (error) {
     console.error("Error getting referral stats:", error);
@@ -763,6 +913,9 @@ export async function getReferralStats(walletAddress: string) {
       totalReferrals: 0,
       confirmedReferrals: 0,
       freeEntriesEarned: 0,
+      freeEntriesFromReferrals: 0,
+      freeEntriesFromTrivia: 0,
+      freeEntriesFromWordle: 0,
       freeEntriesUsed: 0,
       freeEntriesAvailable: 0,
     };

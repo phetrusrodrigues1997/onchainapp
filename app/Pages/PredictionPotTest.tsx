@@ -156,6 +156,8 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     seconds: number;
   }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   
+  // Track successful pot entry for enhanced UI feedback
+  const [justEnteredPot, setJustEnteredPot] = useState(false);
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -389,6 +391,20 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const isParticipant = address && participants && Array.isArray(participants) 
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
+
+  // Debug logging for participant status
+  useEffect(() => {
+    if (address && participants) {
+      console.log('🔍 Participant Status Debug:', {
+        address,
+        participants,
+        isParticipant,
+        participantCount: Array.isArray(participants) ? participants.length : 0,
+        justEnteredPot,
+        reEntryFee
+      });
+    }
+  }, [address, participants, isParticipant, justEnteredPot, reEntryFee]);
 
   // Type-safe helpers
   const formatBigIntValue = (value: bigint | undefined, decimals: number = 6): string => {
@@ -699,12 +715,58 @@ useEffect(() => {
 }, 1000);
     } else if (lastAction === 'enterPot') {
       setIsLoading(false);
-      showMessage('Successfully entered the pot! Redirecting to prediction page...');
+      setJustEnteredPot(true);
+      showMessage('Successfully entered the pot! Welcome to the prediction game!');
       
-      // Always force refetch of contract data first (same as before referral system)
+      // Aggressive refresh strategy for both free entries and normal entries
+      // Immediate refresh - clear all contract queries
+      queryClient.invalidateQueries({ queryKey: ['readContract'] });
+      queryClient.removeQueries({ queryKey: ['readContract'] }); // Force complete refetch
+      
+      // Multiple staged refreshes to ensure participant list updates properly
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['readContract'] });
-      }, 2000);
+        queryClient.removeQueries({ queryKey: ['readContract'] });
+        console.log('🔄 Force refresh #1 - 500ms');
+      }, 500);
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+        queryClient.removeQueries({ queryKey: ['readContract'] });
+        console.log('🔄 Force refresh #2 - 1500ms');
+      }, 1500);
+      
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+        queryClient.removeQueries({ queryKey: ['readContract'] });
+        console.log('🔄 Force refresh #3 - 3000ms');
+      }, 3000);
+      
+      // Extra refresh specifically for free entries after 5 seconds
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+        queryClient.removeQueries({ queryKey: ['readContract'] });
+        console.log('🔄 Force refresh #4 - 5000ms');
+      }, 5000);
+      
+      // Clear the "just entered" state after showing success for a while
+      setTimeout(() => {
+        setJustEnteredPot(false);
+      }, 8000); // Extended to 8 seconds for better visibility
+      
+      // Reload free entries count to reflect the used entry
+      if (address) {
+        setTimeout(async () => {
+          try {
+            const updatedFreeEntries = await getAvailableFreeEntries(address);
+            setFreeEntriesAvailable(updatedFreeEntries);
+            // Additional refresh after updating free entries
+            queryClient.invalidateQueries({ queryKey: ['readContract'] });
+          } catch (error) {
+            console.error('Error reloading free entries:', error);
+          }
+        }, 2000);
+      }
       
       // Handle referral confirmation in background (completely isolated)
       if (address) {
@@ -722,7 +784,7 @@ useEffect(() => {
         // Use a separate timeout to ensure it doesn't interfere with contract refresh
         setTimeout(() => {
           handleReferralConfirmation();
-        }, 3000); // Run after contract refresh completes
+        }, 4000); // Run after initial contract refreshes complete
       }
     } else if (lastAction === 'approveReEntry') {
       setIsLoading(false);
@@ -979,15 +1041,26 @@ useEffect(() => {
           {/* User Actions - Show different content if already a participant */}
           {isConnected && contractAddress && isParticipant && !reEntryFee && (
             <div className="mb-6">
-              <div className="bg-white rounded-xl border border-gray-200 p-8 hover:border-gray-300 transition-all duration-300 text-center">
-                <div className="text-2xl font-light text-gray-900 mb-3">
-                  {t.alreadyInPot || "✓ You're in the Pot"}
+              <div className={`rounded-xl border p-8 text-center transition-all duration-500 ${
+                justEnteredPot 
+                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400 shadow-lg scale-105' 
+                  : 'bg-white border border-gray-200 hover:border-gray-300'
+              }`}>
+                <div className={`text-2xl font-light mb-3 transition-colors duration-500 ${
+                  justEnteredPot ? 'text-green-800' : 'text-gray-900'
+                }`}>
+                  {justEnteredPot ? "🎉 Welcome! You're in the Pot!" : (t.alreadyInPot || "✓ You're in the Pot")}
                 </div>
-                <div className="text-gray-600 font-light mb-6 leading-relaxed">
-                  {t.enteredPotMessage || "You've successfully entered this prediction market. You can now place your daily predictions!"}
+                <div className={`font-light mb-6 leading-relaxed transition-colors duration-500 ${
+                  justEnteredPot ? 'text-green-700' : 'text-gray-600'
+                }`}>
+                  {justEnteredPot 
+                    ? "🎊 Congratulations! You're now part of this prediction market. Start making your daily predictions to compete for the pot!" 
+                    : (t.enteredPotMessage || "You've successfully entered this prediction market. You can now place your daily predictions!")
+                  }
                 </div>
                 <button
-                  onClick={() => setActiveSection('bitcoinBetting')}
+                  onClick={() => setActiveSection('makePrediction')}
                   className="px-8 py-3 bg-gray-900 text-white font-medium rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105"
                 >
                   {t.goToBetting || 'Start Betting'}
@@ -1070,6 +1143,9 @@ useEffect(() => {
                       <p className="text-gray-600 text-sm mb-3">
                         Discounted price: {formatBigIntValue(entryAmount)} USDC (regular: {formatBigIntValue(baseEntryAmount)} USDC)
                       </p>
+                      <p className="text-orange-600 text-xs mb-3 font-medium">
+                        💡 Note: After using your free entry, please REFRESH the page to see your updated status.
+                      </p>
                       
                       {!hasEnoughAllowance ? (
                         <button
@@ -1095,9 +1171,9 @@ useEffect(() => {
                       {!hasEnoughBalance && (
                         <p className="text-red-400 text-sm mt-2">Insufficient USDC balance for discounted entry</p>
                       )}
-                      {!hasEnoughAllowance && (
+                      {/* {!hasEnoughAllowance && (
                         <p className="text-yellow-400 text-sm mt-2">Need to approve {formatBigIntValue(entryAmount)} USDC first</p>
-                      )}
+                      )} */}
                     </div>
                   )}
                   

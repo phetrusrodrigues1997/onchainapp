@@ -7,7 +7,7 @@ import { formatUnits } from 'viem';
 import { User } from 'lucide-react';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
-import BitcoinBetting from './Pages/BitcoinBetting';
+import MakePredicitions from './Pages/MakePredictionsPage';
 import ProfilePage from './Pages/ProfilePage';
 import TutorialBridge from './Pages/TutorialBridge';
 import ReferralProgram from './Pages/ReferralProgram';
@@ -20,7 +20,7 @@ import ResponsiveLogo from './Sections/ResponsiveLogo';
 import HowItWorksSection from './Pages/Discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
-import AITriviaGame from './Pages/AIPage';
+import GamesHub from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
 import CreatePotPage from './Pages/CreatePotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
@@ -218,8 +218,8 @@ export default function App() {
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "bitcoinBetting" && <BitcoinBetting /> }
-          {activeSection === "AI" && <AITriviaGame activeSection={activeSection} setActiveSection={setActiveSection}/>}
+          {activeSection === "makePrediction" && <MakePredicitions /> }
+          {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "createPot" && <CreatePotPage activeSection={activeSection} setActiveSection={setActiveSection} navigateToPrivatePot={navigateToPrivatePot} />}
           {activeSection === "privatePot" && privatePotAddress && (
             <PrivatePotInterface 
