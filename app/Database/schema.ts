@@ -76,3 +76,11 @@ export const FreeEntries = pgTable("free_entries", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const UsersTable = pgTable("users_table", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull().unique(), // Each wallet can only have one email
+  email: text("email").notNull(),
+  sourcePage: text("source_page").notNull(), // 'PredictionPot', 'AI', or 'PrivatePot'
+  collectedAt: timestamp("collected_at").defaultNow().notNull(),
+});
+

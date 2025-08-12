@@ -93,6 +93,11 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 #### AI Trivia System Tables
 - `TriviaStats`: Tracks AI trivia game statistics (walletAddress, correctAnswers, totalQuestions, currentStreak, bestStreak, discountEarned)
 
+#### Email Collection System (New)
+- `UserEmails`: Stores user email addresses for marketing and updates (walletAddress, email, sourcePage, createdAt, updatedAt)
+- Comprehensive input validation and SQL injection protection implemented across all database operations
+- Email collection modal system with persistent dismissal state (3-day duration) and permanent opt-out after submission
+
 #### User Management
 - `Messages`: User messaging system
 - `ImageURLs`: User profile images
@@ -202,6 +207,20 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Fallback System**: Built-in fallback questions if OpenAI API fails
 - **Progress Tracking**: Visual progress bar showing advancement toward 100 correct answers goal
 - **Database Optimization**: Currently updates database immediately per question; future optimization could batch updates on page unload/inactivity for better performance
+- **Email Collection Integration**: Modal appears 2 seconds after wallet connection with dismissible 3-day persistence
+
+### Email Collection System (NEW)
+- **Universal Integration**: Implemented across PredictionPotTest, AIPage, PrivatePotInterface, and CreatePotPage
+- **Smart Timing**: Modal appears 2 seconds after wallet connection on each page
+- **Persistent State Management**: Uses localStorage with 3-day dismissal duration
+- **Hook-Based Architecture**: `useEmailCollection` hook serves as single source of truth for modal state
+- **Database Security**: Comprehensive input validation, sanitization, and SQL injection protection
+- **User Experience**: 
+  - **Dismissible**: Users can close modal and won't see it again for 3 days
+  - **One-Time Collection**: After email submission, modal permanently disappears
+  - **Non-Intrusive**: Only appears once per wallet per page with respectful timing
+- **State Synchronization**: Hook state takes precedence over database checks to prevent modal re-appearance after submission
+- **Source Tracking**: Tracks which page collected each email (PredictionPot, AI, PrivatePot, CreatePot)
 
 ## Development Notes
 

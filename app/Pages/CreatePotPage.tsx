@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Users, Trophy, Target, Plus, ArrowLeft, Check, Copy, Search, ExternalLink } from 'lucide-react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import { createPrivatePot, getPotsByCreator, getPotDetails } from '../Database/actions2';
+import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
+import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
+import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
 // Contract ABI for PredictionPotWithCloning
 const PREDICTION_POT_CLONING_ABI = [
@@ -59,10 +62,23 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   const [myPots, setMyPots] = useState<any[]>([]);
   const [joinAddress, setJoinAddress] = useState('');
   const [isLoadingMyPots, setIsLoadingMyPots] = useState(false);
+  const { alertState, showAlert, closeAlert } = useCustomAlert();
 
 
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { data: hash, writeContract, isPending } = useWriteContract();
+  
+  // Email collection modal
+  const emailModalRef = useRef<NodeJS.Timeout | null>(null);
+  const {
+    showModal: showEmailModal,
+    showEmailModal: triggerEmailModal,
+    hideEmailModal,
+    markEmailCollected,
+    setIsEmailCollected,
+    isDismissed,
+    isEmailCollected: hookEmailCollected
+  } = useEmailCollection(address);
   
   const { isLoading: isConfirming, isSuccess: isConfirmed, data: receipt } = useWaitForTransactionReceipt({
     hash,
@@ -104,16 +120,113 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
       } catch (error) {
         console.error('Error extracting clone address:', error);
         // Fallback: show a generic success message
-        alert('Pot created successfully! Check the transaction on Basescan for the contract address.');
+        showAlert('Market created successfully! Check the transaction on Basescan for the contract address.', 'success', 'Success!');
       }
     }
   }, [isConfirmed, receipt]);
+
+  // Email collection logic - trigger 2 seconds after wallet connects
+  useEffect(() => {
+    const handleEmailCollection = async () => {
+      console.log('🔍 CreatePot Email Debug:', {
+        isConnected,
+        address,
+        activeSection,
+        hookEmailCollected,
+        isDismissed,
+        condition: isConnected && address && activeSection === 'createPot'
+      });
+
+      if (isConnected && address && activeSection === 'createPot') {
+        console.log('✅ Wallet connected on Create Pot page, checking email...');
+        console.log('📧 Hook email collected state:', hookEmailCollected);
+        console.log('📧 Dismissal state:', isDismissed);
+        
+        // First check the hook's state - it's the single source of truth
+        if (hookEmailCollected) {
+          console.log('📧 Hook says email already collected, not showing modal');
+          return;
+        }
+
+        if (isDismissed) {
+          console.log('📧 Modal was dismissed, not showing modal');
+          return;
+        }
+        
+        // Only check database if hook doesn't have email collected info yet
+        try {
+          const emailExists = await checkEmailExists(address);
+          console.log('📧 Database email check result:', emailExists);
+          
+          if (emailExists) {
+            console.log('📧 Database says email exists, updating hook state');
+            setIsEmailCollected(true);
+            return;
+          }
+          
+          // Clear any existing timer
+          if (emailModalRef.current) {
+            clearTimeout(emailModalRef.current);
+          }
+          
+          console.log('⏰ Setting 2-second timer for email modal...');
+          // Show modal after 2 seconds
+          emailModalRef.current = setTimeout(() => {
+            console.log('🎯 Timer triggered! Showing email modal...');
+            triggerEmailModal();
+          }, 2000);
+        } catch (error) {
+          console.error('❌ Error checking email status:', error);
+        }
+      } else {
+        console.log('❌ Conditions not met for email modal');
+        // Clear timer if wallet disconnects or user leaves page
+        if (emailModalRef.current) {
+          clearTimeout(emailModalRef.current);
+          emailModalRef.current = null;
+        }
+      }
+    };
+
+    handleEmailCollection();
+    
+    return () => {
+      if (emailModalRef.current) {
+        clearTimeout(emailModalRef.current);
+      }
+    };
+  }, [isConnected, address, activeSection, triggerEmailModal, setIsEmailCollected, isDismissed, hookEmailCollected]);
+
+  // Handle email submission
+  const handleEmailSubmit = async (email: string) => {
+    if (!address) return;
+    
+    console.log('📧 Starting email submission for CreatePot:', email);
+    try {
+      const result = await saveUserEmail(address, email, 'CreatePot');
+      console.log('📧 saveUserEmail result:', result);
+      
+      if (result.success) {
+        console.log('📧 Email saved successfully, marking as collected in hook...');
+        markEmailCollected(); // This should be the single source of truth
+        console.log('📧 Hook state updated with markEmailCollected()');
+      } else {
+        throw new Error(result.error || 'Failed to save email');
+      }
+    } catch (error) {
+      console.error('❌ Email submission error:', error);
+      throw error;
+    }
+  };
 
   // Note: Pot loading now happens in handleMyMarketsClick for better UX
 
   // Handle My Markets button click with loading screen
   const handleMyMarketsClick = async () => {
-    if (!address) return;
+    if (!address) {
+      showAlert('Please connect your wallet to view your markets', 'warning', 'Wallet Required');
+      return;
+    }
     
     setIsLoadingMyPots(true);
     
@@ -137,14 +250,14 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     
     // Validate address format
     if (!joinAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
-      alert('Please enter a valid contract address');
+      showAlert('Please enter a valid contract address', 'error', 'Invalid Address');
       return;
     }
 
     // Check if pot exists in database
     const potDetails = await getPotDetails(joinAddress);
     if (!potDetails) {
-      alert('Market not found. Make sure the contract address is correct.');
+      showAlert('Market not found. Make sure the contract address is correct.', 'error', 'Market Not Found');
       return;
     }
 
@@ -154,7 +267,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
 
   const handleCreatePot = async () => {
     if (!address || !potName.trim() || !description.trim()) {
-      alert('Please connect wallet and fill in all fields');
+      showAlert('Please connect wallet and fill in all fields', 'warning', 'Missing Information');
       return;
     }
 
@@ -167,7 +280,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
       });
     } catch (error) {
       console.error('Error creating pot:', error);
-      alert('Failed to create market. Please try again.');
+      showAlert('Failed to create market. Please try again.', 'error', 'Creation Failed');
     }
   };
 
@@ -202,22 +315,6 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
           <h1 className="text-4xl font-light text-black mb-4">Market Created Successfully!</h1>
           <p className="text-xl text-gray-600 mb-8">Your prediction market "{potName}" is now live</p>
           
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-medium mb-4">Contract Address</h3>
-            <div className="flex items-center justify-center gap-2 bg-white p-3 rounded border">
-              <code className="text-sm text-gray-800 break-all">{addressToShow}</code>
-              {createdPotAddress && (
-                <button
-                  onClick={() => copyToClipboard(createdPotAddress)}
-                  className="p-2 hover:bg-gray-100 rounded"
-                >
-                  <Copy className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            {copied && <p className="text-green-600 text-sm mt-2">Copied to clipboard!</p>}
-          </div>
-          
           <div className="flex gap-4 justify-center">
             {createdPotAddress && navigateToPrivatePot && (
               <button
@@ -228,17 +325,6 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               </button>
             )}
             
-            <button
-              onClick={() => {
-                setShowCreateForm(false);
-                setCreatedPotAddress(null);
-                setPotName('');
-                setDescription('');
-              }}
-              className="bg-black text-white py-3 px-8 rounded hover:bg-gray-900 transition-colors"
-            >
-              Create Another Market
-            </button>
           </div>
         </div>
       </div>
@@ -353,31 +439,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <p className="text-lg text-gray-600">Enter a contract address to join an existing market</p>
             </div>
 
-            {/* Address Input */}
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  Contract Address
-                </label>
-                <input
-                  type="text"
-                  value={joinAddress}
-                  onChange={(e) => setJoinAddress(e.target.value)}
-                  placeholder="0x..."
-                  className="w-full p-4 border border-gray-200 rounded-lg focus:border-black focus:outline-none text-lg"
-                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
-                />
-              </div>
-              
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium text-black mb-2">How to find the address:</h3>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Get it from the market creator</li>
-                  <li>• It was shared when the market was created</li>
-                  <li>• Starts with "0x" followed by 40 characters</li>
-                </ul>
-              </div>
-            </div>
+            
 
             {/* Join Button */}
             <div className="mt-8">
@@ -596,6 +658,24 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
           </p>
         </div>
       </div>
+      
+      {/* Custom Alert */}
+      <CustomAlert
+        isOpen={alertState.isOpen}
+        onClose={closeAlert}
+        title={alertState.title}
+        message={alertState.message}
+        type={alertState.type}
+        autoClose={alertState.autoClose}
+      />
+      
+      {/* Email Collection Modal */}
+      <EmailCollectionModal
+        isOpen={showEmailModal}
+        onClose={hideEmailModal}
+        onSubmit={handleEmailSubmit}
+        sourcePage="CreatePot"
+      />
     </div>
   );
 };

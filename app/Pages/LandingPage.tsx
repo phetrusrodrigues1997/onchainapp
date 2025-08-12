@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
+import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 
 interface LandingPageProps {
   activeSection: string;
@@ -22,6 +23,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [selectedMarket, setSelectedMarket] = useState('Featured');
   const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const { alertState, showAlert, closeAlert } = useCustomAlert();
   const [showRightArrow, setShowRightArrow] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const availableMarkets = ["random topics", "crypto"];
@@ -193,7 +195,7 @@ const handleMarketClick = (marketId: string) => {
     
     console.log('Set cookie selectedMarket:', contractAddress); // Debug log
   } else {
-    alert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`);
+    showAlert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`, 'info', 'Coming Soon');
   }
 };
 
@@ -562,6 +564,16 @@ const handleMarketClick = (marketId: string) => {
       <footer className="relative z-10 px-6 py-10 bg-white text-center text-[#666666] text-sm">
         &copy; {new Date().getFullYear()} {t.footerText}
       </footer>
+      
+      {/* Custom Alert */}
+      <CustomAlert
+        isOpen={alertState.isOpen}
+        onClose={closeAlert}
+        title={alertState.title}
+        message={alertState.message}
+        type={alertState.type}
+        autoClose={alertState.autoClose}
+      />
     </div>
   );
 };

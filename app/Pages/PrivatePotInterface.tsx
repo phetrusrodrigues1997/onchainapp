@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits } from 'viem';
 import { useQueryClient } from '@tanstack/react-query';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
+import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
+import { checkEmailExists, saveUserEmail, getUserEmail } from '../Database/emailActions';
 
 // Import new private pot database functions
 import { 
@@ -12,6 +15,7 @@ import {
   addParticipant,
   isParticipant,
   getParticipants,
+  getParticipantsWithDetails,
   getPredictionsForDate,
   cleanupPotTables
 } from '../Database/actions2';
@@ -137,11 +141,13 @@ const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
 interface PrivatePotInterfaceProps {
   contractAddress: string;
   onBack: () => void;
+  activeSection?: string;
 }
 
 const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({ 
   contractAddress, 
-  onBack 
+  onBack,
+  activeSection = 'PrivatePot' 
 }) => {
   const [newEntryAmount, setNewEntryAmount] = useState(''); // For creator to set new entry amount
   const [prediction, setPrediction] = useState<'positive' | 'negative' | null>(null);
@@ -163,8 +169,24 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   const [isEditingDetails, setIsEditingDetails] = useState(false); // Edit mode for pot details
   const [editingPotName, setEditingPotName] = useState(''); // Editing pot name
   const [editingDescription, setEditingDescription] = useState(''); // Editing description
-
-  const { address } = useAccount();
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false); // Participants modal state
+  const [participantsData, setParticipantsData] = useState<any[]>([]); // Participants with details
+  const [loadingParticipants, setLoadingParticipants] = useState(false); // Loading state for participants
+  const { alertState, showAlert, closeAlert } = useCustomAlert();
+  
+  const { address, isConnected } = useAccount();
+  
+  // Email collection modal
+  const emailModalRef = useRef<NodeJS.Timeout | null>(null);
+  const {
+    showModal: showEmailModal,
+    showEmailModal: triggerEmailModal,
+    hideEmailModal,
+    markEmailCollected,
+    setIsEmailCollected,
+    isDismissed,
+    isEmailCollected: hookEmailCollected
+  } = useEmailCollection(address);
   const queryClient = useQueryClient();
 
   // Contract read hooks
@@ -261,6 +283,95 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     loadData();
   }, [address, contractAddress, isConfirmed]);
 
+  // Email collection logic - trigger 2 seconds after wallet connects
+  useEffect(() => {
+    const handleEmailCollection = async () => {
+      console.log('🔍 PrivatePot Email Debug:', {
+        isConnected,
+        address,
+        activeSection,
+        condition: isConnected && address && activeSection === 'privatePot'
+      });
+
+      if (isConnected && address && activeSection === 'privatePot') {
+        console.log('✅ Wallet connected on Private Pot page, checking email...');
+        console.log('📧 Hook email collected state:', hookEmailCollected);
+        console.log('📧 Dismissal state:', isDismissed);
+        
+        // First check the hook's state - it's the single source of truth
+        if (hookEmailCollected) {
+          console.log('📧 Hook says email already collected, not showing modal');
+          return;
+        }
+
+        if (isDismissed) {
+          console.log('📧 Modal was dismissed, not showing modal');
+          return;
+        }
+        
+        // Only check database if hook doesn't have email collected info yet
+        try {
+          const emailExists = await checkEmailExists(address);
+          console.log('📧 Database email check result:', emailExists);
+          
+          if (emailExists) {
+            console.log('📧 Database says email exists, updating hook state');
+            setIsEmailCollected(true);
+            return;
+          }
+          
+          // Clear any existing timer
+          if (emailModalRef.current) {
+            clearTimeout(emailModalRef.current);
+          }
+          
+          console.log('⏰ Setting 2-second timer for email modal...');
+          // Show modal after 2 seconds
+          emailModalRef.current = setTimeout(() => {
+            console.log('🎯 Timer triggered! Showing email modal...');
+            triggerEmailModal();
+          }, 2000);
+        } catch (error) {
+          console.error('❌ Error checking email status:', error);
+        }
+      } else {
+        console.log('❌ Conditions not met for email modal');
+        // Clear timer if wallet disconnects or user leaves page
+        if (emailModalRef.current) {
+          clearTimeout(emailModalRef.current);
+          emailModalRef.current = null;
+        }
+      }
+    };
+
+    handleEmailCollection();
+    
+    return () => {
+      if (emailModalRef.current) {
+        clearTimeout(emailModalRef.current);
+      }
+    };
+  }, [isConnected, address, activeSection, triggerEmailModal, setIsEmailCollected, isDismissed, hookEmailCollected]);
+
+  // Handle email submission
+  const handleEmailSubmit = async (email: string) => {
+    if (!address) return;
+    
+    try {
+      const result = await saveUserEmail(address, email, 'PrivatePot');
+      if (result.success) {
+        console.log('📧 Email saved successfully, marking as collected in hook...');
+        markEmailCollected(); // This should be the single source of truth
+        console.log('📧 Hook state updated with markEmailCollected()');
+      } else {
+        throw new Error(result.error || 'Failed to save email');
+      }
+    } catch (error) {
+      console.error('Email submission error:', error);
+      throw error;
+    }
+  };
+
   // Handle USDC approval - approve a large amount to avoid repeated approvals
   const handleApprove = () => {
     if (!potDetails?.entryAmount || !address) return;
@@ -349,7 +460,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               
             } catch (error) {
               console.error('Distribution failed:', error);
-              alert('Distribution failed. Please try again.');
+              showAlert('Distribution failed. Please try again.', 'error', 'Distribution Failed');
               setIsLoading(false);
               setLastAction('');
               delete (window as any).pendingWinners;
@@ -358,7 +469,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           }
         } else if (lastAction === 'distributePotFinal') {
           setIsLoading(false);
-          alert('🎉 Rewards distributed successfully!');
+          showAlert('🎉 Rewards distributed successfully!', 'success', 'Success!');
           
           // Clean up all database tables for this completed pot
           const cleanup = async () => {
@@ -414,7 +525,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       // alert('Prediction saved successfully!');
     } catch (error) {
       console.error('Error making prediction:', error);
-      alert('Failed to save prediction');
+      showAlert('Failed to save prediction', 'error', 'Prediction Failed');
     }
   };
 
@@ -426,18 +537,18 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const result = await setPotOutcome(contractAddress, address, predictionDate, outcomeToSet);
       
       if (result.success) {
-        alert(`Outcome set! ${result.totalWinners} winners, ${result.totalLosers} losers`);
+        showAlert(`Outcome set! ${result.totalWinners} winners, ${result.totalLosers} losers`, 'success', 'Outcome Set');
         // Refresh stats
         const stats = await getPotStats(contractAddress, address);
         if (stats.success) {
           setPotStats(stats.stats);
         }
       } else {
-        alert(result.error);
+        showAlert(result.error, 'error', 'Error');
       }
     } catch (error) {
       console.error('Error setting outcome:', error);
-      alert('Failed to set outcome');
+      showAlert('Failed to set outcome', 'error', 'Operation Failed');
     }
   };
 
@@ -450,17 +561,17 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const result = await updatePotEntryAmount(contractAddress, address, amount);
       
       if (result.success) {
-        alert('Entry amount updated successfully!');
+        showAlert('Entry amount updated successfully!', 'success', 'Updated!');
         // Refresh pot details
         const details = await getPotDetails(contractAddress);
         setPotDetails(details);
         setNewEntryAmount('');
       } else {
-        alert(result.error);
+        showAlert(result.error, 'error', 'Error');
       }
     } catch (error) {
       console.error('Error updating entry amount:', error);
-      alert('Failed to update entry amount');
+      showAlert('Failed to update entry amount', 'error', 'Update Failed');
     }
   };
 
@@ -476,7 +587,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const result = await updatePotDetails(contractAddress, address, updates);
       
       if (result.success) {
-        alert('Market details updated successfully!');
+        showAlert('Market details updated successfully!', 'success', 'Updated!');
         // Refresh pot details
         const details = await getPotDetails(contractAddress);
         setPotDetails(details);
@@ -484,11 +595,11 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         setEditingPotName('');
         setEditingDescription('');
       } else {
-        alert(result.error);
+        showAlert(result.error, 'error', 'Error');
       }
     } catch (error) {
       console.error('Error updating pot details:', error);
-      alert('Failed to update market details');
+      showAlert('Failed to update market details', 'error', 'Update Failed');
     }
   };
 
@@ -522,7 +633,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const predictions = await getPredictionsForDate(contractAddress, predictionDate);
       
       if (!predictions || predictions.length === 0) {
-        alert('No predictions found for today. Cannot distribute rewards.');
+        showAlert('No predictions found for today. Cannot distribute rewards.', 'warning', 'No Predictions');
         return;
       }
 
@@ -532,7 +643,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         .map((p: any) => p.wallet_address as `0x${string}`);
 
       if (winners.length === 0) {
-        alert(`No winners found. All participants predicted ${outcome === 'positive' ? 'negative' : 'positive'}.`);
+        showAlert(`No winners found. All participants predicted ${outcome === 'positive' ? 'negative' : 'positive'}.`, 'info', 'No Winners');
         return;
       }
 
@@ -563,11 +674,45 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       (window as any).pendingWinners = winners;
     } catch (error) {
       console.error('Error distributing pot:', error);
-      alert('Failed to distribute market. Check console for details.');
+      showAlert('Failed to distribute market. Check console for details.', 'error', 'Distribution Failed');
       // Reset loading states on error (EXACTLY like PredictionPotTest)
       setLastAction('');
       setIsLoading(false);
     }
+  };
+
+  // Load participants with their prediction status and emails
+  const loadParticipantsData = async () => {
+    setLoadingParticipants(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const participants = await getParticipantsWithDetails(contractAddress, today);
+      
+      // Fetch emails for participants who have them
+      const participantsWithEmails = await Promise.all(
+        participants.map(async (participant: any) => {
+          const email = await getUserEmail(participant.wallet_address);
+          return {
+            ...participant,
+            email,
+            displayName: email || `${participant.wallet_address.slice(0, 6)}...${participant.wallet_address.slice(-4)}`,
+            predictionStatus: participant.prediction ? participant.prediction : 'Pending'
+          };
+        })
+      );
+      
+      setParticipantsData(participantsWithEmails);
+    } catch (error) {
+      console.error('Error loading participants data:', error);
+      showAlert('Failed to load participants data', 'error', 'Error');
+    }
+    setLoadingParticipants(false);
+  };
+
+  // Handle clicking on participants count
+  const handleParticipantsClick = () => {
+    setShowParticipantsModal(true);
+    loadParticipantsData();
   };
 
   // Generate shareable URL for this pot
@@ -705,10 +850,14 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                   <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{formatUSDC(potBalance)}</div>
                   <div className="text-xs sm:text-sm text-gray-500">USDC Balance</div>
                 </div>
-                <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
+                <button
+                  onClick={handleParticipantsClick}
+                  className="p-3 sm:p-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-black transition-colors w-full"
+                >
                   <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potParticipants?.length || 0}</div>
                   <div className="text-xs sm:text-sm text-gray-500">Participants</div>
-                </div>
+                  <div className="text-xs text-blue-600 mt-1">Click to view</div>
+                </button>
               </div>
             </div>
             
@@ -1030,6 +1179,219 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           )}
         </div>
       </div>
+      
+      {/* Custom Alert */}
+      <CustomAlert
+        isOpen={alertState.isOpen}
+        onClose={closeAlert}
+        title={alertState.title}
+        message={alertState.message}
+        type={alertState.type}
+        autoClose={alertState.autoClose}
+      />
+      
+      {/* Email Collection Modal */}
+      <EmailCollectionModal
+        isOpen={showEmailModal}
+        onClose={hideEmailModal}
+        onSubmit={handleEmailSubmit}
+        sourcePage="PrivatePot"
+      />
+
+      {/* Participants Modal */}
+      {showParticipantsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-light text-black">Market Participants</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">{participantsData.length} participants in this market</p>
+              </div>
+              <button
+                onClick={() => setShowParticipantsModal(false)}
+                className="text-gray-400 hover:text-black transition-colors p-1 sm:p-2 hover:bg-gray-100 rounded-full"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+              {loadingParticipants ? (
+                <div className="text-center py-12">
+                  <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600">Loading participants...</p>
+                </div>
+              ) : participantsData.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-black mb-2">No Participants Yet</h3>
+                  <p className="text-gray-500">This market doesn't have any participants yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Desktop Table Header - Hidden on Mobile */}
+                  <div className="hidden md:grid md:grid-cols-4 gap-4 pb-3 border-b border-gray-200 text-sm font-medium text-gray-500 uppercase tracking-wide">
+                    <div>Participant</div>
+                    <div>Entry Amount</div>
+                    <div>Prediction</div>
+                    <div>Joined</div>
+                  </div>
+
+                  {/* Participants List */}
+                  {participantsData.map((participant, index) => (
+                    <React.Fragment key={participant.wallet_address}>
+                      {/* Mobile Card Layout */}
+                      <div className="block md:hidden bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors mb-3">
+                        <div className="flex items-start space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            {participant.email ? participant.email.charAt(0).toUpperCase() : (index + 1)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-black text-sm mb-1 truncate">
+                              {participant.email || `${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
+                            </div>
+                            {participant.email && (
+                              <div className="text-xs text-gray-500 break-all">
+                                {participant.wallet_address.slice(0, 12)}...{participant.wallet_address.slice(-8)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Entry</div>
+                            <div className="font-medium text-black">
+                              ${(participant.entry_amount / 1_000_000).toFixed(2)}
+                              <span className="text-gray-500 text-xs ml-1">USDC</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Prediction</div>
+                            {participant.predictionStatus === 'Pending' ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Pending
+                              </span>
+                            ) : participant.predictionStatus === 'positive' ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 font-medium">
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                YES
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 font-medium">
+                                <TrendingDown className="w-3 h-3 mr-1" />
+                                NO
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Joined</div>
+                            <div className="text-xs text-gray-600">
+                              {new Date(participant.joined_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Desktop Table Row */}
+                      <div className="hidden md:grid md:grid-cols-4 gap-4 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors rounded-lg">
+                        {/* Participant Name/Address */}
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
+                            {participant.email ? participant.email.charAt(0).toUpperCase() : (index + 1)}
+                          </div>
+                          <div>
+                            <div className="font-medium text-black">
+                              {participant.email || `${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
+                            </div>
+                            {participant.email && (
+                              <div className="text-xs text-gray-500 break-all">
+                                {participant.wallet_address.slice(0, 12)}...{participant.wallet_address.slice(-8)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Entry Amount */}
+                        <div className="flex items-center">
+                          <span className="text-gray-900 font-medium">
+                            ${(participant.entry_amount / 1_000_000).toFixed(2)}
+                          </span>
+                          <span className="text-gray-500 text-sm ml-1">USDC</span>
+                        </div>
+
+                        {/* Prediction Status */}
+                        <div className="flex items-center">
+                          {participant.predictionStatus === 'Pending' ? (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">
+                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              Pending
+                            </span>
+                          ) : participant.predictionStatus === 'positive' ? (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 font-medium">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              YES
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800 font-medium">
+                              <TrendingDown className="w-3 h-3 mr-1" />
+                              NO
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Join Date */}
+                        <div className="flex items-center">
+                          <span className="text-gray-600 text-sm">
+                            {new Date(participant.joined_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-gray-200 p-3 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+                  <span className="font-medium text-black">{participantsData.filter(p => p.predictionStatus !== 'Pending').length}</span> 
+                  {' '}of {participantsData.length} participants have made predictions
+                </div>
+                <button
+                  onClick={() => setShowParticipantsModal(false)}
+                  className="w-full sm:w-auto bg-black text-white px-6 py-2 rounded hover:bg-gray-900 transition-colors text-sm sm:text-base"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

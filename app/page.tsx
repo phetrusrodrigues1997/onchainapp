@@ -224,6 +224,7 @@ export default function App() {
           {activeSection === "privatePot" && privatePotAddress && (
             <PrivatePotInterface 
               contractAddress={privatePotAddress} 
+              activeSection={activeSection}
               onBack={() => {
                 setActiveSection('home');
                 setPrivatePotAddress('');

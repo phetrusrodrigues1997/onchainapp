@@ -5,6 +5,36 @@ import { PrivatePots } from "./schema2";
 import { eq, sql } from "drizzle-orm";
 import { pgTable, text, boolean, serial, timestamp, integer } from "drizzle-orm/pg-core";
 
+// Security validation functions
+const isValidEthereumAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+};
+
+const sanitizeString = (input: string): string => {
+  return input.trim().replace(/[<>"\\']/g, '');
+};
+
+const isValidPrediction = (prediction: string): prediction is 'positive' | 'negative' => {
+  return ['positive', 'negative'].includes(prediction);
+};
+
+const sanitizeTableName = (contractAddress: string): string => {
+  // Remove 0x prefix and ensure only hexadecimal characters
+  const clean = contractAddress.toLowerCase().replace('0x', '').replace(/[^a-f0-9]/g, '');
+  if (clean.length !== 40) {
+    throw new Error('Invalid contract address for table name');
+  }
+  return clean;
+};
+
+const validatePotName = (potName: string): boolean => {
+  return potName.length >= 1 && potName.length <= 100 && !/[<>"\\'`]/.test(potName);
+};
+
+const validateDescription = (description: string): boolean => {
+  return description.length <= 500 && !/[<>"\\'`]/.test(description);
+};
+
 // ========== POT MANAGEMENT ==========
 
 /**
@@ -17,16 +47,52 @@ export async function createPrivatePot(
   description: string
 ) {
   try {
-    // Insert pot into master table
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return { success: false, error: "Invalid contract address" };
+    }
+    if (!creatorAddress || typeof creatorAddress !== 'string') {
+      return { success: false, error: "Invalid creator address" };
+    }
+    if (!potName || typeof potName !== 'string') {
+      return { success: false, error: "Invalid pot name" };
+    }
+    if (!description || typeof description !== 'string') {
+      return { success: false, error: "Invalid description" };
+    }
+
+    // Sanitize inputs
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    const sanitizedCreatorAddress = sanitizeString(creatorAddress);
+    const sanitizedPotName = sanitizeString(potName);
+    const sanitizedDescription = sanitizeString(description);
+
+    // Validate Ethereum addresses
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      return { success: false, error: "Invalid contract address format" };
+    }
+    if (!isValidEthereumAddress(sanitizedCreatorAddress)) {
+      return { success: false, error: "Invalid creator address format" };
+    }
+
+    // Validate pot name and description
+    if (!validatePotName(sanitizedPotName)) {
+      return { success: false, error: "Invalid pot name" };
+    }
+    if (!validateDescription(sanitizedDescription)) {
+      return { success: false, error: "Invalid description" };
+    }
+
+    // Insert pot into master table with validated data
     const result = await db2.insert(PrivatePots).values({
-      contractAddress: contractAddress.toLowerCase(),
-      creatorAddress: creatorAddress.toLowerCase(),
-      potName,
-      description,
+      contractAddress: sanitizedContractAddress.toLowerCase(),
+      creatorAddress: sanitizedCreatorAddress.toLowerCase(),
+      potName: sanitizedPotName,
+      description: sanitizedDescription,
     }).returning();
 
     // Create the dynamic tables for this pot
-    await createPotTables(contractAddress);
+    await createPotTables(sanitizedContractAddress);
 
     return { success: true, pot: result[0] };
   } catch (error) {
@@ -39,12 +105,26 @@ export async function createPrivatePot(
  * Create all necessary tables for a specific pot
  */
 export async function createPotTables(contractAddress: string) {
-  const cleanAddress = contractAddress.toLowerCase().replace('0x', '');
-  
   try {
-    // Create predictions table
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      throw new Error("Invalid contract address");
+    }
+
+    const sanitizedAddress = sanitizeString(contractAddress);
+    
+    // Validate Ethereum address format
+    if (!isValidEthereumAddress(sanitizedAddress)) {
+      throw new Error("Invalid Ethereum address format");
+    }
+
+    // Sanitize table name - CRITICAL for SQL injection prevention
+    const cleanAddress = sanitizeTableName(sanitizedAddress);
+  
+    // Create predictions table with properly sanitized table name
+    const predictionsTableName = `pot_${cleanAddress}_predictions`;
     await db2.execute(sql`
-      CREATE TABLE IF NOT EXISTS ${sql.identifier(`pot_${cleanAddress}_predictions`)} (
+      CREATE TABLE IF NOT EXISTS ${sql.identifier(predictionsTableName)} (
         id SERIAL PRIMARY KEY,
         wallet_address TEXT NOT NULL,
         prediction TEXT NOT NULL,
@@ -54,8 +134,9 @@ export async function createPotTables(contractAddress: string) {
     `);
 
     // Create participants table  
+    const participantsTableName = `pot_${cleanAddress}_participants`;
     await db2.execute(sql`
-      CREATE TABLE IF NOT EXISTS ${sql.identifier(`pot_${cleanAddress}_participants`)} (
+      CREATE TABLE IF NOT EXISTS ${sql.identifier(participantsTableName)} (
         id SERIAL PRIMARY KEY,
         wallet_address TEXT NOT NULL,
         entry_amount INTEGER NOT NULL,
@@ -65,8 +146,9 @@ export async function createPotTables(contractAddress: string) {
     `);
 
     // Create wrong predictions table
+    const wrongPredictionsTableName = `pot_${cleanAddress}_wrong_predictions`;
     await db2.execute(sql`
-      CREATE TABLE IF NOT EXISTS ${sql.identifier(`pot_${cleanAddress}_wrong_predictions`)} (
+      CREATE TABLE IF NOT EXISTS ${sql.identifier(wrongPredictionsTableName)} (
         id SERIAL PRIMARY KEY,
         wallet_address TEXT NOT NULL,
         re_entry_fee INTEGER NOT NULL,
@@ -91,8 +173,21 @@ export async function createPotTables(contractAddress: string) {
  */
 export async function getPotDetails(contractAddress: string) {
   try {
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return null;
+    }
+
+    const sanitizedAddress = sanitizeString(contractAddress);
+    
+    // Validate Ethereum address format
+    if (!isValidEthereumAddress(sanitizedAddress)) {
+      console.error("Invalid Ethereum address format in getPotDetails");
+      return null;
+    }
+
     const result = await db2.select().from(PrivatePots)
-      .where(eq(PrivatePots.contractAddress, contractAddress.toLowerCase()))
+      .where(eq(PrivatePots.contractAddress, sanitizedAddress.toLowerCase()))
       .limit(1);
     
     return result[0] || null;
@@ -129,28 +224,66 @@ export async function makePrediction(
   predictionDate: string
 ) {
   try {
-    const tableName = getTableName(contractAddress, 'predictions');
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return { success: false, error: "Invalid contract address" };
+    }
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      return { success: false, error: "Invalid wallet address" };
+    }
+    if (!prediction || typeof prediction !== 'string') {
+      return { success: false, error: "Invalid prediction" };
+    }
+    if (!predictionDate || typeof predictionDate !== 'string') {
+      return { success: false, error: "Invalid prediction date" };
+    }
+
+    // Sanitize inputs
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    const sanitizedWalletAddress = sanitizeString(walletAddress);
+    const sanitizedPrediction = sanitizeString(prediction);
+    const sanitizedDate = sanitizeString(predictionDate);
+
+    // Validate Ethereum addresses
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      return { success: false, error: "Invalid contract address format" };
+    }
+    if (!isValidEthereumAddress(sanitizedWalletAddress)) {
+      return { success: false, error: "Invalid wallet address format" };
+    }
+
+    // Validate prediction
+    if (!isValidPrediction(sanitizedPrediction)) {
+      return { success: false, error: "Invalid prediction value" };
+    }
+
+    // Validate date format (basic check for ISO date)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(sanitizedDate)) {
+      return { success: false, error: "Invalid date format" };
+    }
+
+    const tableName = getTableName(sanitizedContractAddress, 'predictions');
     
     // Check if user already made a prediction for this date
     const existing = await db2.execute(sql`
       SELECT * FROM ${sql.identifier(tableName)} 
-      WHERE wallet_address = ${walletAddress.toLowerCase()} 
-      AND prediction_date = ${predictionDate}
+      WHERE wallet_address = ${sanitizedWalletAddress.toLowerCase()} 
+      AND prediction_date = ${sanitizedDate}
     `);
 
     if (existing.rows.length > 0) {
       // Update existing prediction
       await db2.execute(sql`
         UPDATE ${sql.identifier(tableName)} 
-        SET prediction = ${prediction}, created_at = NOW()
-        WHERE wallet_address = ${walletAddress.toLowerCase()} 
-        AND prediction_date = ${predictionDate}
+        SET prediction = ${sanitizedPrediction}, created_at = NOW()
+        WHERE wallet_address = ${sanitizedWalletAddress.toLowerCase()} 
+        AND prediction_date = ${sanitizedDate}
       `);
     } else {
       // Create new prediction
       await db2.execute(sql`
         INSERT INTO ${sql.identifier(tableName)} (wallet_address, prediction, prediction_date)
-        VALUES (${walletAddress.toLowerCase()}, ${prediction}, ${predictionDate})
+        VALUES (${sanitizedWalletAddress.toLowerCase()}, ${sanitizedPrediction}, ${sanitizedDate})
       `);
     }
 
@@ -170,12 +303,44 @@ export async function getUserPrediction(
   predictionDate: string
 ) {
   try {
-    const tableName = getTableName(contractAddress, 'predictions');
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return null;
+    }
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      return null;
+    }
+    if (!predictionDate || typeof predictionDate !== 'string') {
+      return null;
+    }
+
+    // Sanitize inputs
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    const sanitizedWalletAddress = sanitizeString(walletAddress);
+    const sanitizedDate = sanitizeString(predictionDate);
+
+    // Validate Ethereum addresses
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      console.error("Invalid contract address format in getUserPrediction");
+      return null;
+    }
+    if (!isValidEthereumAddress(sanitizedWalletAddress)) {
+      console.error("Invalid wallet address format in getUserPrediction");
+      return null;
+    }
+
+    // Validate date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(sanitizedDate)) {
+      console.error("Invalid date format in getUserPrediction");
+      return null;
+    }
+
+    const tableName = getTableName(sanitizedContractAddress, 'predictions');
     
     const result = await db2.execute(sql`
       SELECT * FROM ${sql.identifier(tableName)} 
-      WHERE wallet_address = ${walletAddress.toLowerCase()} 
-      AND prediction_date = ${predictionDate}
+      WHERE wallet_address = ${sanitizedWalletAddress.toLowerCase()} 
+      AND prediction_date = ${sanitizedDate}
     `);
 
     return result.rows[0] || null;
@@ -265,6 +430,55 @@ export async function getParticipants(contractAddress: string) {
     return result.rows;
   } catch (error) {
     console.error("Error getting participants:", error);
+    return [];
+  }
+}
+
+/**
+ * Get participants with their prediction status and email (if available)
+ */
+export async function getParticipantsWithDetails(
+  contractAddress: string,
+  predictionDate?: string
+) {
+  try {
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return [];
+    }
+
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    
+    // Validate Ethereum address
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      console.error("Invalid contract address format in getParticipantsWithDetails");
+      return [];
+    }
+
+    // Use today's date if not provided
+    const dateToCheck = predictionDate || new Date().toISOString().split('T')[0];
+    
+    const participantsTable = getTableName(sanitizedContractAddress, 'participants');
+    const predictionsTable = getTableName(sanitizedContractAddress, 'predictions');
+    
+    // Get participants with their prediction status
+    const result = await db2.execute(sql`
+      SELECT 
+        p.wallet_address,
+        p.entry_amount,
+        p.joined_at,
+        pred.prediction,
+        pred.prediction_date
+      FROM ${sql.identifier(participantsTable)} p
+      LEFT JOIN ${sql.identifier(predictionsTable)} pred 
+        ON p.wallet_address = pred.wallet_address 
+        AND pred.prediction_date = ${dateToCheck}
+      ORDER BY p.joined_at ASC
+    `);
+
+    return result.rows;
+  } catch (error) {
+    console.error("Error getting participants with details:", error);
     return [];
   }
 }

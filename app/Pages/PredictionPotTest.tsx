@@ -17,6 +17,8 @@ import {
   debugWrongPredictions,
   clearWrongPredictionsForWallet
 } from '../Database/actions';
+import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
+import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
 
 // Define table identifiers instead of passing table objects
@@ -134,6 +136,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
   const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
+  
+  // Email collection hook
+  const { showModal: showEmailModal, isEmailCollected, showEmailModal: triggerEmailModal, hideEmailModal, markEmailCollected, setIsEmailCollected, isDismissed } = useEmailCollection(address);
   
   // Countdown state for when pot reopens (Sunday)
   const [timeUntilReopening, setTimeUntilReopening] = useState<{
@@ -272,6 +277,46 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       }, 3000);
     }
   }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
+
+  // Email collection effect - check if user's email exists when wallet connects
+  useEffect(() => {
+    const checkUserEmail = async () => {
+      if (address && !isEmailCollected) {
+        try {
+          const emailExists = await checkEmailExists(address);
+          if (emailExists) {
+            markEmailCollected();
+          } else {
+            // Show email modal after a short delay on first interaction
+            setTimeout(() => {
+              triggerEmailModal();
+            }, 2000);
+          }
+        } catch (error) {
+          console.error('Error checking email:', error);
+        }
+      }
+    };
+    
+    checkUserEmail();
+  }, [address, isEmailCollected, markEmailCollected, triggerEmailModal]);
+
+  // Handle email submission
+  const handleEmailSubmit = async (email: string) => {
+    if (!address) return;
+    
+    try {
+      const result = await saveUserEmail(address, email, 'PredictionPot');
+      if (result.success) {
+        markEmailCollected();
+      } else {
+        throw new Error(result.error || 'Failed to save email');
+      }
+    } catch (error) {
+      console.error('Error saving email:', error);
+      throw error; // Re-throw so modal can show error
+    }
+  };
 
   // Read contract data
   const { data: participants } = useReadContract({
@@ -1273,6 +1318,14 @@ useEffect(() => {
           )}
         </div>
       </div>
+      
+      {/* Email Collection Modal */}
+      <EmailCollectionModal
+        isOpen={showEmailModal}
+        onClose={hideEmailModal}
+        onSubmit={handleEmailSubmit}
+        sourcePage="PredictionPot"
+      />
     </div>
   );
 };

@@ -22,43 +22,63 @@ const HowItWorksSection: React.FC = () => {
   const faqItems: FAQItem[] = [
     {
       question: "How does PrediWin work?",
-      answer: "PrediWin.com is a prediction market platform where users compete to predict various world events and outcomes. Every week, users enter prediction markets beginning on Sundays, make predictions about tomorrow's global events everyday of the week, and winners split the reward equally on Saturday."
+      answer: "PrediWin.com is a prediction market platform with two main types: Public Markets (weekly competitions on global events) and Private Markets (custom markets you create for friends). Public markets run Sunday-Friday with increasing entry fees, while Private Markets let you create custom topics and invite friends via shareable links."
+    },
+    {
+      question: "What are Private Markets and how do they work?",
+      answer: "Private Markets are custom prediction markets you create on any topic - crypto prices, sports outcomes, world events, or fun questions with friends. As the creator, you set the entry fee, invite participants via a shareable link, and decide the winners. It's perfect for friend groups, teams, or communities who want their own prediction competitions."
+    },
+    {
+      question: "How do I create and share a Private Market?",
+      answer: "Go to 'Private Markets' in the navigation menu, set your market name and description, then deploy it for minimal gas fees (~$0.01-0.05 on Base). You'll receive a shareable URL that you can send to friends via text, social media, or email. Anyone with the link can join your market by paying the entry fee you set."
+    },
+    {
+      question: "Who controls Private Markets?",
+      answer: "As the market creator, you have full control. You set the entry amount, manage participants, decide when to close entries, determine the winning outcome, and distribute rewards to winners. The platform provides tools to see all participants and their predictions in a beautiful interface."
+    },
+    {
+      question: "How do Private Market participants join?",
+      answer: "Friends click your shared link, connect their wallet, pay the entry fee in USDC, and make their prediction. They can see all other participants (by wallet address or email if submitted), entry amounts, and prediction status. It's fully transparent so everyone can see who predicted what."
     },
     {
       question: "Why do I need Ethereum to place predictions?",
       answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering markets, making predictions, and claiming winnings. You'll also need USDC to pay the actual market's entry fees."
     },
     {
-      question: "What is the weekly schedule?",
-      answer: "Sunday-Friday: Market entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - markets are closed and winners are determined at midnight UTC with market distribution."
+      question: "What is the weekly schedule for Public Markets?",
+      answer: "Sunday-Friday: Market entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - markets are closed and winners are determined at midnight UTC with market distribution. Private Markets have no schedule - you control when they open and close."
     },
     {
-      question: "How are entry fees calculated?",
-      answer: "Entry fees follow a dynamic pricing model to encourage early participation: Sunday (0.01 USDC), Monday (0.02 USDC), Tuesday (0.03 USDC), Wednesday (0.04 USDC), Thursday (0.05 USDC), Friday (0.06 USDC). Saturday is closed for results."
+      question: "How are entry fees calculated in Public Markets?",
+      answer: "Public Markets follow a dynamic pricing model to encourage early participation: Sunday (0.01 USDC), Monday (0.02 USDC), Tuesday (0.03 USDC), Wednesday (0.04 USDC), Thursday (0.05 USDC), Friday (0.06 USDC). Saturday is closed for results. Private Markets let you set any entry fee you want."
     },
     {
       question: "What happens if I make a wrong prediction?",
-      answer: "If you predict incorrectly, you'll be blocked from future prediction rounds. However, you can re-enter by paying the current day's entry fee. This gives you another chance to participate in the markets."
+      answer: "In Public Markets: If you predict incorrectly, you'll be blocked from future rounds but can re-enter by paying the current day's entry fee. In Private Markets: The market creator decides the outcome and winners - there's no automatic blocking system."
     },
     {
       question: "How does the referral system work?",
-      answer: "Each user gets a unique 8-character referral code. When 3 friends enter markets using your code and make confirmed USDC payments, you earn 1 free market entry. This system includes fraud protection to ensure legitimate referrals."
+      answer: "Each user gets a unique 8-character referral code. When 3 friends enter markets using your code and make confirmed USDC payments, you earn 1 free market entry. This system includes fraud protection to ensure legitimate referrals and works for both Public and Private Markets."
     },
     {
       question: "What types of events can I predict?",
-      answer: "The platform supports predictions on various world events including cryptocurrency price movements, stock market outcomes, sports events, political developments, and other measurable real-world occurrences. New event categories are regularly added based on user interest."
+      answer: "Public Markets cover cryptocurrency prices, stock movements, sports, and world events. Private Markets are unlimited - create markets on anything: 'Will it rain tomorrow?', 'Who wins the office fantasy league?', 'Will our friend get the job?', crypto prices, sports bets with friends, or any measurable outcome you can think of."
     },
     {
       question: "How do I make predictions?",
-      answer: "After entering a market, you can make predictions about specific event outcomes (such as whether a price will go up/down, a team will win/lose, or an event will occur). You can make one prediction per event per day and update it before the cutoff time."
+      answer: "After entering a market, you choose YES or NO for the outcome (or positive/negative for price movements). In Public Markets, you can make one prediction per day and update it before cutoff. In Private Markets, you typically make one prediction per market topic set by the creator."
     },
     {
-      question: "When are winners determined?",
-      answer: "Winners are determined every Saturday at midnight UTC based on actual event outcomes. If the event result matches what you predicted, you're a winner and share the reward equally with other correct predictors."
+      question: "When and how are winners determined?",
+      answer: "Public Markets: Winners are determined every Saturday at midnight UTC based on actual event outcomes. Private Markets: The market creator decides when to close predictions, determines the actual outcome, and distributes rewards to winners through the smart contract."
     },
     {
       question: "How do I get my winnings?",
-      answer: "Winnings are automatically distributed through smart contracts on the Base network. Once you're determined as a winner, the USDC is sent directly to your connected wallet - no manual claiming required."
+      answer: "Winnings are automatically distributed through smart contracts on the Base network. Once you're determined as a winner, the USDC is sent directly to your connected wallet - no manual claiming required. This works the same for both Public and Private Markets."
+    },
+    {
+      question: "What's the difference between Public and Private Markets?",
+      answer: "Public Markets: Weekly competitions, set schedule, automatic outcomes, compete with everyone. Private Markets: You create custom topics, set your own rules, invite specific friends, control timing and outcomes. Both use the same USDC payment system and smart contracts for security."
     },
     {
       question: "Can I participate without crypto experience?",
@@ -66,7 +86,7 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       question: "Is this gambling?",
-      answer: "PrediWin is a prediction market platform focused on forecasting skills rather than gambling. Users make informed predictions about real-world events using their knowledge and analysis, similar to platforms like Polymarket or Kalshi."
+      answer: "PrediWin is a prediction market platform focused on forecasting skills rather than gambling. Users make informed predictions about real-world events using their knowledge and analysis, similar to platforms like Polymarket or Kalshi. Private Markets add a social element where friends compete on topics they care about."
     }
   ];
 

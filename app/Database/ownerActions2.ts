@@ -4,6 +4,19 @@ import { db2, getTableName } from "./db2";
 import { PrivatePots } from "./schema2";
 import { eq, sql } from "drizzle-orm";
 
+// Security validation functions
+const isValidEthereumAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+};
+
+const sanitizeString = (input: string): string => {
+  return input.trim().replace(/[<>"\\']/g, '');
+};
+
+const isValidOutcome = (outcome: string): outcome is 'positive' | 'negative' => {
+  return ['positive', 'negative'].includes(outcome);
+};
+
 // ========== POT CREATOR ACTIONS ==========
 
 /**
@@ -14,19 +27,39 @@ export async function closePotEntries(
   creatorAddress: string
 ) {
   try {
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return { success: false, error: "Invalid contract address" };
+    }
+    if (!creatorAddress || typeof creatorAddress !== 'string') {
+      return { success: false, error: "Invalid creator address" };
+    }
+
+    // Sanitize inputs
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    const sanitizedCreatorAddress = sanitizeString(creatorAddress);
+
+    // Validate Ethereum addresses
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      return { success: false, error: "Invalid contract address format" };
+    }
+    if (!isValidEthereumAddress(sanitizedCreatorAddress)) {
+      return { success: false, error: "Invalid creator address format" };
+    }
+
     // Verify the caller is the pot creator
     const pot = await db2.select().from(PrivatePots)
-      .where(eq(PrivatePots.contractAddress, contractAddress.toLowerCase()))
+      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()))
       .limit(1);
 
-    if (!pot[0] || pot[0].creatorAddress !== creatorAddress.toLowerCase()) {
+    if (!pot[0] || pot[0].creatorAddress !== sanitizedCreatorAddress.toLowerCase()) {
       return { success: false, error: "Not authorized - only pot creator can close entries" };
     }
 
     // Update pot status
     await db2.update(PrivatePots)
       .set({ isActive: false })
-      .where(eq(PrivatePots.contractAddress, contractAddress.toLowerCase()));
+      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()));
 
     return { success: true };
   } catch (error) {
@@ -45,22 +78,60 @@ export async function setPotOutcome(
   correctOutcome: string // "positive", "negative", or custom value
 ) {
   try {
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return { success: false, error: "Invalid contract address" };
+    }
+    if (!creatorAddress || typeof creatorAddress !== 'string') {
+      return { success: false, error: "Invalid creator address" };
+    }
+    if (!predictionDate || typeof predictionDate !== 'string') {
+      return { success: false, error: "Invalid prediction date" };
+    }
+    if (!correctOutcome || typeof correctOutcome !== 'string') {
+      return { success: false, error: "Invalid outcome" };
+    }
+
+    // Sanitize inputs
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    const sanitizedCreatorAddress = sanitizeString(creatorAddress);
+    const sanitizedDate = sanitizeString(predictionDate);
+    const sanitizedOutcome = sanitizeString(correctOutcome);
+
+    // Validate Ethereum addresses
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      return { success: false, error: "Invalid contract address format" };
+    }
+    if (!isValidEthereumAddress(sanitizedCreatorAddress)) {
+      return { success: false, error: "Invalid creator address format" };
+    }
+
+    // Validate date format
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(sanitizedDate)) {
+      return { success: false, error: "Invalid date format" };
+    }
+
+    // Validate outcome
+    if (!isValidOutcome(sanitizedOutcome)) {
+      return { success: false, error: "Invalid outcome value" };
+    }
+
     // Verify the caller is the pot creator
     const pot = await db2.select().from(PrivatePots)
-      .where(eq(PrivatePots.contractAddress, contractAddress.toLowerCase()))
+      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()))
       .limit(1);
 
-    if (!pot[0] || pot[0].creatorAddress !== creatorAddress.toLowerCase()) {
+    if (!pot[0] || pot[0].creatorAddress !== sanitizedCreatorAddress.toLowerCase()) {
       return { success: false, error: "Not authorized - only pot creator can set outcomes" };
     }
 
-    const predictionsTable = getTableName(contractAddress, 'predictions');
-    const wrongPredictionsTable = getTableName(contractAddress, 'wrong_predictions');
+    const predictionsTable = getTableName(sanitizedContractAddress, 'predictions');
+    const wrongPredictionsTable = getTableName(sanitizedContractAddress, 'wrong_predictions');
 
     // Get all predictions for this date
     const predictions = await db2.execute(sql`
       SELECT * FROM ${sql.identifier(predictionsTable)} 
-      WHERE prediction_date = ${predictionDate}
+      WHERE prediction_date = ${sanitizedDate}
     `);
 
     // Separate winners and losers
@@ -68,7 +139,7 @@ export async function setPotOutcome(
     const losers: string[] = [];
 
     predictions.rows.forEach((row: any) => {
-      if (row.prediction === correctOutcome) {
+      if (row.prediction === sanitizedOutcome) {
         winners.push(row.wallet_address);
       } else {
         losers.push(row.wallet_address);
