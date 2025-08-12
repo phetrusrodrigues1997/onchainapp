@@ -22,7 +22,8 @@ import {
   getPotStats,
   clearWrongPredictionsForUser,
   getWrongPredictors,
-  updatePotEntryAmount
+  updatePotEntryAmount,
+  updatePotDetails
 } from '../Database/ownerActions2';
 
 // Contract ABI for individual pot contracts (clones)
@@ -159,6 +160,9 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   const [isPotLoading, setIsPotLoading] = useState(true); // Pot details loading state
   const [lastAction, setLastAction] = useState(''); // Track transaction types
   const [shareUrlCopied, setShareUrlCopied] = useState(false); // Track if share URL was copied
+  const [isEditingDetails, setIsEditingDetails] = useState(false); // Edit mode for pot details
+  const [editingPotName, setEditingPotName] = useState(''); // Editing pot name
+  const [editingDescription, setEditingDescription] = useState(''); // Editing description
 
   const { address } = useAccount();
   const queryClient = useQueryClient();
@@ -407,7 +411,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const userPred = await getUserPrediction(contractAddress, address, predictionDate);
       setUserPrediction(userPred);
       
-      alert('Prediction saved successfully!');
+      // alert('Prediction saved successfully!');
     } catch (error) {
       console.error('Error making prediction:', error);
       alert('Failed to save prediction');
@@ -460,6 +464,48 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
+  // Handle updating pot details (creator only)
+  const handleUpdatePotDetails = async () => {
+    if (!address || !isCreator || (!editingPotName.trim() && !editingDescription.trim())) return;
+
+    try {
+      const updates: { potName?: string; description?: string } = {};
+      if (editingPotName.trim()) updates.potName = editingPotName.trim();
+      if (editingDescription.trim()) updates.description = editingDescription.trim();
+
+      const result = await updatePotDetails(contractAddress, address, updates);
+      
+      if (result.success) {
+        alert('Market details updated successfully!');
+        // Refresh pot details
+        const details = await getPotDetails(contractAddress);
+        setPotDetails(details);
+        setIsEditingDetails(false);
+        setEditingPotName('');
+        setEditingDescription('');
+      } else {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error('Error updating pot details:', error);
+      alert('Failed to update market details');
+    }
+  };
+
+  // Start editing mode
+  const startEditingDetails = () => {
+    setEditingPotName(potDetails?.potName || '');
+    setEditingDescription(potDetails?.description || '');
+    setIsEditingDetails(true);
+  };
+
+  // Cancel editing mode
+  const cancelEditingDetails = () => {
+    setIsEditingDetails(false);
+    setEditingPotName('');
+    setEditingDescription('');
+  };
+
   
 
   // Handle distributing pot to winners (matching PredictionPotTest pattern)
@@ -496,7 +542,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         `• Outcome: ${outcome.toUpperCase()} predictions won\n` +
         `• Winners: ${winners.length} participants\n` +
         `• Reward per winner: ${(Number(potBalance) / 1_000_000 / winners.length).toFixed(4)} USDC\n\n` +
-        `This will close the pot and distribute rewards automatically.`
+        `This will close the market and distribute rewards automatically.`
       );
 
       if (!confirmed) return;
@@ -517,7 +563,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       (window as any).pendingWinners = winners;
     } catch (error) {
       console.error('Error distributing pot:', error);
-      alert('Failed to distribute pot. Check console for details.');
+      alert('Failed to distribute market. Check console for details.');
       // Reset loading states on error (EXACTLY like PredictionPotTest)
       setLastAction('');
       setIsLoading(false);
@@ -527,7 +573,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   // Generate shareable URL for this pot
   const generateShareUrl = () => {
     const baseUrl = window.location.origin;
-    return `${baseUrl}?pot=${contractAddress}`;
+    return `${baseUrl}?market=${contractAddress}`;
   };
 
   // Copy share URL to clipboard
@@ -573,7 +619,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
               
               <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
-                Loading Private Pot
+                Loading Private Market
               </h1>
               
               {/* Loading dots animation */}
@@ -599,7 +645,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading pot details...</p>
+          <p className="text-gray-600">Loading market details...</p>
         </div>
       </div>
     );
@@ -615,9 +661,9 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-light text-black mb-4">Pot Not Found</h2>
+          <h2 className="text-2xl font-light text-black mb-4">Market Not Found</h2>
           <p className="text-gray-600 mb-6">
-            This prediction pot doesn't exist or hasn't been registered in our system yet.
+            This prediction market doesn't exist or hasn't been registered in our system yet.
           </p>
           <div className="space-y-3">
             <p className="text-sm text-gray-500">Contract Address:</p>
@@ -643,7 +689,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             onClick={onBack}
             className="text-gray-600 hover:text-black mb-4 sm:mb-6 flex items-center gap-2 font-light transition-colors"
           >
-            ← Back to Create Pot
+            ← Back to Private Markets
           </button>
           
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
@@ -666,14 +712,25 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
             </div>
             
-            {isCreator && (
+            <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 w-full lg:w-auto">
               <button
-                onClick={() => setShowCreatorPanel(!showCreatorPanel)}
-                className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
+                onClick={copyShareUrl}
+                className="bg-gray-100 text-black px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-200 font-light transition-colors text-sm sm:text-base w-full lg:w-auto flex items-center justify-center gap-2"
               >
-                {showCreatorPanel ? 'Hide' : 'Settings ⚙'}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                </svg>
+                {shareUrlCopied ? 'Copied!' : 'Share'}
               </button>
-            )}
+              {isCreator && (
+                <button
+                  onClick={() => setShowCreatorPanel(!showCreatorPanel)}
+                  className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
+                >
+                  {showCreatorPanel ? 'Hide' : 'Settings ⚙'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -684,38 +741,77 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 mb-6">
             <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Creator Panel</h2>
             
-            {/* Share Link Section */}
+            {/* Edit Pot Details Section */}
             <div className="bg-gray-50 border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-medium text-black mb-3">Share This Pot</h3>
-              <p className="text-sm text-gray-600 mb-4">Share this link with friends so they can join your prediction pot directly:</p>
-              
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={generateShareUrl()}
-                  readOnly
-                  className="flex-1 p-2 sm:p-3 border border-gray-200 rounded-none bg-white text-xs sm:text-sm text-gray-800"
-                />
-                <button
-                  onClick={copyShareUrl}
-                  className="bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-none hover:bg-blue-700 transition-colors font-light text-sm flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  {shareUrlCopied ? 'Copied!' : 'Copy'}
-                </button>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base sm:text-lg font-medium text-black">Market Details</h3>
+                {!isEditingDetails ? (
+                  <button
+                    onClick={startEditingDetails}
+                    className="text-black hover:text-gray-700 transition-colors font-light text-sm flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={cancelEditingDetails}
+                      className="text-gray-600 hover:text-black transition-colors font-light text-sm"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdatePotDetails}
+                      className="bg-black text-white px-3 py-1 rounded-none hover:bg-gray-900 transition-colors font-light text-sm"
+                    >
+                      Save
+                    </button>
+                  </div>
+                )}
               </div>
               
-              {shareUrlCopied && (
-                <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Link copied to clipboard!
-                </p>
+              {!isEditingDetails ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Market Name</label>
+                    <p className="text-sm text-black">{potDetails?.potName}</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Description</label>
+                    <p className="text-sm text-black">{potDetails?.description}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-2">Market Name</label>
+                    <input
+                      type="text"
+                      value={editingPotName}
+                      onChange={(e) => setEditingPotName(e.target.value)}
+                      placeholder="Enter market name"
+                      className="w-full p-2 border border-gray-200 rounded-none focus:border-black focus:outline-none text-sm"
+                      style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-2">Description</label>
+                    <textarea
+                      value={editingDescription}
+                      onChange={(e) => setEditingDescription(e.target.value)}
+                      placeholder="Enter market description"
+                      rows={3}
+                      className="w-full p-2 border border-gray-200 rounded-none focus:border-black focus:outline-none text-sm resize-none"
+                      style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                    />
+                  </div>
+                </div>
               )}
             </div>
+
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
               <div>
@@ -760,7 +856,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
               
               <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Pot Management</label>
+                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Market Management</label>
                 <div className="space-y-2 sm:space-y-3">
                   
                   
@@ -777,30 +873,16 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
             </div>
 
-            {potStats && (
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-base sm:text-lg font-light text-black mb-3 sm:mb-4">Statistics</h3>
-                <div className="grid grid-cols-2 gap-3 sm:gap-6 text-sm text-gray-600">
-                  <div className="text-center p-3 sm:p-4 border border-gray-200">
-                    <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potStats.totalParticipants}</div>
-                    <div className="text-xs sm:text-sm">Participants</div>
-                  </div>
-                  <div className="text-center p-3 sm:p-4 border border-gray-200">
-                    <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{(potStats.totalPotValue / 1_000_000).toFixed(2)}</div>
-                    <div className="text-xs sm:text-sm">USDC Total</div>
-                  </div>
-                </div>
-              </div>
-            )}
+            
           </div>
         )}
 
         {/* User Interface */}
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Enter Pot */}
+          {/* Enter Market */}
           {!userParticipant && potState === 0 && (
             <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Enter Pot</h2>
+              <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Enter Market</h2>
               
               <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 border border-gray-200">
                 <div className="flex justify-between items-center mb-2 sm:mb-3">
@@ -816,10 +898,10 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               {!usdcApproved ? (
                 // STEP 1: FORCE USDC APPROVAL FIRST
                 <div>
-                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-orange-50 border border-orange-200">
+                  {/* <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-orange-50 border border-orange-200">
                     <h3 className="text-xs sm:text-sm font-medium text-black mb-2">⚠️ Step 1: Approve USDC</h3>
                     <p className="text-xs text-orange-700">You must approve USDC spending before entering any pot.</p>
-                  </div>
+                  </div> */}
 
                   <button
                     onClick={handleApprove}
@@ -844,8 +926,8 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 // STEP 2: ENTER POT (ONLY AFTER APPROVAL)
                 <div>
                   <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200">
-                    <h3 className="text-xs sm:text-sm font-medium text-black mb-2">✅ Step 2: Enter Pot</h3>
-                    <p className="text-xs text-green-700">USDC approved! Now you can enter the pot.</p>
+                    <h3 className="text-xs sm:text-sm font-medium text-black mb-2">✅ Step 2: Enter Market</h3>
+                    <p className="text-xs text-green-700">USDC approved! Now you can enter the market.</p>
                   </div>
 
                   <button
@@ -856,7 +938,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                     {isPending || isConfirming ? (
                       <div className="flex items-center justify-center gap-3">
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Entering Pot...
+                        Entering Market...
                       </div>
                     ) : (
                       `Pay ${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC to Enter`
@@ -864,7 +946,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                   </button>
 
                   <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-xs text-gray-600 text-center">
-                    This will transfer ${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC to the pot
+                    This will transfer ${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC to the market
                   </div>
                 </div>
               )}
@@ -940,7 +1022,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           {userParticipant && (
             <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-light text-black mb-3 sm:mb-4">You're In!</h2>
-              <p className="text-sm sm:text-base text-gray-600">You've successfully joined this prediction pot.</p>
+              <p className="text-sm sm:text-base text-gray-600">You've successfully joined this prediction market.</p>
               <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
                 <p className="text-xs sm:text-sm text-gray-500">You can now make predictions and compete with other participants.</p>
               </div>

@@ -799,7 +799,7 @@ useEffect(() => {
             <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">
               {t.bitcoinPotTitle || 'The ₿itcoin Pot'}
             </h1>
-            <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>
+            {/* <div className="w-60 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div> */}
           </div>
 
           {!isConnected && (
@@ -1082,7 +1082,7 @@ useEffect(() => {
                     <div className="bg-[#2C2C47] p-4 rounded-lg">
                       <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
                       <p className="text-[#A0A0B0] text-sm mb-3">
-                        Pay {formatBigIntValue(entryAmount)} USDC to enter the pot. Approve USDC spending first.
+                      Approve USDC spending first.
                       </p>
                       
                       {/* Referral Code Input */}
@@ -1090,15 +1090,13 @@ useEffect(() => {
                         <label className="text-[#F5F5F5] text-sm mb-1 block">Referral Code (Optional)</label>
                         <input
                           type="text"
-                          placeholder="Enter friend's referral code"
+                          placeholder="Earn free entries."
                           value={inputReferralCode}
                           onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
-                          className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a]"
+                          className=" px-3 py-2 bg-black/50 border border-[#efefef] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#ffffff]"
                           maxLength={8}
                         />
-                        <p className="text-[#A0A0B0] text-xs mt-1">
-                          Help a friend earn free entries
-                        </p>
+                        
                       </div>
                       
                       <button

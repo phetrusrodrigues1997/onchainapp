@@ -94,7 +94,7 @@ const ProfilePage = () => {
   // Mock user data
   const userStats = {
     totalEarnings: '$24,750',
-    potsWon: 127,
+    marketsWon: 127,
     accuracy: '73.2%',
     totalPredictions: 342,
     rank: 23
@@ -102,20 +102,20 @@ const ProfilePage = () => {
 
   // Mock leaderboard data
   const leaderboard = [
-    { rank: 1, name: 'CryptoOracle', earnings: '$89,420', potsWon: 445, accuracy: '81.3%' },
-    { rank: 2, name: 'MarketMaven', earnings: '$76,890', potsWon: 398, accuracy: '79.8%' },
-    { rank: 3, name: 'PredictionKing', earnings: '$65,230', potsWon: 356, accuracy: '78.4%' },
-    { rank: 4, name: 'TradeWizard', earnings: '$58,940', potsWon: 321, accuracy: '76.9%' },
-    { rank: 5, name: 'ForecastPro', earnings: '$52,110', potsWon: 289, accuracy: '75.6%' },
-    { rank: 22, name: 'SmartTrader', earnings: '$25,890', potsWon: 134, accuracy: '74.1%' },
-    { rank: 23, name: 'You', earnings: '$24,750', potsWon: 127, accuracy: '73.2%', isCurrentUser: true },
-    { rank: 24, name: 'MarketShark', earnings: '$23,640', potsWon: 121, accuracy: '72.8%' },
-    { rank: 25, name: 'ProfitSeeker', earnings: '$22,380', potsWon: 118, accuracy: '72.3%' },
+    { rank: 1, name: 'CryptoOracle', earnings: '$89,420', marketsWon: 445, accuracy: '81.3%' },
+    { rank: 2, name: 'MarketMaven', earnings: '$76,890', marketsWon: 398, accuracy: '79.8%' },
+    { rank: 3, name: 'PredictionKing', earnings: '$65,230', marketsWon: 356, accuracy: '78.4%' },
+    { rank: 4, name: 'TradeWizard', earnings: '$58,940', marketsWon: 321, accuracy: '76.9%' },
+    { rank: 5, name: 'ForecastPro', earnings: '$52,110', marketsWon: 289, accuracy: '75.6%' },
+    { rank: 22, name: 'SmartTrader', earnings: '$25,890', marketsWon: 134, accuracy: '74.1%' },
+    { rank: 23, name: 'You', earnings: '$24,750', marketsWon: 127, accuracy: '73.2%', isCurrentUser: true },
+    { rank: 24, name: 'MarketShark', earnings: '$23,640', marketsWon: 121, accuracy: '72.8%' },
+    { rank: 25, name: 'ProfitSeeker', earnings: '$22,380', marketsWon: 118, accuracy: '72.3%' },
   ];
 
 interface UserStats {
     totalEarnings: string;
-    potsWon: number;
+    marketsWon: number;
     accuracy: string;
     totalPredictions: number;
     rank: number;
@@ -125,7 +125,7 @@ interface LeaderboardUser {
     rank: number;
     name: string;
     earnings: string;
-    potsWon: number;
+    marketsWon: number;
     accuracy: string;
     isCurrentUser?: boolean;
 }
@@ -240,8 +240,8 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
                   <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Total Earnings</div>
                 </div>
                 <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.potsWon}</div>
-                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Pots Won</div>
+                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.marketsWon}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Markets Won</div>
                 </div>
                 <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
                   <div className="text-xl sm:text-2xl font-semibold text-gray-900">{userStats.accuracy}</div>
@@ -317,13 +317,13 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
               {user.earnings}
             </td>
             <td className="px-2 sm:px-6 py-3 whitespace-nowrap text-sm text-gray-800 hidden sm:table-cell">
-              {user.potsWon}
+              {user.marketsWon}
             </td>
             <td className="px-2 sm:px-6 py-3">
               <div className="flex flex-col">
                 <span className="text-sm text-gray-800">{user.accuracy}</span>
                 <span className="text-xs text-gray-500 sm:hidden">
-                  {user.potsWon} pots
+                  {user.marketsWon} markets
                 </span>
               </div>
             </td>

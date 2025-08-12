@@ -29,7 +29,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   const menuItems = [
     { id: 'home', label: 'Home' },
     { id: 'AI', label: 'Games' },
-    { id: 'createPot', label: 'Create Pot' },
+    { id: 'createPot', label: 'Private Markets' },
     { id: 'profile', label: 'Profile' },
     { id: 'wallet', label: 'Receive' },
     { id: 'buy', label: 'Purchase' },

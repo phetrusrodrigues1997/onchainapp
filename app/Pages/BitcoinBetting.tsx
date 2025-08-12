@@ -192,9 +192,9 @@ export default function BitcoinBetting() {
               <Shield className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Access Required</h1>
-            <p className="text-gray-600 mb-8 text-lg">You must join the pot first</p>
+            <p className="text-gray-600 mb-8 text-lg">You must join the market first</p>
             <button className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300">
-              Enter Pot
+              Enter Market
             </button>
           </div>
         </div>
@@ -253,7 +253,7 @@ export default function BitcoinBetting() {
               
               <div className="bg-orange-100 rounded-2xl p-6 border border-orange-200 mb-6">
                 <p className="text-orange-800 font-bold text-lg mb-2">
-                  Return to pot entry page to pay today's entry fee for this market
+                  Return to market entry page to pay today's entry fee for this market
                 </p>
                 <p className="text-orange-600 text-sm">
                   Then come back here to resume predicting in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}
@@ -341,7 +341,7 @@ export default function BitcoinBetting() {
                       Sit tight and wait for the results!
                     </p>
                     <p className="text-blue-600 text-sm mt-2">
-                      Winners will be announced and pot distributed automatically
+                      Winners will be announced and market distributed automatically
                     </p>
                   </div>
                   <div className="text-gray-600 text-sm">
@@ -391,7 +391,7 @@ export default function BitcoinBetting() {
                 <p className="text-gray-600 text-lg mb-4">
                   Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
                 </p>
-                <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>
+                {/* <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div> */}
               </div>
 
               <div className="grid grid-cols-2 gap-4 sm:gap-6">

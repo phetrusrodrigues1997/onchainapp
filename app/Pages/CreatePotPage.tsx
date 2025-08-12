@@ -58,6 +58,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   const [copied, setCopied] = useState(false);
   const [myPots, setMyPots] = useState<any[]>([]);
   const [joinAddress, setJoinAddress] = useState('');
+  const [isLoadingMyPots, setIsLoadingMyPots] = useState(false);
 
 
   const { address } = useAccount();
@@ -108,16 +109,28 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     }
   }, [isConfirmed, receipt]);
 
-  // Load user's pots when they view "My Pots"
-  useEffect(() => {
-    const loadMyPots = async () => {
-      if (showMyPots && address) {
-        const pots = await getPotsByCreator(address);
-        setMyPots(pots);
-      }
-    };
-    loadMyPots();
-  }, [showMyPots, address]);
+  // Note: Pot loading now happens in handleMyMarketsClick for better UX
+
+  // Handle My Markets button click with loading screen
+  const handleMyMarketsClick = async () => {
+    if (!address) return;
+    
+    setIsLoadingMyPots(true);
+    
+    // Start database operation immediately
+    const potsPromise = getPotsByCreator(address);
+    
+    // Ensure minimum 2 seconds of loading
+    const [pots] = await Promise.all([
+      potsPromise,
+      new Promise(resolve => setTimeout(resolve, 2000))
+    ]);
+    
+    // Set the data and show the view
+    setMyPots(pots);
+    setShowMyPots(true);
+    setIsLoadingMyPots(false);
+  };
 
   const handleJoinByAddress = async () => {
     if (!joinAddress || !navigateToPrivatePot) return;
@@ -131,7 +144,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     // Check if pot exists in database
     const potDetails = await getPotDetails(joinAddress);
     if (!potDetails) {
-      alert('Pot not found. Make sure the contract address is correct.');
+      alert('Market not found. Make sure the contract address is correct.');
       return;
     }
 
@@ -154,7 +167,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
       });
     } catch (error) {
       console.error('Error creating pot:', error);
-      alert('Failed to create pot. Please try again.');
+      alert('Failed to create market. Please try again.');
     }
   };
 
@@ -186,8 +199,8 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             <Check className="w-12 h-12 text-white" />
           </div>
           
-          <h1 className="text-4xl font-light text-black mb-4">Pot Created Successfully!</h1>
-          <p className="text-xl text-gray-600 mb-8">Your prediction pot "{potName}" is now live</p>
+          <h1 className="text-4xl font-light text-black mb-4">Market Created Successfully!</h1>
+          <p className="text-xl text-gray-600 mb-8">Your prediction market "{potName}" is now live</p>
           
           <div className="bg-gray-50 rounded-lg p-6 mb-8">
             <h3 className="text-lg font-medium mb-4">Contract Address</h3>
@@ -211,7 +224,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                 onClick={() => navigateToPrivatePot(createdPotAddress)}
                 className="bg-green-600 text-white py-3 px-8 rounded hover:bg-green-700 transition-colors"
               >
-                Open Your Pot
+                Open Your Market
               </button>
             )}
             
@@ -224,7 +237,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               }}
               className="bg-black text-white py-3 px-8 rounded hover:bg-gray-900 transition-colors"
             >
-              Create Another Pot
+              Create Another Market
             </button>
           </div>
         </div>
@@ -253,7 +266,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
                 <Users className="w-10 h-10 text-white" />
               </div>
-              <h1 className="text-4xl font-light text-black mb-4">My Prediction Pots</h1>
+              <h1 className="text-4xl font-light text-black mb-4">My Prediction Markets</h1>
               <p className="text-lg text-gray-600">Manage your created prediction markets</p>
             </div>
 
@@ -261,7 +274,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             <div className="space-y-4">
               {myPots.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-gray-600 mb-4">You haven't created any pots yet.</p>
+                  <p className="text-gray-600 mb-4">You haven't created any markets yet.</p>
                   <button
                     onClick={() => {
                       setShowMyPots(false);
@@ -269,7 +282,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                     }}
                     className="bg-black text-white py-2 px-6 rounded hover:bg-gray-900"
                   >
-                    Create Your First Pot
+                    Create Your First Market
                   </button>
                 </div>
               ) : (
@@ -281,23 +294,23 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                         <p className="text-gray-600 mb-3">{pot.description}</p>
                         <div className="text-sm text-gray-500">
                           <p>Created: {new Date(pot.createdAt).toLocaleDateString()}</p>
-                          <p>Contract: {pot.contractAddress.slice(0, 6)}...{pot.contractAddress.slice(-4)}</p>
+                          {/* <p>Contract: {pot.contractAddress.slice(0, 6)}...{pot.contractAddress.slice(-4)}</p> */}
                         </div>
                       </div>
                       
                       <div className="flex gap-2">
-                        <button
+                        {/* <button
                           onClick={() => copyToClipboard(pot.contractAddress)}
                           className="p-2 text-gray-500 hover:text-black border border-gray-300 rounded hover:border-black"
                           title="Copy address"
                         >
                           <Copy className="w-4 h-4" />
-                        </button>
+                        </button> */}
                         
                         {navigateToPrivatePot && (
                           <button
                             onClick={() => navigateToPrivatePot(pot.contractAddress)}
-                            className="flex items-center gap-2 bg-black text-white py-2 px-4 rounded hover:bg-gray-900"
+                            className="flex items-center gap-2 bg-black text-white py-2 px-4 rounded hover:bg-[#eaeaea] hover:text-black transition-colors"
                           >
                             <ExternalLink className="w-4 h-4" />
                             Open
@@ -336,8 +349,8 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
                 <Search className="w-10 h-10 text-white" />
               </div>
-              <h1 className="text-4xl font-light text-black mb-4">Join Prediction Pot</h1>
-              <p className="text-lg text-gray-600">Enter a contract address to join an existing pot</p>
+              <h1 className="text-4xl font-light text-black mb-4">Join Prediction Market</h1>
+              <p className="text-lg text-gray-600">Enter a contract address to join an existing market</p>
             </div>
 
             {/* Address Input */}
@@ -359,8 +372,8 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-medium text-black mb-2">How to find the address:</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Get it from the pot creator</li>
-                  <li>• It was shared when the pot was created</li>
+                  <li>• Get it from the market creator</li>
+                  <li>• It was shared when the market was created</li>
                   <li>• Starts with "0x" followed by 40 characters</li>
                 </ul>
               </div>
@@ -374,7 +387,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                 className="w-full bg-black text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-3"
               >
                 <Search className="w-5 h-5" />
-                Join Pot
+                Join Market
               </button>
               
               {!navigateToPrivatePot && (
@@ -410,7 +423,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
                 <Plus className="w-10 h-10 text-white" />
               </div>
-              <h1 className="text-4xl font-light text-black mb-4">Create Your Prediction Pot</h1>
+              <h1 className="text-4xl font-light text-black mb-4">Create Your Prediction Market</h1>
               <p className="text-lg text-gray-600">Set up a custom prediction market for your friends</p>
             </div>
 
@@ -418,7 +431,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
-                  Pot Name
+                  Market Name
                 </label>
                 <input
                   type="text"
@@ -449,8 +462,8 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                 <h3 className="font-medium text-black mb-2">How it works:</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• Friends can enter with any USDC amount</li>
-                  <li>• You decide the winners and distribute the pot</li>
-                  <li>• Winners split the total pot equally</li>
+                  <li>• You decide the winners and distribute the market</li>
+                  <li>• Winners split the total market equally</li>
                 </ul>
               </div>
             </div>
@@ -473,14 +486,14 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               ) : (
                 <>
                   <Plus className="w-5 h-5" />
-                  Create Prediction Pot
+                  Create Prediction Market
                 </>
               )}
             </button>
             
             {!address && (
               <p className="text-center text-sm text-red-500 mt-3">
-                Please connect your wallet to create a pot
+                Please connect your wallet to create a market
               </p>
             )}
           </div>
@@ -556,30 +569,30 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             className="w-full bg-black text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 flex items-center justify-center gap-3"
           >
             <Plus className="w-5 h-5" />
-            Create Your Prediction Pot
+            Create Your Prediction Market
           </button>
           
           {/* Secondary Actions */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <button
-              onClick={() => setShowMyPots(true)}
-              className="w-full bg-gray-100 text-black py-3 px-6 font-light transition-all hover:bg-gray-200 flex items-center justify-center gap-2"
-            >
-              <Users className="w-4 h-4" />
-              My Pots
-            </button>
-            
-            <button
-              onClick={() => setShowJoinPot(true)}
-              className="w-full bg-gray-100 text-black py-3 px-6 font-light transition-all hover:bg-gray-200 flex items-center justify-center gap-2"
-            >
-              <Search className="w-4 h-4" />
-              Join by Address
-            </button>
-          </div>
+          <button
+            onClick={handleMyMarketsClick}
+            disabled={isLoadingMyPots}
+            className="w-full bg-gray-100 text-black py-3 px-6 font-light transition-all hover:bg-gray-200 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isLoadingMyPots ? (
+              <>
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                Loading...
+              </>
+            ) : (
+              <>
+                <Users className="w-4 h-4" />
+                My Markets
+              </>
+            )}
+          </button>
           
           <p className="text-center text-sm text-gray-500 mt-3">
-            Create new pots, manage existing ones, or join with an address
+            Create new markets, manage existing ones, or join with an address
           </p>
         </div>
       </div>

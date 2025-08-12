@@ -147,10 +147,10 @@ export const translations: Record<Language, Translations> = {
     tutorialTip: 'The more accurate your predictions, the more you\'ll win!',
 
     // PredictionPotTest specific
-    bitcoinPotTitle: 'Pot Details',
+    bitcoinPotTitle: 'Prediction Market',
     connectWalletPrompt: 'Please connect your wallet to interact with the contract.',
-    alreadyInPot: "🎉 You're in the Pot!",
-    enteredPotMessage: "You've successfully entered the pot. You can now place your predictions!",
+    alreadyInPot: "🎉 You're in!",
+    enteredPotMessage: "You can now place your predictions!",
     goToBetting: 'Go to Prediction Page',
     entryAmount: 'Entry Amount',
     amountBalance: 'Pot Balance', // Added for consistency with other sections

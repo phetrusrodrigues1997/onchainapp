@@ -22,15 +22,15 @@ const HowItWorksSection: React.FC = () => {
   const faqItems: FAQItem[] = [
     {
       question: "How does PrediWin work?",
-      answer: "PrediWin.com is a prediction market platform where users compete to predict various world events and outcomes. Every week, users enter prediction pots beginning on Sundays, make predictions about tomorrow's global events everyday of the week, and winners split the pot equally on Saturday."
+      answer: "PrediWin.com is a prediction market platform where users compete to predict various world events and outcomes. Every week, users enter prediction markets beginning on Sundays, make predictions about tomorrow's global events everyday of the week, and winners split the reward equally on Saturday."
     },
     {
       question: "Why do I need Ethereum to place predictions?",
-      answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering pots, making predictions, and claiming winnings. You'll also need USDC to pay the actual pot entry fees."
+      answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering markets, making predictions, and claiming winnings. You'll also need USDC to pay the actual market's entry fees."
     },
     {
       question: "What is the weekly schedule?",
-      answer: "Sunday-Friday: Pot entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - pots are closed and winners are determined at midnight UTC with pot distribution."
+      answer: "Sunday-Friday: Market entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - markets are closed and winners are determined at midnight UTC with market distribution."
     },
     {
       question: "How are entry fees calculated?",
@@ -42,7 +42,7 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       question: "How does the referral system work?",
-      answer: "Each user gets a unique 8-character referral code. When 3 friends enter pots using your code and make confirmed USDC payments, you earn 1 free pot entry. This system includes fraud protection to ensure legitimate referrals."
+      answer: "Each user gets a unique 8-character referral code. When 3 friends enter markets using your code and make confirmed USDC payments, you earn 1 free market entry. This system includes fraud protection to ensure legitimate referrals."
     },
     {
       question: "What types of events can I predict?",
@@ -50,11 +50,11 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       question: "How do I make predictions?",
-      answer: "After entering a pot, you can make predictions about specific event outcomes (such as whether a price will go up/down, a team will win/lose, or an event will occur). You can make one prediction per event per day and update it before the cutoff time."
+      answer: "After entering a market, you can make predictions about specific event outcomes (such as whether a price will go up/down, a team will win/lose, or an event will occur). You can make one prediction per event per day and update it before the cutoff time."
     },
     {
       question: "When are winners determined?",
-      answer: "Winners are determined every Saturday at midnight UTC based on actual event outcomes. If the event result matches what you predicted, you're a winner and share the pot equally with other correct predictors."
+      answer: "Winners are determined every Saturday at midnight UTC based on actual event outcomes. If the event result matches what you predicted, you're a winner and share the reward equally with other correct predictors."
     },
     {
       question: "How do I get my winnings?",

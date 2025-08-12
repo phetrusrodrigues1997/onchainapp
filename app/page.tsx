@@ -54,10 +54,10 @@ export default function App() {
     setActiveSection('privatePot');
   };
 
-  // Check for pot parameter in URL on component mount
+  // Check for market parameter in URL on component mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const potAddress = urlParams.get('pot');
+    const potAddress = urlParams.get('market');
     
     if (potAddress && potAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
       navigateToPrivatePot(potAddress);

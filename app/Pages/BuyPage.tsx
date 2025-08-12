@@ -10,7 +10,7 @@ interface BuySectionProps {
 }
 
 const tokens = [
-  { name: "USDC", token: USDCToken, description: "For pot entries", usage: "For your predictions" },
+  { name: "USDC", token: USDCToken, description: "For market entries", usage: "For your predictions" },
   { name: "ETH", token: ETHToken, description: "For gas fees", usage: "(~$0.01-0.05)" },
 ];
 
