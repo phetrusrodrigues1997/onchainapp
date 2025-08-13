@@ -42,18 +42,13 @@ export async function POST(request: NextRequest) {
     // Generate question using shared utility
     let questionData;
     try {
-      const { generateQuestionWithImage } = await import('../../Services/questionGenerator');
-      questionData = await generateQuestionWithImage();
+      const { generateQuestion } = await import('../../Services/questionGenerator');
+      questionData = await generateQuestion();
     } catch (error) {
       console.error('Failed to generate question, using fallback:', error);
       // Fallback question
       questionData = {
-        question: "Will something unexpected happen in the next 15 minutes?",
-        image: {
-          url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-          source: 'fallback',
-          alt: 'Default prediction image'
-        }
+        question: "Will something unexpected happen in the next 15 minutes?"
       };
     }
 
@@ -66,8 +61,6 @@ export async function POST(request: NextRequest) {
       .insert(LiveQuestions)
       .values({
         question: questionData.question,
-        imageUrl: questionData.image.url,
-        imageAlt: questionData.image.alt,
         startTime: now,
         endTime: endTime,
         isActive: true

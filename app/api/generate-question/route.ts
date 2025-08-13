@@ -153,13 +153,8 @@ export async function POST(request: NextRequest) {
     const aiQuestion = completion.choices[0]?.message?.content?.trim();
     const question = aiQuestion || generateRandomQuestion();
 
-    // Import and get image for the question
-    const { getImageForQuestion } = await import('../../Services/imageService');
-    const imageData = await getImageForQuestion(question);
-
     return NextResponse.json({ 
-      question,
-      image: imageData
+      question
     });
   } catch (error) {
     console.error('Error generating question:', error);
@@ -167,24 +162,8 @@ export async function POST(request: NextRequest) {
     // Fallback to random question if OpenAI fails
     const fallbackQuestion = generateRandomQuestion();
     
-    // Still try to get image for fallback question
-    try {
-      const { getImageForQuestion } = await import('../../Services/imageService');
-      const imageData = await getImageForQuestion(fallbackQuestion);
-      return NextResponse.json({ 
-        question: fallbackQuestion,
-        image: imageData
-      });
-    } catch (imageError) {
-      console.error('Image service also failed:', imageError);
-      return NextResponse.json({ 
-        question: fallbackQuestion,
-        image: {
-          url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-          source: 'fallback',
-          alt: 'Default prediction image'
-        }
-      });
-    }
+    return NextResponse.json({ 
+      question: fallbackQuestion
+    });
   }
 }

@@ -28,11 +28,6 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({
         question: question.question,
-        image: {
-          url: question.imageUrl,
-          source: 'static' as const, // Default since we removed imageSource column
-          alt: question.imageAlt
-        },
         timeRemaining,
         questionId: question.id,
         startTime: question.startTime.toISOString(),
@@ -74,11 +69,6 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({
         question: question.question,
-        image: {
-          url: question.imageUrl,
-          source: 'static' as const,
-          alt: question.imageAlt
-        },
         timeRemaining,
         questionId: question.id,
         startTime: question.startTime.toISOString(),
@@ -121,11 +111,6 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({
         question: question.question,
-        image: {
-          url: question.imageUrl,
-          source: 'static' as const,
-          alt: question.imageAlt
-        },
         timeRemaining,
         questionId: question.id,
         startTime: question.startTime.toISOString(),
@@ -137,11 +122,6 @@ export async function GET(request: NextRequest) {
     // Ultimate fallback
     return NextResponse.json({
       question: "Will something unexpected happen in the next 15 minutes?",
-      image: {
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        source: 'fallback' as const,
-        alt: 'Default prediction image'
-      },
       timeRemaining: 0,
       questionId: null,
       error: "No questions available"
@@ -152,11 +132,6 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       question: "Will something unexpected happen in the next 15 minutes?",
-      image: {
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        source: 'fallback' as const,
-        alt: 'Default prediction image'
-      },
       timeRemaining: 0,
       questionId: null,
       error: "Failed to fetch question"
@@ -174,8 +149,8 @@ async function generateNewQuestion() {
       .where(eq(LiveQuestions.isActive, true));
 
     // Generate question using shared utility
-    const { generateQuestionWithImage } = await import('../../Services/questionGenerator');
-    const data = await generateQuestionWithImage();
+    const { generateQuestion } = await import('../../Services/questionGenerator');
+    const data = await generateQuestion();
     
     // Calculate start and end times
     const now = new Date();
@@ -187,8 +162,6 @@ async function generateNewQuestion() {
       .insert(LiveQuestions)
       .values({
         question: data.question,
-        imageUrl: data.image.url,
-        imageAlt: data.image.alt,
         startTime: now,
         endTime: endTime,
         isActive: true
@@ -200,11 +173,6 @@ async function generateNewQuestion() {
 
     return {
       question: newQuestion.question,
-      image: {
-        url: newQuestion.imageUrl,
-        source: 'static' as const, // Default since we removed imageSource column
-        alt: newQuestion.imageAlt
-      },
       timeRemaining,
       questionId: newQuestion.id,
       startTime: newQuestion.startTime.toISOString(),
@@ -218,11 +186,6 @@ async function generateNewQuestion() {
     // Return fallback question without saving to database
     return {
       question: "Will something unexpected happen in the next 15 minutes?",
-      image: {
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        source: 'fallback' as const,
-        alt: 'Default prediction image'
-      },
       timeRemaining: 15 * 60, // 15 minutes
       questionId: null,
       error: "Failed to generate new question"

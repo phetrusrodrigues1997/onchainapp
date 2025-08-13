@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { getImageForQuestion } from './imageService';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -91,7 +90,7 @@ function generateRandomQuestion(): string {
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
-export async function generateQuestionWithImage() {
+export async function generateQuestion() {
   try {
     // Gather real-time data
     const [btcPrice, ethPrice, recentNews] = await Promise.all([
@@ -152,12 +151,8 @@ export async function generateQuestionWithImage() {
     const aiQuestion = completion.choices[0]?.message?.content?.trim();
     const question = aiQuestion || generateRandomQuestion();
 
-    // Get image for the question
-    const imageData = await getImageForQuestion(question);
-
     return { 
-      question,
-      image: imageData
+      question
     };
   } catch (error) {
     console.error('Error generating question:', error);
@@ -165,22 +160,8 @@ export async function generateQuestionWithImage() {
     // Fallback to random question if OpenAI fails
     const fallbackQuestion = generateRandomQuestion();
     
-    try {
-      const imageData = await getImageForQuestion(fallbackQuestion);
-      return { 
-        question: fallbackQuestion,
-        image: imageData
-      };
-    } catch (imageError) {
-      console.error('Image service also failed:', imageError);
-      return { 
-        question: fallbackQuestion,
-        image: {
-          url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-          source: 'fallback' as const,
-          alt: 'Default prediction image'
-        }
-      };
-    }
+    return { 
+      question: fallbackQuestion
+    };
   }
 }

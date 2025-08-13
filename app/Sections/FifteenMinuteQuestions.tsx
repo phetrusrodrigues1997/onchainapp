@@ -9,15 +9,8 @@ interface FifteenMinuteQuestionsProps {
   className?: string;
 }
 
-interface ImageData {
-  url: string;
-  source: 'static' | 'unsplash' | 'pexels' | 'fallback';
-  alt: string;
-}
-
 export default function FifteenMinuteQuestions({ className = '' }: FifteenMinuteQuestionsProps) {
   const [question, setQuestion] = useState<string>('Loading question...');
-  const [imageData, setImageData] = useState<ImageData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
@@ -52,7 +45,6 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       }
       
       setQuestion(data.question);
-      setImageData(data.image);
       setTimeRemaining(data.timeRemaining || 0);
       
       // If the question is expired or has very little time left, it will auto-refresh
@@ -75,11 +67,6 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       }
       
       setQuestion(`Will something unexpected happen in the next ${QUESTION_INTERVAL_MINUTES} minutes?`);
-      setImageData({
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        source: 'fallback',
-        alt: 'Default prediction image'
-      });
       setTimeRemaining(QUESTION_INTERVAL_MINUTES * 60);
     }
     
@@ -88,18 +75,6 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   }, [isInitialLoad]); // Add isInitialLoad as dependency
 
   useEffect(() => {
-    // Preload critical images for better performance
-    const preloadImages = [
-      'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=400',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-      'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400',
-    ];
-    
-    preloadImages.forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
-    
     fetchCurrentQuestion();
   }, []);
 
@@ -127,94 +102,172 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-lg p-6 max-w-2xl -translate-y-8  mx-auto ${className}`}>
-      <div className="text-center">
-        {/* <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          {QUESTION_INTERVAL_MINUTES}-Minute Prediction
-        </h2> */}
+    <>
+      <style jsx>{`
+        @keyframes grid-move {
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(20px, 20px); }
+        }
         
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-8">
-            {isInitialLoad ? (
-              // Initial loading screen
-              <>
-                <div className="relative mb-6">
-                  <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+        .animated-grid {
+          background-image: 
+            linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+          background-size: 20px 20px;
+          animation: grid-move 20s linear infinite;
+        }
+      `}</style>
+      
+      <div className={`relative max-w-4xl mx-auto ${className}`}>
+        {/* Animated Background Grid */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 animated-grid"></div>
+        </div>
+      
+      {/* Subtle Border Effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-gray-800 to-black opacity-10 rounded-xl blur-sm"></div>
+      
+      <div className="relative bg-white border-2 border-black rounded-xl shadow-2xl overflow-hidden">
+        {/* Top Status Bar */}
+        <div className="bg-black text-white px-6 py-3 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            <span className="text-sm font-mono tracking-wider">LIVE PREDICTION</span>
+          </div>
+          {!isLoading && (
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-mono">
+                {formatTime(timeRemaining)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="p-8">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              {isInitialLoad ? (
+                // Dramatic initial loading
+                <>
+                  <div className="relative mb-8">
+                    <div className="w-24 h-24 border-8 border-gray-200 border-t-black rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 w-24 h-24 border-8 border-transparent border-b-gray-800 rounded-full animate-spin" 
+                         style={{ animationDirection: 'reverse', animationDelay: '150ms' }}></div>
+                    <div className="absolute inset-4 w-16 h-16 border-4 border-gray-300 border-r-black rounded-full animate-spin"
+                         style={{ animationDuration: '1s' }}></div>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h3 className="text-2xl font-bold text-black tracking-wider">SYNCHRONIZING</h3>
+                    <div className="flex justify-center space-x-1">
+                      {[0, 1, 2].map((i) => (
+                        <div 
+                          key={i}
+                          className="w-2 h-8 bg-black"
+                          style={{ 
+                            opacity: 0.3 + (i * 0.2),
+                            animationDelay: `${i * 200}ms`
+                          }}
+                        ></div>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 font-mono text-sm tracking-wide">CONNECTING TO GLOBAL FEED</p>
+                  </div>
+                </>
+              ) : (
+                // Quick refresh loading
+                <>
+                  <div className="flex space-x-3 mb-4">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <div 
+                        key={i}
+                        className="w-3 h-12 bg-black"
+                        style={{ 
+                          opacity: 0.2 + (i * 0.15),
+                          transform: `scaleY(${0.5 + (i * 0.1)})`
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                  <p className="text-black font-mono font-bold tracking-wider">LOADING NEXT PREDICTION</p>
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Main Question Area */}
+              <div className="relative mb-8">
+                <div className="relative bg-black text-white p-8 rounded-lg shadow-inner">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"></div>
+                  <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"></div>
+                  
+                  <p className="text-2xl md:text-3xl font-bold leading-tight text-center tracking-wide">
+                    {question}
+                  </p>
+                  
+                  {/* Corner Brackets */}
+                  <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-white"></div>
+                  <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-white"></div>
+                  <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-white"></div>
+                  <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-white"></div>
+                </div>
+              </div>
+
+              {/* Time Pressure Indicator */}
+              <div className="mb-6">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div 
-                    className="absolute inset-0 w-16 h-16 border-4 border-transparent border-l-purple-400 rounded-full animate-spin"
-                    style={{ animationDelay: '150ms' }}
+                    className="h-full bg-gradient-to-r from-black via-gray-700 to-black transition-all duration-1000"
+                    style={{ 
+                      width: `${(timeRemaining / (QUESTION_INTERVAL_MINUTES * 60)) * 100}%`
+                    }}
                   ></div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Live Markets</h3>
-                <p className="text-gray-600 animate-pulse">Generating your next prediction...</p>
-              </>
-            ) : (
-              // Question refresh loading
-              <>
-                <div className="relative mb-4">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
-                    <div 
-                      className="w-3 h-3 bg-purple-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '200ms' }}
-                    ></div>
-                    <div 
-                      className="w-3 h-3 bg-green-500 rounded-full animate-bounce"
-                      style={{ animationDelay: '400ms' }}
-                    ></div>
-                  </div>
+                <div className="flex justify-between mt-1 text-xs font-mono text-gray-500">
+                  <span>STARTED</span>
+                  <span className={timeRemaining < 60 ? 'text-red-500 font-bold' : ''}>
+                    {timeRemaining < 60 ? 'URGENT' : 'TIME REMAINING'}
+                  </span>
+                  <span>EXPIRES</span>
                 </div>
-                <p className="text-gray-700 font-medium animate-pulse">Loading next question...</p>
-              </>
-            )}
-          </div>
-        ) : (
-          <>
-            {/* Countdown Timer - Top Right */}
-            <div className="flex justify-end mb-3">
-              <div className="bg-black/80 text-white px-3 py-1 rounded-full text-sm font-mono font-bold">
-                {formatTime(timeRemaining)}
               </div>
-            </div>
-            
-            {/* Image Display */}
-            {imageData && (
-              <div className="mb-4 overflow-hidden rounded-lg">
-                <img
-                  src={imageData.url}
-                  alt={imageData.alt}
-                  className="w-full h-48 sm:h-56 object-cover transition-transform duration-300 hover:scale-105"
-                  onError={(e) => {
-                    // Fallback to default image if loading fails
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400';
-                  }}
-                />
-                {/* <div className="text-xs text-gray-500 mt-2 text-center">
-                  Source: {imageData.source === 'static' ? 'Curated' : 
-                           imageData.source === 'unsplash' ? 'Unsplash' :
-                           imageData.source === 'pexels' ? 'Pexels' : 'Default'}
-                </div> */}
+              
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-6">
+                <button className="group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95">
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+                  <div className="relative flex items-center justify-center space-x-2">
+                    <span className="text-3xl">✓</span>
+                    <span className="tracking-widest">YES</span>
+                  </div>
+                  {/* Button Corner Effects */}
+                  <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 border-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 border-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </button>
+                
+                <button className="group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+                  <div className="relative flex items-center justify-center space-x-2">
+                    <span className="text-3xl">✗</span>
+                    <span className="tracking-widest">NO</span>
+                  </div>
+                  {/* Button Corner Effects */}
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </button>
               </div>
-            )}
-            
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <p className="text-lg font-medium text-gray-800 leading-relaxed">
-                {question}
-              </p>
-            </div>
-            
-            <div className="flex justify-center items-center space-x-4">
-              <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-                YES
-              </button>
-              <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-                NO
-              </button>
-            </div>
-          </>
-        )}
+
+              {/* Bottom Status */}
+              <div className="mt-6 text-center">
+                <p className="text-xs font-mono text-gray-500 tracking-wider">
+                  GLOBAL SYNCHRONIZATION • ID: {timeRemaining > 0 ? 'ACTIVE' : 'EXPIRED'}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+
+      </div>
+    </>
   );
 }
