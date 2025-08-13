@@ -47,12 +47,13 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       setQuestion(data.question);
       setTimeRemaining(data.timeRemaining || 0);
       
-      // If the question is expired or has very little time left, it will auto-refresh
-      if (data.timeRemaining <= 5 && !data.expired) {
-        // Schedule a refresh in a few seconds to get the new question
+      // Improved sync: If question has very little time left, schedule a refresh
+      // but add a random delay to prevent all clients from refreshing at once
+      if (data.timeRemaining <= 10 && data.timeRemaining > 0) {
+        const randomDelay = Math.random() * 2000; // 0-2 second random delay
         setTimeout(() => {
           fetchCurrentQuestion();
-        }, (data.timeRemaining + 1) * 1000);
+        }, (data.timeRemaining * 1000) + randomDelay);
       }
       
     } catch (error) {
@@ -83,8 +84,12 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       const timer = setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev <= 1) {
-            // Fetch new question when timer reaches zero
-            fetchCurrentQuestion();
+            // Add random delay when timer reaches zero to prevent all clients
+            // from fetching simultaneously and causing synchronization issues
+            const randomDelay = Math.random() * 3000; // 0-3 second random delay
+            setTimeout(() => {
+              fetchCurrentQuestion();
+            }, randomDelay);
             return 0;
           }
           return prev - 1;
@@ -93,7 +98,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
       return () => clearInterval(timer);
     }
-  }, [timeRemaining]); // Remove fetchCurrentQuestion from dependencies to prevent infinite re-renders
+  }, [timeRemaining, fetchCurrentQuestion]); // Add fetchCurrentQuestion back but with useCallback
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

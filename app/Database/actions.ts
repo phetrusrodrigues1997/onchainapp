@@ -49,11 +49,14 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
 
 export async function saveImageUrl(walletAddress: string, imageUrl: string) {
   try {
+    // Normalize wallet address to lowercase for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Check if user already exists in users_table
     const existingUser = await db
       .select()
       .from(UsersTable)
-      .where(eq(UsersTable.walletAddress, walletAddress))
+      .where(eq(UsersTable.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (existingUser.length > 0) {
@@ -61,7 +64,7 @@ export async function saveImageUrl(walletAddress: string, imageUrl: string) {
       const result = await db
         .update(UsersTable)
         .set({ imageUrl })
-        .where(eq(UsersTable.walletAddress, walletAddress))
+        .where(eq(UsersTable.walletAddress, normalizedWalletAddress))
         .returning();
       return result;
     } else {
@@ -69,7 +72,7 @@ export async function saveImageUrl(walletAddress: string, imageUrl: string) {
       const result = await db
         .insert(UsersTable)
         .values({
-          walletAddress,
+          walletAddress: normalizedWalletAddress,
           sourcePage: 'Profile', // Indicate this came from profile page
           imageUrl,
         })
@@ -467,10 +470,13 @@ export async function getBetsForDate(date: string, typeTable: string) {
 
 export async function getLatestImageUrl(walletAddress: string): Promise<string | null> {
   try {
+    // Normalize wallet address to lowercase for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const result = await db
       .select({ imageUrl: UsersTable.imageUrl })
       .from(UsersTable)
-      .where(eq(UsersTable.walletAddress, walletAddress))
+      .where(eq(UsersTable.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     return result.length > 0 ? result[0].imageUrl : null;

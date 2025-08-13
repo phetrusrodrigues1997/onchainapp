@@ -90,9 +90,9 @@ export async function GET(request: NextRequest) {
       // No questions at all, generate first one
       shouldGenerateNew = true;
     } else {
-      // Check if the latest question has expired (with a small buffer)
+      // Check if the latest question has expired (with a buffer for sync)
       const latestEndTime = latestQuestion[0].endTime.getTime();
-      const bufferTime = 5 * 1000; // 5 seconds buffer (reduced from 30s for better sync)
+      const bufferTime = 30 * 1000; // 30 seconds buffer for better synchronization
       if (now.getTime() > (latestEndTime + bufferTime)) {
         shouldGenerateNew = true;
       }
@@ -144,6 +144,10 @@ async function generateNewQuestion() {
   try {
     // Double-check if a new question was already created by another request (race condition fix)
     const currentTime = new Date();
+    
+    // Add a small random delay to reduce race conditions
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
+    
     const recentQuestion = await db
       .select()
       .from(LiveQuestions)
@@ -181,23 +185,32 @@ async function generateNewQuestion() {
     const { generateQuestion } = await import('../../Services/questionGenerator');
     const data = await generateQuestion();
     
-    // Calculate start and end times
-    const INTERVAL_MINUTES = 15; // This should match your component's QUESTION_INTERVAL_MINUTES
-    const endTime = new Date(currentTime.getTime() + (INTERVAL_MINUTES * 60 * 1000));
+    // Calculate start and end times - align to next 15-minute boundary for better sync
+    const INTERVAL_MINUTES = 15;
+    const alignedStartTime = new Date(currentTime);
+    // Round up to next 15-minute boundary
+    const minutes = alignedStartTime.getMinutes();
+    const roundedMinutes = Math.ceil(minutes / INTERVAL_MINUTES) * INTERVAL_MINUTES;
+    alignedStartTime.setMinutes(roundedMinutes, 0, 0);
+    
+    // If the aligned time is more than 2 minutes away, start immediately instead
+    const timeDiff = alignedStartTime.getTime() - currentTime.getTime();
+    const startTime = timeDiff > 2 * 60 * 1000 ? currentTime : alignedStartTime;
+    const endTime = new Date(startTime.getTime() + (INTERVAL_MINUTES * 60 * 1000));
 
     // Insert new question into database
     const insertedQuestion = await db
       .insert(LiveQuestions)
       .values({
         question: data.question,
-        startTime: currentTime,
+        startTime: startTime,
         endTime: endTime,
         isActive: true
       })
       .returning();
 
     const newQuestion = insertedQuestion[0];
-    const timeRemaining = Math.floor((endTime.getTime() - currentTime.getTime()) / 1000);
+    const timeRemaining = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
 
     return {
       question: newQuestion.question,
