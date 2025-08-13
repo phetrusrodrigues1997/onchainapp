@@ -112,9 +112,6 @@ function generateRandomQuestion(): string {
     `Will Amazon stock (AMZN) price be above $190 in the next 15 minutes?`,
     `Will Microsoft stock (MSFT) price be above $420 in the next 15 minutes?`,
     
-    // Time-based with balanced outcomes
-    `Will the seconds when this question expires be greater than 30?`,
-    `Will it be past the top of the hour (XX:00) when this expires?`,
     
     // Additional current price comparisons (perfect 50/50 balance)
     `Will AAVE token price be above its current price in the next 15 minutes?`,

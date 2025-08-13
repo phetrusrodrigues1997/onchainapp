@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 // Configure the time interval for new questions (in minutes)
-const QUESTION_INTERVAL_MINUTES = 15;
+const QUESTION_INTERVAL_MINUTES = 5;
 
 interface FifteenMinuteQuestionsProps {
   className?: string;
