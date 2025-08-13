@@ -34,12 +34,6 @@ export const WrongPredictionsCrypto = pgTable("wrong_predictions_crypto", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-  export const ImageURLs = pgTable("image_urls", {
-  id: serial("id").primaryKey(),                // Auto-incremented ID
-  walletAddress: text("wallet_address").notNull(), // Associated user's wallet address
-  imageUrl: text("image_url").notNull(),        // URL to the image
-  createdAt: timestamp("created_at").defaultNow().notNull(), // Timestamp for when the image was added
-});
 
 export const CryptoBets = pgTable("crypto_bets", {
   id: serial("id").primaryKey(), // Auto-incrementing ID as primary key
@@ -80,9 +74,10 @@ export const FreeEntries = pgTable("free_entries", {
 
 export const UsersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
-  walletAddress: text("wallet_address").notNull().unique(), // Each wallet can only have one email
-  email: text("email").notNull(),
-  sourcePage: text("source_page").notNull(), // 'PredictionPot', 'AI', or 'PrivatePot'
+  walletAddress: text("wallet_address").notNull().unique(), // Each wallet can only have one entry
+  email: text("email"), // Optional email address
+  sourcePage: text("source_page"), // Optional: where the user data was collected from
+  imageUrl: text("image_url").default(null), // Optional profile image URL, defaults to null
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
 });
 

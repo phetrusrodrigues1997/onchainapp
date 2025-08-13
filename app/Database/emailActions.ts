@@ -50,7 +50,8 @@ export async function checkEmailExists(walletAddress: string): Promise<boolean> 
       .where(eq(UsersTable.walletAddress, sanitizedAddress.toLowerCase()))
       .limit(1);
     
-    return user.length > 0;
+    // Check if user exists AND has an email
+    return user.length > 0 && user[0].email !== null && user[0].email !== undefined;
   } catch (error) {
     console.error("Error checking email existence:", error);
     return false; // Default to false so modal shows on error
@@ -128,13 +129,22 @@ export async function saveUserEmail(
       return { success: false, error: "Invalid source page" };
     }
 
-    // Check if email already exists first
+    // Check if user already exists
     const existingUser = await db.select().from(UsersTable)
       .where(eq(UsersTable.walletAddress, sanitizedAddress.toLowerCase()))
       .limit(1);
     
     if (existingUser.length > 0) {
-      return { success: true }; // Already exists, treat as success
+      // User exists, update their email if they don't have one
+      if (!existingUser[0].email) {
+        await db.update(UsersTable)
+          .set({ 
+            email: sanitizedEmail.toLowerCase().trim(),
+            sourcePage: sourcePage, // Update source page too
+          })
+          .where(eq(UsersTable.walletAddress, sanitizedAddress.toLowerCase()));
+      }
+      return { success: true }; // Already exists or updated, treat as success
     }
 
     // Insert with validated and sanitized data
@@ -197,15 +207,18 @@ export async function getUserInfo(walletAddress: string) {
 export async function getEmailStats() {
   try {
     const total = await db.select().from(UsersTable);
-    const bySource = await db.select().from(UsersTable);
+    // Only count users with emails
+    const usersWithEmails = total.filter(u => u.email !== null && u.email !== undefined);
     
     const stats = {
-      total: total.length,
+      total: usersWithEmails.length,
+      totalUsers: total.length, // Total users (including those with just imageUrl)
       bySource: {
-        PredictionPot: bySource.filter(u => u.sourcePage === 'PredictionPot').length,
-        AI: bySource.filter(u => u.sourcePage === 'AI').length,
-        PrivatePot: bySource.filter(u => u.sourcePage === 'PrivatePot').length,
-        CreatePot: bySource.filter(u => u.sourcePage === 'CreatePot').length,
+        PredictionPot: usersWithEmails.filter(u => u.sourcePage === 'PredictionPot').length,
+        AI: usersWithEmails.filter(u => u.sourcePage === 'AI').length,
+        PrivatePot: usersWithEmails.filter(u => u.sourcePage === 'PrivatePot').length,
+        CreatePot: usersWithEmails.filter(u => u.sourcePage === 'CreatePot').length,
+        Profile: usersWithEmails.filter(u => u.sourcePage === 'Profile').length,
       }
     };
     
@@ -214,7 +227,8 @@ export async function getEmailStats() {
     console.error("Error getting email stats:", error);
     return {
       total: 0,
-      bySource: { PredictionPot: 0, AI: 0, PrivatePot: 0, CreatePot: 0 }
+      totalUsers: 0,
+      bySource: { PredictionPot: 0, AI: 0, PrivatePot: 0, CreatePot: 0, Profile: 0 }
     };
   }
 }

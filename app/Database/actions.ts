@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import {  Messages, FeaturedBets, CryptoBets } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
-import { ImageURLs, ReferralCodes, Referrals, FreeEntries } from "./schema";
+import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { desc } from "drizzle-orm";
 
 // Initialize database connection
@@ -49,15 +49,33 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
 
 export async function saveImageUrl(walletAddress: string, imageUrl: string) {
   try {
-    const result = await db
-      .insert(ImageURLs)
-      .values({
-        walletAddress,
-        imageUrl,
-      })
-      .returning();
+    // Check if user already exists in users_table
+    const existingUser = await db
+      .select()
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, walletAddress))
+      .limit(1);
 
-    return result;
+    if (existingUser.length > 0) {
+      // Update existing user's imageUrl
+      const result = await db
+        .update(UsersTable)
+        .set({ imageUrl })
+        .where(eq(UsersTable.walletAddress, walletAddress))
+        .returning();
+      return result;
+    } else {
+      // Create new user entry with just walletAddress and imageUrl
+      const result = await db
+        .insert(UsersTable)
+        .values({
+          walletAddress,
+          sourcePage: 'Profile', // Indicate this came from profile page
+          imageUrl,
+        })
+        .returning();
+      return result;
+    }
   } catch (error) {
     console.error("Error saving image URL:", error);
     throw new Error("Failed to save image URL");
@@ -450,10 +468,9 @@ export async function getBetsForDate(date: string, typeTable: string) {
 export async function getLatestImageUrl(walletAddress: string): Promise<string | null> {
   try {
     const result = await db
-      .select({ imageUrl: ImageURLs.imageUrl })
-      .from(ImageURLs)
-      .where(eq(ImageURLs.walletAddress, walletAddress))
-      .orderBy(desc(ImageURLs.createdAt))
+      .select({ imageUrl: UsersTable.imageUrl })
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, walletAddress))
       .limit(1);
 
     return result.length > 0 ? result[0].imageUrl : null;
