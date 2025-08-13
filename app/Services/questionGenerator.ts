@@ -125,6 +125,155 @@ async function getRecentQuestions(): Promise<string[]> {
   }
 }
 
+// Generate a batch of 24 questions for 6 hours (24 * 15-minute slots)
+export async function generateQuestionBatch(count: number = 24) {
+  try {
+    // Gather real-time data and recent questions to avoid duplicates
+    const [btcPrice, ethPrice, recentNews, recentQuestions] = await Promise.all([
+      getCryptoPrice('BTC'),
+      getCryptoPrice('ETH'),
+      getRecentNews(),
+      getRecentQuestions()
+    ]);
+
+    // Add variety to crypto prices for different question types
+    const cryptoPrices = await Promise.all([
+      getCryptoPrice('AERO'),
+      getCryptoPrice('VIRTUAL'),
+      getCryptoPrice('AAVE')
+    ]);
+
+    // Prepare context with real-time data
+    let contextData = '';
+    
+    if (btcPrice) {
+      contextData += `Current Bitcoin price: $${btcPrice.toLocaleString()}. `;
+    }
+    if (ethPrice) {
+      contextData += `Current Ethereum price: $${ethPrice.toLocaleString()}. `;
+    }
+    
+    // Add other crypto prices for variety
+    const cryptoNames = ['AERO', 'VIRTUAL', 'AAVE'];
+    cryptoPrices.forEach((price, index) => {
+      if (price) {
+        contextData += `Current ${cryptoNames[index]} price: $${price.toLocaleString()}. `;
+      }
+    });
+    
+    if (recentNews.length > 0) {
+      contextData += `Recent trending news headlines: ${recentNews.slice(0, 3).join(', ')}. `;
+    } else {
+      contextData += `Trending topics: ${getTrendingTopics().join(', ')}. `;
+    }
+
+    // Add recent questions context to avoid duplicates
+    const recentQuestionsContext = recentQuestions.length > 0 
+      ? `Avoid creating questions similar to these recent ones: ${recentQuestions.slice(0, 10).join(', ')}. `
+      : '';
+
+    // Add timestamp for more variety
+    const currentHour = new Date().getHours();
+    const timeContext = currentHour < 12 ? 'morning' : currentHour < 17 ? 'afternoon' : 'evening';
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `You are a creative question generator creating ${count} diverse yes/no questions about events that could happen in the next 15 minutes each. Create a varied mix covering different categories:
+          
+          Categories to cover (distribute evenly):
+          - Celebrity social media activity (tweets, posts, announcements)
+          - Breaking news or trending topics
+          - Sports moments or announcements  
+          - Tech company announcements
+          - Cryptocurrency price movements (Bitcoin, Ethereum, AERO, VIRTUAL, AAVE)
+          - Entertainment industry updates
+          - Political statements or reactions
+          - Current events and trending topics
+          - Weather or natural events
+          - Business announcements
+          - Viral content creation
+          - Market movements
+          
+          Current context: ${contextData}
+          Time of day: ${timeContext}
+          ${recentQuestionsContext}
+          
+          IMPORTANT REQUIREMENTS:
+          - Each question must be unique and different from others in the batch
+          - Mix different celebrities, topics, and question styles
+          - Make questions specific and interesting
+          - All questions should be realistic possibilities within 15 minutes
+          - Return EXACTLY ${count} questions
+          - Format as a JSON array of strings
+          
+          Example output format:
+          ["Will Elon Musk tweet about AI in the next 15 minutes?", "Will Bitcoin break $100,000 in the next 15 minutes?", ...]
+          
+          Generate ${count} unique, creative questions now.`
+        },
+        {
+          role: "user",
+          content: `Create ${count} diverse, unique yes/no questions about things that could realistically happen in the next 15 minutes. Make them varied and interesting. Return as a JSON array.`
+        }
+      ],
+      max_tokens: 2000,
+      temperature: 1.2, // High temperature for maximum variety
+    });
+
+    const response = completion.choices[0]?.message?.content?.trim();
+    
+    if (!response) {
+      throw new Error('No response from OpenAI');
+    }
+
+    try {
+      // Try to parse as JSON
+      const questions = JSON.parse(response);
+      if (Array.isArray(questions) && questions.length > 0) {
+        return questions.slice(0, count).map((q: any) => ({ question: String(q).trim() }));
+      }
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response as JSON:', parseError);
+    }
+
+    // Fallback: if JSON parsing fails, try to extract questions from text
+    const lines = response.split('\n').filter(line => line.trim().length > 10);
+    const extractedQuestions = lines.map(line => {
+      // Remove common prefixes and clean up
+      let cleaned = line.replace(/^\d+\.\s*/, '').replace(/^["']|["']$/g, '').trim();
+      if (cleaned.includes('?')) {
+        return { question: cleaned };
+      }
+      return null;
+    }).filter(q => q !== null).slice(0, count);
+
+    if (extractedQuestions.length > 0) {
+      return extractedQuestions;
+    }
+
+    // Ultimate fallback: generate random questions
+    const fallbackQuestions = [];
+    for (let i = 0; i < count; i++) {
+      fallbackQuestions.push({ question: generateRandomQuestion() });
+    }
+    return fallbackQuestions;
+
+  } catch (error) {
+    console.error('Error generating question batch:', error);
+    
+    // Fallback to random questions
+    const fallbackQuestions = [];
+    for (let i = 0; i < count; i++) {
+      fallbackQuestions.push({ question: generateRandomQuestion() });
+    }
+    return fallbackQuestions;
+  }
+}
+
+// Keep the single question generator for compatibility
 export async function generateQuestion() {
   try {
     // Gather real-time data and recent questions to avoid duplicates

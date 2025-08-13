@@ -1,112 +1,216 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '../../Database/db';
 import { LiveQuestions } from '../../Database/schema';
-import { desc, eq, and, lte, gte } from 'drizzle-orm';
+import { desc, lte, gte, and } from 'drizzle-orm';
 
-// Get the current active question
-export async function GET(request: NextRequest) {
+const QUESTION_INTERVAL_MINUTES = 15;
+
+// Define batch generation times (UTC hours)
+const BATCH_GENERATION_HOURS = [10, 13, 16, 20, 0]; // 10am, 1pm, 4pm, 8pm, midnight UTC
+
+// Calculate which 15-minute slot we're currently in
+function getCurrentTimeSlot(): Date {
+  const now = new Date();
+  const minutes = now.getUTCMinutes();
+  const roundedMinutes = Math.floor(minutes / QUESTION_INTERVAL_MINUTES) * QUESTION_INTERVAL_MINUTES;
+  
+  const slotTime = new Date(now);
+  slotTime.setUTCMinutes(roundedMinutes, 0, 0);
+  
+  return slotTime;
+}
+
+// Check if we're in a batch generation window (within 15 minutes after generation times)
+// This is now used for logging/optimization only, not as a hard requirement
+function isInBatchGenerationWindow(): boolean {
+  const now = new Date();
+  const currentHour = now.getUTCHours();
+  const currentMinutes = now.getUTCMinutes();
+  
+  // Check if current time is within 15 minutes after any batch generation hour
+  for (const hour of BATCH_GENERATION_HOURS) {
+    if (currentHour === hour && currentMinutes < 15) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+// Get the last batch generation time that should have occurred
+function getLastBatchGenerationTime(): Date {
+  const now = new Date();
+  const currentHour = now.getUTCHours();
+  const currentMinutes = now.getUTCMinutes();
+  
+  // Find the most recent batch generation time
+  let targetHour = BATCH_GENERATION_HOURS[0]; // default to first one
+  
+  for (let i = BATCH_GENERATION_HOURS.length - 1; i >= 0; i--) {
+    const hour = BATCH_GENERATION_HOURS[i];
+    if (currentHour > hour || (currentHour === hour && currentMinutes >= 0)) {
+      targetHour = hour;
+      break;
+    }
+  }
+  
+  // If no hour found today, use the last hour from yesterday
+  const batchTime = new Date(now);
+  if (currentHour < BATCH_GENERATION_HOURS[0]) {
+    batchTime.setUTCDate(batchTime.getUTCDate() - 1);
+    targetHour = BATCH_GENERATION_HOURS[BATCH_GENERATION_HOURS.length - 1];
+  }
+  
+  batchTime.setUTCHours(targetHour, 0, 0, 0);
+  return batchTime;
+}
+
+// Generate 24 questions starting from a specific time
+function generateTimeSlots(startTime: Date, count: number = 24): Date[] {
+  const slots = [];
+  for (let i = 0; i < count; i++) {
+    const slot = new Date(startTime);
+    slot.setUTCMinutes(slot.getUTCMinutes() + (i * QUESTION_INTERVAL_MINUTES));
+    slots.push(slot);
+  }
+  return slots;
+}
+
+// Smart batch generation - ensures we always have enough questions
+async function ensureQuestionsExistSmart() {
   try {
     const now = new Date();
+    const currentSlot = getCurrentTimeSlot();
     
-    // First, try to get the current active question within its time window
+    // Check how many future questions we have from current time
+    const futureQuestions = await db
+      .select()
+      .from(LiveQuestions)
+      .where(gte(LiveQuestions.startTime, currentSlot))
+      .orderBy(desc(LiveQuestions.startTime));
+    
+    console.log(`Found ${futureQuestions.length} future questions from current slot`);
+    
+    // If we have less than 5 questions ahead, generate more
+    const questionsNeeded = Math.max(0, 5 - futureQuestions.length);
+    
+    if (questionsNeeded === 0) {
+      console.log('Sufficient questions available');
+      return;
+    }
+    
+    console.log(`Need to generate ${questionsNeeded} more questions`);
+    
+    // Determine start time for new questions
+    let startSlot;
+    if (futureQuestions.length > 0) {
+      // Continue from the last existing question
+      const latestQuestion = futureQuestions[0];
+      startSlot = new Date(latestQuestion.endTime);
+    } else {
+      // No future questions, start from current slot
+      startSlot = currentSlot;
+    }
+    
+    // Always generate at least 5 questions, but preferably 24 for efficiency
+    const questionsToGenerate = questionsNeeded < 20 ? 24 : questionsNeeded;
+    
+    // Generate time slots
+    const timeSlots = generateTimeSlots(startSlot, questionsToGenerate);
+    
+    // Use batch generation for efficiency
+    const { generateQuestionBatch } = await import('../../Services/questionGenerator');
+    const questionBatch = await generateQuestionBatch(questionsToGenerate);
+    
+    console.log(`Generated ${questionBatch.length} questions via OpenAI batch`);
+    
+    // Insert all questions into database
+    let insertedCount = 0;
+    for (let i = 0; i < Math.min(timeSlots.length, questionBatch.length); i++) {
+      const slotTime = timeSlots[i];
+      const endTime = new Date(slotTime.getTime() + (QUESTION_INTERVAL_MINUTES * 60 * 1000));
+      const questionData = questionBatch[i];
+      
+      try {
+        await db
+          .insert(LiveQuestions)
+          .values({
+            question: questionData.question,
+            startTime: slotTime,
+            endTime: endTime,
+            isActive: false // Not used in new system
+          });
+        
+        insertedCount++;
+        console.log(`Inserted question for slot: ${slotTime.toISOString()}`);
+      } catch (error) {
+        console.error(`Failed to insert question for slot ${slotTime.toISOString()}:`, error);
+      }
+    }
+    
+    console.log(`Successfully inserted ${insertedCount} new questions`);
+    
+  } catch (error) {
+    console.error('Error in smart question generation:', error);
+  }
+}
+
+// Get the current question for this time slot
+export async function GET(request: NextRequest) {
+  try {
+    const currentSlot = getCurrentTimeSlot();
+    const endSlot = new Date(currentSlot.getTime() + (QUESTION_INTERVAL_MINUTES * 60 * 1000));
+    
+    // Find the question for current time slot
     const currentQuestion = await db
       .select()
       .from(LiveQuestions)
       .where(
         and(
-          eq(LiveQuestions.isActive, true),
-          lte(LiveQuestions.startTime, now),
-          gte(LiveQuestions.endTime, now)
+          lte(LiveQuestions.startTime, currentSlot),
+          gte(LiveQuestions.endTime, currentSlot)
         )
       )
-      .orderBy(desc(LiveQuestions.startTime))
       .limit(1);
 
     if (currentQuestion.length > 0) {
       const question = currentQuestion[0];
+      const now = new Date();
       const timeRemaining = Math.max(0, Math.floor((question.endTime.getTime() - now.getTime()) / 1000));
+      
+      // Background task: ensure we have enough questions for the future
+      ensureQuestionsExistSmart().catch(console.error);
       
       return NextResponse.json({
         question: question.question,
         timeRemaining,
         questionId: question.id,
         startTime: question.startTime.toISOString(),
-        endTime: question.endTime.toISOString()
+        endTime: question.endTime.toISOString(),
+        slotTime: currentSlot.toISOString()
       });
     }
 
-    // If no active question found, check if there's a recent question that should still be active
-    // Look for any question that should be active right now (regardless of isActive flag)
-    const shouldBeActiveQuestion = await db
+    console.log('No question found for current slot, generating immediately');
+    
+    // No question for current slot - generate immediately
+    await ensureQuestionsExistSmart();
+    
+    // Try to find question again after generation
+    const newQuestion = await db
       .select()
       .from(LiveQuestions)
       .where(
         and(
-          lte(LiveQuestions.startTime, now),
-          gte(LiveQuestions.endTime, now)
+          lte(LiveQuestions.startTime, currentSlot),
+          gte(LiveQuestions.endTime, currentSlot)
         )
       )
-      .orderBy(desc(LiveQuestions.startTime))
       .limit(1);
 
-    if (shouldBeActiveQuestion.length > 0) {
-      const question = shouldBeActiveQuestion[0];
-      
-      // If this question isn't marked as active, fix that
-      if (!question.isActive) {
-        await db
-          .update(LiveQuestions)
-          .set({ isActive: false })
-          .where(eq(LiveQuestions.isActive, true)); // Deactivate others
-          
-        await db
-          .update(LiveQuestions)
-          .set({ isActive: true })
-          .where(eq(LiveQuestions.id, question.id)); // Activate this one
-      }
-      
-      const timeRemaining = Math.max(0, Math.floor((question.endTime.getTime() - now.getTime()) / 1000));
-      
-      return NextResponse.json({
-        question: question.question,
-        timeRemaining,
-        questionId: question.id,
-        startTime: question.startTime.toISOString(),
-        endTime: question.endTime.toISOString()
-      });
-    }
-
-    // Only generate new question if no question should be active right now
-    // Check if the latest question has truly expired
-    const latestQuestion = await db
-      .select()
-      .from(LiveQuestions)
-      .orderBy(desc(LiveQuestions.endTime))
-      .limit(1);
-
-    let shouldGenerateNew = false;
-    
-    if (latestQuestion.length === 0) {
-      // No questions at all, generate first one
-      shouldGenerateNew = true;
-    } else {
-      // Check if the latest question has expired (with a buffer for sync)
-      const latestEndTime = latestQuestion[0].endTime.getTime();
-      const bufferTime = 30 * 1000; // 30 seconds buffer for better synchronization
-      if (now.getTime() > (latestEndTime + bufferTime)) {
-        shouldGenerateNew = true;
-      }
-    }
-
-    if (shouldGenerateNew) {
-      // Generate a new question
-      const newQuestion = await generateNewQuestion();
-      return NextResponse.json(newQuestion);
-    }
-
-    // If we reach here, return the latest question (even if slightly expired)
-    if (latestQuestion.length > 0) {
-      const question = latestQuestion[0];
+    if (newQuestion.length > 0) {
+      const question = newQuestion[0];
+      const now = new Date();
       const timeRemaining = Math.max(0, Math.floor((question.endTime.getTime() - now.getTime()) / 1000));
       
       return NextResponse.json({
@@ -115,132 +219,83 @@ export async function GET(request: NextRequest) {
         questionId: question.id,
         startTime: question.startTime.toISOString(),
         endTime: question.endTime.toISOString(),
-        expired: timeRemaining === 0
+        slotTime: currentSlot.toISOString(),
+        wasGenerated: true
       });
     }
 
-    // Ultimate fallback
+    // Ultimate fallback: if generation failed, return a default
+    const timeRemaining = Math.floor((endSlot.getTime() - new Date().getTime()) / 1000);
+    
     return NextResponse.json({
       question: "Will something unexpected happen in the next 15 minutes?",
-      timeRemaining: 0,
+      timeRemaining: Math.max(0, timeRemaining),
       questionId: null,
-      error: "No questions available"
+      startTime: currentSlot.toISOString(),
+      endTime: endSlot.toISOString(),
+      slotTime: currentSlot.toISOString(),
+      fallback: true
     });
 
   } catch (error) {
     console.error('Error fetching live question:', error);
     
+    const now = new Date();
     return NextResponse.json({
       question: "Will something unexpected happen in the next 15 minutes?",
-      timeRemaining: 0,
+      timeRemaining: QUESTION_INTERVAL_MINUTES * 60,
       questionId: null,
-      error: "Failed to fetch question"
+      error: "Failed to fetch question",
+      timestamp: now.toISOString()
     });
   }
 }
 
-// Generate a new question and store it in the database
-async function generateNewQuestion() {
-  try {
-    // Double-check if a new question was already created by another request (race condition fix)
-    const currentTime = new Date();
-    
-    // Add a small random delay to reduce race conditions
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
-    
-    const recentQuestion = await db
-      .select()
-      .from(LiveQuestions)
-      .where(
-        and(
-          eq(LiveQuestions.isActive, true),
-          lte(LiveQuestions.startTime, currentTime),
-          gte(LiveQuestions.endTime, currentTime)
-        )
-      )
-      .limit(1);
-
-    if (recentQuestion.length > 0) {
-      // Another request already generated a question, return it
-      const question = recentQuestion[0];
-      const timeRemaining = Math.max(0, Math.floor((question.endTime.getTime() - currentTime.getTime()) / 1000));
-      
-      return {
-        question: question.question,
-        timeRemaining,
-        questionId: question.id,
-        startTime: question.startTime.toISOString(),
-        endTime: question.endTime.toISOString(),
-        isNew: false // Not actually new, just found existing
-      };
-    }
-
-    // First, deactivate all existing questions
-    await db
-      .update(LiveQuestions)
-      .set({ isActive: false })
-      .where(eq(LiveQuestions.isActive, true));
-
-    // Generate question using shared utility
-    const { generateQuestion } = await import('../../Services/questionGenerator');
-    const data = await generateQuestion();
-    
-    // Calculate start and end times - align to next 15-minute boundary for better sync
-    const INTERVAL_MINUTES = 15;
-    const alignedStartTime = new Date(currentTime);
-    // Round up to next 15-minute boundary
-    const minutes = alignedStartTime.getMinutes();
-    const roundedMinutes = Math.ceil(minutes / INTERVAL_MINUTES) * INTERVAL_MINUTES;
-    alignedStartTime.setMinutes(roundedMinutes, 0, 0);
-    
-    // If the aligned time is more than 2 minutes away, start immediately instead
-    const timeDiff = alignedStartTime.getTime() - currentTime.getTime();
-    const startTime = timeDiff > 2 * 60 * 1000 ? currentTime : alignedStartTime;
-    const endTime = new Date(startTime.getTime() + (INTERVAL_MINUTES * 60 * 1000));
-
-    // Insert new question into database
-    const insertedQuestion = await db
-      .insert(LiveQuestions)
-      .values({
-        question: data.question,
-        startTime: startTime,
-        endTime: endTime,
-        isActive: true
-      })
-      .returning();
-
-    const newQuestion = insertedQuestion[0];
-    const timeRemaining = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
-
-    return {
-      question: newQuestion.question,
-      timeRemaining,
-      questionId: newQuestion.id,
-      startTime: newQuestion.startTime.toISOString(),
-      endTime: newQuestion.endTime.toISOString(),
-      isNew: true
-    };
-
-  } catch (error) {
-    console.error('Error generating new question:', error);
-    
-    // Return fallback question without saving to database
-    return {
-      question: "Will something unexpected happen in the next 15 minutes?",
-      timeRemaining: 15 * 60, // 15 minutes
-      questionId: null,
-      error: "Failed to generate new question"
-    };
-  }
-}
-
-// Force generate a new question (for admin/testing purposes)
+// Force populate questions (for initial setup or admin use)
 export async function POST(request: NextRequest) {
   try {
-    const newQuestion = await generateNewQuestion();
-    return NextResponse.json(newQuestion);
+    const currentSlot = getCurrentTimeSlot();
+    
+    // Generate 24 questions starting from current slot
+    const slots = generateTimeSlots(currentSlot, 24);
+    const { generateQuestionBatch } = await import('../../Services/questionGenerator');
+    
+    const questionBatch = await generateQuestionBatch(24);
+    const generatedQuestions = [];
+    
+    for (let i = 0; i < Math.min(slots.length, questionBatch.length); i++) {
+      const slotTime = slots[i];
+      const endTime = new Date(slotTime.getTime() + (QUESTION_INTERVAL_MINUTES * 60 * 1000));
+      const questionData = questionBatch[i];
+      
+      try {
+        const result = await db
+          .insert(LiveQuestions)
+          .values({
+            question: questionData.question,
+            startTime: slotTime,
+            endTime: endTime,
+            isActive: false
+          })
+          .returning();
+        
+        generatedQuestions.push(result[0]);
+      } catch (error) {
+        console.error(`Failed to generate question for slot ${slotTime.toISOString()}:`, error);
+      }
+    }
+    
+    return NextResponse.json({
+      message: `Generated ${generatedQuestions.length} questions via batch generation`,
+      questions: generatedQuestions.map(q => ({
+        id: q.id,
+        question: q.question,
+        startTime: q.startTime.toISOString(),
+        endTime: q.endTime.toISOString()
+      }))
+    });
   } catch (error) {
-    console.error('Error force generating question:', error);
-    return NextResponse.json({ error: 'Failed to generate question' }, { status: 500 });
+    console.error('Error force generating questions:', error);
+    return NextResponse.json({ error: 'Failed to generate questions' }, { status: 500 });
   }
 }
