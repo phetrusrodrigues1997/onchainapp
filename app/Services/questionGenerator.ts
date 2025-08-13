@@ -87,19 +87,29 @@ const topics = [
 function generateRandomQuestion(): string {
   const celebrity = celebrities[Math.floor(Math.random() * celebrities.length)];
   const activity = activities[Math.floor(Math.random() * activities.length)];
-  const topic = topics[Math.floor(Math.random() * topics.length)];
   
+  // Specific, verifiable question templates
   const templates = [
-    `Will ${celebrity} ${activity} about ${topic} in the next 15 minutes?`,
-    `Will ${celebrity} ${activity} in the next 15 minutes?`,
-    `Will ${celebrity} mention ${topic} in the next 15 minutes?`,
-    `Will ${celebrity} surprise everyone with a ${activity} in the next 15 minutes?`,
-    `Will someone famous ${activity} about ${topic} in the next 15 minutes?`,
-    `Will breaking news about ${celebrity} surface in the next 15 minutes?`,
-    `Will ${celebrity} trend on social media in the next 15 minutes?`,
-    `Will a major ${topic} announcement happen in the next 15 minutes?`,
-    `Will ${celebrity} make headlines about ${topic} in the next 15 minutes?`,
-    `Will something viral related to ${celebrity} happen in the next 15 minutes?`
+    `Will ${celebrity} post on X/Twitter in the next 15 minutes?`,
+    `Will ${celebrity} post on Instagram in the next 15 minutes?`,
+    `Will ${celebrity} share a new photo on social media in the next 15 minutes?`,
+    `Will Bitcoin price go above $50,000 in the next 15 minutes?`,
+    `Will Bitcoin price drop below $40,000 in the next 15 minutes?`,
+    `Will Ethereum price move up by 2% in the next 15 minutes?`,
+    `Will CNN publish a new article in the next 15 minutes?`,
+    `Will BBC News post a new story in the next 15 minutes?`,
+    `Will Apple stock (AAPL) change by more than 0.5% in the next 15 minutes?`,
+    `Will Tesla stock (TSLA) move up in the next 15 minutes?`,
+    `Will Google stock (GOOGL) hit a new daily high in the next 15 minutes?`,
+    `Will the S&P 500 index move up by 0.1% in the next 15 minutes?`,
+    `Will ${celebrity} go live on any social platform in the next 15 minutes?`,
+    `Will ${celebrity} reply to someone on X/Twitter in the next 15 minutes?`,
+    `Will any cryptocurrency gain more than 5% in the next 15 minutes?`,
+    `Will the USD/EUR exchange rate change by 0.1% in the next 15 minutes?`,
+    `Will Reuters publish breaking news in the next 15 minutes?`,
+    `Will the weather change in New York City in the next 15 minutes?`,
+    `Will someone with over 1M followers post about crypto in the next 15 minutes?`,
+    `Will any stock in the Dow Jones hit a new daily high in the next 15 minutes?`
   ];
   
   return templates[Math.floor(Math.random() * templates.length)];
@@ -184,39 +194,50 @@ export async function generateQuestionBatch(count: number = 24) {
           content: `You are a creative question generator creating ${count} diverse yes/no questions about events that could happen in the next 15 minutes each. Create a varied mix covering different categories:
           
           Categories to cover (distribute evenly):
-          - Celebrity social media activity (tweets, posts, announcements)
-          - Breaking news or trending topics
-          - Sports moments or announcements  
-          - Tech company announcements
-          - Cryptocurrency price movements (Bitcoin, Ethereum, AERO, VIRTUAL, AAVE)
-          - Entertainment industry updates
-          - Political statements or reactions
-          - Current events and trending topics
-          - Weather or natural events
-          - Business announcements
-          - Viral content creation
-          - Market movements
+          - Specific celebrity social media activity (name specific people like Elon Musk, Taylor Swift, etc.)
+          - Cryptocurrency price movements with specific thresholds
+          - Major news website headlines (CNN, BBC, Reuters, etc.)
+          - Stock market movements with specific numbers
+          - Weather events in major cities
+          - Sports scores or announcements
+          - Tech company stock prices
+          - Specific social media trends
           
           Current context: ${contextData}
           Time of day: ${timeContext}
           ${recentQuestionsContext}
           
-          IMPORTANT REQUIREMENTS:
-          - Each question must be unique and different from others in the batch
-          - Mix different celebrities, topics, and question styles
-          - Make questions specific and interesting
-          - All questions should be realistic possibilities within 15 minutes
-          - Return EXACTLY ${count} questions
-          - Format as a JSON array of strings
+          CRITICAL REQUIREMENTS - QUESTIONS MUST BE:
+          ✅ SPECIFIC: Use exact names, numbers, thresholds
+          ✅ VERIFIABLE: Anyone can check the answer objectively
+          ✅ REALISTIC: Possible within 15 minutes
+          ✅ CLEAR: No ambiguous terms like "major", "famous", "expert", "significant"
           
-          Example output format:
-          ["Will Elon Musk tweet about AI in the next 15 minutes?", "Will Bitcoin break $100,000 in the next 15 minutes?", ...]
+          ❌ AVOID VAGUE TERMS:
+          - "major expert" → Use specific person names
+          - "famous YouTuber" → Use specific channel names
+          - "significant price movement" → Use specific percentage/dollar amounts
+          - "breaking news" → Use specific news sources
           
-          Generate ${count} unique, creative questions now.`
+          ✅ GOOD EXAMPLES:
+          - "Will Elon Musk post on X/Twitter in the next 15 minutes?"
+          - "Will Bitcoin price go above $45,000 in the next 15 minutes?"
+          - "Will CNN publish a new article in the next 15 minutes?"
+          - "Will Apple stock (AAPL) move up or down by 0.5% in the next 15 minutes?"
+          - "Will it start raining in New York City in the next 15 minutes?"
+          
+          ❌ BAD EXAMPLES:
+          - "Will a crypto expert predict something?" (who counts as expert?)
+          - "Will a famous person make news?" (who counts as famous?)
+          - "Will there be major market movement?" (how much is major?)
+          
+          Return EXACTLY ${count} questions as a JSON array of strings.
+          
+          Generate ${count} specific, verifiable questions now.`
         },
         {
           role: "user",
-          content: `Create ${count} diverse, unique yes/no questions about things that could realistically happen in the next 15 minutes. Make them varied and interesting. Return as a JSON array.`
+          content: `Create ${count} specific, verifiable yes/no questions about things that could realistically happen in the next 15 minutes. Each question must be answerable with a clear YES or NO by checking specific, named sources. Avoid all vague terms. Return as a JSON array.`
         }
       ],
       max_tokens: 2000,
@@ -329,33 +350,35 @@ export async function generateQuestion() {
       messages: [
         {
           role: "system",
-          content: `You are a creative question generator with access to real-time data. Create fun, engaging yes/no questions about events that could realistically happen in the next 15 minutes. Focus on variety and avoid repetition.
+          content: `You are a creative question generator with access to real-time data. Create specific, verifiable yes/no questions about events that could realistically happen in the next 15 minutes.
           
-          Topics to explore (rotate between them):
-          - Celebrity social media activity (tweets, posts, announcements)
-          - Breaking news or trending topics
-          - Sports moments or announcements  
-          - Tech company announcements
-          - Cryptocurrency price movements (Bitcoin, Ethereum, AERO, VIRTUAL, AAVE)
-          - Entertainment industry updates
-          - Political statements or reactions
-          - Current events and trending topics
-          - Weather or natural events
-          - Business announcements
+          REQUIREMENTS - Questions must be:
+          ✅ SPECIFIC: Use exact names, numbers, thresholds
+          ✅ VERIFIABLE: Anyone can check the answer objectively
+          ✅ REALISTIC: Possible within 15 minutes
+          ✅ CLEAR: No vague terms
+          
+          Topics to focus on:
+          - Named celebrity social media activity (Elon Musk, Taylor Swift, etc.)
+          - Cryptocurrency prices with specific thresholds
+          - Named news sources (CNN, BBC, Reuters)
+          - Stock prices with specific percentages
+          - Weather in named cities
+          - Named social media accounts
           
           Current context: ${contextData}
           Time of day: ${timeContext}
           ${recentQuestionsContext}
           
-          Create diverse, specific questions. Examples:
-          - "Will Elon Musk tweet about AI in the next 15 minutes?"
-          - "Will Bitcoin break $${btcPrice ? Math.ceil(btcPrice/1000)*1000 : '100,000'} in the next 15 minutes?"
-          - "Will a major tech company make an announcement in the next 15 minutes?"
-          - "Will someone post a viral video in the next 15 minutes?"
-          - "Will AERO price move more than 5% in the next 15 minutes?"
+          ✅ GOOD examples:
+          - "Will Elon Musk post on X/Twitter in the next 15 minutes?"
+          - "Will Bitcoin go above $${btcPrice ? Math.ceil(btcPrice/1000)*1000 : '50,000'} in the next 15 minutes?"
+          - "Will CNN publish a new article in the next 15 minutes?"
+          - "Will Apple stock move up by 0.5% in the next 15 minutes?"
           
-          IMPORTANT: Create something DIFFERENT from recent questions. Be creative and varied.
-          Return only the question, nothing else.`
+          ❌ AVOID vague terms like: "major", "famous", "significant", "expert", "breaking"
+          
+          Return only the specific, verifiable question, nothing else.`
         },
         {
           role: "user",
