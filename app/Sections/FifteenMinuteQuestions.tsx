@@ -93,7 +93,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
       return () => clearInterval(timer);
     }
-  }, [timeRemaining, fetchCurrentQuestion]);
+  }, [timeRemaining]); // Remove fetchCurrentQuestion from dependencies to prevent infinite re-renders
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

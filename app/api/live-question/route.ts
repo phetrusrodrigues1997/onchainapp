@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Check if the latest question has expired (with a small buffer)
       const latestEndTime = latestQuestion[0].endTime.getTime();
-      const bufferTime = 30 * 1000; // 30 seconds buffer
+      const bufferTime = 5 * 1000; // 5 seconds buffer (reduced from 30s for better sync)
       if (now.getTime() > (latestEndTime + bufferTime)) {
         shouldGenerateNew = true;
       }
@@ -142,6 +142,35 @@ export async function GET(request: NextRequest) {
 // Generate a new question and store it in the database
 async function generateNewQuestion() {
   try {
+    // Double-check if a new question was already created by another request (race condition fix)
+    const currentTime = new Date();
+    const recentQuestion = await db
+      .select()
+      .from(LiveQuestions)
+      .where(
+        and(
+          eq(LiveQuestions.isActive, true),
+          lte(LiveQuestions.startTime, currentTime),
+          gte(LiveQuestions.endTime, currentTime)
+        )
+      )
+      .limit(1);
+
+    if (recentQuestion.length > 0) {
+      // Another request already generated a question, return it
+      const question = recentQuestion[0];
+      const timeRemaining = Math.max(0, Math.floor((question.endTime.getTime() - currentTime.getTime()) / 1000));
+      
+      return {
+        question: question.question,
+        timeRemaining,
+        questionId: question.id,
+        startTime: question.startTime.toISOString(),
+        endTime: question.endTime.toISOString(),
+        isNew: false // Not actually new, just found existing
+      };
+    }
+
     // First, deactivate all existing questions
     await db
       .update(LiveQuestions)
@@ -153,23 +182,22 @@ async function generateNewQuestion() {
     const data = await generateQuestion();
     
     // Calculate start and end times
-    const now = new Date();
     const INTERVAL_MINUTES = 15; // This should match your component's QUESTION_INTERVAL_MINUTES
-    const endTime = new Date(now.getTime() + (INTERVAL_MINUTES * 60 * 1000));
+    const endTime = new Date(currentTime.getTime() + (INTERVAL_MINUTES * 60 * 1000));
 
     // Insert new question into database
     const insertedQuestion = await db
       .insert(LiveQuestions)
       .values({
         question: data.question,
-        startTime: now,
+        startTime: currentTime,
         endTime: endTime,
         isActive: true
       })
       .returning();
 
     const newQuestion = insertedQuestion[0];
-    const timeRemaining = Math.floor((endTime.getTime() - now.getTime()) / 1000);
+    const timeRemaining = Math.floor((endTime.getTime() - currentTime.getTime()) / 1000);
 
     return {
       question: newQuestion.question,
