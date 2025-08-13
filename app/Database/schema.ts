@@ -77,7 +77,7 @@ export const UsersTable = pgTable("users_table", {
   walletAddress: text("wallet_address").notNull().unique(), // Each wallet can only have one entry
   email: text("email"), // Optional email address
   sourcePage: text("source_page"), // Optional: where the user data was collected from
-  imageUrl: text("image_url").default(null), // Optional profile image URL, defaults to null
+  imageUrl: text("image_url"), // Optional profile image URL
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
 });
 
