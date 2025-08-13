@@ -86,3 +86,15 @@ export const UsersTable = pgTable("users_table", {
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
 });
 
+// Synchronized questions for prediction market
+export const LiveQuestions = pgTable("live_questions", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(), // The generated question
+  imageUrl: text("image_url").notNull(), // URL to the relevant image
+  imageAlt: text("image_alt").notNull(), // Alt text for the image
+  startTime: timestamp("start_time").notNull(), // When this question cycle starts
+  endTime: timestamp("end_time").notNull(), // When this question cycle ends
+  isActive: boolean("is_active").default(true).notNull(), // Whether this is the current question
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+

@@ -24,6 +24,7 @@ import GamesHub from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
 import CreatePotPage from './Pages/CreatePotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
+import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 
 
 
@@ -231,6 +232,7 @@ export default function App() {
               }} 
             />
           )}
+          {activeSection === "liveMarkets" && <FifteenMinuteQuestions className="mt-20" />}
           {/* Add more sections as needed */}
         
       </main>

@@ -237,6 +237,16 @@ const handleMarketClick = (marketId: string) => {
       <section className="relative z-10 px-6 py-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 relative">
+            {/* Live Markets Link */}
+            <div className="mb-6 -translate-y-1/4">
+              <button 
+                onClick={() => setActiveSection('liveMarkets')}
+                className="text-gray-600 hover:text-gray-900 font-medium tracking-wide transition-colors"
+              >
+                Live Markets →
+              </button>
+            </div>
+            
             {/* Market Carousel */}
             <div className="relative -translate-y-1/3">
 

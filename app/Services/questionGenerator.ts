@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getImageForQuestion } from './imageService';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -29,7 +29,7 @@ async function getCryptoPrice(symbolOrId: string): Promise<number | null> {
   }
 }
 
-// Free News API function (using The News API)
+// Free News API function
 async function getRecentNews(): Promise<string[]> {
   try {
     const response = await fetch('https://api.thenewsapi.com/v1/news/top?api_token=free&locale=us&limit=5');
@@ -45,14 +45,13 @@ async function getRecentNews(): Promise<string[]> {
   }
 }
 
-// Simple function to get trending topics (fallback if news API fails)
 function getTrendingTopics(): string[] {
   const topics = [
     'AI developments', 'cryptocurrency markets', 'tech earnings', 
     'social media trends', 'celebrity announcements', 'political statements',
     'sports highlights', 'entertainment news', 'market movements'
   ];
-  return topics.slice(0, 3); // Return 3 random topics
+  return topics.slice(0, 3);
 }
 
 const celebrities = [
@@ -77,7 +76,7 @@ const topics = [
   'China', 'the economy', 'their latest project', 'their personal life'
 ];
 
-const generateRandomQuestion = () => {
+function generateRandomQuestion(): string {
   const celebrity = celebrities[Math.floor(Math.random() * celebrities.length)];
   const activity = activities[Math.floor(Math.random() * activities.length)];
   const topic = topics[Math.floor(Math.random() * topics.length)];
@@ -90,9 +89,9 @@ const generateRandomQuestion = () => {
   ];
   
   return templates[Math.floor(Math.random() * templates.length)];
-};
+}
 
-export async function POST(request: NextRequest) {
+export async function generateQuestionWithImage() {
   try {
     // Gather real-time data
     const [btcPrice, ethPrice, recentNews] = await Promise.all([
@@ -153,38 +152,35 @@ export async function POST(request: NextRequest) {
     const aiQuestion = completion.choices[0]?.message?.content?.trim();
     const question = aiQuestion || generateRandomQuestion();
 
-    // Import and get image for the question
-    const { getImageForQuestion } = await import('../../Services/imageService');
+    // Get image for the question
     const imageData = await getImageForQuestion(question);
 
-    return NextResponse.json({ 
+    return { 
       question,
       image: imageData
-    });
+    };
   } catch (error) {
     console.error('Error generating question:', error);
     
     // Fallback to random question if OpenAI fails
     const fallbackQuestion = generateRandomQuestion();
     
-    // Still try to get image for fallback question
     try {
-      const { getImageForQuestion } = await import('../../Services/imageService');
       const imageData = await getImageForQuestion(fallbackQuestion);
-      return NextResponse.json({ 
+      return { 
         question: fallbackQuestion,
         image: imageData
-      });
+      };
     } catch (imageError) {
       console.error('Image service also failed:', imageError);
-      return NextResponse.json({ 
+      return { 
         question: fallbackQuestion,
         image: {
           url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-          source: 'fallback',
+          source: 'fallback' as const,
           alt: 'Default prediction image'
         }
-      });
+      };
     }
   }
 }
