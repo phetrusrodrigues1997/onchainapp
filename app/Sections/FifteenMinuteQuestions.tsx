@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 // Configure the time interval for new questions (in minutes)
-const QUESTION_INTERVAL_MINUTES = 5;
+const QUESTION_INTERVAL_MINUTES = 15;
 
 interface FifteenMinuteQuestionsProps {
   className?: string;
@@ -141,10 +141,20 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
         
         // If we hit 0 and no next question, fetch immediately
         if (newTimeRemaining === 0 && !nextQuestion) {
+          // Force immediate fetch and update
           fetchCurrentQuestion().then(question => {
             if (question && question.questionId !== prev.questionId) {
-              setNextQuestion(question);
-              transitionToNextQuestion();
+              // If a new question is available, update immediately without transition
+              setCurrentQuestion(question);
+            }
+          });
+        }
+        
+        // Additional backup: if timer is at 0 for more than 2 seconds, force refresh
+        if (newTimeRemaining === 0 && prev.timeRemaining === 0) {
+          fetchCurrentQuestion().then(question => {
+            if (question && question.questionId !== prev.questionId) {
+              setCurrentQuestion(question);
             }
           });
         }

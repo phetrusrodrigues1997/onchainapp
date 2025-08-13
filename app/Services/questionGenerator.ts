@@ -252,14 +252,24 @@ export async function generateQuestionBatch(count: number = 24) {
           - "Will it be past midnight somewhere?" → OBVIOUS YES - time zones make this guaranteed
           - "Will Bitcoin remain #1 by market cap?" → OBVIOUS YES - rankings are very stable
           - "Will Bitcoin be between $X-$Y?" → COMPLEX - hard to verify, use current price instead
+          - "Will there be a new AI development reported in the news?" → TOO BROAD - AI news appears constantly worldwide
+          - "Will any news be reported about [topic]?" → TOO BROAD - global news makes this nearly guaranteed
+          - "Will someone mention [topic] in the news?" → TOO BROAD - impossible to verify all global sources
+          - "Will [broad category] be in the news?" → TOO BROAD - use specific outlets instead
+          - "Will a new cryptocurrency emerge on CoinGecko?" → OBVIOUS YES - new coins added constantly
+          - "Will a new trending crypto appear?" → OBVIOUS YES - crypto markets are extremely active
+          - "Will any new token be listed?" → OBVIOUS YES - exchanges add tokens frequently
+          - "Will crypto rankings change?" → OBVIOUS YES - rankings fluctuate constantly
           
           ✅ PERFECT EXAMPLES (Easy to verify + 50/50 balance):
           - "Will Elon Musk post on X/Twitter in the next 15 minutes?" (check @elonmusk)
           - "Will Bitcoin price be above its current price in the next 15 minutes?" (check CoinGecko - perfect 50/50)
-          - "Will CNN publish a new article in the next 15 minutes?" (check CNN.com homepage)
+          - "Will CNN publish a new article in the next 15 minutes?" (check CNN.com homepage - SPECIFIC outlet, not "any news")
           - "Will Apple stock be above its current price in the next 15 minutes?" (check Yahoo Finance - perfect 50/50)
           - "Will the Lakers score change from its current score?" (check ESPN.com when games are live)
           - "Will the seconds be greater than 30 when this expires?" (check current time - true 50/50)
+          - "Will Reuters publish a new story in the next 15 minutes?" (check Reuters.com homepage - SPECIFIC outlet)
+          - "Will BBC News post a new article in the next 15 minutes?" (check BBC.com/news - SPECIFIC outlet)
           
           ❌ HARD-TO-VERIFY EXAMPLES:
           - "Will there be a foul called in the Lakers game?" (fouls aren't prominently shown)
@@ -421,6 +431,10 @@ export async function generateQuestion() {
           - "Will the seconds be greater than 30 when this expires?" (true 50/50)
           
           ❌ AVOID obvious/guaranteed answers: "Will Bitcoin price change?", "Will any digit appear?", "Will time pass?"
+          ❌ AVOID broad global questions: "Will there be AI news?", "Will any news be reported about [topic]?"
+          ❌ AVOID crypto platform changes: "Will new crypto emerge?", "Will rankings change?", "Will new tokens be listed?"
+          ✅ USE specific outlets instead: "Will CNN publish a new article?", "Will Reuters post a story?"
+          ✅ USE current price comparisons: "Will Bitcoin be above its current price?", "Will ETH be below its current price?"
           
           Return only the specific, verifiable question, nothing else.`
         },
