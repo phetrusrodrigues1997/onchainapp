@@ -86,30 +86,43 @@ const topics = [
 
 function generateRandomQuestion(): string {
   const celebrity = celebrities[Math.floor(Math.random() * celebrities.length)];
-  const activity = activities[Math.floor(Math.random() * activities.length)];
   
-  // Specific, verifiable question templates
+  // Focus on EASILY VERIFIABLE questions with BALANCED OUTCOMES (not obvious answers)
   const templates = [
+    // Social media posts (roughly 50/50 chance - celebrities don't post every 15 minutes)
     `Will ${celebrity} post on X/Twitter in the next 15 minutes?`,
     `Will ${celebrity} post on Instagram in the next 15 minutes?`,
-    `Will ${celebrity} share a new photo on social media in the next 15 minutes?`,
-    `Will Bitcoin price go above $50,000 in the next 15 minutes?`,
-    `Will Bitcoin price drop below $40,000 in the next 15 minutes?`,
-    `Will Ethereum price move up by 2% in the next 15 minutes?`,
+    
+    // Cryptocurrency current price comparisons (perfect 50/50 chance)
+    `Will Bitcoin price be above its current price in the next 15 minutes?`,
+    `Will Bitcoin price be below its current price in the next 15 minutes?`,
+    `Will Ethereum price be above its current price in the next 15 minutes?`,
+    `Will Ethereum price be below its current price in the next 15 minutes?`,
+    
+    // News websites (balanced - major sites don't publish every 15 minutes)
     `Will CNN publish a new article in the next 15 minutes?`,
     `Will BBC News post a new story in the next 15 minutes?`,
-    `Will Apple stock (AAPL) change by more than 0.5% in the next 15 minutes?`,
-    `Will Tesla stock (TSLA) move up in the next 15 minutes?`,
-    `Will Google stock (GOOGL) hit a new daily high in the next 15 minutes?`,
-    `Will the S&P 500 index move up by 0.1% in the next 15 minutes?`,
-    `Will ${celebrity} go live on any social platform in the next 15 minutes?`,
-    `Will ${celebrity} reply to someone on X/Twitter in the next 15 minutes?`,
-    `Will any cryptocurrency gain more than 5% in the next 15 minutes?`,
-    `Will the USD/EUR exchange rate change by 0.1% in the next 15 minutes?`,
-    `Will Reuters publish breaking news in the next 15 minutes?`,
-    `Will the weather change in New York City in the next 15 minutes?`,
-    `Will someone with over 1M followers post about crypto in the next 15 minutes?`,
-    `Will any stock in the Dow Jones hit a new daily high in the next 15 minutes?`
+    `Will Reuters publish a new article in the next 15 minutes?`,
+    `Will The New York Times publish a new article in the next 15 minutes?`,
+    
+    // Stock prices with reasonable thresholds (balanced outcomes)
+    `Will Apple stock (AAPL) price be above $200 in the next 15 minutes?`,
+    `Will Tesla stock (TSLA) price be above $250 in the next 15 minutes?`,
+    `Will Google stock (GOOGL) price be above $160 in the next 15 minutes?`,
+    `Will Amazon stock (AMZN) price be above $190 in the next 15 minutes?`,
+    `Will Microsoft stock (MSFT) price be above $420 in the next 15 minutes?`,
+    
+    // Time-based with balanced outcomes
+    `Will the seconds when this question expires be greater than 30?`,
+    `Will it be past the top of the hour (XX:00) when this expires?`,
+    
+    // Additional current price comparisons (perfect 50/50 balance)
+    `Will AAVE token price be above its current price in the next 15 minutes?`,
+    `Will USDC be 2 cents above or below $1 in the next 15 minutes?`,
+    
+    // More current price comparisons (perfect 50/50 outcomes)
+    `Will AERO token price be above its current price in the next 15 minutes?`,
+    `Will VIRTUAL token price be above its current price in the next 15 minutes?`
   ];
   
   return templates[Math.floor(Math.random() * templates.length)];
@@ -136,14 +149,26 @@ async function getRecentQuestions(): Promise<string[]> {
 }
 
 // Generate a batch of 24 questions for 6 hours (24 * 15-minute slots)
+// Helper function to get live games data
+async function getLiveGamesData() {
+  try {
+    const { getAllLiveGames } = await import('./sportsData');
+    return await getAllLiveGames();
+  } catch (error) {
+    console.error('Error getting live games:', error);
+    return { nfl: [], nba: [] };
+  }
+}
+
 export async function generateQuestionBatch(count: number = 24) {
   try {
     // Gather real-time data and recent questions to avoid duplicates
-    const [btcPrice, ethPrice, recentNews, recentQuestions] = await Promise.all([
+    const [btcPrice, ethPrice, recentNews, recentQuestions, liveGames] = await Promise.all([
       getCryptoPrice('BTC'),
       getCryptoPrice('ETH'),
       getRecentNews(),
-      getRecentQuestions()
+      getRecentQuestions(),
+      getLiveGamesData()
     ]);
 
     // Add variety to crypto prices for different question types
@@ -185,6 +210,11 @@ export async function generateQuestionBatch(count: number = 24) {
     // Add timestamp for more variety
     const currentHour = new Date().getHours();
     const timeContext = currentHour < 12 ? 'morning' : currentHour < 17 ? 'afternoon' : 'evening';
+    
+    // Add live sports context if games are happening
+    const liveGamesContext = liveGames.nfl.length > 0 || liveGames.nba.length > 0 
+      ? `Live games currently happening: NFL games: ${liveGames.nfl.map(g => g.shortName).join(', ')}, NBA games: ${liveGames.nba.map(g => g.shortName).join(', ')}. You can create questions about these specific live games.`
+      : 'No live games currently happening. Avoid questions about live sports results.';
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -193,43 +223,51 @@ export async function generateQuestionBatch(count: number = 24) {
           role: "system",
           content: `You are a creative question generator creating ${count} diverse yes/no questions about events that could happen in the next 15 minutes each. Create a varied mix covering different categories:
           
-          Categories to cover (distribute evenly):
-          - Specific celebrity social media activity (name specific people like Elon Musk, Taylor Swift, etc.)
-          - Cryptocurrency price movements with specific thresholds
-          - Major news website headlines (CNN, BBC, Reuters, etc.)
-          - Stock market movements with specific numbers
-          - Weather events in major cities
-          - Sports scores or announcements
-          - Tech company stock prices
-          - Specific social media trends
+          Categories to cover (distribute evenly) - ALL MUST BE EASILY VERIFIABLE:
+          - Social media posts (X/Twitter, Instagram) - easily verified by visiting the platform
+          - Cryptocurrency current price comparisons - "above/below current price" (perfect 50/50 chance)
+          - News website article publications - easily verified by checking CNN.com, BBC.com, Reuters.com homepage
+          - Stock prices current comparisons - "above/below current price" (perfect 50/50 chance)
+          - Time-based questions - easily verified by checking current time
+          - Sports scores (when games are live) - easily verified on ESPN.com scoreboard
           
           Current context: ${contextData}
           Time of day: ${timeContext}
           ${recentQuestionsContext}
+          Sports context: ${liveGamesContext}
           
-          CRITICAL REQUIREMENTS - QUESTIONS MUST BE:
+          CRITICAL REQUIREMENTS - QUESTIONS MUST BE EASILY VERIFIABLE & BALANCED:
           ✅ SPECIFIC: Use exact names, numbers, thresholds
-          ✅ VERIFIABLE: Anyone can check the answer objectively
+          ✅ EASILY VERIFIABLE: Anyone can check the answer in 30 seconds on a major website
+          ✅ BALANCED OUTCOMES: Roughly 50/50 chance for YES/NO - avoid obvious answers
           ✅ REALISTIC: Possible within 15 minutes
           ✅ CLEAR: No ambiguous terms like "major", "famous", "expert", "significant"
+          ✅ ACCESSIBLE: Verifiable on popular websites (CNN.com, CoinGecko, Yahoo Finance, X.com, Instagram.com, ESPN.com)
           
-          ❌ AVOID VAGUE TERMS:
-          - "major expert" → Use specific person names
-          - "famous YouTuber" → Use specific channel names
-          - "significant price movement" → Use specific percentage/dollar amounts
-          - "breaking news" → Use specific news sources
+          ❌ AVOID HARD-TO-VERIFY OR OBVIOUS QUESTIONS:
+          - "Will there be a foul in the NBA game?" → Sports sites don't show individual fouls
+          - "Will a timeout be called?" → Not prominently displayed on scoreboards
+          - "Will someone get a first down?" → Play-by-play details aren't always visible
+          - "Will it rain in New York?" → Weather changes are hard to verify quickly
+          - "Will a stock hit a new daily high?" → Requires tracking throughout the day
+          - "Will Bitcoin's last digit be odd?" → OBVIOUS YES - crypto prices change constantly
+          - "Will any cryptocurrency change price?" → OBVIOUS YES - prices always fluctuate
+          - "Will it be past midnight somewhere?" → OBVIOUS YES - time zones make this guaranteed
+          - "Will Bitcoin remain #1 by market cap?" → OBVIOUS YES - rankings are very stable
+          - "Will Bitcoin be between $X-$Y?" → COMPLEX - hard to verify, use current price instead
           
-          ✅ GOOD EXAMPLES:
-          - "Will Elon Musk post on X/Twitter in the next 15 minutes?"
-          - "Will Bitcoin price go above $45,000 in the next 15 minutes?"
-          - "Will CNN publish a new article in the next 15 minutes?"
-          - "Will Apple stock (AAPL) move up or down by 0.5% in the next 15 minutes?"
-          - "Will it start raining in New York City in the next 15 minutes?"
+          ✅ PERFECT EXAMPLES (Easy to verify + 50/50 balance):
+          - "Will Elon Musk post on X/Twitter in the next 15 minutes?" (check @elonmusk)
+          - "Will Bitcoin price be above its current price in the next 15 minutes?" (check CoinGecko - perfect 50/50)
+          - "Will CNN publish a new article in the next 15 minutes?" (check CNN.com homepage)
+          - "Will Apple stock be above its current price in the next 15 minutes?" (check Yahoo Finance - perfect 50/50)
+          - "Will the Lakers score change from its current score?" (check ESPN.com when games are live)
+          - "Will the seconds be greater than 30 when this expires?" (check current time - true 50/50)
           
-          ❌ BAD EXAMPLES:
-          - "Will a crypto expert predict something?" (who counts as expert?)
-          - "Will a famous person make news?" (who counts as famous?)
-          - "Will there be major market movement?" (how much is major?)
+          ❌ HARD-TO-VERIFY EXAMPLES:
+          - "Will there be a foul called in the Lakers game?" (fouls aren't prominently shown)
+          - "Will it start raining in Los Angeles?" (weather changes hard to verify)
+          - "Will Apple stock hit a new daily high?" (requires historical tracking)
           
           Return EXACTLY ${count} questions as a JSON array of strings.
           
@@ -298,11 +336,12 @@ export async function generateQuestionBatch(count: number = 24) {
 export async function generateQuestion() {
   try {
     // Gather real-time data and recent questions to avoid duplicates
-    const [btcPrice, ethPrice, recentNews, recentQuestions] = await Promise.all([
+    const [btcPrice, ethPrice, recentNews, recentQuestions, liveGames] = await Promise.all([
       getCryptoPrice('BTC'),
       getCryptoPrice('ETH'),
       getRecentNews(),
-      getRecentQuestions()
+      getRecentQuestions(),
+      getLiveGamesData()
     ]);
 
     // Add variety to crypto prices for different question types
@@ -344,6 +383,11 @@ export async function generateQuestion() {
     // Add timestamp for more variety
     const currentHour = new Date().getHours();
     const timeContext = currentHour < 12 ? 'morning' : currentHour < 17 ? 'afternoon' : 'evening';
+    
+    // Add live sports context
+    const liveGamesContext = liveGames.nfl.length > 0 || liveGames.nba.length > 0 
+      ? `Live games: NFL: ${liveGames.nfl.map(g => g.shortName).join(', ')}, NBA: ${liveGames.nba.map(g => g.shortName).join(', ')}`
+      : 'No live games currently';
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo", // Changed from gpt-4o for more variety and faster response
@@ -355,28 +399,31 @@ export async function generateQuestion() {
           REQUIREMENTS - Questions must be:
           ✅ SPECIFIC: Use exact names, numbers, thresholds
           ✅ VERIFIABLE: Anyone can check the answer objectively
+          ✅ BALANCED: Roughly 50/50 chance for YES/NO - avoid obvious answers
           ✅ REALISTIC: Possible within 15 minutes
           ✅ CLEAR: No vague terms
           
-          Topics to focus on:
-          - Named celebrity social media activity (Elon Musk, Taylor Swift, etc.)
-          - Cryptocurrency prices with specific thresholds
-          - Named news sources (CNN, BBC, Reuters)
-          - Stock prices with specific percentages
-          - Weather in named cities
-          - Named social media accounts
+          Topics to focus on (ALL MUST BE EASILY VERIFIABLE):
+          - Celebrity social media posts (check X.com, Instagram.com directly)
+          - Cryptocurrency current price comparisons - "above/below current price" (check CoinGecko.com)
+          - News website article publications (check CNN.com, BBC.com, Reuters.com homepage)
+          - Stock current price comparisons - "above/below current price" (check Yahoo Finance)
+          - Time-based questions (check current time)
+          - Live sports scores when games are active (check ESPN.com scoreboard)
           
           Current context: ${contextData}
           Time of day: ${timeContext}
           ${recentQuestionsContext}
+          Sports context: ${liveGamesContext}
           
-          ✅ GOOD examples:
-          - "Will Elon Musk post on X/Twitter in the next 15 minutes?"
-          - "Will Bitcoin go above $${btcPrice ? Math.ceil(btcPrice/1000)*1000 : '50,000'} in the next 15 minutes?"
-          - "Will CNN publish a new article in the next 15 minutes?"
-          - "Will Apple stock move up by 0.5% in the next 15 minutes?"
+          ✅ PERFECT BALANCED examples:
+          - "Will Elon Musk post on X/Twitter in the next 15 minutes?" (balanced - doesn't post constantly)
+          - "Will Bitcoin price be above its current price in the next 15 minutes?" (perfect 50/50 - use current price)
+          - "Will CNN publish a new article in the next 15 minutes?" (balanced - doesn't publish every 15 min)
+          - "Will Apple stock be above its current price in the next 15 minutes?" (perfect 50/50 - use current price)
+          - "Will the seconds be greater than 30 when this expires?" (true 50/50)
           
-          ❌ AVOID vague terms like: "major", "famous", "significant", "expert", "breaking"
+          ❌ AVOID obvious/guaranteed answers: "Will Bitcoin price change?", "Will any digit appear?", "Will time pass?"
           
           Return only the specific, verifiable question, nothing else.`
         },
