@@ -498,14 +498,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
                 <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-white"></div>
               </div>
               
-              {/* Next question preview (subtle) */}
-              {nextQuestion && currentQuestion.timeRemaining <= 30 && (
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-2 py-1 rounded text-xs font-mono opacity-60">
-                    NEXT: {nextQuestion.question.substring(0, 30)}...
-                  </div>
-                </div>
-              )}
+              
             </div>
 
             {/* Time Pressure Indicator */}
