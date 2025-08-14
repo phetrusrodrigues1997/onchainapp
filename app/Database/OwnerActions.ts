@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets } from "../Database/schema";
+import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions } from "../Database/schema";
 import { eq, inArray, lt } from "drizzle-orm";
 
 // Database setup
@@ -158,5 +158,60 @@ export async function determineWinners(typeTable: string) {
   } catch (error) {
     console.error("Error determining winners:", error);
     throw new Error("Failed to determine winners");
+  }
+}
+
+/**
+ * Gets the wallet addresses of users who made correct live predictions.
+ * This function should be called after manually determining the correct answer for the live question.
+ * @param correctAnswer - Either "positive" or "negative" - the correct answer for the live question
+ */
+export async function determineWinnersLive(correctAnswer: "positive" | "negative") {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Get all users who predicted correctly for today
+    const winners = await db
+      .select({ walletAddress: LivePredictions.walletAddress })
+      .from(LivePredictions)
+      .where(eq(LivePredictions.prediction, correctAnswer))
+      .where(eq(LivePredictions.betDate, today));
+
+    return winners.map(w => w.walletAddress).join(",");
+  } catch (error) {
+    console.error("Error determining live prediction winners:", error);
+    throw new Error("Failed to determine live prediction winners");
+  }
+}
+
+/**
+ * Clears all live predictions for today and removes the first row from live_questions table
+ */
+export async function clearLivePredictions() {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // First, remove the first row from live_questions table
+    const firstQuestion = await db
+      .select()
+      .from(LiveQuestions)
+      .limit(1);
+      
+    if (firstQuestion.length > 0) {
+      await db
+        .delete(LiveQuestions)
+        .where(eq(LiveQuestions.id, firstQuestion[0].id));
+      console.log("Removed first row from live_questions table");
+    }
+    
+    // Then clear all predictions for today
+    await db
+      .delete(LivePredictions)
+      .where(eq(LivePredictions.betDate, today));
+      
+    console.log("Cleared live predictions for today");
+  } catch (error) {
+    console.error("Failed to clear live predictions:", error);
+    throw new Error("Could not clear live predictions");
   }
 }

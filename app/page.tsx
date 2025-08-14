@@ -25,6 +25,7 @@ import WalletPage from './Pages/ReceivePage';
 import CreatePotPage from './Pages/CreatePotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
 import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
+import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
 
 
 
@@ -43,17 +44,31 @@ const USDC_ABI = [
 ];
 
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const LIVE_POT_ADDRESS = '0xbaA1ef49db42a483B42477D633E9ABc77EFdF965';
 
 export default function App() {
   const { address, isConnected } = useAccount();
   const [activeSection, setActiveSection] = useState('home'); // Default section
   const [privatePotAddress, setPrivatePotAddress] = useState<string>(''); // For routing to private pots
+  const [hasEnteredLivePot, setHasEnteredLivePot] = useState(false); // Track live pot entry
 
   // Function to navigate to a private pot
   const navigateToPrivatePot = (contractAddress: string) => {
     setPrivatePotAddress(contractAddress);
     setActiveSection('privatePot');
   };
+
+  // Function to handle successful live pot entry
+  const handleLivePotEntry = () => {
+    setHasEnteredLivePot(true);
+  };
+
+  // Reset live pot entry state when switching sections
+  useEffect(() => {
+    if (activeSection !== 'liveMarkets') {
+      setHasEnteredLivePot(false);
+    }
+  }, [activeSection]);
 
   // Check for market parameter in URL on component mount
   useEffect(() => {
@@ -232,7 +247,16 @@ export default function App() {
               }} 
             />
           )}
-          {activeSection === "liveMarkets" && <FifteenMinuteQuestions className="mt-20" />}
+          {activeSection === "liveMarkets" && (
+            hasEnteredLivePot ? (
+              <FifteenMinuteQuestions className="mt-20" />
+            ) : (
+              <LiveMarketPotEntry 
+                contractAddress={LIVE_POT_ADDRESS}
+                onPotEntered={handleLivePotEntry}
+              />
+            )
+          )}
           {/* Add more sections as needed */}
         
       </main>

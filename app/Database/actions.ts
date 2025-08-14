@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import {  Messages, FeaturedBets, CryptoBets } from "./schema"; // Import the schema
+import {  Messages, FeaturedBets, CryptoBets, LivePredictions } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
@@ -945,5 +945,52 @@ export async function getReferralStats(walletAddress: string) {
   }
 }
 
+/**
+ * Places a live prediction for the current question
+ */
+export async function placeLivePrediction(walletAddress: string, prediction: 'positive' | 'negative') {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check if user already made a prediction for today
+    const existingPrediction = await db
+      .select()
+      .from(LivePredictions)
+      .where(and(
+        eq(LivePredictions.walletAddress, walletAddress),
+        eq(LivePredictions.betDate, today)
+      ))
+      .limit(1);
+
+    if (existingPrediction.length > 0) {
+      // Update existing prediction
+      const result = await db
+        .update(LivePredictions)
+        .set({ prediction })
+        .where(and(
+          eq(LivePredictions.walletAddress, walletAddress),
+          eq(LivePredictions.betDate, today)
+        ))
+        .returning();
+      
+      return { updated: true, ...result[0] };
+    } else {
+      // Insert new prediction
+      const result = await db
+        .insert(LivePredictions)
+        .values({
+          walletAddress,
+          prediction,
+          betDate: today,
+        })
+        .returning();
+      
+      return { updated: false, ...result[0] };
+    }
+  } catch (error) {
+    console.error("Error placing live prediction:", error);
+    throw new Error("Failed to place live prediction");
+  }
+}
 
 

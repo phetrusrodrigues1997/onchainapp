@@ -91,3 +91,12 @@ export const LiveQuestions = pgTable("live_questions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Live predictions table - same schema as featured_predictions but for live prediction markets
+export const LivePredictions = pgTable("live_predictions", {
+  id: serial("id").primaryKey(), // Auto-incrementing ID as primary key
+  walletAddress: text("wallet_address").notNull(), // Bettor's wallet address
+  prediction: text("prediction").notNull(), // "positive" or "negative"
+  betDate: text("bet_date").notNull(), // Date of the bet (YYYY-MM-DD format)
+  createdAt: timestamp("created_at").defaultNow().notNull(), // When the bet was placed
+});
+

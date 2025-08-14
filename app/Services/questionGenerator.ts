@@ -1,8 +1,4 @@
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Deterministic question generation - no external APIs needed
 
 // Import the existing crypto price function
 const COINGECKO_API = 'https://api.coingecko.com/api/v3/simple/price';
@@ -28,30 +24,7 @@ async function getCryptoPrice(symbolOrId: string): Promise<number | null> {
   }
 }
 
-// Free News API function
-async function getRecentNews(): Promise<string[]> {
-  try {
-    const response = await fetch('https://api.thenewsapi.com/v1/news/top?api_token=free&locale=us&limit=5');
-    const data = await response.json();
-    
-    if (data.data && Array.isArray(data.data)) {
-      return data.data.map((article: any) => article.title).filter(Boolean);
-    }
-    return [];
-  } catch (error) {
-    console.error('Error fetching news:', error);
-    return [];
-  }
-}
-
-function getTrendingTopics(): string[] {
-  const topics = [
-    'AI developments', 'cryptocurrency markets', 'tech earnings', 
-    'social media trends', 'celebrity announcements', 'political statements',
-    'sports highlights', 'entertainment news', 'market movements'
-  ];
-  return topics.slice(0, 3);
-}
+// Removed external news API dependencies - using deterministic generation
 
 const celebrities = [
   'Elon Musk', 'Donald Trump', 'Taylor Swift', 'Kanye West', 'Joe Biden',
@@ -63,66 +36,55 @@ const celebrities = [
   'Zendaya', 'Michael Jordan', 'LeBron James', 'Serena Williams', 'Lewis Hamilton'
 ];
 
-const activities = [
-  'tweet', 'post on Instagram', 'release a song', 'announce something',
-  'make a statement', 'share a photo', 'go live on social media',
-  'release a video', 'make news', 'comment on current events',
-  'surprise fans', 'make an appearance', 'drop hints about a project',
-  'share behind-the-scenes content', 'respond to controversy',
-  'start a Twitter space', 'share a TikTok', 'post a story',
-  'do an interview', 'make a cameo', 'reveal a secret',
-  'tease new content', 'break their silence', 'share their thoughts'
-];
+// Simplified generation - removed unused topic arrays
 
-const topics = [
-  'AI', 'cryptocurrency', 'politics', 'music', 'movies', 'technology',
-  'climate change', 'space', 'fashion', 'food', 'sports', 'gaming',
-  'business', 'health', 'travel', 'art', 'science', 'social media',
-  'China', 'the economy', 'their latest project', 'their personal life',
-  'NFTs', 'the metaverse', 'electric cars', 'renewable energy',
-  'mental health', 'fitness', 'relationships', 'parenting',
-  'education', 'innovation', 'startups', 'investing'
-];
-
-function generateRandomQuestion(): string {
-  const celebrity = celebrities[Math.floor(Math.random() * celebrities.length)];
-  
-  // Focus on EASILY VERIFIABLE questions with BALANCED OUTCOMES (not obvious answers)
-  const templates = [
-    // Social media posts (roughly 50/50 chance - celebrities don't post every 15 minutes)
-    `Will ${celebrity} post on X/Twitter in the next 15 minutes?`,
-    `Will ${celebrity} post on Instagram in the next 15 minutes?`,
+// Deterministic question generation with guaranteed 50/50 balance
+function generateDeterministicQuestion(): string {
+  const questionTypes = [
+    'social_media',
+    'crypto_current_price', 
+    'news_websites',
     
-    // Cryptocurrency current price comparisons (perfect 50/50 chance)
-    `Will Bitcoin price be above its current price in the next 15 minutes?`,
-    `Will Bitcoin price be below its current price in the next 15 minutes?`,
-    `Will Ethereum price be above its current price in the next 15 minutes?`,
-    `Will Ethereum price be below its current price in the next 15 minutes?`,
-    
-    // News websites (balanced - major sites don't publish every 15 minutes)
-    `Will CNN publish a new article in the next 15 minutes?`,
-    `Will BBC News post a new story in the next 15 minutes?`,
-    `Will Reuters publish a new article in the next 15 minutes?`,
-    `Will The New York Times publish a new article in the next 15 minutes?`,
-    
-    // Stock prices with reasonable thresholds (balanced outcomes)
-    `Will Apple stock (AAPL) price be above $200 in the next 15 minutes?`,
-    `Will Tesla stock (TSLA) price be above $250 in the next 15 minutes?`,
-    `Will Google stock (GOOGL) price be above $160 in the next 15 minutes?`,
-    `Will Amazon stock (AMZN) price be above $190 in the next 15 minutes?`,
-    `Will Microsoft stock (MSFT) price be above $420 in the next 15 minutes?`,
-    
-    
-    // Additional current price comparisons (perfect 50/50 balance)
-    `Will AAVE token price be above its current price in the next 15 minutes?`,
-    `Will USDC be 2 cents above or below $1 in the next 15 minutes?`,
-    
-    // More current price comparisons (perfect 50/50 outcomes)
-    `Will AERO token price be above its current price in the next 15 minutes?`,
-    `Will VIRTUAL token price be above its current price in the next 15 minutes?`
+    'stock_current_price'
   ];
   
-  return templates[Math.floor(Math.random() * templates.length)];
+  const typeIndex = Math.floor(Math.random() * questionTypes.length);
+  const type = questionTypes[typeIndex];
+  
+  switch (type) {
+    case 'social_media':
+      const celebrity = celebrities[Math.floor(Math.random() * celebrities.length)];
+      const platform = Math.random() < 0.5 ? 'X/Twitter' : 'Instagram';
+      return `Will ${celebrity} post on ${platform} in the next 15 minutes?`;
+      
+    case 'crypto_current_price':
+      const cryptos = ['Bitcoin', 'Ethereum', 'AAVE', 'AERO', 'VIRTUAL'];
+      const crypto = cryptos[Math.floor(Math.random() * cryptos.length)];
+      const direction = Math.random() < 0.5 ? 'above' : 'below';
+      return `Will ${crypto} price be ${direction} its current price in the next 15 minutes?`;
+      
+    case 'news_websites':
+      const newsOutlets = ['CNN', 'BBC News', 'Reuters', 'The New York Times', 'AP News'];
+      const outlet = newsOutlets[Math.floor(Math.random() * newsOutlets.length)];
+      return `Will ${outlet} publish a new article in the next 15 minutes?`;
+      
+    
+      
+    case 'stock_current_price':
+      const stocks = [
+        { name: 'Apple (AAPL)', symbol: 'AAPL' },
+        { name: 'Tesla (TSLA)', symbol: 'TSLA' }, 
+        { name: 'Google (GOOGL)', symbol: 'GOOGL' },
+        { name: 'Amazon (AMZN)', symbol: 'AMZN' },
+        { name: 'Microsoft (MSFT)', symbol: 'MSFT' }
+      ];
+      const stock = stocks[Math.floor(Math.random() * stocks.length)];
+      const stockDirection = Math.random() < 0.5 ? 'above' : 'below';
+      return `Will ${stock.name} stock price be ${stockDirection} its current price in the next 15 minutes?`;
+      
+    default:
+      return 'Will Bitcoin price be above its current price in the next 15 minutes?';
+  }
 }
 
 // Get recent questions to avoid duplicates
@@ -159,181 +121,53 @@ async function getLiveGamesData() {
 
 export async function generateQuestionBatch(count: number = 24) {
   try {
-    // Gather real-time data and recent questions to avoid duplicates
-    const [btcPrice, ethPrice, recentNews, recentQuestions, liveGames] = await Promise.all([
-      getCryptoPrice('BTC'),
-      getCryptoPrice('ETH'),
-      getRecentNews(),
-      getRecentQuestions(),
-      getLiveGamesData()
-    ]);
-
-    // Add variety to crypto prices for different question types
-    const cryptoPrices = await Promise.all([
-      getCryptoPrice('AERO'),
-      getCryptoPrice('VIRTUAL'),
-      getCryptoPrice('AAVE')
-    ]);
-
-    // Prepare context with real-time data
-    let contextData = '';
-    
-    if (btcPrice) {
-      contextData += `Current Bitcoin price: $${btcPrice.toLocaleString()}. `;
+    // Get recent questions to avoid duplicates
+    const recentQuestions = await getRecentQuestions();
+    interface GeneratedQuestion {
+      question: string;
     }
-    if (ethPrice) {
-      contextData += `Current Ethereum price: $${ethPrice.toLocaleString()}. `;
-    }
+    const generatedQuestions: GeneratedQuestion[] = [];
+    const maxAttempts = count * 3; // Allow multiple attempts to avoid duplicates
+    let attempts = 0;
     
-    // Add other crypto prices for variety
-    const cryptoNames = ['AERO', 'VIRTUAL', 'AAVE'];
-    cryptoPrices.forEach((price, index) => {
-      if (price) {
-        contextData += `Current ${cryptoNames[index]} price: $${price.toLocaleString()}. `;
+    console.log(`Generating ${count} deterministic questions...`);
+    
+    while (generatedQuestions.length < count && attempts < maxAttempts) {
+      attempts++;
+      const question = generateDeterministicQuestion();
+      
+      // Check if this question is too similar to recent ones
+      const isSimilar = recentQuestions.some(recent => {
+        const recentWords = recent.toLowerCase().split(' ').slice(0, 4).join(' ');
+        const newWords = question.toLowerCase().split(' ').slice(0, 4).join(' ');
+        return recentWords === newWords;
+      });
+      
+      // Also check against already generated questions in this batch
+      const isDuplicate = generatedQuestions.some(generated => 
+        generated.question.toLowerCase() === question.toLowerCase()
+      );
+      
+      if (!isSimilar && !isDuplicate) {
+        generatedQuestions.push({ question });
       }
-    });
+    }
     
-    if (recentNews.length > 0) {
-      contextData += `Recent trending news headlines: ${recentNews.slice(0, 3).join(', ')}. `;
-    } else {
-      contextData += `Trending topics: ${getTrendingTopics().join(', ')}. `;
+    // If we couldn't generate enough unique questions, fill the remainder with variations
+    while (generatedQuestions.length < count) {
+      generatedQuestions.push({ question: generateDeterministicQuestion() });
     }
-
-    // Add recent questions context to avoid duplicates
-    const recentQuestionsContext = recentQuestions.length > 0 
-      ? `Avoid creating questions similar to these recent ones: ${recentQuestions.slice(0, 10).join(', ')}. `
-      : '';
-
-    // Add timestamp for more variety
-    const currentHour = new Date().getHours();
-    const timeContext = currentHour < 12 ? 'morning' : currentHour < 17 ? 'afternoon' : 'evening';
     
-    // Add live sports context if games are happening
-    const liveGamesContext = liveGames.nfl.length > 0 || liveGames.nba.length > 0 
-      ? `Live games currently happening: NFL games: ${liveGames.nfl.map(g => g.shortName).join(', ')}, NBA games: ${liveGames.nba.map(g => g.shortName).join(', ')}. You can create questions about these specific live games.`
-      : 'No live games currently happening. Avoid questions about live sports results.';
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: `You are a creative question generator creating ${count} diverse yes/no questions about events that could happen in the next 15 minutes each. Create a varied mix covering different categories:
-          
-          Categories to cover (distribute evenly) - ALL MUST BE EASILY VERIFIABLE:
-          - Social media posts (X/Twitter, Instagram) - easily verified by visiting the platform
-          - Cryptocurrency current price comparisons - "above/below current price" (perfect 50/50 chance)
-          - News website article publications - easily verified by checking CNN.com, BBC.com, Reuters.com homepage
-          - Stock prices current comparisons - "above/below current price" (perfect 50/50 chance)
-          - Time-based questions - easily verified by checking current time
-          - Sports scores (when games are live) - easily verified on ESPN.com scoreboard
-          
-          Current context: ${contextData}
-          Time of day: ${timeContext}
-          ${recentQuestionsContext}
-          Sports context: ${liveGamesContext}
-          
-          CRITICAL REQUIREMENTS - QUESTIONS MUST BE EASILY VERIFIABLE & BALANCED:
-          ✅ SPECIFIC: Use exact names, numbers, thresholds
-          ✅ EASILY VERIFIABLE: Anyone can check the answer in 30 seconds on a major website
-          ✅ BALANCED OUTCOMES: Roughly 50/50 chance for YES/NO - avoid obvious answers
-          ✅ REALISTIC: Possible within 15 minutes
-          ✅ CLEAR: No ambiguous terms like "major", "famous", "expert", "significant"
-          ✅ ACCESSIBLE: Verifiable on popular websites (CNN.com, CoinGecko, Yahoo Finance, X.com, Instagram.com, ESPN.com)
-          
-          ❌ AVOID HARD-TO-VERIFY OR OBVIOUS QUESTIONS:
-          - "Will there be a foul in the NBA game?" → Sports sites don't show individual fouls
-          - "Will a timeout be called?" → Not prominently displayed on scoreboards
-          - "Will someone get a first down?" → Play-by-play details aren't always visible
-          - "Will it rain in New York?" → Weather changes are hard to verify quickly
-          - "Will a stock hit a new daily high?" → Requires tracking throughout the day
-          - "Will Bitcoin's last digit be odd?" → OBVIOUS YES - crypto prices change constantly
-          - "Will any cryptocurrency change price?" → OBVIOUS YES - prices always fluctuate
-          - "Will it be past midnight somewhere?" → OBVIOUS YES - time zones make this guaranteed
-          - "Will Bitcoin remain #1 by market cap?" → OBVIOUS YES - rankings are very stable
-          - "Will Bitcoin be between $X-$Y?" → COMPLEX - hard to verify, use current price instead
-          - "Will there be a new AI development reported in the news?" → TOO BROAD - AI news appears constantly worldwide
-          - "Will any news be reported about [topic]?" → TOO BROAD - global news makes this nearly guaranteed
-          - "Will someone mention [topic] in the news?" → TOO BROAD - impossible to verify all global sources
-          - "Will [broad category] be in the news?" → TOO BROAD - use specific outlets instead
-          - "Will a new cryptocurrency emerge on CoinGecko?" → OBVIOUS YES - new coins added constantly
-          - "Will a new trending crypto appear?" → OBVIOUS YES - crypto markets are extremely active
-          - "Will any new token be listed?" → OBVIOUS YES - exchanges add tokens frequently
-          - "Will crypto rankings change?" → OBVIOUS YES - rankings fluctuate constantly
-          
-          ✅ PERFECT EXAMPLES (Easy to verify + 50/50 balance):
-          - "Will Elon Musk post on X/Twitter in the next 15 minutes?" (check @elonmusk)
-          - "Will Bitcoin price be above its current price in the next 15 minutes?" (check CoinGecko - perfect 50/50)
-          - "Will CNN publish a new article in the next 15 minutes?" (check CNN.com homepage - SPECIFIC outlet, not "any news")
-          - "Will Apple stock be above its current price in the next 15 minutes?" (check Yahoo Finance - perfect 50/50)
-          - "Will the Lakers score change from its current score?" (check ESPN.com when games are live)
-          - "Will the seconds be greater than 30 when this expires?" (check current time - true 50/50)
-          - "Will Reuters publish a new story in the next 15 minutes?" (check Reuters.com homepage - SPECIFIC outlet)
-          - "Will BBC News post a new article in the next 15 minutes?" (check BBC.com/news - SPECIFIC outlet)
-          
-          ❌ HARD-TO-VERIFY EXAMPLES:
-          - "Will there be a foul called in the Lakers game?" (fouls aren't prominently shown)
-          - "Will it start raining in Los Angeles?" (weather changes hard to verify)
-          - "Will Apple stock hit a new daily high?" (requires historical tracking)
-          
-          Return EXACTLY ${count} questions as a JSON array of strings.
-          
-          Generate ${count} specific, verifiable questions now.`
-        },
-        {
-          role: "user",
-          content: `Create ${count} specific, verifiable yes/no questions about things that could realistically happen in the next 15 minutes. Each question must be answerable with a clear YES or NO by checking specific, named sources. Avoid all vague terms. Return as a JSON array.`
-        }
-      ],
-      max_tokens: 2000,
-      temperature: 1.2, // High temperature for maximum variety
-    });
-
-    const response = completion.choices[0]?.message?.content?.trim();
-    
-    if (!response) {
-      throw new Error('No response from OpenAI');
-    }
-
-    try {
-      // Try to parse as JSON
-      const questions = JSON.parse(response);
-      if (Array.isArray(questions) && questions.length > 0) {
-        return questions.slice(0, count).map((q: any) => ({ question: String(q).trim() }));
-      }
-    } catch (parseError) {
-      console.error('Failed to parse OpenAI response as JSON:', parseError);
-    }
-
-    // Fallback: if JSON parsing fails, try to extract questions from text
-    const lines = response.split('\n').filter(line => line.trim().length > 10);
-    const extractedQuestions = lines.map(line => {
-      // Remove common prefixes and clean up
-      let cleaned = line.replace(/^\d+\.\s*/, '').replace(/^["']|["']$/g, '').trim();
-      if (cleaned.includes('?')) {
-        return { question: cleaned };
-      }
-      return null;
-    }).filter(q => q !== null).slice(0, count);
-
-    if (extractedQuestions.length > 0) {
-      return extractedQuestions;
-    }
-
-    // Ultimate fallback: generate random questions
-    const fallbackQuestions = [];
-    for (let i = 0; i < count; i++) {
-      fallbackQuestions.push({ question: generateRandomQuestion() });
-    }
-    return fallbackQuestions;
+    console.log(`Generated ${generatedQuestions.length} deterministic questions successfully`);
+    return generatedQuestions;
 
   } catch (error) {
-    console.error('Error generating question batch:', error);
+    console.error('Error generating deterministic question batch:', error);
     
-    // Fallback to random questions
+    // Fallback: generate basic questions
     const fallbackQuestions = [];
     for (let i = 0; i < count; i++) {
-      fallbackQuestions.push({ question: generateRandomQuestion() });
+      fallbackQuestions.push({ question: generateDeterministicQuestion() });
     }
     return fallbackQuestions;
   }
@@ -342,138 +176,34 @@ export async function generateQuestionBatch(count: number = 24) {
 // Keep the single question generator for compatibility
 export async function generateQuestion() {
   try {
-    // Gather real-time data and recent questions to avoid duplicates
-    const [btcPrice, ethPrice, recentNews, recentQuestions, liveGames] = await Promise.all([
-      getCryptoPrice('BTC'),
-      getCryptoPrice('ETH'),
-      getRecentNews(),
-      getRecentQuestions(),
-      getLiveGamesData()
-    ]);
-
-    // Add variety to crypto prices for different question types
-    const cryptoPrices = await Promise.all([
-      getCryptoPrice('AERO'),
-      getCryptoPrice('VIRTUAL'),
-      getCryptoPrice('AAVE')
-    ]);
-
-    // Prepare context with real-time data
-    let contextData = '';
+    // Get recent questions to avoid duplicates
+    const recentQuestions = await getRecentQuestions();
+    const maxAttempts = 10;
+    let attempts = 0;
     
-    if (btcPrice) {
-      contextData += `Current Bitcoin price: $${btcPrice.toLocaleString()}. `;
-    }
-    if (ethPrice) {
-      contextData += `Current Ethereum price: $${ethPrice.toLocaleString()}. `;
-    }
-    
-    // Add other crypto prices for variety
-    const cryptoNames = ['AERO', 'VIRTUAL', 'AAVE'];
-    cryptoPrices.forEach((price, index) => {
-      if (price) {
-        contextData += `Current ${cryptoNames[index]} price: $${price.toLocaleString()}. `;
-      }
-    });
-    
-    if (recentNews.length > 0) {
-      contextData += `Recent trending news headlines: ${recentNews.slice(0, 3).join(', ')}. `;
-    } else {
-      contextData += `Trending topics: ${getTrendingTopics().join(', ')}. `;
-    }
-
-    // Add recent questions context to avoid duplicates
-    const recentQuestionsContext = recentQuestions.length > 0 
-      ? `Avoid creating questions similar to these recent ones: ${recentQuestions.slice(0, 5).join(', ')}. `
-      : '';
-
-    // Add timestamp for more variety
-    const currentHour = new Date().getHours();
-    const timeContext = currentHour < 12 ? 'morning' : currentHour < 17 ? 'afternoon' : 'evening';
-    
-    // Add live sports context
-    const liveGamesContext = liveGames.nfl.length > 0 || liveGames.nba.length > 0 
-      ? `Live games: NFL: ${liveGames.nfl.map(g => g.shortName).join(', ')}, NBA: ${liveGames.nba.map(g => g.shortName).join(', ')}`
-      : 'No live games currently';
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Changed from gpt-4o for more variety and faster response
-      messages: [
-        {
-          role: "system",
-          content: `You are a creative question generator with access to real-time data. Create specific, verifiable yes/no questions about events that could realistically happen in the next 15 minutes.
-          
-          REQUIREMENTS - Questions must be:
-          ✅ SPECIFIC: Use exact names, numbers, thresholds
-          ✅ VERIFIABLE: Anyone can check the answer objectively
-          ✅ BALANCED: Roughly 50/50 chance for YES/NO - avoid obvious answers
-          ✅ REALISTIC: Possible within 15 minutes
-          ✅ CLEAR: No vague terms
-          
-          Topics to focus on (ALL MUST BE EASILY VERIFIABLE):
-          - Celebrity social media posts (check X.com, Instagram.com directly)
-          - Cryptocurrency current price comparisons - "above/below current price" (check CoinGecko.com)
-          - News website article publications (check CNN.com, BBC.com, Reuters.com homepage)
-          - Stock current price comparisons - "above/below current price" (check Yahoo Finance)
-          - Time-based questions (check current time)
-          - Live sports scores when games are active (check ESPN.com scoreboard)
-          
-          Current context: ${contextData}
-          Time of day: ${timeContext}
-          ${recentQuestionsContext}
-          Sports context: ${liveGamesContext}
-          
-          ✅ PERFECT BALANCED examples:
-          - "Will Elon Musk post on X/Twitter in the next 15 minutes?" (balanced - doesn't post constantly)
-          - "Will Bitcoin price be above its current price in the next 15 minutes?" (perfect 50/50 - use current price)
-          - "Will CNN publish a new article in the next 15 minutes?" (balanced - doesn't publish every 15 min)
-          - "Will Apple stock be above its current price in the next 15 minutes?" (perfect 50/50 - use current price)
-          - "Will the seconds be greater than 30 when this expires?" (true 50/50)
-          
-          ❌ AVOID obvious/guaranteed answers: "Will Bitcoin price change?", "Will any digit appear?", "Will time pass?"
-          ❌ AVOID broad global questions: "Will there be AI news?", "Will any news be reported about [topic]?"
-          ❌ AVOID crypto platform changes: "Will new crypto emerge?", "Will rankings change?", "Will new tokens be listed?"
-          ✅ USE specific outlets instead: "Will CNN publish a new article?", "Will Reuters post a story?"
-          ✅ USE current price comparisons: "Will Bitcoin be above its current price?", "Will ETH be below its current price?"
-          
-          Return only the specific, verifiable question, nothing else.`
-        },
-        {
-          role: "user",
-          content: `Generate a unique, creative yes/no question about something that could happen in the next 15 minutes. Make it different from recent questions and incorporate current ${timeContext} context. Focus on being specific and interesting.`
-        }
-      ],
-      max_tokens: 150,
-      temperature: 1.1, // Increased for more variety
-    });
-
-    const aiQuestion = completion.choices[0]?.message?.content?.trim();
-    
-    // Check if the AI question is too similar to recent ones
-    if (aiQuestion && recentQuestions.length > 0) {
-      const isTooSimilar = recentQuestions.some(recent => 
-        aiQuestion.toLowerCase().includes(recent.toLowerCase().split(' ').slice(0, 3).join(' '))
-      );
+    while (attempts < maxAttempts) {
+      attempts++;
+      const question = generateDeterministicQuestion();
       
-      if (isTooSimilar) {
-        console.log('AI question too similar to recent ones, using fallback');
-        return { question: generateRandomQuestion() };
+      // Check if this question is too similar to recent ones
+      const isSimilar = recentQuestions.some(recent => {
+        const recentWords = recent.toLowerCase().split(' ').slice(0, 4).join(' ');
+        const newWords = question.toLowerCase().split(' ').slice(0, 4).join(' ');
+        return recentWords === newWords;
+      });
+      
+      if (!isSimilar) {
+        return { question };
       }
     }
     
-    const question = aiQuestion || generateRandomQuestion();
-
-    return { 
-      question
-    };
+    // If we couldn't find a unique question, just return a new one
+    return { question: generateDeterministicQuestion() };
+    
   } catch (error) {
-    console.error('Error generating question:', error);
+    console.error('Error generating deterministic question:', error);
     
-    // Fallback to random question if OpenAI fails
-    const fallbackQuestion = generateRandomQuestion();
-    
-    return { 
-      question: fallbackQuestion
-    };
+    // Fallback to basic deterministic question
+    return { question: generateDeterministicQuestion() };
   }
 }

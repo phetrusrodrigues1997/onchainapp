@@ -236,7 +236,7 @@ const handleMarketClick = (marketId: string) => {
       {/* Markets Grid */}
       <section className="relative z-10 px-6 py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 relative">
+          <div className="text-right mb-12 relative">
             {/* Live Markets Link */}
             <div className="mb-6 -translate-y-1/4">
               <button 
