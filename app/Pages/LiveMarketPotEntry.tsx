@@ -79,7 +79,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
   }) as { data: bigint | undefined };
 
   // Read current allowance
-  const { data: currentAllowance, refetch: refetchAllowance } = useReadContract({
+  const { data: currentAllowance } = useReadContract({
     address: USDC_ADDRESS as `0x${string}`,
     abi: USDC_ABI,
     functionName: 'allowance',
@@ -88,7 +88,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
   }) as { data: bigint | undefined };
 
   // Read pot participants to check if user is already in
-  const { data: participants, refetch: refetchParticipants } = useReadContract({
+  const { data: participants } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: PREDICTION_POT_ABI,
     functionName: 'getParticipants',
@@ -124,10 +124,8 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
     if (isConfirmed && receipt) {
       if (lastAction === 'approve') {
         setMessage('USDC approved successfully! Now entering pot...');
-        refetchAllowance();
       } else if (lastAction === 'enter') {
         setMessage('Successfully entered the pot!');
-        refetchParticipants();
         setTimeout(() => {
           onPotEntered();
         }, 2000);
@@ -135,7 +133,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
       setIsLoading(false);
       setLastAction(null);
     }
-  }, [isConfirmed, receipt, lastAction, refetchAllowance, refetchParticipants, onPotEntered]);
+  }, [isConfirmed, receipt, lastAction, onPotEntered]);
 
   const handleApproveUsdc = () => {
     if (!address || !contractAddress) return;
