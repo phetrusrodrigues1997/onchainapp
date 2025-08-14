@@ -3,7 +3,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions } from "../Database/schema";
-import { eq, inArray, lt } from "drizzle-orm";
+import { eq, inArray, lt, and } from "drizzle-orm";
 
 // Database setup
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -174,8 +174,10 @@ export async function determineWinnersLive(correctAnswer: "positive" | "negative
     const winners = await db
       .select({ walletAddress: LivePredictions.walletAddress })
       .from(LivePredictions)
-      .where(eq(LivePredictions.prediction, correctAnswer))
-      .where(eq(LivePredictions.betDate, today));
+      .where(and(
+        eq(LivePredictions.prediction, correctAnswer),
+        eq(LivePredictions.betDate, today)
+      ));
 
     return winners.map(w => w.walletAddress).join(",");
   } catch (error) {
