@@ -733,7 +733,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   //   return Number(usdcAllowance) < amount;
   // };
 
-  const potStateNames = ['Active', 'Closed', 'Distributed'];
 
   // Show loading screen for first 2 seconds
   if (isInitialLoading) {
@@ -830,51 +829,57 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             <div className="max-w-3xl flex-1">
               <h1 className="text-2xl sm:text-3xl lg:text-5xl font-light text-black mb-3 sm:mb-4">{potDetails.potName}</h1>
               <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-4 sm:mb-6 leading-relaxed">{potDetails.description}</p>
-              <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
-                <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potStateNames[Number(potState) || 0]}</div>
-                  <div className="text-xs sm:text-sm text-gray-500">Status</div>
-                </div>
-                <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
-                  <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{formatUSDC(potBalance)}</div>
-                  <div className="text-xs sm:text-sm text-gray-500">USDC Balance</div>
-                </div>
-                <button
-                  onClick={handleParticipantsClick}
-                  className="p-3 sm:p-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-black transition-colors w-full"
-                >
-                  <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potParticipants?.length || 0}</div>
-                  <div className="text-xs sm:text-sm text-gray-500">Participants</div>
-                  <div className="text-xs text-blue-600 mt-1">Click to view</div>
-                </button>
-              </div>
-            </div>
-            
-            <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 w-full lg:w-auto">
-              <button
-                onClick={copyShareUrl}
-                className="bg-gray-100 text-black px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-200 font-light transition-colors text-sm sm:text-base w-full lg:w-auto flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-                {shareUrlCopied ? 'Copied!' : 'Share'}
-              </button>
-              {isCreator && (
-                <button
-                  onClick={() => setShowCreatorPanel(!showCreatorPanel)}
-                  className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
-                >
-                  {showCreatorPanel ? 'Hide' : 'Control Panel ⚙'}
-                </button>
+              
+              {/* Only show stats and controls if user is a participant or creator */}
+              {(userParticipant || isCreator) && (
+                <>
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
+                    
+                    <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
+                      <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{formatUSDC(potBalance)}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Market Balance</div>
+                    </div>
+                    <button
+                      onClick={handleParticipantsClick}
+                      className="p-3 sm:p-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-black transition-colors w-full"
+                    >
+                      <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potParticipants?.length || 0}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Participants</div>
+                      <div className="text-xs text-blue-600 mt-1">Click to view</div>
+                    </button>
+                  </div>
+                </>
               )}
             </div>
+            
+            {/* Only show share and control buttons if user is a participant or creator */}
+            {(userParticipant || isCreator) && (
+              <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 w-full lg:w-auto">
+                <button
+                  onClick={copyShareUrl}
+                  className="bg-gray-100 text-black px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-200 font-light transition-colors text-sm sm:text-base w-full lg:w-auto flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  </svg>
+                  {shareUrlCopied ? 'Copied!' : 'Share'}
+                </button>
+                {isCreator && (
+                  <button
+                    onClick={() => setShowCreatorPanel(!showCreatorPanel)}
+                    className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
+                  >
+                    {showCreatorPanel ? 'Hide' : 'Control Panel ⚙'}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto p-4 sm:p-8">
-        {/* Creator Panel */}
+        {/* Creator Panel - Only show to creators */}
         {isCreator && showCreatorPanel && (
           <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 mb-6">
             <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Creator Panel</h2>
@@ -1016,10 +1021,10 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         )}
 
         {/* User Interface */}
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Enter Market */}
+        <div className="grid lg:grid-cols-1 lg:justify-items-center gap-6 lg:gap-8">
+          {/* Enter Market - Only show if not a participant and pot is open */}
           {!userParticipant && potState === 0 && (
-            <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
+            <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 lg:max-w-md lg:w-full">
               <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Enter Market</h2>
               
               <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 border border-gray-200">
@@ -1091,7 +1096,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             </div>
           )}
 
-          {/* Make Prediction */}
+          {/* Make Prediction - Only show to participants */}
           {userParticipant && (
             <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
               {/* Subtle animated background */}
@@ -1156,7 +1161,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             </div>
           )}
 
-          {/* Status */}
+          {/* Status - Only show to participants */}
           {userParticipant && (
             <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-light text-black mb-3 sm:mb-4">You're In!</h2>
