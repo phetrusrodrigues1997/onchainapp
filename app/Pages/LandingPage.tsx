@@ -243,11 +243,10 @@ const handleMarketClick = (marketId: string) => {
                 onClick={() => setActiveSection('liveMarkets')}
                 className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105"
               >
-                {/* Live indicator dot */}
-                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+              
                 
                 <span className="relative">
-                  Live Predictions
+                  Try Live Predictions
                 </span>
                 
                 {/* Arrow with hover animation */}
