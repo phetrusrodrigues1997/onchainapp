@@ -398,9 +398,11 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
-  // Check if approval is needed based on actual allowance
+  // Simplified approval check
   const isApprovalNeeded = () => {
-    if (!potDetails?.entryAmount || !usdcAllowance) return true;
+    if (!potDetails?.entryAmount) return true;
+    if (!usdcAllowance) return true;
+    // Simple comparison - if allowance is less than needed, approve
     return Number(usdcAllowance) < potDetails.entryAmount;
   };
 
@@ -450,35 +452,18 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   }, [isConfirmed, hash, pendingTransactionType, address, potDetails?.entryAmount, contractAddress, refetchPotBalance, refetchPotParticipants, queryClient]);
 
-  // Handle pot entry
+  // Simplified pot entry
   const handleEnterPot = async () => {
     if (!potDetails?.entryAmount || !address) return;
 
-    // Check if user is already a participant to prevent double entry
-    // Check both database state AND on-chain participants array
-    const onChainParticipants = potParticipants as string[] || [];
-    const isAlreadyInContract = onChainParticipants.some(
-      (participant: string) => participant.toLowerCase() === address.toLowerCase()
-    );
-    
-    if (userParticipant || isAlreadyInContract) {
+    // Simple check - just check database state (more reliable than on-chain)
+    if (userParticipant) {
       showAlert('You have already entered this market.', 'warning', 'Already Entered');
       return;
     }
 
-    // Re-validate allowance before attempting entry
-    if (isApprovalNeeded()) {
-      showAlert('USDC allowance insufficient. Please approve USDC spending first.', 'warning', 'Approval Needed');
-      return;
-    }
-
-    // Check USDC balance
-    if (usdcBalance && Number(usdcBalance) < potDetails.entryAmount) {
-      showAlert('Insufficient USDC balance. Please add USDC to your wallet.', 'error', 'Insufficient Balance');
-      return;
-    }
-
-    setPendingTransactionType('potEntry'); // Mark that we're doing a pot entry
+    // Try the transaction - let the contract handle validation
+    setPendingTransactionType('potEntry');
     writeContract({
       address: contractAddress as `0x${string}`,
       abi: PRIVATE_POT_ABI,

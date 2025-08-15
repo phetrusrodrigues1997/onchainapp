@@ -84,43 +84,30 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     hash,
   });
 
-  // Extract contract address from transaction receipt when confirmed
+  // Simplified transaction handling
   React.useEffect(() => {
-    if (isConfirmed && receipt && receipt.logs && receipt.logs.length > 0) {
+    if (isConfirmed && receipt) {
+      // Simple success - let user check transaction manually if needed
+      showAlert('Market created successfully! Transaction confirmed on Base network.', 'success', 'Success!');
+      
+      // Try to extract clone address, but don't fail if we can't
       try {
-        // CloneCreated event signature: CloneCreated(address indexed clone, address indexed owner)
-        // The clone address should be in the first topic (after the event signature)
-        const cloneCreatedLog = receipt.logs.find(log => 
+        const cloneCreatedLog = receipt.logs?.find(log => 
           log.address?.toLowerCase() === FACTORY_CONTRACT_ADDRESS.toLowerCase()
         );
         
-        if (cloneCreatedLog && cloneCreatedLog.topics && cloneCreatedLog.topics.length >= 2) {
-          // Extract the clone address from the first indexed parameter (topic[1])
-          const cloneAddressHex = cloneCreatedLog.topics[1];
-          if (cloneAddressHex && cloneAddressHex.length >= 42) {
-            const cloneAddress = '0x' + cloneAddressHex.slice(-40);
-            setCreatedPotAddress(cloneAddress);
-            
-            // Register the pot in the database
-            if (address) {
-              createPrivatePot(cloneAddress, address, potName, description)
-                .then(result => {
-                  if (result.success) {
-                    console.log('Pot registered in database:', result.pot);
-                  } else {
-                    console.error('Failed to register pot in database:', result.error);
-                  }
-                })
-                .catch(error => {
-                  console.error('Database registration error:', error);
-                });
-            }
+        if (cloneCreatedLog?.topics?.[1]) {
+          const cloneAddress = '0x' + cloneCreatedLog.topics[1].slice(-40);
+          setCreatedPotAddress(cloneAddress);
+          
+          // Register in database (optional - don't block UI if this fails)
+          if (address) {
+            createPrivatePot(cloneAddress, address, potName, description)
+              .catch(error => console.log('Database registration failed:', error));
           }
         }
       } catch (error) {
-        console.error('Error extracting clone address:', error);
-        // Fallback: show a generic success message
-        showAlert('Market created successfully! Check the transaction on Basescan for the contract address.', 'success', 'Success!');
+        console.log('Clone address extraction failed:', error);
       }
     }
   }, [isConfirmed, receipt]);
