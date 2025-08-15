@@ -1003,4 +1003,77 @@ export async function getUserLivePrediction(walletAddress: string) {
   }
 }
 
+// Wordle 24-hour cooldown functions
+export async function canPlayWordle(walletAddress: string): Promise<boolean> {
+  try {
+    const user = await db
+      .select()
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, walletAddress))
+      .limit(1);
+
+    if (user.length === 0) {
+      // New user can play
+      return true;
+    }
+
+    const lastPlay = user[0].lastWordlePlay;
+    if (!lastPlay) {
+      // Never played before
+      return true;
+    }
+
+    // Check if 24 hours have passed
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    return lastPlay < twentyFourHoursAgo;
+  } catch (error) {
+    console.error('Error checking Wordle eligibility:', error);
+    return false;
+  }
+}
+
+export async function recordWordlePlay(walletAddress: string): Promise<void> {
+  try {
+    const now = new Date();
+    
+    // Try to insert new user, or update existing user's last play time
+    await db
+      .insert(UsersTable)
+      .values({
+        walletAddress,
+        lastWordlePlay: now,
+        wordlePlaysToday: 1,
+      })
+      .onConflictDoUpdate({
+        target: UsersTable.walletAddress,
+        set: {
+          lastWordlePlay: now,
+          wordlePlaysToday: sql`${UsersTable.wordlePlaysToday} + 1`,
+        },
+      });
+  } catch (error) {
+    console.error('Error recording Wordle play:', error);
+    throw error;
+  }
+}
+
+export async function getLastWordlePlay(walletAddress: string): Promise<Date | null> {
+  try {
+    const user = await db
+      .select({
+        lastWordlePlay: UsersTable.lastWordlePlay
+      })
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, walletAddress))
+      .limit(1);
+
+    return user.length > 0 ? user[0].lastWordlePlay : null;
+  } catch (error) {
+    console.error('Error getting last Wordle play:', error);
+    return null;
+  }
+}
+
 

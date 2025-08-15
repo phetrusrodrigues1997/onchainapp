@@ -27,6 +27,46 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
   const [message, setMessage] = useState("");
   const [isWinner, setIsWinner] = useState(false);
   const [error, setError] = useState("");
+  const [canPlay, setCanPlay] = useState<boolean | null>(null);
+  const [timeUntilNextPlay, setTimeUntilNextPlay] = useState<string>("");
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(true);
+
+  // Check if user can play when component mounts
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!address || !isConnected) {
+        setCanPlay(true); // Anonymous users can play
+        setIsCheckingEligibility(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/wordle/check-eligibility?wallet=${address}`);
+        const data = await response.json();
+        setCanPlay(data.canPlay);
+        
+        if (!data.canPlay && data.nextPlayTime) {
+          // Calculate time remaining
+          const nextPlay = new Date(data.nextPlayTime);
+          const now = new Date();
+          const timeLeft = nextPlay.getTime() - now.getTime();
+          
+          if (timeLeft > 0) {
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            setTimeUntilNextPlay(`${hours}h ${minutes}m`);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking eligibility:", err);
+        setCanPlay(true); // Default to allowing play on error
+      } finally {
+        setIsCheckingEligibility(false);
+      }
+    };
+
+    checkEligibility();
+  }, [address, isConnected]);
 
   useEffect(() => {
     // Check if someone already won today
@@ -59,6 +99,19 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
       return;
     }
     setError("");
+
+    // Record play on first guess for connected users
+    if (guesses.length === 0 && address && isConnected) {
+      try {
+        await fetch('/api/wordle/record-play', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: address })
+        });
+      } catch (err) {
+        console.error("Error recording play:", err);
+      }
+    }
 
     const updatedGuesses = [...guesses, guess];
     setGuesses(updatedGuesses);
@@ -151,6 +204,37 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
     return "absent";
   }
 
+  // Show loading while checking eligibility
+  if (isCheckingEligibility) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.title}>Wordle</h1>
+        <div style={styles.loading}>
+          <p>Checking game eligibility...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show cooldown message if user can't play
+  if (canPlay === false && isConnected) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.title}>Wordle</h1>
+        <div style={styles.cooldownMessage}>
+          <h2>🕐 Come back later!</h2>
+          <p>You can play Wordle once every 24 hours.</p>
+          {timeUntilNextPlay && (
+            <p>Next game available in: <strong>{timeUntilNextPlay}</strong></p>
+          )}
+          <p style={styles.cooldownHint}>
+            💡 Connect your wallet to track your progress and earn rewards!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Wordle</h1>
@@ -233,7 +317,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#fcfcfc",
     color: "#000",
     minHeight: "100vh",
     padding: "20px",
@@ -298,5 +382,27 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: "bold",
     fontSize: "1rem",
     color: "#d32f2f",
+  },
+  loading: {
+    textAlign: "center",
+    fontSize: "1.1rem",
+    color: "#666",
+    marginTop: "50px",
+  },
+  cooldownMessage: {
+    textAlign: "center",
+    backgroundColor: "#fff3cd",
+    border: "2px solid #ffeaa7",
+    borderRadius: "10px",
+    padding: "30px",
+    margin: "50px auto",
+    maxWidth: "400px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+  cooldownHint: {
+    fontSize: "0.9rem",
+    color: "#666",
+    fontStyle: "italic",
+    marginTop: "15px",
   },
 };

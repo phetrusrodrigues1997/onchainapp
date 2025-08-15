@@ -27,12 +27,16 @@ interface GameStats {
   bestStreak: number;
 }
 
-// *** CONFIGURABLE SETTING: Questions required for free entry ***
-// Change this value to adjust difficulty:
-// 50 = easier (50, 100, 150... questions)
-// 100 = current (100, 200, 300... questions) 
-// 200 = harder (200, 400, 600... questions)
-const QUESTIONS_PER_FREE_ENTRY = 5;
+// *** PROGRESSIVE MILESTONE SYSTEM ***
+// First free entry: 100 correct answers
+// Second free entry: 200 correct answers 
+// Third free entry: 300 correct answers (and so on...)
+// Each subsequent milestone increases by 100
+
+// Helper function to calculate milestone for Nth free entry
+const getMilestoneForEntry = (entryNumber: number): number => {
+  return entryNumber * 100;
+};
 
 const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
   // Game selection state
@@ -55,7 +59,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
   const [timeRemaining, setTimeRemaining] = useState(18);
   const [timerActive, setTimerActive] = useState(false);
   const [congratulationsShown, setCongratulationsShown] = useState(false);
-  const [currentMilestone, setCurrentMilestone] = useState(QUESTIONS_PER_FREE_ENTRY);
+  const [currentMilestone, setCurrentMilestone] = useState(getMilestoneForEntry(1));
   const [triviaFreeEntries, setTriviaFreeEntries] = useState(0);
   
   const questionTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -104,11 +108,11 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
       setTriviaFreeEntries(triviaEntries);
       
       // Calculate milestone based ONLY on trivia free entries earned
-      const milestone = (triviaEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+      const milestone = getMilestoneForEntry(triviaEntries + 1);
       setCurrentMilestone(milestone);
     } catch (error) {
       console.error('Error loading milestone:', error);
-      setCurrentMilestone(QUESTIONS_PER_FREE_ENTRY); // Default to first milestone
+      setCurrentMilestone(getMilestoneForEntry(1)); // Default to first milestone
       setTriviaFreeEntries(0);
     }
   };
@@ -226,7 +230,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
       localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
       
       // Reset milestone to appropriate level based on current trivia free entries
-      const resetMilestone = (triviaFreeEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+      const resetMilestone = getMilestoneForEntry(triviaFreeEntries + 1);
       setCurrentMilestone(resetMilestone);
       
       // Return to menu
@@ -280,7 +284,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
     setCongratulationsShown(false);
 
     // Reset milestone to appropriate level based on current trivia free entries
-    const resetMilestone = (triviaFreeEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+    const resetMilestone = getMilestoneForEntry(triviaFreeEntries + 1);
     setCurrentMilestone(resetMilestone);
 
     // Save to localStorage
@@ -361,7 +365,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
       localStorage.setItem('prediwin-trivia-stats', JSON.stringify(freshStats));
       
       // Reset milestone to appropriate level based on current trivia free entries
-      const resetMilestone = (triviaFreeEntries + 1) * QUESTIONS_PER_FREE_ENTRY;
+      const resetMilestone = getMilestoneForEntry(triviaFreeEntries + 1);
       setCurrentMilestone(resetMilestone);
       return;
     }
@@ -386,7 +390,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
       if (address) {
         awardTriviaFreeEntry(address).then(() => {
           // Update milestone for next reward after awarding
-          const nextMilestone = currentMilestone + QUESTIONS_PER_FREE_ENTRY;
+          const nextMilestone = getMilestoneForEntry(triviaFreeEntries + 2);
           setCurrentMilestone(nextMilestone);
           setTriviaFreeEntries(prev => prev + 1);
         });
@@ -519,9 +523,9 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
             <div className="text-center">
                <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Win free pot entries by answering questions correctly in a row!</div>
                <div className="text-gray-700 space-y-2 text-sm">
-                <p><strong>🎯 1st Free Entry:</strong> {QUESTIONS_PER_FREE_ENTRY} correct answers</p>
-                <p><strong>🎯 2nd Free Entry:</strong> {QUESTIONS_PER_FREE_ENTRY * 2} correct answers</p>
-                <p><strong>🎯 3rd Free Entry:</strong> {QUESTIONS_PER_FREE_ENTRY * 3} correct answers (and so on...)</p>
+                <p><strong>🎯 1st Free Entry:</strong> {getMilestoneForEntry(1)} correct answers</p>
+                <p><strong>🎯 2nd Free Entry:</strong> {getMilestoneForEntry(2)} correct answers</p>
+                <p><strong>🎯 3rd Free Entry:</strong> {getMilestoneForEntry(3)} correct answers (and so on...)</p>
                 <p className="text-red-600"><strong>⚡ ONE wrong answer</strong> → All progress resets to zero</p>
                 <p className="text-red-600"><strong>⏱️ 10 minutes inactive</strong> → All progress resets to zero</p>
               </div>
@@ -563,7 +567,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              {congratulationsShown && gameStats.correctAnswers >= QUESTIONS_PER_FREE_ENTRY && (
+              {congratulationsShown && gameStats.correctAnswers >= getMilestoneForEntry(1) && (
                 <div className="mt-4 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg">
                   <div className="text-center">
                     <Trophy className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
@@ -582,7 +586,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
                         You can now enter any prediction pot for free!
                       </p>
                       <p className="text-green-600 text-xs mt-2">
-                        Game will reset in 5 seconds... Next milestone: {currentMilestone + QUESTIONS_PER_FREE_ENTRY} correct answers!
+                        Game will reset in 5 seconds... Next milestone: {getMilestoneForEntry(triviaFreeEntries + 2)} correct answers!
                       </p>
                     </div>
                   </div>
@@ -822,7 +826,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
               </div>
               <h3 className="text-2xl font-light text-black mb-3">AI Trivia</h3>
               <p className="text-gray-600 mb-4 leading-relaxed">
-                Test your knowledge across 25+ categories. First milestone: {QUESTIONS_PER_FREE_ENTRY} correct answers. Each additional free entry requires {QUESTIONS_PER_FREE_ENTRY} more correct answers!
+                Test your knowledge across 25+ categories. First milestone: {getMilestoneForEntry(1)} correct answers. Each additional free entry requires 100 more correct answers!
               </p>
               <div className="flex items-center text-sm text-green-600 font-medium">
                 <Trophy className="w-4 h-4 mr-2" />

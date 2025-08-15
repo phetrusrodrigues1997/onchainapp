@@ -79,6 +79,8 @@ export const UsersTable = pgTable("users_table", {
   sourcePage: text("source_page"), // Optional: where the user data was collected from
   imageUrl: text("image_url"), // Optional profile image URL
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
+  lastWordlePlay: timestamp("last_wordle_play"), // Last time user played Wordle
+  wordlePlaysToday: integer("wordle_plays_today").default(0).notNull(), // Number of plays today
 });
 
 // Synchronized questions for prediction market
