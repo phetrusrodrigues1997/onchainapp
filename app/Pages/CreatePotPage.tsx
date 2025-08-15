@@ -9,7 +9,7 @@ import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
 import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
-// Contract ABI for PredictionPotWithCloning
+// Contract ABI for PredictionPot (simplified contract)
 const PREDICTION_POT_CLONING_ABI = [
   {
     "inputs": [
@@ -42,7 +42,7 @@ const USDC_ABI = [
   }
 ] as const;
 
-const FACTORY_CONTRACT_ADDRESS = '0xeE44be339B390726865aAC73435B96552C0697d3' as const;
+const FACTORY_CONTRACT_ADDRESS = '0x1344e4614719ff4D491280f0d2707e87354ed823' as const;
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
 
 interface CreatePotPageProps {
