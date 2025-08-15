@@ -55,18 +55,18 @@ function generateDeterministicQuestion(): string {
     case 'social_media':
       const celebrity = celebrities[Math.floor(Math.random() * celebrities.length)];
       const platform = Math.random() < 0.5 ? 'X/Twitter' : 'Instagram';
-      return `Will ${celebrity} post on ${platform} in the next 15 minutes?`;
+      return `Will ${celebrity} post on ${platform} in the next hour?`;
       
     case 'crypto_current_price':
       const cryptos = ['Bitcoin', 'Ethereum', 'AAVE', 'AERO', 'VIRTUAL'];
       const crypto = cryptos[Math.floor(Math.random() * cryptos.length)];
       const direction = Math.random() < 0.5 ? 'above' : 'below';
-      return `Will ${crypto} price be ${direction} its current price in the next 15 minutes?`;
+      return `Will ${crypto} price be ${direction} its current price in the next hour?`;
       
     case 'news_websites':
       const newsOutlets = ['CNN', 'BBC News', 'Reuters', 'The New York Times', 'AP News'];
       const outlet = newsOutlets[Math.floor(Math.random() * newsOutlets.length)];
-      return `Will ${outlet} publish a new article in the next 15 minutes?`;
+      return `Will ${outlet} publish a new article in the next hour?`;
       
     
       
@@ -80,10 +80,10 @@ function generateDeterministicQuestion(): string {
       ];
       const stock = stocks[Math.floor(Math.random() * stocks.length)];
       const stockDirection = Math.random() < 0.5 ? 'above' : 'below';
-      return `Will ${stock.name} stock price be ${stockDirection} its current price in the next 15 minutes?`;
+      return `Will ${stock.name} stock price be ${stockDirection} its current price in the next hour?`;
       
     default:
-      return 'Will Bitcoin price be above its current price in the next 15 minutes?';
+      return 'Will Bitcoin price be above its current price in the next hour?';
   }
 }
 
@@ -165,7 +165,7 @@ export async function generateQuestionBatch(count: number = 24) {
     console.error('Error generating deterministic question batch:', error);
     
     // Fallback: generate basic questions
-    const fallbackQuestions = [];
+    const fallbackQuestions: { question: string }[] = [];
     for (let i = 0; i < count; i++) {
       fallbackQuestions.push({ question: generateDeterministicQuestion() });
     }

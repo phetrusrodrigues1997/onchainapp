@@ -85,9 +85,6 @@ export const UsersTable = pgTable("users_table", {
 export const LiveQuestions = pgTable("live_questions", {
   id: serial("id").primaryKey(),
   question: text("question").notNull(), // The generated question
-  startTime: timestamp("start_time").notNull(), // When this question cycle starts
-  endTime: timestamp("end_time").notNull(), // When this question cycle ends
-  isActive: boolean("is_active").default(true).notNull(), // Whether this is the current question
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

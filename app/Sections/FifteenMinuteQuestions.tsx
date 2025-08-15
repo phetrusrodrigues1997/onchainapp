@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'viem';
-import { placeLivePrediction } from '../Database/actions';
+import { placeLivePrediction, getUserLivePrediction } from '../Database/actions';
 import { determineWinnersLive, clearLivePredictions } from '../Database/OwnerActions';
 
 // Configure the time interval for new questions (in minutes)
-const QUESTION_INTERVAL_MINUTES = 15;
+const QUESTION_INTERVAL_MINUTES = 60;
 
 // Contract ABI for owner functions
 const LIVE_POT_ABI = [
@@ -45,28 +46,30 @@ interface QuestionData {
   question: string;
   timeRemaining: number;
   questionId: string | null;
-  startTime: string;
-  endTime: string;
 }
 
 export default function FifteenMinuteQuestions({ className = '' }: FifteenMinuteQuestionsProps) {
   const { address } = useAccount();
   const { writeContract, data: txHash, isPending } = useWriteContract();
+  const queryClient = useQueryClient();
   
   const [currentQuestion, setCurrentQuestion] = useState<QuestionData>({
     question: 'Loading question...',
-    timeRemaining: 0,
-    questionId: null,
-    startTime: '',
-    endTime: ''
+    timeRemaining: 0, // Will be calculated on first fetch
+    questionId: null
   });
   const [nextQuestion, setNextQuestion] = useState<QuestionData | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [userPrediction, setUserPrediction] = useState<'positive' | 'negative' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Loading and pot entry state
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasEnteredPot, setHasEnteredPot] = useState(false);
+  const [isCheckingPotEntry, setIsCheckingPotEntry] = useState(false);
+  
   // Owner functionality state
-  const [outcomeInput, setOutcomeInput] = useState<string>('');
+  const [outcomeInput, setOutcomeInput] = useState<'positive' | 'negative' | ''>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processMessage, setProcessMessage] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
@@ -89,6 +92,22 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     functionName: 'getBalance',
   }) as { data: bigint | undefined };
 
+  // Read pot participants to check if user has entered
+  const { data: participants } = useReadContract({
+    address: LIVE_POT_ADDRESS as `0x${string}`,
+    abi: [
+      {
+        "inputs": [],
+        "name": "getParticipants",
+        "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    functionName: 'getParticipants',
+    query: { enabled: !!address }
+  }) as { data: string[] | undefined };
+
   // Wait for transaction receipt
   const { data: receipt, isSuccess: isDistributionConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -97,24 +116,31 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   // Check if current user is owner
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase();
 
-  // Calculate seconds until next 15-minute slot
+  // Check if user has entered the pot
+  const checkPotEntry = async () => {
+    console.log('Checking pot entry - address:', address, 'participants:', participants);
+    if (!address || !participants) {
+      console.log('No address or participants, setting hasEnteredPot to false');
+      setHasEnteredPot(false);
+      return;
+    }
+    
+    const hasEntered = participants.some(
+      participant => participant.toLowerCase() === address.toLowerCase()
+    );
+    console.log('User has entered pot:', hasEntered);
+    setHasEnteredPot(hasEntered);
+  };
+
+  // Calculate seconds until next hour (top of the hour :00)
   const getSecondsUntilNextSlot = (): number => {
     const now = new Date();
-    const minutes = now.getUTCMinutes();
-    const seconds = now.getUTCSeconds();
-    const roundedMinutes = Math.ceil(minutes / QUESTION_INTERVAL_MINUTES) * QUESTION_INTERVAL_MINUTES;
     
-    if (roundedMinutes >= 60) {
-      // Next slot is in the next hour
-      const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
-      nextHour.setUTCMinutes(0, 0, 0);
-      return Math.floor((nextHour.getTime() - now.getTime()) / 1000);
-    } else {
-      // Next slot is in current hour
-      const nextSlot = new Date(now);
-      nextSlot.setUTCMinutes(roundedMinutes, 0, 0);
-      return Math.floor((nextSlot.getTime() - now.getTime()) / 1000);
-    }
+    // Next slot is always at :00 of the next hour
+    const nextHour = new Date(now);
+    nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+    
+    return Math.floor((nextHour.getTime() - now.getTime()) / 1000);
   };
 
   const fetchCurrentQuestion = async (): Promise<QuestionData | null> => {
@@ -134,20 +160,16 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       
       return {
         question: data.question,
-        timeRemaining: data.timeRemaining || 0,
-        questionId: data.questionId,
-        startTime: data.startTime || '',
-        endTime: data.endTime || ''
+        timeRemaining: getSecondsUntilNextSlot(), // Calculate real-time remaining
+        questionId: data.questionId
       };
       
     } catch (error) {
       console.error('Error fetching live question:', error);
       return {
-        question: `Will something unexpected happen in the next ${QUESTION_INTERVAL_MINUTES} minutes?`,
-        timeRemaining: QUESTION_INTERVAL_MINUTES * 60,
-        questionId: null,
-        startTime: '',
-        endTime: ''
+        question: `Will bitcoin fall by $1000 in the next ${QUESTION_INTERVAL_MINUTES} minutes?`,
+        timeRemaining: getSecondsUntilNextSlot(), // Calculate real-time remaining
+        questionId: null
       };
     }
   };
@@ -192,33 +214,27 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     // Set up countdown timer (updates every second)
     countdownIntervalRef.current = setInterval(() => {
       setCurrentQuestion(prev => {
-        const newTimeRemaining = Math.max(0, prev.timeRemaining - 1);
+        const newTimeRemaining = getSecondsUntilNextSlot(); // Recalculate real-time remaining
         
         // Prefetch next question 30 seconds before current expires
         if (newTimeRemaining === 30 && !nextQuestion) {
           prefetchNextQuestion();
         }
         
-        // Transition when current question expires
-        if (newTimeRemaining === 0 && nextQuestion) {
+        // Server-side cleanup will handle expired questions automatically
+        // No frontend deletion needed
+        
+        // Transition when 15-minute mark is reached
+        if (newTimeRemaining === 0 && prev.timeRemaining > 0 && nextQuestion) {
           transitionToNextQuestion();
         }
         
-        // If we hit 0 and no next question, fetch immediately
-        if (newTimeRemaining === 0 && !nextQuestion) {
+        // If we hit the 15-minute mark and no next question, fetch immediately
+        if (newTimeRemaining === 0 && prev.timeRemaining > 0 && !nextQuestion) {
           // Force immediate fetch and update
           fetchCurrentQuestion().then(question => {
             if (question && question.questionId !== prev.questionId) {
               // If a new question is available, update immediately without transition
-              setCurrentQuestion(question);
-            }
-          });
-        }
-        
-        // Additional backup: if timer is at 0 for more than 2 seconds, force refresh
-        if (newTimeRemaining === 0 && prev.timeRemaining === 0) {
-          fetchCurrentQuestion().then(question => {
-            if (question && question.questionId !== prev.questionId) {
               setCurrentQuestion(question);
             }
           });
@@ -233,11 +249,12 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
     // Set up smart background fetching
     // Fetch every 2 minutes, but more frequently when close to transition
-    const baseInterval = currentQuestion.timeRemaining > 120 ? 120 * 1000 : 60 * 1000; // 2 min or 1 min
+    const baseInterval = getSecondsUntilNextSlot() > 120 ? 120 * 1000 : 60 * 1000; // 2 min or 1 min
     
     fetchIntervalRef.current = setInterval(async () => {
-      // Don't fetch if we're about to transition
-      if (currentQuestion.timeRemaining > 10) {
+      // Don't fetch if we're about to transition (within 10 seconds of 15-minute mark)
+      const timeRemaining = getSecondsUntilNextSlot();
+      if (timeRemaining > 10) {
         const question = await fetchCurrentQuestion();
         if (question && question.questionId !== currentQuestion.questionId) {
           // Update current question only if it's a different question
@@ -250,9 +267,13 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     }, baseInterval);
   };
 
-  // Initialize and setup smart fetching
+  // Initialize and setup smart fetching with loading screen
   useEffect(() => {
     const initializeQuestions = async () => {
+      console.log('Starting initialization with loading screen');
+      // Show loading for at least 2 seconds
+      const loadingPromise = new Promise(resolve => setTimeout(resolve, 2000));
+      
       const question = await fetchCurrentQuestion();
       if (question) {
         setCurrentQuestion(question);
@@ -264,6 +285,12 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       }
       
       setupSmartFetching();
+      
+      // Wait for loading screen duration
+      console.log('Waiting for loading screen duration...');
+      await loadingPromise;
+      console.log('Loading screen duration complete, setting isLoading to false');
+      setIsLoading(false);
     };
 
     initializeQuestions();
@@ -283,11 +310,30 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     }
   }, [currentQuestion.questionId]);
 
+  // Check pot entry when participants data changes
+  useEffect(() => {
+    checkPotEntry();
+  }, [participants, address]);
+
+  // Add effect to refresh contract data when user might have entered pot
+  useEffect(() => {
+    // Set up an interval to periodically refresh contract data
+    // This ensures the UI updates when user enters pot from another component
+    const refreshInterval = setInterval(() => {
+      if (address && !hasEnteredPot) {
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+      }
+    }, 2000); // Check every 2 seconds if user hasn't entered pot yet
+
+    return () => clearInterval(refreshInterval);
+  }, [address, hasEnteredPot, queryClient]);
+
   // Handle page visibility changes
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (!document.hidden) {
         // Page became visible, sync with current question
+        // This will also trigger server-side cleanup of expired questions
         const question = await fetchCurrentQuestion();
         if (question && question.questionId !== currentQuestion.questionId) {
           setCurrentQuestion(question);
@@ -326,11 +372,39 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       setUserPrediction(prediction);
     } catch (error) {
       console.error('Failed to place prediction:', error);
-      // You might want to show an error message to the user here
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Load user's existing prediction on component mount
+  useEffect(() => {
+    const loadUserPrediction = async () => {
+      if (!address) {
+        console.log('No address, skipping prediction load');
+        return;
+      }
+      
+      try {
+        console.log('Loading user prediction for address:', address);
+        const prediction = await getUserLivePrediction(address);
+        console.log('Received prediction from API:', prediction);
+        
+        if (prediction && (prediction.prediction === 'positive' || prediction.prediction === 'negative')) {
+          console.log('Setting user prediction to:', prediction.prediction);
+          setUserPrediction(prediction.prediction as 'positive' | 'negative');
+        } else {
+          console.log('No valid prediction found, user prediction remains null');
+          setUserPrediction(null);
+        }
+      } catch (error) {
+        console.error('Failed to load user prediction:', error);
+        setUserPrediction(null);
+      }
+    };
+
+    loadUserPrediction();
+  }, [address]);
 
   // Handle automated winner processing and pot distribution
   const handleProcessWinners = async () => {
@@ -409,6 +483,50 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       finishProcessing();
     }
   }, [isDistributionConfirmed, receipt, isProcessing, lastAction]);
+
+  // Show loading screen
+  console.log('Render check - isLoading:', isLoading, 'hasEnteredPot:', hasEnteredPot, 'isOwner:', isOwner);
+  
+  if (isLoading) {
+    console.log('Showing loading screen');
+    return (
+      <div className={`relative max-w-4xl mx-auto -translate-y-8 ${className}`}>
+        <div className="relative bg-white border-2 border-black rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-black text-white px-6 py-4 text-center">
+            <span className="text-lg font-mono tracking-wider">LOADING LIVE PREDICTIONS</span>
+          </div>
+          <div className="p-12 text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-black mx-auto mb-6"></div>
+            <p className="text-xl font-bold text-gray-700 mb-2">Setting up your prediction environment...</p>
+            <p className="text-gray-500">This will only take a moment</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show pot entry requirement if user hasn't entered
+  if (!hasEnteredPot && !isOwner) {
+    return (
+      <div className={`relative max-w-4xl mx-auto -translate-y-8 ${className}`}>
+        <div className="relative bg-white border-2 border-black rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-red-600 text-white px-6 py-4 text-center">
+            <span className="text-lg font-mono tracking-wider">POT ENTRY REQUIRED</span>
+          </div>
+          <div className="p-12 text-center">
+            <div className="text-6xl mb-6">🔒</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Enter the Prediction Pot First</h2>
+            <p className="text-gray-600 mb-6">
+              You must enter the live prediction pot before you can view questions and make predictions.
+            </p>
+            <p className="text-sm text-gray-500">
+              Go to the pot entry section to join this round.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -528,75 +646,162 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
               </div>
             </div>
             
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-6">
-              <button 
-                onClick={() => handlePrediction('positive')}
-                className={`group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95 ${
-                  isTransitioning || isSubmitting || !address ? 'opacity-60 cursor-wait' : ''
-                } ${userPrediction === 'positive' ? 'bg-green-100 border-green-600' : ''}`} 
-                disabled={isTransitioning || isSubmitting || !address}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
-                <div className="relative flex items-center justify-center space-x-2">
-                  <span className="text-3xl">{isSubmitting && userPrediction !== 'positive' ? '⏳' : '✓'}</span>
-                  <span className="tracking-widest">{userPrediction === 'positive' ? 'SELECTED' : 'YES'}</span>
+            {/* Action Buttons or Prediction Display */}
+            {userPrediction === null ? (
+              // Show buttons if no prediction made yet
+              <div className="grid grid-cols-2 gap-6">
+                <button 
+                  onClick={() => handlePrediction('positive')}
+                  className={`group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95 ${
+                    isTransitioning || isSubmitting || !address ? 'opacity-60 cursor-wait' : ''
+                  }`} 
+                  disabled={isTransitioning || isSubmitting || !address}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+                  <div className="relative flex items-center justify-center space-x-2">
+                    <span className="text-3xl">{isSubmitting ? '⏳' : '✓'}</span>
+                    <span className="tracking-widest">YES</span>
+                  </div>
+                  {/* Button Corner Effects */}
+                  <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 border-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 border-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </button>
+                
+                <button 
+                  onClick={() => handlePrediction('negative')}
+                  className={`group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95 ${
+                    isTransitioning || isSubmitting || !address ? 'opacity-60 cursor-wait' : ''
+                  }`} 
+                  disabled={isTransitioning || isSubmitting || !address}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+                  <div className="relative flex items-center justify-center space-x-2">
+                    <span className="text-3xl">{isSubmitting ? '⏳' : '✗'}</span>
+                    <span className="tracking-widest">NO</span>
+                  </div>
+                  {/* Button Corner Effects */}
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </button>
+              </div>
+            ) : (
+              // Show prediction if user has already made one
+              <div className="flex justify-center">
+                <div className={`relative px-8 py-6 rounded-lg border-4 ${
+                  userPrediction === 'positive' 
+                    ? 'bg-green-100 border-green-600 text-green-800' 
+                    : 'bg-red-100 border-red-600 text-red-800'
+                }`}>
+                  <div className="flex items-center justify-center space-x-3">
+                    <span className="text-3xl">
+                      {userPrediction === 'positive' ? '✓' : '✗'}
+                    </span>
+                    <div className="text-center">
+                      <div className="text-xl font-black tracking-wider">
+                        YOUR PREDICTION
+                      </div>
+                      <div className="text-2xl font-black tracking-widest">
+                        {userPrediction === 'positive' ? 'YES' : 'NO'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                {/* Button Corner Effects */}
-                <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 border-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 border-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-              </button>
-              
-              <button 
-                onClick={() => handlePrediction('negative')}
-                className={`group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95 ${
-                  isTransitioning || isSubmitting || !address ? 'opacity-60 cursor-wait' : ''
-                } ${userPrediction === 'negative' ? 'bg-red-100 border-red-600' : ''}`} 
-                disabled={isTransitioning || isSubmitting || !address}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
-                <div className="relative flex items-center justify-center space-x-2">
-                  <span className="text-3xl">{isSubmitting && userPrediction !== 'negative' ? '⏳' : '✗'}</span>
-                  <span className="tracking-widest">{userPrediction === 'negative' ? 'SELECTED' : 'NO'}</span>
-                </div>
-                {/* Button Corner Effects */}
-                <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-              </button>
-            </div>
+              </div>
+            )}
 
             
           </div>
         </div>
 
-        {/* Owner Controls */}
+
+        {/* Owner Controls - Simplified */}
         {isOwner && (
-          <div className="max-w-4xl mx-auto mt-6">
-            <div className="bg-black text-white border-2 border-red-500 rounded-xl shadow-2xl overflow-hidden">
-              <div className="bg-red-600 text-white px-6 py-4">
-                <h2 className="text-xl font-black tracking-wider">🔧 OWNER CONTROLS</h2>
-                <p className="text-red-200 text-sm">Set outcome and process winners automatically</p>
-              </div>
+          <div className="max-w-4xl mx-auto mt-6" style={{ position: 'relative', zIndex: 1000 }}>
+            <div style={{ backgroundColor: 'black', color: 'white', padding: '20px', border: '2px solid red', borderRadius: '12px' }}>
+              <h2 style={{ marginBottom: '10px' }}>🔧 OWNER CONTROLS</h2>
               
-              <div className="p-6">
+              <div style={{ marginBottom: '20px' }}>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Question Outcome
                   </label>
-                  <input
-                    type="text"
-                    placeholder="positive or negative"
+                  <select
                     value={outcomeInput}
-                    onChange={(e) => setOutcomeInput(e.target.value.toLowerCase())}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    disabled={isProcessing}
-                  />
+                    onChange={(e) => {
+                      console.log('Dropdown changed to:', e.target.value);
+                      setOutcomeInput(e.target.value as 'positive' | 'negative' | '');
+                    }}
+                    onClick={(e) => {
+                      console.log('Dropdown clicked');
+                      e.stopPropagation();
+                    }}
+                    onFocus={() => console.log('Dropdown focused')}
+                    style={{ pointerEvents: 'all', zIndex: 9999 }}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent relative"
+                  >
+                    <option value="">Select outcome...</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                  </select>
                 </div>
 
+                {/* Debug State Info */}
+                <div className="mb-4 p-3 bg-blue-900 text-blue-200 rounded text-xs">
+                  <div>outcomeInput: "{outcomeInput}"</div>
+                  <div>isProcessing: {isProcessing.toString()}</div>
+                  <div>isPending: {isPending.toString()}</div>
+                  <div>Button should be disabled: {(isProcessing || isPending || !outcomeInput).toString()}</div>
+                </div>
+
+                {/* Generate Questions Button */}
+                <button 
+                  onClick={async () => {
+                    console.log('Generating questions for current time...');
+                    try {
+                      const response = await fetch('/api/live-question', {
+                        method: 'POST',
+                      });
+                      const data = await response.json();
+                      console.log('Questions generated:', data);
+                      alert('Questions generated successfully! Refresh the page to see new questions.');
+                    } catch (error) {
+                      console.error('Failed to generate questions:', error);
+                      alert('Failed to generate questions');
+                    }
+                  }}
+                  style={{
+                    marginBottom: '16px',
+                    padding: '8px 16px',
+                    backgroundColor: 'blue',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Generate Questions for Current Time
+                </button>
+
                 <button
-                  onClick={handleProcessWinners}
-                  disabled={isProcessing || isPending || !outcomeInput.trim()}
-                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                  onClick={(e) => {
+                    console.log('Process Winners button clicked!');
+                    console.log('outcomeInput:', outcomeInput);
+                    handleProcessWinners();
+                  }}
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'green',
+                    color: 'white',
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    pointerEvents: 'all',
+                    position: 'relative',
+                    zIndex: 9999
+                  }}
                 >
                   {isProcessing || isPending ? (
                     <>

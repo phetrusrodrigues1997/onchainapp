@@ -952,28 +952,22 @@ export async function placeLivePrediction(walletAddress: string, prediction: 'po
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     
-    // Check if user already made a prediction for today
+    // Check if user already made a prediction (no date filtering)
     const existingPrediction = await db
       .select()
       .from(LivePredictions)
-      .where(and(
-        eq(LivePredictions.walletAddress, walletAddress),
-        eq(LivePredictions.betDate, today)
-      ))
+      .where(eq(LivePredictions.walletAddress, walletAddress))
       .limit(1);
 
     if (existingPrediction.length > 0) {
-      // Update existing prediction
+      // Update existing prediction instead of blocking
       const result = await db
         .update(LivePredictions)
         .set({ prediction })
-        .where(and(
-          eq(LivePredictions.walletAddress, walletAddress),
-          eq(LivePredictions.betDate, today)
-        ))
+        .where(eq(LivePredictions.walletAddress, walletAddress))
         .returning();
       
-      return { updated: true, ...result[0] };
+      return { updated: true, alreadyExists: true, ...result[0] };
     } else {
       // Insert new prediction
       const result = await db
@@ -985,11 +979,27 @@ export async function placeLivePrediction(walletAddress: string, prediction: 'po
         })
         .returning();
       
-      return { updated: false, ...result[0] };
+      return { updated: false, alreadyExists: false, ...result[0] };
     }
   } catch (error) {
     console.error("Error placing live prediction:", error);
     throw new Error("Failed to place live prediction");
+  }
+}
+
+export async function getUserLivePrediction(walletAddress: string) {
+  try {
+    // Remove date filtering to match other live prediction functions
+    const result = await db
+      .select()
+      .from(LivePredictions)
+      .where(eq(LivePredictions.walletAddress, walletAddress))
+      .limit(1);
+
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error("Error getting user live prediction:", error);
+    throw new Error("Failed to get user live prediction");
   }
 }
 

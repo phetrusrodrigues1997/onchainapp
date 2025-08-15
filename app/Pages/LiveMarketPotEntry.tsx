@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatUnits, parseUnits } from 'viem';
 
 // Contract ABIs
@@ -64,6 +65,7 @@ const ENTRY_FEE_USDC = parseUnits('0.01', 6); // 0.01 USDC
 export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: LiveMarketPotEntryProps) {
   const { address, isConnected } = useAccount();
   const { writeContract, data: txHash, isPending } = useWriteContract();
+  const queryClient = useQueryClient();
   
   const [lastAction, setLastAction] = useState<'approve' | 'enter' | null>(null);
   const [message, setMessage] = useState<string>('');
@@ -124,16 +126,22 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
     if (isConfirmed && receipt) {
       if (lastAction === 'approve') {
         setMessage('USDC approved successfully! Now entering pot...');
+        // Force refetch of all contract data after approval
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['readContract'] });
+        }, 1000);
       } else if (lastAction === 'enter') {
         setMessage('Successfully entered the pot!');
+        // Force refetch of all contract data after entering pot
         setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['readContract'] });
           onPotEntered();
         }, 2000);
       }
       setIsLoading(false);
       setLastAction(null);
     }
-  }, [isConfirmed, receipt, lastAction, onPotEntered]);
+  }, [isConfirmed, receipt, lastAction, onPotEntered, queryClient]);
 
   const handleApproveUsdc = () => {
     if (!address || !contractAddress) return;
