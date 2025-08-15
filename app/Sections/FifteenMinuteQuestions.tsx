@@ -593,7 +593,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
             {/* Pot Balance Display - Top Right */}
             <div className="flex justify-end mb-2">
               <div className="text-xs text-gray-500 font-mono">
-                Pot: ${formatUsdcBalance(potBalance)}
+                Total Predictions: <span className='text-sm text-green-400'>${formatUsdcBalance(potBalance)}</span>
               </div>
             </div>
 

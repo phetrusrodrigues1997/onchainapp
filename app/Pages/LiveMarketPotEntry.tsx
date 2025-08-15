@@ -209,7 +209,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
         <div className="bg-black text-white px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-black tracking-wider">LIVE PREDICTION POT</h1>
+              <h1 className="text-2xl font-black tracking-wider">Live Predictions</h1>
               <p className="text-gray-300 mt-1">Entry required to participate</p>
             </div>
             <div className="text-right">
@@ -236,13 +236,6 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
             </div>
           </div>
 
-          {/* User Balance */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Your USDC Balance:</span>
-              <span className="font-bold text-gray-900">${formatUsdcBalance(userUsdcBalance)}</span>
-            </div>
-          </div>
 
           {/* Status Messages */}
           {message && (

@@ -222,7 +222,7 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfdfd] text-[#111111] overflow-hidden -mt-32 md:-mt-40">
+    <div className="min-h-screen bg-[#fdfdfd] text-[#111111] overflow-hidden -mt-44">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
@@ -241,9 +241,17 @@ const handleMarketClick = (marketId: string) => {
             <div className="mb-6 -translate-y-1/4">
               <button 
                 onClick={() => setActiveSection('liveMarkets')}
-                className="text-gray-600 hover:text-gray-900 font-medium tracking-wide transition-colors"
+                className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-xs font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105"
               >
-                Live Markets →
+                {/* Live indicator dot */}
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+                
+                <span className="relative">
+                  Live Predictions
+                </span>
+                
+                {/* Arrow with hover animation */}
+                <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs">→</span>
               </button>
             </div>
             
@@ -349,9 +357,9 @@ const handleMarketClick = (marketId: string) => {
     </div>
     
     {/* Header with Icon and Price */}
-    <div className="flex flex-col items-center mb-2">
-      <div className="flex items-center justify-center mb-1">
-        <div className="rounded-xl flex items-center justify-center w-70 h-58 bg-gray-50 overflow-hidden">
+    <div className="flex flex-col items-center mb-3">
+      <div className="flex items-center justify-center mb-2">
+        <div className="rounded-xl flex items-center justify-center w-full h-48 bg-gray-50 overflow-hidden">
   {markets[0].icon?.slice(0, 4) === 'http' ? (
     <img 
       src={markets[0].icon} 
@@ -365,20 +373,20 @@ const handleMarketClick = (marketId: string) => {
       </div>
 
       <div className="text-center">
-        <h2 className="text-xl font-bold text-gray-900">{markets[0].name}</h2>
+        <h2 className="text-lg font-bold text-gray-900">{markets[0].name}</h2>
         <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
       </div>
     </div>
 
     {/* Question */}
     <div className="mb-3">
-      <p className="text-lg font-semibold text-gray-800 leading-snug text-center">
+      <p className="text-base font-semibold text-gray-800 leading-snug text-center">
         {markets[0].question}
       </p>
     </div>
 
     {/* Trading Buttons */}
-    <div className="grid grid-cols-2 gap-3 mb-2">
+    <div className="grid grid-cols-2 gap-3 mb-3">
       <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
         YES
       </button>
@@ -393,11 +401,11 @@ const handleMarketClick = (marketId: string) => {
 <div
   className={`w-2.5 h-2.5 rounded-full ${
     availableMarkets.includes(markets[0].name.toLowerCase())
-      ? 'bg-green-500 animate-pulse'
+      ? 'bg-green-500'
       : 'bg-red-500'
   }`}
 ></div>        <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-600' : 'text-red-600'}`}>
-          {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Live' : 'Soon'}
+          {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Available' : 'Soon'}
         </span>
       </div>
       
@@ -422,13 +430,13 @@ const handleMarketClick = (marketId: string) => {
               <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-12' : '-translate-y-12'}`}>
                 <div 
                   onClick={() => handleMarketClick(markets[0].id)}
-                  className="group bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-5 border border-gray-700 hover:border-gray-600 hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[500px] flex flex-col"
+                  className="group bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-4 border border-gray-700 hover:border-gray-600 hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[480px] flex flex-col"
                 >
                   {/* Background Gradient Accent */}
                   <div className="absolute top-0 left-0 right-0 h-1 "></div>
                   
                   {/* Countdown Timer - Above image */}
-                  <div className="flex justify-end mb-3">
+                  <div className="flex justify-end mb-2">
                     <div className="text-sm text-gray-300 font-medium whitespace-nowrap">
                       <span className="text-xs text-gray-400 mr-2">{getCountdownLabel()}</span>
                       <span className="text-sm font-bold text-white">
@@ -442,9 +450,9 @@ const handleMarketClick = (marketId: string) => {
                   </div>
                   
                   {/* Header with Icon and Price */}
-                  <div className="flex flex-col items-center mb-4">
+                  <div className="flex flex-col items-center mb-3">
                     <div className="flex items-center justify-center mb-2">
-                      <div className="rounded-xl flex items-center justify-center w-96 h-44 bg-gray-50 overflow-hidden">
+                      <div className="rounded-xl flex items-center justify-center w-96 h-40 bg-gray-50 overflow-hidden">
                         {markets[0].icon?.slice(0, 4) === 'http' ? (
                           <img 
                             src={markets[0].icon} 
@@ -458,24 +466,24 @@ const handleMarketClick = (marketId: string) => {
                     </div>
 
                     <div className="text-center">
-                      <h2 className="text-xl font-bold text-white">{markets[0].name}</h2>
+                      <h2 className="text-lg font-bold text-white">{markets[0].name}</h2>
                       <p className="text-sm text-gray-300 font-medium">{markets[0].symbol}</p>
                     </div>
                   </div>
 
                   {/* Question */}
-                  <div className="mb-4 flex-1 flex items-center justify-center">
-                    <p className="text-lg font-semibold text-white leading-snug text-center">
+                  <div className="mb-3 flex-1 flex items-center justify-center">
+                    <p className="text-base font-semibold text-white leading-snug text-center">
                       {markets[0].question}
                     </p>
                   </div>
 
                   {/* Trading Buttons */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <button className="bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-400 text-green-700 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
                       YES
                     </button>
-                    <button className="bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-400 text-red-700 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
+                    <button className="bg-red-50 hover:bg-red-100 border border-red-200 hover:border-red-400 text-red-700 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-150 hover:scale-105">
                       NO
                     </button>
                   </div>
@@ -491,7 +499,7 @@ const handleMarketClick = (marketId: string) => {
                         }`}
                       ></div>
                       <span className={`text-sm font-medium ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-green-400' : 'text-red-400'}`}>
-                        {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Live' : 'Soon'}
+                        {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Available' : 'Soon'}
                       </span>
                     </div>
                     
