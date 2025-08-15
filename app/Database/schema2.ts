@@ -9,7 +9,6 @@ export const PrivatePots = pgTable("private_pots", {
   description: text("description").notNull(), // What users are predicting
   entryAmount: integer("entry_amount").default(10000).notNull(), // Entry amount in USDC micros (default 0.01 USDC)
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  isActive: boolean("is_active").default(true).notNull(), // Whether pot is still accepting entries
 });
 
 // Template for dynamic pot-specific tables

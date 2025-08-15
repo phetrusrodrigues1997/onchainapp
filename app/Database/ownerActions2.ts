@@ -19,54 +19,6 @@ const isValidOutcome = (outcome: string): outcome is 'positive' | 'negative' => 
 
 // ========== POT CREATOR ACTIONS ==========
 
-/**
- * Close a pot to new entries (only pot creator can do this)
- */
-export async function closePotEntries(
-  contractAddress: string,
-  creatorAddress: string
-) {
-  try {
-    // Input validation
-    if (!contractAddress || typeof contractAddress !== 'string') {
-      return { success: false, error: "Invalid contract address" };
-    }
-    if (!creatorAddress || typeof creatorAddress !== 'string') {
-      return { success: false, error: "Invalid creator address" };
-    }
-
-    // Sanitize inputs
-    const sanitizedContractAddress = sanitizeString(contractAddress);
-    const sanitizedCreatorAddress = sanitizeString(creatorAddress);
-
-    // Validate Ethereum addresses
-    if (!isValidEthereumAddress(sanitizedContractAddress)) {
-      return { success: false, error: "Invalid contract address format" };
-    }
-    if (!isValidEthereumAddress(sanitizedCreatorAddress)) {
-      return { success: false, error: "Invalid creator address format" };
-    }
-
-    // Verify the caller is the pot creator
-    const pot = await db2.select().from(PrivatePots)
-      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()))
-      .limit(1);
-
-    if (!pot[0] || pot[0].creatorAddress !== sanitizedCreatorAddress.toLowerCase()) {
-      return { success: false, error: "Not authorized - only pot creator can close entries" };
-    }
-
-    // Update pot status
-    await db2.update(PrivatePots)
-      .set({ isActive: false })
-      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()));
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error closing pot entries:", error);
-    return { success: false, error: "Failed to close pot entries" };
-  }
-}
 
 /**
  * Set outcome for predictions and determine winners (only pot creator)

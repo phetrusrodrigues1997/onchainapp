@@ -22,7 +22,6 @@ import {
 
 import {
   setPotOutcome,
-  closePotEntries,
   getPotStats,
   clearWrongPredictionsForUser,
   getWrongPredictors,
@@ -208,11 +207,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     functionName: 'owner',
   });
 
-  const { data: potState } = useReadContract({
-    address: contractAddress as `0x${string}`,
-    abi: PRIVATE_POT_ABI,
-    functionName: 'state',
-  });
 
   const { data: usdcBalance } = useReadContract({
     address: USDC_ADDRESS,
@@ -1022,8 +1016,8 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
         {/* User Interface */}
         <div className="grid lg:grid-cols-1 lg:justify-items-center gap-6 lg:gap-8">
-          {/* Enter Market - Only show if not a participant and pot is open */}
-          {!userParticipant && potState === 0 && (
+          {/* Enter Market - Only show if not a participant */}
+          {!userParticipant && (
             <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 lg:max-w-md lg:w-full">
               <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Enter Market</h2>
               
