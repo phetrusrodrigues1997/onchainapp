@@ -207,6 +207,12 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     functionName: 'owner',
   });
 
+  const { data: potState } = useReadContract({
+    address: contractAddress as `0x${string}`,
+    abi: PRIVATE_POT_ABI,
+    functionName: 'state',
+  });
+
 
   const { data: usdcBalance } = useReadContract({
     address: USDC_ADDRESS,
@@ -1010,6 +1016,42 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
             </div>
 
+            {/* Debug: Pot State Display */}
+            <div className="bg-yellow-50 border border-yellow-200 p-4 sm:p-6 mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-medium text-black mb-3">🔧 Contract Debug Info</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Contract State:</span>
+                  <span className="text-sm font-medium text-black">
+                    {potState === 0 ? '🟢 Active' : 
+                     potState === 1 ? '🟡 Closed' : 
+                     potState === 2 ? '🔴 Distributed' : 
+                     `Unknown (${potState})`}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Pot Balance:</span>
+                  <span className="text-sm font-medium text-black">${formatUSDC(potBalance)} USDC</span>
+                </div>
+                <div className="text-xs text-gray-500 mt-2">
+                  <strong>State Guide:</strong> Active = accepting entries, Closed = ready for distribution, Distributed = rewards paid out
+                </div>
+                {potState === 1 && (
+                  <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded">
+                    <p className="text-xs text-orange-700">
+                      ⚠️ <strong>Pot is CLOSED</strong> - You can now distribute rewards to winners. If distribution failed before, you can try again.
+                    </p>
+                  </div>
+                )}
+                {potState === 2 && (
+                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
+                    <p className="text-xs text-green-700">
+                      ✅ <strong>Rewards already distributed</strong> - This pot has completed its lifecycle.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
             
           </div>
         )}
