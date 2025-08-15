@@ -624,10 +624,8 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     if (!address || !isCreator) return;
 
     try {
-      // First, ask creator to confirm the winning outcome
-      const outcome = window.confirm(
-        `Click OK if POSITIVE predictions won, or CANCEL if NEGATIVE predictions won.`
-      ) ? 'positive' : 'negative';
+      // Automatically use positive outcome (user agrees)
+      const outcome = 'positive';
 
       // Get all predictions for today
       const predictions = await getPredictionsForDate(contractAddress, predictionDate);
@@ -647,16 +645,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         return;
       }
 
-      // Single confirmation with all details
-      const confirmed = window.confirm(
-        `Distribute rewards?\n\n` +
-        `• Outcome: ${outcome.toUpperCase()} predictions won\n` +
-        `• Winners: ${winners.length} participants\n` +
-        `• Reward per winner: ${(Number(potBalance) / 1_000_000 / winners.length).toFixed(4)} USDC\n\n` +
-        `This will close the market and distribute rewards automatically.`
-      );
-
-      if (!confirmed) return;
+      // Automatically proceed (user agrees to distribution)
 
       // Set loading states
       setIsLoading(true);
