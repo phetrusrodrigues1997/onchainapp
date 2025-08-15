@@ -222,6 +222,19 @@ const handleMarketClick = (marketId: string) => {
   };
 
   return (
+    <>
+      <style>{`
+        @keyframes pulse-right {
+          0% { transform: translateX(0); }
+          50% { transform: translateX(3px); }
+          100% { transform: translateX(0); }
+        }
+        
+        .animate-pulse-right {
+          animation: pulse-right 6s ease-in-out infinite;
+        }
+      `}</style>
+      
     <div className="min-h-screen bg-[#fdfdfd] text-[#111111] overflow-hidden -mt-44">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
@@ -243,14 +256,15 @@ const handleMarketClick = (marketId: string) => {
                 onClick={() => setActiveSection('liveMarkets')}
                 className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105"
               >
-              
+                {/* Live indicator dot */}
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
                 
                 <span className="relative">
-                  Try Live Predictions
+                  Go to Live Markets
                 </span>
                 
                 {/* Arrow with hover animation */}
-                <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs">→</span>
+                <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs animate-pulse-right">→</span>
               </button>
             </div>
             
@@ -592,6 +606,7 @@ const handleMarketClick = (marketId: string) => {
         autoClose={alertState.autoClose}
       />
     </div>
+    </>
   );
 };
 
