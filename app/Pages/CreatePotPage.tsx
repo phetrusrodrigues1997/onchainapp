@@ -553,7 +553,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
 
   // Landing page state
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col md:translate-y-0 -translate-y-8">
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-4xl w-full">
