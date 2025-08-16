@@ -400,10 +400,10 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                         className={`max-w-xs lg:max-w-md px-4 py-3 ${
                           msg.from === address
                             ? 'bg-black text-white'
-                            : 'bg-white border border-gray-200'
+                            : 'bg-white text-black border border-gray-200'
                         }`}
                       >
-                        <p className="text-sm text-black leading-relaxed">{msg.message}</p>
+                        <p className="text-sm leading-relaxed">{msg.message}</p>
                         <span
                           className={`text-xs mt-1 block ${
                             msg.from === address ? 'text-gray-300' : 'text-gray-500'
