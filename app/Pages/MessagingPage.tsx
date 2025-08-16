@@ -34,6 +34,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showNewMessage, setShowNewMessage] = useState<boolean>(false);
   const [status, setStatus] = useState<string>('');
+  const [showSidebar, setShowSidebar] = useState<boolean>(true);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -57,6 +58,21 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
       loadMessages();
     }
   }, [address]);
+
+  // Set initial sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setShowSidebar(true);
+      } else if (!selectedConversation && !showNewMessage) {
+        setShowSidebar(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [selectedConversation, showNewMessage]);
 
   useEffect(() => {
     scrollToBottom();
@@ -193,28 +209,36 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
     <div className="min-h-screen bg-[#fdfdfd]">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setActiveSection('profile')}
                 className="group inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors duration-200"
               >
                 <span className="transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
-                <span className="text-sm tracking-wide uppercase">Back</span>
+                <span className="text-sm tracking-wide uppercase hidden sm:inline">Back</span>
+              </button>
+              
+              {/* Mobile sidebar toggle */}
+              <button
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="md:hidden p-2 text-gray-500 hover:text-black transition-colors duration-200"
+              >
+                <span className="text-lg">☰</span>
               </button>
               
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">💬</span>
                 </div>
-                <h1 className="text-2xl font-light text-black tracking-tight">Messages</h1>
+                <h1 className="text-xl sm:text-2xl font-light text-black tracking-tight">Messages</h1>
               </div>
             </div>
             
             <button
               onClick={() => setShowNewMessage(true)}
-              className="bg-black text-white px-4 py-2 hover:bg-gray-800 transition-colors duration-200"
+              className="bg-black text-white px-3 py-2 sm:px-4 hover:bg-gray-800 transition-colors duration-200"
             >
               <span className="text-sm tracking-wide uppercase">✚</span>
             </button>
@@ -222,11 +246,29 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto flex h-[calc(100vh-80px)]">
+      <div className="max-w-6xl mx-auto flex relative h-[calc(100vh-80px)]">
+        {/* Mobile overlay */}
+        {showSidebar && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-5"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+        
         {/* Conversations Sidebar */}
-        <div className="w-1/3 border-r border-gray-200 bg-white">
-          <div className="p-6">
-            <h2 className="text-lg font-light text-black mb-4 tracking-wide">Conversations</h2>
+        <div className={`${
+          showSidebar ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 fixed md:relative z-10 w-full sm:w-80 md:w-1/3 h-full border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out`}>
+          <div className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-light text-black tracking-wide">Conversations</h2>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="md:hidden p-2 text-gray-500 hover:text-black transition-colors duration-200"
+              >
+                ✕
+              </button>
+            </div>
             
             {loading && conversations.length === 0 ? (
               <div className="text-center text-gray-500 py-8">Loading...</div>
@@ -248,6 +290,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                     onClick={() => {
                       setSelectedConversation(conv.otherParty);
                       setShowNewMessage(false);
+                      setShowSidebar(false); // Hide sidebar on mobile when conversation is selected
                       // Mark messages as read
                       messages
                         .filter(m => m.from === conv.otherParty && m.to === address && !m.read)
@@ -287,25 +330,35 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-50">
+        <div className="flex-1 flex flex-col bg-gray-50 w-full md:w-auto">
           {selectedConversation || showNewMessage ? (
             <>
               {/* Chat Header */}
-              <div className="bg-white border-b border-gray-200 p-6">
+              <div className="bg-white border-b border-gray-200 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    {showNewMessage ? (
-                      <h3 className="text-lg font-light text-black tracking-wide">New Message</h3>
-                    ) : (
-                      <h3 className="text-lg font-light text-black tracking-wide">
-                        {formatAddress(selectedConversation)}
-                      </h3>
-                    )}
+                  <div className="flex items-center gap-3">
+                    {/* Mobile back to conversations button */}
+                    <button
+                      onClick={() => setShowSidebar(true)}
+                      className="md:hidden p-2 text-gray-500 hover:text-black transition-colors duration-200"
+                    >
+                      ←
+                    </button>
+                    <div>
+                      {showNewMessage ? (
+                        <h3 className="text-lg font-light text-black tracking-wide">New Message</h3>
+                      ) : (
+                        <h3 className="text-lg font-light text-black tracking-wide">
+                          {formatAddress(selectedConversation)}
+                        </h3>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={() => {
                       setSelectedConversation('');
                       setShowNewMessage(false);
+                      setShowSidebar(true); // Show sidebar when closing chat on mobile
                     }}
                     className="text-gray-500 hover:text-black transition-colors duration-200"
                   >
@@ -315,9 +368,9 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
                 {showNewMessage ? (
-                  <div className="bg-white border border-gray-200 p-6">
+                  <div className="bg-white border border-gray-200 p-4 sm:p-6">
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm text-gray-700 mb-2 tracking-wide uppercase">
@@ -362,7 +415,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
               </div>
 
               {/* Message Input */}
-              <div className="bg-white border-t border-gray-200 p-6">
+              <div className="bg-white border-t border-gray-200 p-4 sm:p-6">
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -381,7 +434,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                   <button
                     onClick={handleSendMessage}
                     disabled={loading || !newMessage.trim()}
-                    className="bg-black text-white px-6 py-3 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                    className="bg-black text-white px-4 sm:px-6 py-3 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     <span className="text-sm tracking-wide uppercase">
                       {loading ? 'Sending...' : 'Send'}
