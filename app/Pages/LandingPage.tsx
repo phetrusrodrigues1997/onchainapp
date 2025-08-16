@@ -377,7 +377,9 @@ const handleMarketClick = (marketId: string) => {
           {isShortCountdown() ? (
             `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
           ) : (
-            `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
+            timeUntilMidnight.days === 0 ? 
+              `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S` :
+              `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
           )}
         </span>
       </div>
@@ -470,7 +472,9 @@ const handleMarketClick = (marketId: string) => {
                         {isShortCountdown() ? (
                           `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
                         ) : (
-                          `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
+                          timeUntilMidnight.days === 0 ? 
+                            `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S` :
+                            `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
                         )}
                       </span>
                     </div>
