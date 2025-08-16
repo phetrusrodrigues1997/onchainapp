@@ -518,16 +518,13 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
             </p>
           </div>
 
-          {/* Challenge Rules Warning */}
-          <div className="bg-[#f2f2f2]  rounded-lg p-6 mb-8">
+          {/* Reward System */}
+          <div className="bg-gray-50 rounded-lg p-6 mb-8">
             <div className="text-center">
-               <div className="text-red-600 text-xl font-semibold mb-3">⚠️ Win free pot entries by answering questions correctly in a row!</div>
-               <div className="text-gray-700 space-y-2 text-sm">
-                <p><strong>🎯 1st Free Entry:</strong> {getMilestoneForEntry(1)} correct answers</p>
-                <p><strong>🎯 2nd Free Entry:</strong> {getMilestoneForEntry(2)} correct answers</p>
-                <p><strong>🎯 3rd Free Entry:</strong> {getMilestoneForEntry(3)} correct answers (and so on...)</p>
-                <p className="text-red-600"><strong>⚡ ONE wrong answer</strong> → All progress resets to zero</p>
-                <p className="text-red-600"><strong>⏱️ 10 minutes inactive</strong> → All progress resets to zero</p>
+               <div className="text-black text-lg font-medium mb-3">🎁 Earn Free Predictions</div>
+               <div className="text-gray-600 space-y-1 text-sm">
+                <p>Answer {getMilestoneForEntry(1)} questions correctly to earn your first free entry</p>
+                <p className="text-gray-500">Wrong answers reset progress</p>
               </div>
             </div>
           </div>
