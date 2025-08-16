@@ -185,9 +185,9 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
                     <div className="text-2xl font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-400 mt-2">
+                {/* <div className="text-xs text-gray-400 mt-2">
                   For your predictions
-                </div>
+                </div> */}
               </div>
               
               {/* ETH Balance */}
@@ -201,9 +201,9 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
                     <div className="text-2xl font-bold">{formatEthBalanceUSD()}</div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-400 mt-2">
+                {/* <div className="text-xs text-gray-400 mt-2">
                   For gas fees
-                </div>
+                </div> */}
               </div>
             </div>
             

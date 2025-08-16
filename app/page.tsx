@@ -13,7 +13,6 @@ import TutorialBridge from './Pages/TutorialBridge';
 import ReferralProgram from './Pages/ReferralProgram';
 // import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
 import BuySection from "./Pages/BuyPage";
-// import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
@@ -22,7 +21,7 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import GamesHub from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
-import CreatePotPage from './Pages/CreatePotPage';
+import CreatePotPage from './Pages/createPotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
 import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';

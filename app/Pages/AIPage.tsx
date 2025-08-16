@@ -789,14 +789,14 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
           <div className="inline-flex items-center justify-center w-24 h-24 bg-black rounded-full mb-8">
             <Gamepad2 className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-6xl font-light text-black mb-6">Games Hub</h1>
+          {/* <h1 className="text-6xl font-light text-black mb-6">Games Hub</h1>
           <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto">
             Challenge your mind with our collection of engaging games
-          </p>
+          </p> */}
         </div>
 
         {/* Available Games */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 mb-24 max-w-4xl mx-auto -translate-y-8">
           
 
           {/* Wordle Game */}
@@ -837,7 +837,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
         </div>
 
         {/* Coming Soon Section */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-12 max-w-3xl mx-auto">
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl -translate-y-8 p-12 max-w-3xl mx-auto">
           <h2 className="text-3xl font-light text-black mb-6">More Games Coming Soon</h2>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
             We're working on exciting new games to expand your gaming experience

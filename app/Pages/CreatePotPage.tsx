@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, Trophy, Target, Plus, ArrowLeft, Check, Copy, Search, ExternalLink } from 'lucide-react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseUnits } from 'viem';
+import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { createPrivatePot, getPotsByCreator, getPotDetails } from '../Database/actions2';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
@@ -640,9 +640,9 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             )}
           </button>
           
-          <p className="text-center text-sm text-gray-500 mt-3">
-            Create new markets, manage existing ones, or join with an address
-          </p>
+          <footer className="relative z-10 px-6 py-10 bg-white text-center text-[#666666] text-sm">
+        &copy; {new Date().getFullYear()} PrediWin.com — All rights reserved.
+      </footer>
         </div>
       </div>
       
