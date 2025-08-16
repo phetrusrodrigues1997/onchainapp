@@ -216,7 +216,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
               onClick={() => setShowNewMessage(true)}
               className="bg-black text-white px-4 py-2 hover:bg-gray-800 transition-colors duration-200"
             >
-              <span className="text-sm tracking-wide uppercase">New Message</span>
+              <span className="text-sm tracking-wide uppercase">✚</span>
             </button>
           </div>
         </div>
