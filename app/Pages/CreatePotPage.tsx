@@ -355,7 +355,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                     }}
                     className="bg-[#0000aa] text-white py-2 px-6 rounded hover:bg-gray-900"
                   >
-                    Create Your First Market
+                    Create Market
                   </button>
                 </div>
               ) : (
@@ -472,7 +472,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
                 <Plus className="w-10 h-10 text-white" />
               </div>
-              <h1 className="text-4xl font-light text-black mb-4">Create Your Prediction Market</h1>
+              <h1 className="text-4xl font-light text-black mb-4">Create Prediction Market</h1>
               <p className="text-lg text-gray-600">Set up a custom prediction market for your friends</p>
             </div>
 
@@ -618,7 +618,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             className="w-full bg-[#0000aa] text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 flex items-center justify-center gap-3"
           >
             <Plus className="w-5 h-5" />
-            Create Your Prediction Market
+            Create Prediction Market
           </button>
           
           {/* Secondary Actions */}
