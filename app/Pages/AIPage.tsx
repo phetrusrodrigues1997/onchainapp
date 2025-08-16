@@ -786,9 +786,9 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
       <div className="max-w-4xl w-full text-center">
         {/* Header */}
         <div className="mb-16">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-black rounded-full mb-8">
-            <Gamepad2 className="w-12 h-12 text-white" />
-          </div>
+          {/* <div className="inline-flex items-center justify-center w-12 h-12 bg-black rounded-full mb-8">
+            <Gamepad2 className="w-8 h-8 text-white" />
+          </div> */}
           {/* <h1 className="text-6xl font-light text-black mb-6">Games Hub</h1>
           <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto">
             Challenge your mind with our collection of engaging games
@@ -808,11 +808,11 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
               </div>
               <h3 className="text-2xl font-light text-black mb-3">Wordle</h3>
               <p className="text-gray-600 mb-4 leading-relaxed">
-                Guess the 5-letter word in 6 attempts. Be the first to solve today's puzzle and earn a free pot entry!
+                Guess the 5-letter word in 5 attempts.
               </p>
               <div className="flex items-center text-sm text-green-600 font-medium">
                 <Star className="w-4 h-4 mr-2" />
-                🎁 Free pot entry reward
+                🎁 Free prediction reward
               </div>
             </div>
           </div>
@@ -826,11 +826,11 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
               </div>
               <h3 className="text-2xl font-light text-black mb-3">AI Trivia</h3>
               <p className="text-gray-600 mb-4 leading-relaxed">
-                Test your knowledge across 25+ categories. First milestone: {getMilestoneForEntry(1)} correct answers. Each additional free entry requires 100 more correct answers!
+                Test your knowledge across 25+ categories.
               </p>
               <div className="flex items-center text-sm text-green-600 font-medium">
                 <Trophy className="w-4 h-4 mr-2" />
-                🎁 Free pot entry reward
+                🎁 Free prediction reward
               </div>
             </div>
           </div>

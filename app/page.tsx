@@ -184,8 +184,8 @@ export default function App() {
             <div className={`wallet-container ${isMobile ? '-ml-2' : 'ml-4'}`}>
               <Wallet>
 <ConnectWallet 
-                  text={isMobile ? "Log In" : "Connect Wallet"}
-                  className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? '!px-4 !py-2 !min-w-0' : ''}`}
+                  text={isMobile ? "Sign In" : "Connect Wallet"}
+                  className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-black !px-4 !py-2 !min-w-0' : 'bg-black'}`}
                 >
                 {isConnected && (
                   <>
