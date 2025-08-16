@@ -565,7 +565,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             </div>
             {/* <h1 className="text-6xl font-light text-black mb-6">Create Pot</h1> */}
             <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
-              Start your own prediction market and invite friends to compete in forecasting the future
+              Start your own prediction market and invite friends.
             </p>
           </div>
 
