@@ -276,8 +276,12 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
               <div className="text-center text-gray-500 py-8">
                 <p className="mb-4">No conversations yet</p>
                 <button
-                  onClick={() => setShowNewMessage(true)}
-                  className="text-black hover:underline text-sm"
+                  onClick={() => {
+                    setShowNewMessage(true);
+                    setSelectedConversation('');
+                    setShowSidebar(false); // Hide sidebar on mobile when starting new conversation
+                  }}
+                  className="text-black underline hover:text-[#0000fe] text-sm"
                 >
                   Start a conversation
                 </button>
@@ -451,8 +455,12 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                 </div>
                 <p className="text-gray-600 mb-4">Select a conversation to start messaging</p>
                 <button
-                  onClick={() => setShowNewMessage(true)}
-                  className="text-black hover:underline text-sm tracking-wide uppercase"
+                  onClick={() => {
+                    setShowNewMessage(true);
+                    setSelectedConversation('');
+                    setShowSidebar(false); // Hide sidebar on mobile when starting new conversation
+                  }}
+                  className="text-black underline hover:text-[#0000fe] text-sm tracking-wide uppercase"
                 >
                   Start New Conversation
                 </button>
