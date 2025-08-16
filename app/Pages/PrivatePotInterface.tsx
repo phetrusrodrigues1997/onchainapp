@@ -868,28 +868,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
             <div className="max-w-3xl flex-1">
               <h1 className="text-2xl sm:text-3xl lg:text-5xl font-light text-black mb-3 sm:mb-4">{potDetails.potName}</h1>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-4 sm:mb-6 leading-relaxed">{potDetails.description}</p>
-              
-              {/* Only show stats and controls if user is a participant or creator */}
-              {(userParticipant || isCreator) && (
-                <>
-                  <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
-                    
-                    <div className="p-3 sm:p-4 bg-gray-50 border border-gray-200">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{formatUSDC(potBalance)}</div>
-                      <div className="text-xs sm:text-sm text-gray-500">Market Balance</div>
-                    </div>
-                    <button
-                      onClick={handleParticipantsClick}
-                      className="p-3 sm:p-4 bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-black transition-colors w-full"
-                    >
-                      <div className="text-lg sm:text-xl lg:text-2xl font-light text-black">{potParticipants?.length || 0}</div>
-                      <div className="text-xs sm:text-sm text-gray-500">Participants</div>
-                      <div className="text-xs text-blue-600 mt-1">Click to view</div>
-                    </button>
-                  </div>
-                </>
-              )}
             </div>
             
             {/* Only show share and control buttons if user is a participant or creator */}
@@ -915,6 +893,46 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
             )}
           </div>
+          
+          {/* Market stats - centered across full width */}
+          {(userParticipant || isCreator) && (
+            <div className="w-full flex justify-center mt-8">
+              <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl shadow-xl p-5 max-w-sm relative overflow-hidden">
+                {/* Subtle animated background */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 animate-pulse"></div>
+                
+                <div className="grid grid-cols-2 gap-4 relative z-10">
+                  {/* Balance Card */}
+                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl shadow-md border border-green-200 transform hover:scale-105 transition-all duration-300">
+                    <div className="text-2xl mb-2">💰</div>
+                    <div className="text-lg font-black text-gray-900">${formatUSDC(potBalance)}</div>
+                    <div className="text-xs font-semibold text-green-700 mt-1 tracking-wide">PRIZE POOL</div>
+                  </div>
+                  
+                  {/* Participants Card */}
+                  <button
+                    onClick={handleParticipantsClick}
+                    className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl shadow-md border-2 border-blue-300 transform hover:scale-105 hover:from-blue-100 hover:to-cyan-200 transition-all duration-300 group relative overflow-hidden"
+                  >
+                    {/* Subtle shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                    
+                    <div className="relative z-10">
+                      <div className="text-2xl mb-2 group-hover:animate-bounce">👥</div>
+                      <div className="text-lg font-black text-gray-900">{potParticipants?.length || 0}</div>
+                      <div className="text-xs font-semibold text-blue-700 mt-1 tracking-wide">PLAYERS</div>
+                      <div className="flex items-center justify-center gap-1 mt-2">
+                        <div className="text-xs font-medium text-blue-600">Tap to view</div>
+                        <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1245,7 +1263,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             </div>
           )}
 
-          {/* Status - Only show to participants */}
+          {/* Status - Only show to participants
           {userParticipant && (
             <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-light text-black mb-3 sm:mb-4">You're In!</h2>
@@ -1254,7 +1272,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 <p className="text-xs sm:text-sm text-gray-500">You can now make predictions and compete with other participants.</p>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
       
@@ -1465,6 +1483,25 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 >
                   Close
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Market Description - Bottom Section */}
+      {potDetails?.description && (
+        <div className="max-w-4xl mx-auto mt-16 mb-8 p-6 sm:p-8">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-gray-900 rounded-r-xl p-6 sm:p-8 shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">About This Market</h3>
+                <p className="text-gray-700 leading-relaxed text-base sm:text-lg">{potDetails.description}</p>
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ const wordOfTheDay = words[Math.floor(
   (new Date(today).getTime() / (1000 * 60 * 60 * 24)) % words.length
 )].toUpperCase();
 
-const MAX_ATTEMPTS = 6;
+const MAX_ATTEMPTS = 5;
 const WORD_LENGTH = 5;
 
 interface WordleProps {
@@ -170,8 +170,7 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
       "Second attempt", 
       "Third attempt",
       "Fourth attempt",
-      "Fifth attempt",
-      "Sixth attempt"
+      "Fifth attempt"
     ];
     return labels[attemptNumber] || `Attempt ${attemptNumber + 1}`;
   }
@@ -240,7 +239,7 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
       <h1 style={styles.title}>Wordle</h1>
 
       {guesses.map((guess, i) => (
-        <div key={i} style={styles.rowWithLabel}>
+        <div key={i} style={styles.rowContainer}>
           <div 
             style={{
               ...styles.attemptLabel,
@@ -270,7 +269,7 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
       ))}
 
       {Array.from({ length: MAX_ATTEMPTS - guesses.length }).map((_, i) => (
-        <div key={i} style={styles.rowWithLabel}>
+        <div key={i} style={styles.rowContainer}>
           <div style={styles.attemptLabel}>
             {getAttemptLabel(guesses.length + i)}
           </div>
@@ -292,19 +291,30 @@ export default function Wordle({ activeSection, setActiveSection, selectedMarket
         </div>
       ))}
 
-      <input
-        type="text"
-        maxLength={WORD_LENGTH}
-        value={currentGuess}
-        onChange={(e) => {
-          const value = e.target.value.toUpperCase();
-          if (/^[A-Z]*$/.test(value)) setCurrentGuess(value);
-        }}
-        onKeyDown={handleKeyPress}
-        style={styles.input}
-        autoFocus
-        disabled={gameOver}
-      />
+      {!gameOver && (
+        <div style={styles.inputSection}>
+          <div style={styles.inputLabel}>
+            Enter your 5-letter word below:
+          </div>
+          <input
+            type="text"
+            maxLength={WORD_LENGTH}
+            value={currentGuess}
+            onChange={(e) => {
+              const value = e.target.value.toUpperCase();
+              if (/^[A-Z]*$/.test(value)) setCurrentGuess(value);
+            }}
+            onKeyDown={handleKeyPress}
+            style={styles.input}
+            autoFocus
+            disabled={gameOver}
+            placeholder="GUESS"
+          />
+          <div style={styles.inputHint}>
+            Press Enter to submit your guess
+          </div>
+        </div>
+      )}
 
       {error && <p style={styles.error}>{error}</p>}
       {message && <p style={styles.message}>{message}</p>}
@@ -320,39 +330,43 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "#fcfcfc",
     color: "#000",
     minHeight: "100vh",
-    padding: "20px",
+    padding: "10px",
     fontFamily: "Arial, sans-serif",
+    maxWidth: "100vw",
+    overflow: "hidden",
   },
   title: {
-    fontSize: "2.5rem",
+    fontSize: "clamp(1.8rem, 5vw, 2.5rem)",
     fontWeight: "bold",
     marginBottom: "20px",
+    textAlign: "center",
   },
-  rowWithLabel: {
+  rowContainer: {
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    gap: "15px",
-    marginBottom: "5px",
+    marginBottom: "10px",
   },
   attemptLabel: {
-    fontSize: "1rem",
+    fontSize: "0.9rem",
     fontWeight: "500",
-    minWidth: "120px",
-    textAlign: "right",
+    textAlign: "center",
     color: "#666",
+    marginBottom: "5px",
   },
   row: {
     display: "flex",
-    gap: "5px",
+    gap: "clamp(3px, 1.5vw, 5px)",
+    justifyContent: "center",
   },
   cell: {
-    width: "50px",
-    height: "50px",
+    width: "clamp(40px, 12vw, 50px)",
+    height: "clamp(40px, 12vw, 50px)",
     border: "2px solid #333",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "1.5rem",
+    fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
     fontWeight: "bold",
     textTransform: "uppercase",
     backgroundColor: "#fff",
@@ -360,16 +374,35 @@ const styles: Record<string, React.CSSProperties> = {
   correct: { backgroundColor: "#4caf50", color: "#fff", borderColor: "#4caf50" },
   present: { backgroundColor: "#ffca28", color: "#000", borderColor: "#ffca28" },
   absent: { backgroundColor: "#b0bec5", color: "#000", borderColor: "#b0bec5" },
+  inputSection: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    marginTop: "20px",
+    gap: "8px",
+  },
+  inputLabel: {
+    fontSize: "clamp(0.9rem, 2.5vw, 1.1rem)",
+    fontWeight: "600",
+    color: "#333",
+    textAlign: "center",
+  },
   input: {
-    marginTop: "15px",
     padding: "10px",
-    fontSize: "1.2rem",
+    fontSize: "clamp(1rem, 3vw, 1.2rem)",
     border: "2px solid #333",
     outline: "none",
-    width: "150px",
+    width: "clamp(120px, 40vw, 150px)",
     textAlign: "center",
     textTransform: "uppercase",
     borderRadius: "5px",
+    maxWidth: "90vw",
+  },
+  inputHint: {
+    fontSize: "clamp(0.8rem, 2vw, 0.9rem)",
+    color: "#666",
+    fontStyle: "italic",
+    textAlign: "center",
   },
   message: {
     marginTop: "15px",
