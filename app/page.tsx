@@ -26,6 +26,7 @@ import CreatePotPage from './Pages/CreatePotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
 import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
+import MessagingPage from './Pages/MessagingPage';
 
 
 
@@ -225,7 +226,8 @@ export default function App() {
           
           {/* {activeSection === "usernamePage" && <UsernameSetup />} */}
           {activeSection === "buy" && <BuySection activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "profile" && <ProfilePage/>}
+          {activeSection === "profile" && <ProfilePage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "messagesPage" && <MessagingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "discord" && <HowItWorksSection />}
           {activeSection === "wallet" && <WalletPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "activity" && <Activity />}

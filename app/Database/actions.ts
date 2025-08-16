@@ -140,6 +140,11 @@ export async function createMessage(from: string, to: string, message: string, d
   return db.insert(Messages).values({ from, to, message, datetime }).returning();
 }
 
+// Alias for createMessage to match MessagingPage import
+export async function sendMessage(from: string, to: string, message: string, datetime: string) {
+  return createMessage(from, to, message, datetime);
+}
+
 // Function to get unread messages for a recipient
 export async function getUnreadMessages(to: string) {
   return db
@@ -155,6 +160,11 @@ export async function updateMessageReadStatus(id: number) {
     .set({ read: true })
     .where(eq(Messages.id, id))
     .returning();
+}
+
+// Alias for updateMessageReadStatus to match MessagingPage import
+export async function markAsRead(id: number) {
+  return updateMessageReadStatus(id);
 }
 
 // New function to delete a message

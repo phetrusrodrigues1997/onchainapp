@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap } from 'lucide-react';
+import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap, MessageCircle } from 'lucide-react';
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { saveImageUrl, getLatestImageUrl } from '../Database/actions';
@@ -18,7 +18,12 @@ const USDC_ABI = [
 
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
-const ProfilePage = () => {
+interface ProfilePageProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
   const [profileImage, setProfileImage] = useState('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center');
 
   const { address, isConnected } = useAccount();
@@ -202,6 +207,24 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
               </div>
             </div>
             
+            {/* Action Buttons */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setActiveSection('messagesPage')}
+                className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 transition-all duration-200 group"
+              >
+                <MessageCircle className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-white font-medium">Messages</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveSection('referralProgram')}
+                className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 transition-all duration-200 group"
+              >
+                <Trophy className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-white font-medium">Referrals</span>
+              </button>
+            </div>
            
           </div>
         )}
