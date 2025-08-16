@@ -501,7 +501,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
           <div className="mb-8">
             <button
               onClick={() => setSelectedGame('hub')}
-              className="text-gray-600 hover:text-black transition-colors flex items-center gap-2 mx-auto"
+              className="text-gray-600 hover:text-black transition-colors flex items-center gap-2"
             >
               ← Back to Games
             </button>

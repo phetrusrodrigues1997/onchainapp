@@ -85,6 +85,10 @@ const HowItWorksSection: React.FC = () => {
       answer: "Yes and no! The platform includes a comprehensive 5-step tutorial and a built-in buy page where you can easily purchase USDC and ETH using Coinbase OnChainKit. The interface is designed to be user-friendly for crypto beginners. We recommend users familiarize themselves with basic crypto concepts like wallets, gas fees, and USDC before participating."
     },
     {
+      question: "What are Live Markets?",
+      answer: "Live Markets are hourly prediction rounds that activate after entering a live pot. Once you pay the entry fee, you'll participate in structured hourly question sessions covering various topics. It's a time-based format designed for users who enjoy regular prediction challenges with scheduled results every hour."
+    },
+    {
       question: "Is this gambling?",
       answer: "PrediWin is a prediction market platform focused on forecasting skills rather than gambling. Users make informed predictions about real-world events using their knowledge and analysis, similar to platforms like Polymarket or Kalshi. Private Markets add a social element where friends compete on topics they care about."
     }
