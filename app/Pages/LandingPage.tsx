@@ -274,7 +274,7 @@ const handleMarketClick = (marketId: string) => {
                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
                 
                 <span className="relative">
-                  Go to Live Markets
+                  Join Live Markets
                 </span>
                 
                 {/* Arrow with hover animation */}

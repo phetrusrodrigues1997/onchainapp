@@ -67,9 +67,9 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
         </div>
       </div>
 
-      {/* Mobile menu dropdown brother*/}
+      {/* Mobile menu dropdown */}
       {isMobile && isMenuOpen && (
-        <div className="absolute bg-white top-12 z-50 w-32 mt-2 rounded-md shadow-lg">
+        <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg">
         <div className="py-2">
           {menuItems.map((item) => (
             <button
