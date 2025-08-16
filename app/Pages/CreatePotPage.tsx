@@ -570,7 +570,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {/* <div className="grid md:grid-cols-3 gap-8 mb-16">
             <div className="text-center p-8 border border-gray-200 rounded-lg hover:border-black transition-colors">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="w-8 h-8 text-black" />
@@ -600,7 +600,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                 Set entry fees and prize pools - most accurate predictors split the winnings
               </p>
             </div>
-          </div>
+          </div> */}
 
          
 
