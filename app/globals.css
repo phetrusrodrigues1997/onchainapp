@@ -283,6 +283,16 @@ button[aria-label="Toggle menu"]:hover svg {
 
 
 
+@media (prefers-color-scheme: dark) {
+  [data-testid="ockConnectWallet_Container"] {
+    color: white !important;
+  }
+  
+  [data-testid="ockConnectWallet_Container"] span {
+    color: white !important;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
