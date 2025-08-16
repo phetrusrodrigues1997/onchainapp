@@ -171,6 +171,20 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto-rotate market every 7 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSelectedMarket(prevMarket => {
+        const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
+        const currentIndex = currentMarketOptions.findIndex(market => market.id === prevMarket);
+        const nextIndex = (currentIndex + 1) % currentMarketOptions.length;
+        return currentMarketOptions[nextIndex].id;
+      });
+    }, 7000);
+
+    return () => clearInterval(interval);
+  }, [currentLanguage]);
+
 
   const t = getTranslation(currentLanguage);
 
