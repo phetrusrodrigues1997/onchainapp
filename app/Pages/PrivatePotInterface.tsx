@@ -885,9 +885,9 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 {isCreator && (
                   <button
                     onClick={() => setShowCreatorPanel(!showCreatorPanel)}
-                    className="bg-black text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
+                    className="bg-[#0000aa] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
                   >
-                    {showCreatorPanel ? 'Hide' : 'Control Panel ⚙'}
+                    {showCreatorPanel ? 'Hide' : 'Manage ⚙'}
                   </button>
                 )}
               </div>
@@ -1031,7 +1031,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 <button
                   onClick={handleUpdateEntryAmount}
                   disabled={!newEntryAmount}
-                  className="w-full bg-blue-600 text-white py-2 sm:py-3 rounded-none hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-light text-sm sm:text-base"
+                  className="w-full bg-blue-600 text-white py-2 sm:py-3 rounded-none hover:bg-blue-700 disabled:bg-black transition-colors font-light text-sm sm:text-base"
                 >
                   Update Entry Amount
                 </button>
@@ -1057,7 +1057,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
               
               <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Market Management</label>
+                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">End game (Must set outcome first)</label>
                 <div className="space-y-2 sm:space-y-3">
                   
                   
