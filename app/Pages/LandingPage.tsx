@@ -196,18 +196,29 @@ const handleMarketClick = (marketId: string) => {
   if (contractAddresses[marketId as keyof typeof contractAddresses]) {
     const contractAddress = contractAddresses[marketId as keyof typeof contractAddresses];
     console.log('Selected market:', marketId, 'Contract address:', contractAddress);
-    // Set the cookie with proper options
+    
+    // Find the market question
+    const market = markets.find(m => m.id === marketId);
+    const marketQuestion = market?.question || '';
+    
+    // Set the cookies with proper options
     Cookies.set('selectedMarket', contractAddress, { 
+      sameSite: 'lax',
+      expires: 7 // Cookie expires in 7 days
+    });
+    
+    Cookies.set('selectedMarketQuestion', marketQuestion, { 
       sameSite: 'lax',
       expires: 7 // Cookie expires in 7 days
     });
     
     // Optional: Add a small delay to ensure cookie is set before navigation
     setTimeout(() => {
-      setActiveSection('tutorial');
+      setActiveSection('dashboard');
     }, 200);
     
     console.log('Set cookie selectedMarket:', contractAddress); // Debug log
+    console.log('Set cookie selectedMarketQuestion:', marketQuestion); // Debug log
   } else {
     showAlert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`, 'info', 'Coming Soon');
   }

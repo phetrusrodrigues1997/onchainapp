@@ -42,6 +42,7 @@ export default function MakePredicitions() {
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
   const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
+  const [marketQuestion, setMarketQuestion] = useState<string>('');
 
   // Check if betting is allowed (Sunday through Friday)
   const isBettingAllowed = (): boolean => {
@@ -60,6 +61,13 @@ export default function MakePredicitions() {
   // Add useEffect to handle cookie retrieval
   useEffect(() => {
     const savedContract = Cookies.get('selectedMarket');
+    const savedQuestion = Cookies.get('selectedMarketQuestion');
+    
+    // Set the market question if available
+    if (savedQuestion) {
+      setMarketQuestion(savedQuestion);
+      console.log('Loaded market question:', savedQuestion);
+    }
     
     // Validate contract address is in our allowed list
     if (savedContract && tableMapping[savedContract as keyof typeof tableMapping]) {
@@ -102,7 +110,7 @@ export default function MakePredicitions() {
       setTomorrowsBet(tomorrowBet);
       setTodaysBet(todayBet);
       setReEntryFee(reEntryAmount);
-      setAllReEntryFees(allReEntries);
+      setAllReEntryFees(allReEntryFees);
     } catch (error) {
       console.error("Error loading bets:", error);
       setTomorrowsBet(null);
@@ -387,6 +395,13 @@ export default function MakePredicitions() {
             <div className="relative z-10">
               <div className="text-center mb-10">
                 <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Your Call?</h2>
+                {marketQuestion && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 mx-auto max-w-md">
+                    <p className="text-gray-800 font-semibold text-base leading-relaxed">
+                      {marketQuestion}
+                    </p>
+                  </div>
+                )}
                 <p className="text-gray-600 text-lg mb-4">
                   Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
                 </p>

@@ -1,247 +1,217 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, X, Play } from 'lucide-react';
+import { Calendar, DollarSign, TrendingUp, Trophy, Users, Clock } from 'lucide-react';
 import Cookies from 'js-cookie';
-import { Language, getTranslation } from '../Languages/languages';
 
-interface TutorialBridgeProps {
+interface DashboardProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   selectedMarket?: string;
 }
 
-interface TutorialStep {
-  id: number;
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-}
-
-const TutorialBridge = ({ activeSection, setActiveSection, selectedMarket }: TutorialBridgeProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
-  const [isVisible, setIsVisible] = useState(false);
-
-  // Check if user has seen tutorial
-  const hasSeenTutorial = Cookies.get('hasSeenTutorial') === 'true';
+const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: DashboardProps) => {
+  const [currentDay, setCurrentDay] = useState('');
+  const [currentEntryFee, setCurrentEntryFee] = useState('0.00');
+  const [timeUntilClose, setTimeUntilClose] = useState('');
+  const [marketInfo, setMarketInfo] = useState({ name: '', section: '', address: '' });
 
   useEffect(() => {
-    const savedLang = Cookies.get('language') as Language | undefined;
-    if (savedLang) {
-      setCurrentLanguage(savedLang);
-    }
-    setIsVisible(true);
+    const updateDashboard = () => {
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+      
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const fees = ['0.01', '0.02', '0.03', '0.04', '0.05', '0.06', '0.00'];
+      
+      setCurrentDay(days[dayOfWeek]);
+      setCurrentEntryFee(fees[dayOfWeek]);
 
-    // Auto-skip if user has seen tutorial
-    if (hasSeenTutorial) {
-      handleSkip();
-    }
+      // Calculate time until Saturday midnight UTC
+      const nextSaturday = new Date();
+      nextSaturday.setUTCDate(now.getUTCDate() + (6 - dayOfWeek));
+      nextSaturday.setUTCHours(0, 0, 0, 0);
+      
+      const timeDiff = nextSaturday.getTime() - now.getTime();
+      const daysLeft = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hoursLeft = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      
+      if (dayOfWeek === 6) {
+        setTimeUntilClose('Pot distribution in progress');
+      } else {
+        setTimeUntilClose(`${daysLeft}d ${hoursLeft}h until results`);
+      }
+    };
+
+    // Get selected market from cookie
+    const getSelectedMarket = () => {
+      const selectedMarketAddress = Cookies.get('selectedMarket');
+      console.log('Selected market address from cookie:', selectedMarketAddress);
+      
+      // Map contract addresses to market info
+      if (selectedMarketAddress === '0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794') {
+        setMarketInfo({ 
+          name: '', 
+          section: 'bitcoinPot',
+          address: selectedMarketAddress 
+        });
+      } else if (selectedMarketAddress === '0xD4B6F1CF1d063b760628952DDf32a44974129697') {
+        setMarketInfo({ 
+          name: '', 
+          section: 'bitcoinPot',  // Both markets use the same section, PredictionPotTest handles the difference
+          address: selectedMarketAddress 
+        });
+      } else {
+        // Default to Bitcoin market if no cookie or unknown address
+        setMarketInfo({ 
+          name: 'Bitcoin Market', 
+          section: 'bitcoinPot',
+          address: '0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794' 
+        });
+      }
+    };
+
+    updateDashboard();
+    getSelectedMarket();
+    const interval = setInterval(updateDashboard, 60000); // Update every minute
+
+    return () => clearInterval(interval);
   }, []);
 
-  const t = getTranslation(currentLanguage);
-
-  const tutorialSteps: TutorialStep[] = [
-    {
-      id: 1,
-      title: t.tutorialStep1Title,
-      description: t.tutorialStep1Description,
-      icon: '🎯',
-      color: 'from-purple-500 to-blue-500'
-    },
-    {
-      id: 2,
-      title: t.tutorialStep2Title,
-      description: t.tutorialStep2Description,
-      icon: '💰',
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      id: 3,
-      title: t.tutorialStep3Title,
-      description: t.tutorialStep3Description,
-      icon: '📈',
-      color: 'from-blue-500 to-indigo-500'
-    },
-    {
-      id: 4,
-      title: t.tutorialStep4Title,
-      description: t.tutorialStep4Description,
-      icon: '🏆',
-      color: 'from-amber-500 to-orange-500'
-    },
-    {
-      id: 5,
-      title: t.tutorialStep5Title,
-      description: t.tutorialStep5Description,
-      icon: '🚀',
-      color: 'from-pink-500 to-rose-500'
-    }
-  ];
-
-  const handleNext = () => {
-    if (currentStep < tutorialSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleComplete();
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleSkip = () => {
-    Cookies.set('hasSeenTutorial', 'true', { expires: 30 }); // Remember for 30 days
-    setActiveSection('bitcoinPot');
-  };
-
-  const handleComplete = () => {
-    Cookies.set('hasSeenTutorial', 'true', { expires: 30 });
-    setActiveSection('bitcoinPot');
-  };
-
-  const currentTutorialStep = tutorialSteps[currentStep];
-  const progress = ((currentStep + 1) / tutorialSteps.length) * 100;
-
-  if (!isVisible) return null;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-6">
-      {/* Skip Button */}
-      <button
-        onClick={handleSkip}
-        className="absolute top-6 right-6 flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors z-10"
-      >
-        <span className="text-sm font-medium">{t.skipTutorial}</span>
-        <X className="w-4 h-4" />
-      </button>
+    <div className="min-h-screen bg-white text-black p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        {/* <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Select Your Market</h1>
+          <p className="text-gray-600">Choose a prediction market to enter</p>
+        </div> */}
 
-      {/* Main Tutorial Card */}
-      <div className="max-w-2xl w-full">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-600">
-              Step {currentStep + 1} of {tutorialSteps.length}
-            </span>
-            <span className="text-sm font-medium text-gray-600">
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Tutorial Content */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-          {/* Icon */}
-          <div className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r ${currentTutorialStep.color} flex items-center justify-center text-white text-4xl shadow-lg`}>
-            {currentTutorialStep.icon}
-          </div>
-
-          {/* Title */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {currentTutorialStep.title}
-          </h1>
-
-          {/* Description */}
-          <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-lg mx-auto">
-            {currentTutorialStep.description}
-          </p>
-
-          {/* Step 2 - Token Actions */}
-          {currentStep === 1 && (
-            <div className="mb-6">
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
-                  onClick={() => setActiveSection('buy')}
-                  className="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  🛒 {currentLanguage === 'en' ? 'Buy Tokens' : 'Comprar Tokens'}
-                </button>
-                <button
-                  onClick={() => setActiveSection('wallet')}
-                  className="bg-white text-gray-900 border-2 border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  📥 {currentLanguage === 'en' ? 'Receive Tokens' : 'Receber Tokens'}
-                </button>
-              </div>
-              <p className="text-sm text-gray-500 mt-3 text-center">
-                {currentLanguage === 'en' 
-                  ? 'You can come back to this tutorial after getting tokens'
-                  : 'Você pode voltar a este tutorial após obter tokens'}
-              </p>
-            </div>
-          )}
-
-          {/* Navigation */}
+        {/* Current Status Banner */}
+        {/* <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
           <div className="flex items-center justify-between">
-            {/* Previous Button */}
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                currentStep === 0
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-              }`}
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>{t.previous}</span>
-            </button>
-
-            {/* Step Indicators */}
-            <div className="flex space-x-2">
-              {tutorialSteps.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentStep(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index <= currentStep
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500'
-                      : 'bg-gray-300'
-                  }`}
-                />
-              ))}
+            <div className="flex items-center space-x-4">
+              <Calendar className="w-6 h-6 text-black" />
+              <div>
+                <h3 className="font-bold">{currentDay}</h3>
+                <p className="text-sm text-gray-600">${currentEntryFee} USDC entry fee today</p>
+              </div>
             </div>
+            <div className="flex items-center space-x-4">
+              <Clock className="w-6 h-6 text-black" />
+              <div className="text-right">
+                <h3 className="font-bold">Weekly Cycle</h3>
+                <p className="text-sm text-gray-600">{timeUntilClose}</p>
+              </div>
+            </div>
+          </div>
+        </div> */}
 
-            {/* Next/Start Button */}
-            <button
-              onClick={handleNext}
-              className="flex items-center space-x-2 bg-transparent text-[#00aa00] px-6 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-blue-600 transition-all hover:shadow-xl transform hover:scale-105"
+        {/* Elimination Market Explanation */}
+        <div className="border border-gray-200 rounded-lg p-6 md:p-8 mb-8 relative">
+          {/* Enter Market Button - Positioned absolutely in top right, responsive */}
+          <button 
+            onClick={() => setActiveSection(marketInfo.section)}
+            className="absolute top-4 right-4 md:top-6 md:right-6 bg-[#0000aa] text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm md:text-base font-medium shadow-lg hover:shadow-xl"
+            style={{
+              animation: 'subtlePulse 2s infinite'
+            }}
+          >
+            Enter Market →
+          </button>
+          
+          {/* Custom CSS for subtle pulse */}
+          <style jsx>{`
+            @keyframes subtlePulse {
+              0%, 100% { transform: scale(1); opacity: 1; }
+              50% { transform: scale(1.04); opacity: 0.8; }
+            }
+          `}</style>
+          
+          {/* Centered Headers - Always perfectly centered */}
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center mb-3 md:mb-4">
+              <Trophy className="w-10 h-10 md:w-12 md:h-12 text-black" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
+              How it works
+            </h2>
+            <h3 className="text-lg md:text-xl font-bold mb-4 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
+              {marketInfo.name}
+            </h3>
+          </div>
+          
+          <div className="text-center max-w-3xl mx-auto px-2">
+            <p className="text-gray-600 mb-6 text-sm md:text-base">
+              
+                Can you predict what's going to happen tomorrow and survive until Saturday?
+            </p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 text-left">
+              <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                <h4 className="font-bold mb-2 text-sm md:text-base">🎯 Daily Predictions</h4>
+                <p className="text-xs md:text-sm text-gray-600">Make correct predictions each day to stay alive</p>
+              </div>
+              
+              <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                <h4 className="font-bold mb-2 text-sm md:text-base">⚡ Get Eliminated?</h4>
+                <p className="text-xs md:text-sm text-gray-600">Re-enter by paying today's entry fee</p>
+              </div>
+              
+              <div className="bg-gray-50 p-3 md:p-4 rounded-lg sm:col-span-2 md:col-span-1">
+                <h4 className="font-bold mb-2 text-sm md:text-base">🏆 Win Big</h4>
+                <p className="text-xs md:text-sm text-gray-600">Survivors split the pot on Saturday</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Options */}
+        <div className="border border-gray-200 rounded-lg p-6 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold">Other Options</h2>
+            <Users className="w-6 h-6 text-black" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button 
+              onClick={() => setActiveSection('makePredictions')}
+              className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
-              {currentStep === tutorialSteps.length - 1 ? (
-                <>
-                  <Play className="w-4 h-4" />
-                  <span>{t.startPlaying}</span>
-                </>
-              ) : (
-                <>
-                  <span>{t.next}</span>
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
+              <h4 className="font-semibold mb-1">Make Predictions</h4>
+              <p className="text-sm text-gray-600">Predict on markets you've already entered</p>
+            </button>
+            
+            <button 
+              onClick={() => setActiveSection('createPot')}
+              className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+            >
+              <h4 className="font-semibold mb-1">Create Private Market</h4>
+              <p className="text-sm text-gray-600">Deploy your own prediction market</p>
+            </button>
+            
+            <button 
+              onClick={() => setActiveSection('AI')}
+              className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+            >
+              <h4 className="font-semibold mb-1">Play Games</h4>
+              <p className="text-sm text-gray-600">AI trivia and other games</p>
             </button>
           </div>
         </div>
 
-        {/* Fun fact or tip */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            💡 <strong>Tip:</strong> {t.tutorialTip}
-          </p>
+        {/* Back to Home */}
+        <div className="text-center">
+          <button 
+            onClick={() => setActiveSection('home')}
+            className="text-sm text-gray-500 hover:text-black transition-colors"
+          >
+            ← Back to Home
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default TutorialBridge;
+export default Dashboard;
