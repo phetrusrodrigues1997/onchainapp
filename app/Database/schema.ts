@@ -21,7 +21,6 @@ export const FeaturedBets = pgTable("featured_bets", {
 export const WrongPredictions = pgTable("wrong_Predictions", {
   id: serial("id").primaryKey(),
   walletAddress: text("walletAddress").notNull(),
-  reEntryFeeUsdc: integer("re_entry_fee_usdc").notNull(), // Fee in USDC micros (6 decimals)
   wrongPredictionDate: text("wrong_prediction_date").notNull(), // Date they made wrong prediction
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -29,7 +28,6 @@ export const WrongPredictions = pgTable("wrong_Predictions", {
 export const WrongPredictionsCrypto = pgTable("wrong_predictions_crypto", {
   id: serial("id").primaryKey(),
   walletAddress: text("walletAddress").notNull(),
-  reEntryFeeUsdc: integer("re_entry_fee_usdc").notNull(), // Fee in USDC micros (6 decimals)
   wrongPredictionDate: text("wrong_prediction_date").notNull(), // Date they made wrong prediction
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

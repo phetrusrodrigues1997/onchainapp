@@ -202,6 +202,7 @@ export async function getAllMessages(address: string) {
 
 /**
  * Gets re-entry fee for a wallet address if they need to pay to re-enter
+ * Returns null if no re-entry needed, otherwise returns today's dynamic entry fee
  */
 export async function getReEntryFee(walletAddress: string, typeTable: string): Promise<number | null> {
   try {
@@ -210,54 +211,38 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
     console.log(`Using table:`, wrongPredictionTable);
     
     const result = await db
-      .select({ reEntryFeeUsdc: wrongPredictionTable.reEntryFeeUsdc })
+      .select({ walletAddress: wrongPredictionTable.walletAddress })
       .from(wrongPredictionTable)
       .where(eq(wrongPredictionTable.walletAddress, walletAddress))
       .limit(1);
     
     console.log(`getReEntryFee result:`, result);
-    return result.length > 0 ? result[0].reEntryFeeUsdc : null;
+    
+    // If user has wrong prediction, return today's dynamic entry fee
+    if (result.length > 0) {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      const basePrices = {
+        0: 10000, // Sunday: 0.01 USDC
+        1: 20000, // Monday: 0.02 USDC  
+        2: 30000, // Tuesday: 0.03 USDC
+        3: 40000, // Wednesday: 0.04 USDC
+        4: 50000, // Thursday: 0.05 USDC
+        5: 60000, // Friday: 0.06 USDC
+        6: 10000, // Saturday: Fallback to Sunday price
+      };
+      
+      return basePrices[day as keyof typeof basePrices];
+    }
+    
+    return null;
   } catch (error) {
     console.error("Error getting re-entry fee:", error);
     return null;
   }
 }
 
-/**
- * Gets all markets that require re-entry for a wallet address
- */
-export async function getAllReEntryFees(walletAddress: string): Promise<{market: string, fee: number}[]> {
-  try {
-    const results: {market: string, fee: number}[] = [];
-    
-    // Check featured market
-    const featuredResult = await db
-      .select({ reEntryFeeUsdc: WrongPredictions.reEntryFeeUsdc })
-      .from(WrongPredictions)
-      .where(eq(WrongPredictions.walletAddress, walletAddress))
-      .limit(1);
-    
-    if (featuredResult.length > 0) {
-      results.push({ market: 'featured', fee: featuredResult[0].reEntryFeeUsdc });
-    }
-    
-    // Check crypto market
-    const cryptoResult = await db
-      .select({ reEntryFeeUsdc: WrongPredictionsCrypto.reEntryFeeUsdc })
-      .from(WrongPredictionsCrypto)
-      .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress))
-      .limit(1);
-    
-    if (cryptoResult.length > 0) {
-      results.push({ market: 'crypto', fee: cryptoResult[0].reEntryFeeUsdc });
-    }
-    
-    return results;
-  } catch (error) {
-    console.error("Error getting all re-entry fees:", error);
-    return [];
-  }
-}
 
 /**
  * Debug function to check wrong predictions table usage
@@ -274,7 +259,7 @@ export async function debugWrongPredictions(walletAddress: string): Promise<void
     
     console.log(`Featured Market (WrongPredictions table): ${featuredResult.length} entries`);
     featuredResult.forEach((entry, i) => {
-      console.log(`  ${i+1}. Fee: ${entry.reEntryFeeUsdc}, Date: ${entry.wrongPredictionDate}`);
+      console.log(`  ${i+1}. Date: ${entry.wrongPredictionDate}`);
     });
     
     // Check crypto market (WrongPredictionsCrypto table)  
@@ -285,7 +270,7 @@ export async function debugWrongPredictions(walletAddress: string): Promise<void
     
     console.log(`Crypto Market (WrongPredictionsCrypto table): ${cryptoResult.length} entries`);
     cryptoResult.forEach((entry, i) => {
-      console.log(`  ${i+1}. Fee: ${entry.reEntryFeeUsdc}, Date: ${entry.wrongPredictionDate}`);
+      console.log(`  ${i+1}. Date: ${entry.wrongPredictionDate}`);
     });
     
     console.log('=== END DEBUG ===');
@@ -366,7 +351,6 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
       .limit(1);
 
     if (wrongPrediction.length > 0) {
-      const reEntryFee = wrongPrediction[0].reEntryFeeUsdc;
       throw new Error(`You need to pay today's entry fee to re-enter after your wrong prediction. Please pay the re-entry fee first.`);
     }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
-import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, getAllReEntryFees } from '../Database/actions';
+import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee } from '../Database/actions';
 import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
 import Cookies from 'js-cookie';
 
@@ -93,11 +93,10 @@ export default function MakePredicitions() {
     setIsBetLoading(true);
     try {
       // Load both tomorrow's bet (for betting interface) and today's bet (for results display)
-      const [tomorrowBet, todayBet, reEntryAmount, allReEntries] = await Promise.all([
+      const [tomorrowBet, todayBet, reEntryAmount] = await Promise.all([
         getTomorrowsBet(address, selectedTableType),
         getTodaysBet(address, selectedTableType),
-        getReEntryFee(address, selectedTableType),
-        getAllReEntryFees(address)
+        getReEntryFee(address, selectedTableType)
       ]);
       
       setTomorrowsBet(tomorrowBet);

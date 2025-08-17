@@ -37,46 +37,71 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
   }
 };
 
-// Helper function to get current day's entry fee for re-entry
-const getNextDayEntryFee = (): number => {
-  const now = new Date();
-  const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc. (use today, not tomorrow)
-  
-  // Dynamic pricing: Sunday 0.01 to Friday 0.06 USDC (in micros - 6 decimals)
-  const basePrices = {
-    0: 10000, // Sunday: 0.01 USDC
-    1: 20000, // Monday: 0.02 USDC  
-    2: 30000, // Tuesday: 0.03 USDC
-    3: 40000, // Wednesday: 0.04 USDC
-    4: 50000, // Thursday: 0.05 USDC
-    5: 60000, // Friday: 0.06 USDC
-    6: 10000, // Saturday: Fallback to Sunday price
-  };
-  
-  return basePrices[day as keyof typeof basePrices];
-};
 
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
-  tableType: string
+  tableType: string,
+  contractParticipants: string[] = []
 ) {
   const opposite = outcome === "positive" ? "negative" : "positive";
   const betsTable = getTableFromType(tableType);
   const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
 
   try {
-    const wrongBets = await db
+    // Get all users who made predictions
+    const allPredictors = await db
+      .select({ walletAddress: betsTable.walletAddress })
+      .from(betsTable);
+
+    // Get all wrong predictions
+    const allWrongBets = await db
       .select()
       .from(betsTable)
       .where(eq(betsTable.prediction, opposite));
 
+    // Filter to only include wrong predictions from current pot participants
+    let wrongBets = allWrongBets;
+    if (contractParticipants.length > 0) {
+      const normalizedParticipants = contractParticipants.map(addr => addr.toLowerCase());
+      console.log(`Normalizing contract participants: ${normalizedParticipants}`);
+      wrongBets = allWrongBets.filter(bet => 
+        normalizedParticipants.includes(bet.walletAddress.toLowerCase())
+      );
+      
+      console.log(`Total wrong predictions: ${allWrongBets.length}, From current participants: ${wrongBets.length}`);
+      
+      // Find participants who didn't predict (these will be eliminated)
+      const nonPredictors = contractParticipants.filter(participant => 
+        !allPredictors.some(predictor => predictor.walletAddress.toLowerCase() === participant.toLowerCase())
+      );
+      
+      // Add non-predictors to wrong predictions table so they must pay re-entry fee
+      if (nonPredictors.length > 0) {
+        console.log(`Eliminating ${nonPredictors.length} participants who didn't predict:`, nonPredictors);
+        
+        const today = new Date().toISOString().split('T')[0];
+        
+        const nonPredictorRecords = nonPredictors.map(participant => ({
+          walletAddress: participant,
+          wrongPredictionDate: today,
+        }));
+
+        await db
+          .insert(wrongPredictionTable)
+          .values(nonPredictorRecords)
+          .onConflictDoNothing();
+          
+        console.log(`Added ${nonPredictors.length} non-predictors to wrong predictions table`);
+      }
+    } else {
+      console.warn("No contract participants provided to setDailyOutcome - using old logic (potential exploit!)");
+    }
+
     if (wrongBets.length > 0) {
-      const nextDayFee = getNextDayEntryFee();
       const today = new Date().toISOString().split('T')[0];
       
       const wrongAddresses = wrongBets.map(bet => ({
         walletAddress: bet.walletAddress,
-        reEntryFeeUsdc: nextDayFee,
         wrongPredictionDate: today,
       }));
 
@@ -90,13 +115,10 @@ export async function setDailyOutcome(
         .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
     }
     
-    // Remove all predictions that were just processed (yesterday's results)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayISO = yesterday.toISOString().split('T')[0];
+    // Clear ALL processed predictions (both right and wrong have been handled)
     await db
       .delete(betsTable)
-      .where(eq(betsTable.betDate, yesterdayISO));
+      .where(inArray(betsTable.walletAddress, allPredictors.map(p => p.walletAddress)));
       
   } catch (error) {
     console.error("Error processing outcome:", error);
@@ -143,18 +165,37 @@ export async function clearWrongPredictions(tableType: string) {
 
 /**
  * Gets the wallet addresses of users who are still in the game.
- * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
+ * Only considers participants who are BOTH in the pot AND made predictions.
+ * Note: Non-predictor elimination is now handled in setDailyOutcome().
+ * @param typeTable - Table type ('featured' or 'crypto')
+ * @param contractParticipants - Array of wallet addresses currently in the pot contract
  */
-export async function determineWinners(typeTable: string) {
+export async function determineWinners(typeTable: string, contractParticipants: string[] = []) {
   try {
     const betsTable = getTableFromType(typeTable);
-    const winners = await db
+    
+    // Get all users who made predictions
+    const allPredictors = await db
       .select({ walletAddress: betsTable.walletAddress })
       .from(betsTable);
 
-  
+    // If no contract participants provided, fall back to old behavior (for backward compatibility)
+    if (contractParticipants.length === 0) {
+      console.warn("No contract participants provided - using old logic (potential exploit!)");
+      return allPredictors.map(w => w.walletAddress).join(",");
+    }
 
-    return winners.map(w => w.walletAddress).join(",");
+    // Normalize addresses to lowercase for comparison
+    const normalizedParticipants = contractParticipants.map(addr => addr.toLowerCase());
+    
+    // Filter to only include predictors who are also pot participants
+    const eligibleWinners = allPredictors.filter(predictor => 
+      normalizedParticipants.includes(predictor.walletAddress.toLowerCase())
+    );
+
+    console.log(`Total predictors: ${allPredictors.length}, Pot participants: ${contractParticipants.length}, Eligible winners: ${eligibleWinners.length}`);
+
+    return eligibleWinners.map(w => w.walletAddress).join(",");
   } catch (error) {
     console.error("Error determining winners:", error);
     throw new Error("Failed to determine winners");

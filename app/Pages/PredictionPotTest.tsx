@@ -13,7 +13,6 @@ import {
   consumeFreeEntry, 
   getReEntryFee,
   processReEntry,
-  getAllReEntryFees,
   debugWrongPredictions,
   clearWrongPredictionsForWallet
 } from '../Database/actions';
@@ -254,10 +253,8 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       console.log("getReEntryFee returned:", reEntryAmount);
       setReEntryFee(reEntryAmount);
       
-      // Get all markets that need re-entry (for informational purposes)
-      const allReEntries = await getAllReEntryFees(address);
-      console.log("getAllReEntryFees returned:", allReEntries);
-      setAllReEntryFees(allReEntries);
+      // Note: getAllReEntryFees was removed since we now use dynamic pricing
+      setAllReEntryFees([]);
       
       console.log("=== END DEBUG loadReferralData ===");
       
@@ -682,13 +679,11 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   })();
 
-  // Re-entry allowance and balance checks
-  const reEntryAmount = reEntryFee ? BigInt(reEntryFee) : BigInt(0);
-  
+  // Re-entry allowance and balance checks (use same entryAmount as normal entry)
   const hasEnoughReEntryAllowance = (() => {
     if (!allowance || !reEntryFee) return false;
     try {
-      return allowance >= reEntryAmount;
+      return allowance >= entryAmount;
     } catch {
       return false;
     }
@@ -697,7 +692,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const hasEnoughReEntryBalance = (() => {
     if (!userUsdcBalance || !reEntryFee) return false;
     try {
-      return userUsdcBalance >= reEntryAmount;
+      return userUsdcBalance >= entryAmount;
     } catch {
       return false;
     }
@@ -1270,7 +1265,7 @@ useEffect(() => {
           }
           setIsLoading(true);
           try {
-            await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType);
+            await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType, participants || []);
             showMessage("Today's outcome set successfully!");
             setOutcomeInput("");
           } catch (error) {
@@ -1290,7 +1285,7 @@ useEffect(() => {
     <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
       <h3 className="text-[#F5F5F5] font-medium mb-2">Process Winners & Distribute Pot</h3>
       <p className="text-[#A0A0B0] text-sm mb-3">
-        This will automatically determine winners, distribute the pot equally among them, and clear wrong predictions for the next round.
+        This will automatically determine winners, distribute the pot equally among them, eliminate non-predictors, and clear wrong predictions for the next round.
       </p>
       <button
         onClick={async () => {
@@ -1299,11 +1294,12 @@ useEffect(() => {
           
           try {
             // Step 1: Determine winners
-            showMessage("Step 1/3: Determining winners...");
-            const winnersString = await determineWinners(selectedTableType);
+            const participantCount = participants?.length || 0;
+            showMessage(`Step 1/3: Determining winners among ${participantCount} pot participants...`);
+            const winnersString = await determineWinners(selectedTableType, participants || []);
             
             if (!winnersString || winnersString.trim() === "") {
-              showMessage("No winners found for this round", true);
+              showMessage(`No winners found for this round (${participantCount} participants checked)`, true);
               return;
             }
             
@@ -1315,7 +1311,7 @@ useEffect(() => {
               return;
             }
             
-            showMessage(`Found ${addresses.length} winner(s). Step 2/3: Distributing pot...`);
+            showMessage(`Found ${addresses.length} winner(s) out of ${participantCount} participants. Step 2/3: Distributing pot...`);
             
             // Step 2: Distribute pot using the blockchain contract
             await writeContract({
