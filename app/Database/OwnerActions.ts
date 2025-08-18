@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions, UsersTable } from "../Database/schema";
+import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions, UsersTable, MarketOutcomes } from "../Database/schema";
 import { eq, inArray, lt, asc, sql } from "drizzle-orm";
 
 // Database setup
@@ -10,9 +10,16 @@ const sqlConnection = neon(process.env.DATABASE_URL!);
 const db = drizzle(sqlConnection);
 
 /**
- * Sets the actual Bitcoin price movement outcome for the current day.
+ * Sets the provisional outcome with 1-hour evidence window.
  * @param outcome - Either "positive" or "negative".
- * @param betsTable - Table to use instead of BitcoinBets (must match its shape).
+ * @param tableType - Table type ('featured' or 'crypto').
+ */
+
+/**
+ * Sets the final outcome and processes winners immediately.
+ * @param outcome - Either "positive" or "negative".
+ * @param tableType - Table type ('featured' or 'crypto').
+ * @param contractParticipants - List of participants from the contract.
  */
 
 const getTableFromType = (tableType: string) => {
@@ -37,6 +44,92 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
   }
 };
 
+
+export async function setProvisionalOutcome(
+  outcome: "positive" | "negative",
+  tableType: string,
+  outcomeDate?: string
+) {
+  const today = new Date();
+  const targetDate = outcomeDate || today.toISOString().split('T')[0]; // YYYY-MM-DD format
+  
+  // Calculate 1-hour evidence window expiry
+  const evidenceWindowExpires = new Date(today.getTime() + 60 * 60 * 1000); // 1 hour from now
+
+  try {
+    console.log(`Setting provisional outcome for ${tableType}: ${outcome} on ${targetDate}`);
+
+    // Check if there's already an outcome for this market and date
+    const existingOutcome = await db.select()
+      .from(MarketOutcomes)
+      .where(eq(MarketOutcomes.marketType, tableType))
+      .where(eq(MarketOutcomes.outcomeDate, targetDate));
+
+    if (existingOutcome.length > 0) {
+      // Update existing outcome
+      const result = await db.update(MarketOutcomes)
+        .set({
+          provisionalOutcome: outcome,
+          provisionalOutcomeSetAt: today,
+          evidenceWindowExpires: evidenceWindowExpires,
+          isDisputed: false // Reset dispute status
+        })
+        .where(eq(MarketOutcomes.id, existingOutcome[0].id));
+
+      console.log(`Updated existing provisional outcome for ${tableType} on ${targetDate}`);
+      return result;
+    } else {
+      // Insert new outcome record
+      const result = await db.insert(MarketOutcomes).values({
+        marketType: tableType,
+        outcomeDate: targetDate,
+        provisionalOutcome: outcome,
+        evidenceWindowExpires: evidenceWindowExpires,
+        isDisputed: false
+      });
+
+      console.log(`Created new provisional outcome for ${tableType} on ${targetDate}. Evidence window expires at: ${evidenceWindowExpires.toISOString()}`);
+      return result;
+    }
+  } catch (error) {
+    console.error(`Error setting provisional outcome for ${tableType}:`, error);
+    throw new Error(`Failed to set provisional outcome for ${tableType}: ${error}`);
+  }
+}
+
+export async function getProvisionalOutcome(tableType: string, outcomeDate?: string) {
+  const targetDate = outcomeDate || new Date().toISOString().split('T')[0]; // Today if no date provided
+  
+  try {
+    // Get outcome record for the specified market type and date
+    const result = await db.select()
+      .from(MarketOutcomes)
+      .where(eq(MarketOutcomes.marketType, tableType))
+      .where(eq(MarketOutcomes.outcomeDate, targetDate))
+      .limit(1);
+
+    if (result.length === 0) {
+      return null; // No provisional outcome set
+    }
+
+    const outcomeData = result[0];
+    const now = new Date();
+    const evidenceExpiry = new Date(outcomeData.evidenceWindowExpires);
+    const isWindowActive = now < evidenceExpiry;
+
+    return {
+      outcome: outcomeData.provisionalOutcome as 'positive' | 'negative',
+      setAt: outcomeData.provisionalOutcomeSetAt.toISOString(), // Convert to string
+      evidenceWindowExpires: evidenceExpiry.toISOString(), // Convert to string
+      isEvidenceWindowActive: isWindowActive,
+      finalOutcome: outcomeData.finalOutcome as 'positive' | 'negative' | null,
+      isDisputed: outcomeData.isDisputed
+    };
+  } catch (error) {
+    console.error(`Error getting provisional outcome for ${tableType}:`, error);
+    throw new Error(`Failed to get provisional outcome for ${tableType}: ${error}`);
+  }
+}
 
 export async function setDailyOutcome(
   outcome: "positive" | "negative",

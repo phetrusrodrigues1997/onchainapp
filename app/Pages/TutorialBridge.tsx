@@ -26,6 +26,20 @@ const PREDICTION_POT_ABI = [
     "stateMutability": "view",
     "type": "function"
   },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "creator",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
 ] as const;
 
 const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: DashboardProps) => {
@@ -35,6 +49,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [marketInfo, setMarketInfo] = useState({ name: '', section: '', address: '' });
   const [userPots, setUserPots] = useState<string[]>([]);
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
+  const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
   
   const { address, isConnected } = useAccount();
 
@@ -60,6 +75,18 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     functionName: 'getParticipants',
     query: { enabled: isConnected && !!address }
   });
+
+  // Set up the selected market address from cookie
+  useEffect(() => {
+    const savedMarket = Cookies.get('selectedMarket');
+    if (savedMarket) {
+      setSelectedMarketAddress(savedMarket);
+    }
+  }, []);
+
+  // Simple owner check - hardcoded owner address
+  const OWNER_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
+  const isOwner = address && address.toLowerCase() === OWNER_ADDRESS.toLowerCase();
 
   // Update userPots when participant data changes
   useEffect(() => {
@@ -90,12 +117,16 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     setUserPots(participatingPots);
 
     // Check if user is already a participant in the selected market and redirect to predictions
-    const selectedMarketAddress = Cookies.get('selectedMarket');
+    // BUT only if they are NOT the owner
     if (selectedMarketAddress && participatingPots.includes(selectedMarketAddress)) {
-      console.log('User is already a participant in selected market, redirecting to predictions');
-      setActiveSection('makePrediction');
+      if (!isOwner) {
+        console.log('User is participant but not owner, redirecting to predictions');
+        setActiveSection('makePrediction');
+      } else {
+        console.log('User is owner, keeping normal dashboard flow');
+      }
     }
-  }, [participants1, participants2, address, isConnected, setActiveSection]);
+  }, [participants1, participants2, address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
 
   useEffect(() => {
     const updateDashboard = () => {

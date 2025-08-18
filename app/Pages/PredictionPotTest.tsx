@@ -4,7 +4,7 @@ import { useAccount, useWriteContract, useReadContract, useWaitForTransactionRec
 import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
-import { setDailyOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
+import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
 import { 
   recordReferral, 
@@ -118,6 +118,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const { writeContract, data: txHash, isPending } = useWriteContract();
   
   const [outcomeInput, setOutcomeInput] = useState<string>('');
+  const [provisionalOutcomeInput, setProvisionalOutcomeInput] = useState<string>('');
   // Contract addresses
   const [contractAddress, setContractAddress] = useState<string>('');
   const [usdcAddress, setUsdcAddress] = useState<string>('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'); 
@@ -1449,11 +1450,48 @@ useEffect(() => {
   <div className="mb-6">
     <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">Owner Actions</h2>
     
-    {/* Set Today's Outcome */}
-    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
-      <h3 className="text-[#F5F5F5] font-medium mb-2">Set Today's Outcome</h3>
+    {/* Set Provisional Outcome (NEW) */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-orange-500">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">🟡 Set Provisional Outcome</h3>
       <p className="text-[#A0A0B0] text-sm mb-3">
-        Enter the actual Bitcoin price movement for today ("positive" or "negative").
+        Set the provisional outcome - starts 1-hour evidence window where users can dispute.
+      </p>
+      <input
+        type="text"
+        placeholder="positive or negative"
+        value={provisionalOutcomeInput}
+        onChange={(e) => setProvisionalOutcomeInput(e.target.value.toLowerCase())}
+        className="w-full px-3 py-2 bg-black/50 border border-orange-500 rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 mb-3"
+      />
+      <button
+        onClick={async () => {
+          if (provisionalOutcomeInput !== "positive" && provisionalOutcomeInput !== "negative") {
+            showMessage("Please enter 'positive' or 'negative'", true);
+            return;
+          }
+          setIsLoading(true);
+          try {
+            await setProvisionalOutcome(provisionalOutcomeInput as "positive" | "negative", selectedTableType);
+            showMessage("Provisional outcome set! Evidence window started (1 hour)");
+            setProvisionalOutcomeInput("");
+          } catch (error) {
+            showMessage("Failed to set provisional outcome", true);
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+        disabled={isActuallyLoading}
+        className="bg-orange-500 text-white px-4 py-2 rounded-md font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActuallyLoading ? "Processing..." : "Set Provisional Outcome (1hr Evidence Window)"}
+      </button>
+    </div>
+
+    {/* Set Final Outcome (EXISTING - UPDATED) */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">🔴 Set Final Outcome</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Set the final outcome - processes winners and distributes pot (no evidence window).
       </p>
       <input
         type="text"
@@ -1471,18 +1509,18 @@ useEffect(() => {
           setIsLoading(true);
           try {
             await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType, participants || []);
-            showMessage("Today's outcome set successfully!");
+            showMessage("Final outcome set and pot distributed!");
             setOutcomeInput("");
           } catch (error) {
-            showMessage("Failed to set outcome", true);
+            showMessage("Failed to set final outcome", true);
           } finally {
             setIsLoading(false);
           }
         }}
         disabled={isActuallyLoading}
-        className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isActuallyLoading ? "Processing..." : "Set Today's Outcome"}
+        {isActuallyLoading ? "Processing..." : "Set Final Outcome & Distribute Pot"}
       </button>
     </div>
 
