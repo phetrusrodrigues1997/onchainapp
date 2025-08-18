@@ -1093,13 +1093,16 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
  */
 export async function getUserStats(walletAddress: string) {
   try {
+    // Normalize wallet address to lowercase for consistency
+    const normalizedAddress = walletAddress.toLowerCase();
+    
     const user = await db
       .select({
         potsWon: UsersTable.potsWon,
         totalEarningsUSDC: UsersTable.totalEarningsUSDC,
       })
       .from(UsersTable)
-      .where(eq(UsersTable.walletAddress, walletAddress))
+      .where(eq(UsersTable.walletAddress, normalizedAddress))
       .limit(1);
 
     if (user.length === 0) {

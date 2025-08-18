@@ -146,30 +146,31 @@ export default function App() {
 // }
 
   return (
-    
-     <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
+    <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
       
       {/* Dark green header */}
       <header className="z-50 bg-[#fdfdfd] px-4 py-3 shadow-md sticky top-0">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            {/* Mobile hamburger only - shows to left of logo on mobile */}
-            <div className="md:hidden ml-2">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center flex-1">
+              {/* Mobile hamburger only - shows to left of logo on mobile */}
+              <div className="md:hidden">
+                <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+              </div>
+              
+              {/* Logo */}
+              <div className="relative -ml-2">
+                <div className="absolute -inset-1 rounded-full blur-md"></div>
+                <ResponsiveLogo />
+              </div>
+            </div>
+            
+            {/* Desktop menu - slightly left of center */}
+            <div className="hidden md:flex flex-1 justify-center ml-12">
               <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
             </div>
             
-            {/* Logo */}
-            <div className="relative -ml-2">
-              <div className="absolute -inset-1 rounded-full blur-md"></div>
-              <ResponsiveLogo />
-            </div>
-          </div>
-          
-          {/* Desktop menu - centered in header */}
-          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
-            <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
-          </div>
-          <div className="flex items-center ml-8">
+            <div className="flex items-center justify-end flex-1">
             {/* USDC Balance Display - Desktop Only */}
             {isConnected && address && (
               <div 
@@ -216,6 +217,7 @@ export default function App() {
             </Wallet>
             </div>
           </div>
+        </div>
         </div>
 
       </header>

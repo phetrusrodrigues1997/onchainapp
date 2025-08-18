@@ -143,7 +143,8 @@ useEffect(() => {
       
       // Calculate placeholder accuracy (we'd need prediction data for real accuracy)
       const baseAccuracy = 65;
-      const performanceBonus = Math.min(15, (stats.totalEarningsUSDC / 1000000) / Math.max(stats.potsWon, 1) * 2);
+      const earningsInDollars = stats.totalEarningsUSDC / 1000000;
+      const performanceBonus = Math.min(15, (earningsInDollars / Math.max(stats.potsWon, 1)) * 2);
       const accuracy = Math.min(95, baseAccuracy + performanceBonus);
       
       setUserStats({
