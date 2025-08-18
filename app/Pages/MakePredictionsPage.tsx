@@ -146,6 +146,38 @@ export default function MakePredicitions() {
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
 
+  // Load market outcome for current contract
+  const loadMarketOutcome = useCallback(async () => {
+    if (!contractAddress) return;
+    
+    try {
+      // TODO: Implement getMarketOutcome in Database/actions
+      // const outcome = await getMarketOutcome(contractAddress);
+      // setMarketOutcome(outcome);
+      
+      // For now, simulate an outcome being set (remove this in production)
+      // This simulates admin setting an outcome
+      console.log('Loading market outcome for contract:', contractAddress);
+    } catch (error) {
+      console.error('Error loading market outcome:', error);
+    }
+  }, [contractAddress]);
+
+  // Load user's evidence submission if any
+  const loadUserEvidenceSubmission = useCallback(async () => {
+    if (!address || !contractAddress) return;
+    
+    try {
+      // TODO: Implement getUserEvidenceSubmission in Database/actions
+      // const submission = await getUserEvidenceSubmission(address, contractAddress);
+      // setUserEvidenceSubmission(submission);
+      
+      console.log('Loading evidence submission for user:', address);
+    } catch (error) {
+      console.error('Error loading evidence submission:', error);
+    }
+  }, [address, contractAddress]);
+
   const loadBets = useCallback(async () => {
     if (!address) return;
 
@@ -200,38 +232,6 @@ export default function MakePredicitions() {
 
     return () => clearInterval(timer);
   }, [marketOutcome]);
-
-  // Load market outcome for current contract
-  const loadMarketOutcome = useCallback(async () => {
-    if (!contractAddress) return;
-    
-    try {
-      // TODO: Implement getMarketOutcome in Database/actions
-      // const outcome = await getMarketOutcome(contractAddress);
-      // setMarketOutcome(outcome);
-      
-      // For now, simulate an outcome being set (remove this in production)
-      // This simulates admin setting an outcome
-      console.log('Loading market outcome for contract:', contractAddress);
-    } catch (error) {
-      console.error('Error loading market outcome:', error);
-    }
-  }, [contractAddress]);
-
-  // Load user's evidence submission if any
-  const loadUserEvidenceSubmission = useCallback(async () => {
-    if (!address || !contractAddress) return;
-    
-    try {
-      // TODO: Implement getUserEvidenceSubmission in Database/actions
-      // const submission = await getUserEvidenceSubmission(address, contractAddress);
-      // setUserEvidenceSubmission(submission);
-      
-      console.log('Loading evidence submission for user:', address);
-    } catch (error) {
-      console.error('Error loading evidence submission:', error);
-    }
-  }, [address, contractAddress]);
 
   const showMessage = (msg: string) => {
     setMessage(msg);
