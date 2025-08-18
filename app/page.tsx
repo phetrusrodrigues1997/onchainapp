@@ -22,7 +22,7 @@ import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdo
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import GamesHub from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
-import CreatePotPage from './Pages/CreatePotPage';
+import CreatePotPage from './Pages/createPotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
 import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
