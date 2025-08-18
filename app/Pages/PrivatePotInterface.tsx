@@ -320,25 +320,20 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       });
 
       if (isConnected && address && activeSection === 'privatePot') {
-        console.log('✅ Wallet connected on Private Pot page, checking email...');
-        console.log('📧 Hook email collected state:', hookEmailCollected);
-        console.log('📧 Dismissal state:', isDismissed);
+        
         
         // First check the hook's state - it's the single source of truth
         if (hookEmailCollected) {
-          console.log('📧 Hook says email already collected, not showing modal');
           return;
         }
 
         if (isDismissed) {
-          console.log('📧 Modal was dismissed, not showing modal');
           return;
         }
         
         // Only check database if hook doesn't have email collected info yet
         try {
           const emailExists = await checkEmailExists(address);
-          console.log('📧 Database email check result:', emailExists);
           
           if (emailExists) {
             console.log('📧 Database says email exists, updating hook state');

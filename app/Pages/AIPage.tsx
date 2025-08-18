@@ -120,17 +120,10 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
   // Email collection logic - trigger 2 seconds after wallet connects
   useEffect(() => {
     const handleEmailCollection = async () => {
-      console.log('🔍 AIPage Email Debug:', {
-        isConnected,
-        address,
-        activeSection,
-        condition: isConnected && address && activeSection === 'AI'
-      });
+      
 
       if (isConnected && address && activeSection === 'AI') {
-        console.log('✅ Wallet connected on AI page, checking email...');
-        console.log('📧 Hook email collected state:', hookEmailCollected);
-        console.log('📧 Dismissal state:', isDismissed);
+        
         
         // First check the hook's state - it's the single source of truth
         if (hookEmailCollected) {
@@ -159,10 +152,8 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
             clearTimeout(emailModalRef.current);
           }
           
-          console.log('⏰ Setting 2-second timer for email modal...');
           // Show modal after 2 seconds
           emailModalRef.current = setTimeout(() => {
-            console.log('🎯 Timer triggered! Showing email modal...');
             triggerEmailModal();
           }, 2000);
         } catch (error) {
@@ -191,15 +182,11 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
   const handleEmailSubmit = async (email: string) => {
     if (!address) return;
     
-    console.log('📧 Starting email submission for:', email);
     try {
       const result = await saveUserEmail(address, email, 'AI');
-      console.log('📧 saveUserEmail result:', result);
       
       if (result.success) {
-        console.log('📧 Email saved successfully, marking as collected in hook...');
         markEmailCollected(); // This should be the single source of truth
-        console.log('📧 Hook state updated with markEmailCollected()');
       } else {
         throw new Error(result.error || 'Failed to save email');
       }

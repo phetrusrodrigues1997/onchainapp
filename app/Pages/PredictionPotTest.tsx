@@ -16,6 +16,7 @@ import {
   debugWrongPredictions,
   clearWrongPredictionsForWallet
 } from '../Database/actions';
+import { updateWinnerStats } from '../Database/OwnerActions';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
 import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
@@ -237,28 +238,22 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     if (!address) return;
     
     try {
-      console.log("=== DEBUG loadReferralData ===");
-      console.log("Contract Address:", contractAddress);
-      console.log("Selected Table Type:", selectedTableType);
+      
       
       // Debug wrong predictions tables
       await debugWrongPredictions(address);
       
       // Load available free entries
       const freeEntries = await getAvailableFreeEntries(address);
-      console.log("Debug - getAvailableFreeEntries returned:", freeEntries);
       setFreeEntriesAvailable(freeEntries);
       
       // Check if user needs to pay re-entry fee for current market
-      console.log("Calling getReEntryFee with:", address, selectedTableType);
       const reEntryAmount = await getReEntryFee(address, selectedTableType);
-      console.log("getReEntryFee returned:", reEntryAmount);
       setReEntryFee(reEntryAmount);
       
       // Note: getAllReEntryFees was removed since we now use dynamic pricing
       setAllReEntryFees([]);
       
-      console.log("=== END DEBUG loadReferralData ===");
       
     } catch (error) {
       console.error("Error loading referral data:", error);
@@ -551,7 +546,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
         // Don't await this - run in background to avoid blocking pot entry
         recordReferral(inputReferralCode.trim().toUpperCase(), address!)
           .then(() => {
-            console.log('Referral recorded successfully');
           })
           .catch((error) => {
             console.log('Referral recording failed:', error);
@@ -701,7 +695,23 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
   const queryClient = useQueryClient();
 useEffect(() => {
+  console.log("🔍 🔄 Transaction confirmation useEffect triggered with:", { 
+    isConfirmed, 
+    lastAction, 
+    txHash,
+    winnerAddresses: winnerAddresses ? (winnerAddresses.length > 50 ? winnerAddresses.substring(0, 50) + '...' : winnerAddresses) : 'empty'
+  });
+  
   if (isConfirmed) {
+    console.log("🔍 ✅ Transaction IS CONFIRMED! Processing lastAction:", lastAction);
+    console.log("🔍 Available lastAction options: approve, enterPot, approveReEntry, reEntry, distributePot, processWinners");
+    
+    if (lastAction === 'processWinners') {
+      console.log("🔍 🎯 MATCH! lastAction is processWinners - proceeding to handler");
+    } else {
+      console.log("🔍 ⚠️ lastAction is NOT processWinners, it is:", lastAction);
+    }
+    
     if (lastAction === 'approve') {
       setIsLoading(false);
       showMessage('USDC approval confirmed! You can now enter the pot.');
@@ -719,7 +729,6 @@ useEffect(() => {
       if (usedDiscountedEntry && address) {
         consumeFreeEntry(address).then((success) => {
           if (success) {
-            console.log('Free entry consumed successfully after transaction confirmation');
           } else {
             console.error('Failed to consume free entry after transaction confirmation');
           }
@@ -737,26 +746,22 @@ useEffect(() => {
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['readContract'] });
         queryClient.removeQueries({ queryKey: ['readContract'] });
-        console.log('🔄 Force refresh #1 - 500ms');
       }, 500);
       
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['readContract'] });
         queryClient.removeQueries({ queryKey: ['readContract'] });
-        console.log('🔄 Force refresh #2 - 1500ms');
       }, 1500);
       
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['readContract'] });
         queryClient.removeQueries({ queryKey: ['readContract'] });
-        console.log('🔄 Force refresh #3 - 3000ms');
       }, 3000);
       
       // Extra refresh specifically for free entries after 5 seconds
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['readContract'] });
         queryClient.removeQueries({ queryKey: ['readContract'] });
-        console.log('🔄 Force refresh #4 - 5000ms');
         // Clear post-entry loading state after background processes complete
         setPostEntryLoading(false);
       }, 5000);
@@ -834,32 +839,171 @@ useEffect(() => {
       completeReEntry();
       setLastAction('');
       return; // Don't execute common cleanup below
-    } else if (lastAction === 'distributePot') {
-      setIsLoading(false);
-      showMessage('Pot distributed successfully!');
-      setTimeout(() => {
-  // Force refetch of all contract data
-  queryClient.invalidateQueries({ queryKey: ['readContract'] });
-}, 1000);
-    } else if (lastAction === 'processWinners') {
-      // This handles the combined action - pot distribution is confirmed, now clear wrong predictions
-      const finishProcessing = async () => {
+    } else if (lastAction === 'distributePot' || (winnerAddresses.trim() && txHash)) {
+      console.log("🔍 ✅ ENTERED distributePot transaction confirmation handler!");
+      console.log("🔍 Triggered by:", { 
+        lastActionMatch: lastAction === 'distributePot',
+        winnerAddressesExist: !!winnerAddresses.trim(),
+        txHashExists: !!txHash
+      });
+      console.log("🔍 distributePot state:", {
+        winnerAddresses,
+        potBalance: potBalance?.toString(),
+        selectedTableType
+      });
+      
+      // Handle pot distribution completion - update winner stats and clear wrong predictions
+      const finishDistribution = async () => {
+        console.log("🔍 🚀 Starting finishDistribution function");
+        
         try {
+          // Step 1: Update winner statistics
+          console.log("🔍 Debug - Checking winner stats conditions:");
+          console.log("- winnerAddresses:", winnerAddresses);
+          console.log("- winnerAddresses.trim():", winnerAddresses.trim());
+          console.log("- potBalance:", potBalance);
+          console.log("- potBalance type:", typeof potBalance);
+          console.log("- potBalance > 0:", potBalance ? potBalance > BigInt(0) : false);
+          
+          if (winnerAddresses.trim() && potBalance && potBalance > BigInt(0)) {
+            console.log("🔍 ✅ Winner stats conditions MET - proceeding with update");
+            showMessage("Step 2/3: Updating winner statistics...");
+            const addresses = winnerAddresses.split(',').map(addr => addr.trim()).filter(addr => addr);
+            console.log("- Parsed addresses:", addresses);
+            console.log("- Number of addresses:", addresses.length);
+            
+            if (addresses.length > 0) {
+              const totalPotMicroUSDC = Number(potBalance);
+              const amountPerWinnerMicroUSDC = Math.floor(totalPotMicroUSDC / addresses.length);
+              const amountPerWinnerUSDC = amountPerWinnerMicroUSDC / 1000000;
+              
+              console.log("🔍 Calculated amounts:");
+              console.log("- totalPotMicroUSDC:", totalPotMicroUSDC);
+              console.log("- amountPerWinnerMicroUSDC:", amountPerWinnerMicroUSDC);
+              console.log("- amountPerWinnerUSDC:", amountPerWinnerUSDC);
+              
+              try {
+                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerMicroUSDC });
+                const result = await updateWinnerStats(addresses, amountPerWinnerMicroUSDC);
+                console.log("✅ updateWinnerStats completed successfully, result:", result);
+                showMessage(`Step 2/3: Updated stats for ${addresses.length} winner(s) with $${amountPerWinnerUSDC.toFixed(6)} each`);
+              } catch (statsError) {
+                console.error("❌ Failed to update winner stats:", statsError);
+                showMessage("Pot distributed but failed to update winner statistics. Stats can be updated manually later.");
+              }
+            } else {
+              console.log("❌ No valid addresses found after parsing winnerAddresses");
+            }
+          } else {
+            console.log("❌ Winner stats conditions NOT MET:");
+            console.log("- winnerAddresses.trim():", winnerAddresses.trim());
+            console.log("- winnerAddresses.trim() truthy:", !!winnerAddresses.trim());
+            console.log("- potBalance exists:", !!potBalance);
+            console.log("- potBalance > 0:", potBalance ? potBalance > BigInt(0) : false);
+          }
+          
+          // Step 2: Clear wrong predictions
+          console.log("🔍 Step 3: About to clear wrong predictions");
           showMessage("Step 3/3: Clearing wrong predictions...");
           await clearWrongPredictions(selectedTableType);
-          showMessage("🎉 Winners processed successfully! Pot distributed and wrong predictions cleared!");
+          console.log("🔍 ✅ Successfully cleared wrong predictions");
+          showMessage("🎉 Pot distributed successfully! Winner stats updated and wrong predictions cleared!");
+          
+        } catch (error) {
+          console.error("❌ Error in finishDistribution:", error);
+          showMessage("Pot distributed but failed to complete cleanup tasks. Please clear wrong predictions manually.", true);
+        }
+      };
+      
+      console.log("🔍 About to call finishDistribution function");
+      finishDistribution().finally(() => {
+        setIsLoading(false);
+      });
+      
+      setTimeout(() => {
+        // Force refetch of all contract data
+        queryClient.invalidateQueries({ queryKey: ['readContract'] });
+      }, 1000);
+    } else if (lastAction === 'processWinners') {
+      console.log("🔍 ✅ ENTERED processWinners transaction confirmation handler!");
+      console.log("🔍 Current state:", {
+        winnerAddresses,
+        potBalance: potBalance?.toString(),
+        selectedTableType,
+        lastAction
+      });
+      
+      // This handles the combined action - pot distribution is confirmed, now update stats and clear wrong predictions
+      const finishProcessing = async () => {
+        console.log("🔍 🚀 Starting finishProcessing function");
+        
+        try {
+          // Step 3a: Update winner statistics
+          console.log("🔍 Debug - Checking winner stats conditions:");
+          console.log("- winnerAddresses:", winnerAddresses);
+          console.log("- winnerAddresses.trim():", winnerAddresses.trim());
+          console.log("- potBalance:", potBalance);
+          console.log("- potBalance type:", typeof potBalance);
+          console.log("- potBalance > 0:", potBalance ? potBalance > BigInt(0) : false);
+          
+          if (winnerAddresses.trim() && potBalance && potBalance > BigInt(0)) {
+            console.log("🔍 ✅ Winner stats conditions MET - proceeding with update");
+            showMessage("Step 3/4: Updating winner statistics...");
+            const addresses = winnerAddresses.split(',').map(addr => addr.trim()).filter(addr => addr);
+            console.log("- Parsed addresses:", addresses);
+            console.log("- Number of addresses:", addresses.length);
+            
+            if (addresses.length > 0) {
+              const totalPotMicroUSDC = Number(potBalance);
+              const amountPerWinnerMicroUSDC = Math.floor(totalPotMicroUSDC / addresses.length);
+              const amountPerWinnerUSDC = amountPerWinnerMicroUSDC / 1000000;
+              
+              console.log("🔍 Calculated amounts:");
+              console.log("- totalPotMicroUSDC:", totalPotMicroUSDC);
+              console.log("- amountPerWinnerMicroUSDC:", amountPerWinnerMicroUSDC);
+              console.log("- amountPerWinnerUSDC:", amountPerWinnerUSDC);
+              
+              try {
+                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerMicroUSDC });
+                const result = await updateWinnerStats(addresses, amountPerWinnerMicroUSDC);
+                console.log("✅ updateWinnerStats completed successfully, result:", result);
+                showMessage(`Step 3/4: Updated stats for ${addresses.length} winner(s) with $${amountPerWinnerUSDC.toFixed(6)} each`);
+              } catch (statsError) {
+                console.error("❌ Failed to update winner stats:", statsError);
+                showMessage("Pot distributed but failed to update winner statistics. Stats can be updated manually later.");
+              }
+            } else {
+              console.log("❌ No valid addresses found after parsing winnerAddresses");
+            }
+          } else {
+            console.log("❌ Winner stats conditions NOT MET:");
+            console.log("- winnerAddresses.trim():", winnerAddresses.trim());
+            console.log("- winnerAddresses.trim() truthy:", !!winnerAddresses.trim());
+            console.log("- potBalance exists:", !!potBalance);
+            console.log("- potBalance > 0:", potBalance ? potBalance > BigInt(0) : false);
+          }
+          
+          // Step 4: Clear wrong predictions
+          console.log("🔍 Step 4: About to clear wrong predictions");
+          showMessage("Step 4/4: Clearing wrong predictions...");
+          await clearWrongPredictions(selectedTableType);
+          console.log("🔍 ✅ Successfully cleared wrong predictions");
+          showMessage("🎉 Winners processed successfully! Pot distributed, stats updated, and wrong predictions cleared!");
           setTimeout(() => {
   // Force refetch of all contract data
   queryClient.invalidateQueries({ queryKey: ['readContract'] });
 }, 2000);
         } catch (error) {
+          console.error("❌ Error in finishProcessing:", error);
           showMessage("Pot distributed but failed to clear wrong predictions. Please clear manually.", true);
         } finally {
+          console.log("🔍 finishProcessing cleanup - setting loading false and clearing lastAction");
           setIsLoading(false);
           setLastAction('');
         }
       };
       
+      console.log("🔍 About to call finishProcessing function");
       finishProcessing();
       return; // Don't execute the common cleanup below
     }
@@ -1351,30 +1495,42 @@ useEffect(() => {
       <button
         onClick={async () => {
           setIsLoading(true);
-          setLastAction("processWinners");
+          setLastAction("distributePot");
           
           try {
             // Step 1: Determine winners
             const participantCount = participants?.length || 0;
+            console.log("🔍 Step 1: Starting winner determination process");
             showMessage(`Step 1/3: Determining winners among ${participantCount} pot participants...`);
             const winnersString = await determineWinners(selectedTableType, participants || []);
+            console.log("🔍 determineWinners result:", winnersString);
             
             if (!winnersString || winnersString.trim() === "") {
               showMessage(`No winners found for this round (${participantCount} participants checked)`, true);
+              setIsLoading(false);
+              setLastAction("");
               return;
             }
             
             // Parse winner addresses
             const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
+            console.log("🔍 Parsed winner addresses:", addresses);
             
             if (addresses.length === 0) {
               showMessage("No valid winner addresses found", true);
+              setIsLoading(false);
+              setLastAction("");
               return;
             }
+            
+            // CRITICAL FIX: Set the winnerAddresses state so the transaction confirmation handler can access it
+            setWinnerAddresses(winnersString);
+            console.log("🔍 Set winnerAddresses state to:", winnersString);
             
             showMessage(`Found ${addresses.length} winner(s) out of ${participantCount} participants. Step 2/3: Distributing pot...`);
             
             // Step 2: Distribute pot using the blockchain contract
+            console.log("🔍 Step 2: Submitting distributePot transaction");
             await writeContract({
               address: contractAddress as `0x${string}`,
               abi: PREDICTION_POT_ABI,
@@ -1384,8 +1540,8 @@ useEffect(() => {
             
             // Note: The transaction confirmation will be handled by the existing useEffect
             // We'll show the final message there, but for now show the interim message
-            showMessage("Pot distribution transaction submitted! Step 3/3 will happen after confirmation...");
-            await clearWrongPredictions(selectedTableType);
+            console.log("🔍 Transaction submitted, waiting for confirmation...");
+            showMessage("Pot distribution transaction submitted! Step 3/4 will happen after confirmation...");
           } catch (error) {
             console.error("Error in combined winner processing:", error);
             showMessage("Failed to process winners and distribute pot", true);
@@ -1397,7 +1553,7 @@ useEffect(() => {
         disabled={isActuallyLoading}
         className="bg-green-600 text-[#F5F5F5] px-6 py-3 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed w-full"
       >
-        {isActuallyLoading && lastAction === "processWinners" ? "Processing Winners..." : "🏆 Process Winners & Distribute Pot"}
+        {isActuallyLoading && lastAction === "distributePot" ? "Processing Winners..." : "🏆 Process Winners & Distribute Pot"}
       </button>
     </div>
 

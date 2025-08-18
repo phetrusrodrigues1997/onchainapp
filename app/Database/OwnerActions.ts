@@ -2,8 +2,8 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions } from "../Database/schema";
-import { eq, inArray, lt, asc } from "drizzle-orm";
+import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions, UsersTable } from "../Database/schema";
+import { eq, inArray, lt, asc, sql } from "drizzle-orm";
 
 // Database setup
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -63,12 +63,10 @@ export async function setDailyOutcome(
     let wrongBets = allWrongBets;
     if (contractParticipants.length > 0) {
       const normalizedParticipants = contractParticipants.map(addr => addr.toLowerCase());
-      console.log(`Normalizing contract participants: ${normalizedParticipants}`);
       wrongBets = allWrongBets.filter(bet => 
         normalizedParticipants.includes(bet.walletAddress.toLowerCase())
       );
       
-      console.log(`Total wrong predictions: ${allWrongBets.length}, From current participants: ${wrongBets.length}`);
       
       // Find participants who didn't predict (these will be eliminated)
       const nonPredictors = contractParticipants.filter(participant => 
@@ -77,7 +75,6 @@ export async function setDailyOutcome(
       
       // Add non-predictors to wrong predictions table so they must pay re-entry fee
       if (nonPredictors.length > 0) {
-        console.log(`Eliminating ${nonPredictors.length} participants who didn't predict:`, nonPredictors);
         
         const today = new Date().toISOString().split('T')[0];
         
@@ -91,7 +88,6 @@ export async function setDailyOutcome(
           .values(nonPredictorRecords)
           .onConflictDoNothing();
           
-        console.log(`Added ${nonPredictors.length} non-predictors to wrong predictions table`);
       }
     } else {
       console.warn("No contract participants provided to setDailyOutcome - using old logic (potential exploit!)");
@@ -162,9 +158,7 @@ export async function clearWrongPredictions(tableType: string) {
     const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
     const betsTable = getTableFromType(tableType);
     await db.delete(wrongPredictionTable);
-    console.log("Cleared wrong_predictions table");
     await db.delete(betsTable);
-    console.log("Cleared bets table");
 
   } catch (err) {
     console.error("Failed to clear tables", err);
@@ -202,7 +196,6 @@ export async function determineWinners(typeTable: string, contractParticipants: 
       normalizedParticipants.includes(predictor.walletAddress.toLowerCase())
     );
 
-    console.log(`Total predictors: ${allPredictors.length}, Pot participants: ${contractParticipants.length}, Eligible winners: ${eligibleWinners.length}`);
 
     return eligibleWinners.map(w => w.walletAddress).join(",");
   } catch (error) {
@@ -250,7 +243,6 @@ async function rotateToNextQuestion() {
       .from(LiveQuestions)
       .orderBy(asc(LiveQuestions.id));
     
-    console.log(`Question rotation: Found ${allQuestions.length} questions`);
     
     // Remove the oldest question if we have more than 1
     if (allQuestions.length > 1) {
@@ -260,7 +252,6 @@ async function rotateToNextQuestion() {
         .delete(LiveQuestions)
         .where(eq(LiveQuestions.id, questionToDelete.id));
       
-      console.log(`Question rotation: Removed completed question ID ${questionToDelete.id}`);
     } else {
       console.log('Question rotation: Only 1 question found, keeping it and adding another');
     }
@@ -284,7 +275,6 @@ async function rotateToNextQuestion() {
       .from(LiveQuestions)
       .then(result => result.length);
     
-    console.log(`Question rotation complete: ${finalCount} questions now available`);
     
   } catch (error) {
     console.error('Error during question rotation:', error);
@@ -305,6 +295,77 @@ export async function clearLivePredictions() {
   } catch (error) {
     console.error("Failed to clear live predictions:", error);
     throw new Error("Could not clear live predictions");
+  }
+}
+
+/**
+ * Updates winner statistics after a pot is distributed
+ * This should be called AFTER the smart contract distributes the pot
+ * @param winnerAddresses - Array of winner wallet addresses (from determineWinners)
+ * @param potAmountPerWinner - Amount each winner received in micro-USDC (6 decimals)
+ */
+export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: number) {
+  try {
+    console.log(`🔍 updateWinnerStats called with:`, { winnerAddresses, potAmountPerWinner });
+    console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} micro-USDC each`);
+    
+    // Ensure we have an array of addresses
+    const addresses = Array.isArray(winnerAddresses) ? winnerAddresses : [];
+    
+    console.log(`📍 Processing addresses:`, addresses);
+    
+    for (let i = 0; i < addresses.length; i++) {
+      const address = addresses[i];
+      if (!address) {
+        console.log(`⚠️ Skipping empty address at index ${i}`);
+        continue;
+      }
+      
+      console.log(`📝 Updating stats for address ${i + 1}/${addresses.length}: ${address}`);
+      
+      // Normalize wallet address to lowercase for consistency with profile image saving
+      const normalizedAddress = address.toLowerCase();
+      
+      // First check if user exists
+      const existingUser = await db
+        .select()
+        .from(UsersTable)
+        .where(eq(UsersTable.walletAddress, normalizedAddress))
+        .limit(1);
+      
+      let result;
+      if (existingUser.length > 0) {
+        // Update existing user
+        console.log(`📝 User ${normalizedAddress} exists, updating stats...`);
+        result = await db
+          .update(UsersTable)
+          .set({
+            potsWon: sql`${UsersTable.potsWon} + 1`,
+            totalEarningsUSDC: sql`${UsersTable.totalEarningsUSDC} + ${potAmountPerWinner}`,
+          })
+          .where(eq(UsersTable.walletAddress, normalizedAddress))
+          .returning();
+      } else {
+        // Insert new user
+        console.log(`📝 User ${normalizedAddress} doesn't exist, creating new entry...`);
+        result = await db
+          .insert(UsersTable)
+          .values({
+            walletAddress: normalizedAddress,
+            potsWon: 1,
+            totalEarningsUSDC: potAmountPerWinner,
+          })
+          .returning();
+      }
+      
+      console.log(`✅ Updated user ${address}:`, result);
+    }
+    
+    console.log(`✅ Successfully updated winner stats for ${addresses.length} users`);
+    return true;
+  } catch (error) {
+    console.error("❌ Error updating winner stats:", error);
+    throw new Error("Failed to update winner stats");
   }
 }
 

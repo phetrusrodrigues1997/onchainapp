@@ -16,7 +16,6 @@ async function ensureInitialQuestions() {
     
     // Only generate initial batch if database is completely empty
     if (questionCount === 0) {
-      console.log('No questions found, generating initial batch...');
       
       const { generateQuestionBatch } = await import('../../Services/questionGenerator');
       const questionBatch = await generateQuestionBatch(2); // Start with just 2 questions
@@ -29,7 +28,6 @@ async function ensureInitialQuestions() {
           });
       }
       
-      console.log(`Generated initial ${questionBatch.length} questions`);
     }
     
   } catch (error) {

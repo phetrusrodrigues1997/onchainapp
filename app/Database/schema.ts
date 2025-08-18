@@ -79,6 +79,8 @@ export const UsersTable = pgTable("users_table", {
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
   lastWordlePlay: timestamp("last_wordle_play"), // Last time user played Wordle
   wordlePlaysToday: integer("wordle_plays_today").default(0).notNull(), // Number of plays today
+  potsWon: integer("pots_won").default(0).notNull(), // Total pots won across all markets
+  totalEarningsUSDC: integer("total_earnings_usdc").default(0).notNull(), // Total earnings in micro-USDC (6 decimals)
 });
 
 // Synchronized questions for prediction market

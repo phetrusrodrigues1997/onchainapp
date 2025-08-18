@@ -217,8 +217,6 @@ const handleMarketClick = (marketId: string) => {
       setActiveSection('dashboard');
     }, 200);
     
-    console.log('Set cookie selectedMarket:', contractAddress); // Debug log
-    console.log('Set cookie selectedMarketQuestion:', marketQuestion); // Debug log
   } else {
     showAlert(`${markets.find((m) => m.id === marketId)?.name} ${t.comingSoon}`, 'info', 'Coming Soon');
   }

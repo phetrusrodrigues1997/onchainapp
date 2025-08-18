@@ -516,7 +516,6 @@ export async function cleanupPotTables(contractAddress: string) {
     for (const tableName of tables) {
       try {
         await db2.execute(sql`DROP TABLE IF EXISTS ${sql.identifier(tableName)}`);
-        console.log(`Dropped table: ${tableName}`);
       } catch (error) {
         console.warn(`Failed to drop table ${tableName}:`, error);
         // Continue dropping other tables even if one fails
@@ -525,7 +524,6 @@ export async function cleanupPotTables(contractAddress: string) {
 
     // Remove from PrivatePots registry
     await db2.delete(PrivatePots).where(eq(PrivatePots.contractAddress, contractAddress));
-    console.log(`Cleaned up pot: ${contractAddress}`);
     
     return { success: true };
   } catch (error) {

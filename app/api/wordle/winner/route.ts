@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
       try {
         const success = await awardWordleFreeEntry(winner);
         if (success) {
-          console.log('Free entry awarded for Wordle victory!');
         } else {
           console.error('Failed to award Wordle free entry');
         }

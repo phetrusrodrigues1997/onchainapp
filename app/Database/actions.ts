@@ -206,9 +206,7 @@ export async function getAllMessages(address: string) {
  */
 export async function getReEntryFee(walletAddress: string, typeTable: string): Promise<number | null> {
   try {
-    console.log(`getReEntryFee called with: ${walletAddress}, ${typeTable}`);
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
-    console.log(`Using table:`, wrongPredictionTable);
     
     const result = await db
       .select({ walletAddress: wrongPredictionTable.walletAddress })
@@ -216,7 +214,6 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
       .where(eq(wrongPredictionTable.walletAddress, walletAddress))
       .limit(1);
     
-    console.log(`getReEntryFee result:`, result);
     
     // If user has wrong prediction, return today's dynamic entry fee
     if (result.length > 0) {
@@ -249,7 +246,6 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
  */
 export async function debugWrongPredictions(walletAddress: string): Promise<void> {
   try {
-    console.log(`=== DEBUG: Wrong Predictions for ${walletAddress} ===`);
     
     // Check featured market (WrongPredictions table)
     const featuredResult = await db
@@ -257,23 +253,11 @@ export async function debugWrongPredictions(walletAddress: string): Promise<void
       .from(WrongPredictions)
       .where(eq(WrongPredictions.walletAddress, walletAddress));
     
-    console.log(`Featured Market (WrongPredictions table): ${featuredResult.length} entries`);
-    featuredResult.forEach((entry, i) => {
-      console.log(`  ${i+1}. Date: ${entry.wrongPredictionDate}`);
-    });
     
-    // Check crypto market (WrongPredictionsCrypto table)  
-    const cryptoResult = await db
-      .select()
-      .from(WrongPredictionsCrypto)
-      .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress));
     
-    console.log(`Crypto Market (WrongPredictionsCrypto table): ${cryptoResult.length} entries`);
-    cryptoResult.forEach((entry, i) => {
-      console.log(`  ${i+1}. Date: ${entry.wrongPredictionDate}`);
-    });
     
-    console.log('=== END DEBUG ===');
+    
+    
   } catch (error) {
     console.error("Error in debugWrongPredictions:", error);
   }
@@ -285,7 +269,6 @@ export async function debugWrongPredictions(walletAddress: string): Promise<void
  */
 export async function clearWrongPredictionsForWallet(walletAddress: string): Promise<void> {
   try {
-    console.log(`Clearing wrong predictions for wallet: ${walletAddress}`);
     
     // Clear from featured market table
     const featuredDeleted = await db
@@ -299,8 +282,7 @@ export async function clearWrongPredictionsForWallet(walletAddress: string): Pro
       .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress))
       .returning();
     
-    console.log(`Cleared ${featuredDeleted.length} entries from Featured market`);
-    console.log(`Cleared ${cryptoDeleted.length} entries from Crypto market`);
+    
     
   } catch (error) {
     console.error("Error clearing wrong predictions for wallet:", error);
@@ -1066,6 +1048,203 @@ export async function getLastWordlePlay(walletAddress: string): Promise<Date | n
     return user.length > 0 ? user[0].lastWordlePlay : null;
   } catch (error) {
     console.error('Error getting last Wordle play:', error);
+    return null;
+  }
+}
+
+/**
+ * Updates winner statistics after a pot is distributed
+ * @param winnerAddresses - Array of winner wallet addresses
+ * @param potAmountPerWinner - Amount each winner received in micro-USDC (6 decimals)
+ */
+export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: number) {
+  try {
+    console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} micro-USDC each`);
+    
+    for (const address of winnerAddresses) {
+      // Upsert user entry and update stats
+      await db
+        .insert(UsersTable)
+        .values({
+          walletAddress: address,
+          potsWon: 1,
+          totalEarningsUSDC: potAmountPerWinner,
+        })
+        .onConflictDoUpdate({
+          target: UsersTable.walletAddress,
+          set: {
+            potsWon: sql`${UsersTable.potsWon} + 1`,
+            totalEarningsUSDC: sql`${UsersTable.totalEarningsUSDC} + ${potAmountPerWinner}`,
+          },
+        });
+    }
+    
+    console.log(`Successfully updated winner stats for ${winnerAddresses.length} users`);
+    return true;
+  } catch (error) {
+    console.error("Error updating winner stats:", error);
+    throw new Error("Failed to update winner stats");
+  }
+}
+
+/**
+ * Gets user statistics for ProfilePage
+ * @param walletAddress - User's wallet address
+ */
+export async function getUserStats(walletAddress: string) {
+  try {
+    const user = await db
+      .select({
+        potsWon: UsersTable.potsWon,
+        totalEarningsUSDC: UsersTable.totalEarningsUSDC,
+      })
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, walletAddress))
+      .limit(1);
+
+    if (user.length === 0) {
+      return {
+        potsWon: 0,
+        totalEarningsUSDC: 0,
+        totalEarnings: '$0.00', // Formatted for display
+      };
+    }
+
+    // Convert micro-USDC to dollars for display
+    const earningsInDollars = user[0].totalEarningsUSDC / 1000000;
+    
+    return {
+      potsWon: user[0].potsWon,
+      totalEarningsUSDC: user[0].totalEarningsUSDC,
+      totalEarnings: `$${earningsInDollars.toFixed(2)}`, // Formatted for display
+    };
+  } catch (error) {
+    console.error("Error getting user stats:", error);
+    return {
+      potsWon: 0,
+      totalEarningsUSDC: 0,
+      totalEarnings: '$0.00',
+    };
+  }
+}
+
+/**
+ * Get leaderboard data with top 10 users + current user's position
+ * @param currentUserAddress - Address of current user to highlight them
+ */
+export async function getLeaderboard(currentUserAddress?: string) {
+  try {
+    // Get ALL users ordered by total earnings (descending), then by pots won (descending)
+    const allUsers = await db
+      .select({
+        walletAddress: UsersTable.walletAddress,
+        potsWon: UsersTable.potsWon,
+        totalEarningsUSDC: UsersTable.totalEarningsUSDC,
+        imageUrl: UsersTable.imageUrl,
+      })
+      .from(UsersTable)
+      .where(sql`${UsersTable.potsWon} > 0 OR ${UsersTable.totalEarningsUSDC} > 0`) // Only users with activity
+      .orderBy(
+        sql`${UsersTable.totalEarningsUSDC} DESC`, 
+        sql`${UsersTable.potsWon} DESC`
+      );
+
+    // Helper function to format user data
+    const formatUser = (user: any, index: number) => {
+      const earningsInDollars = user.totalEarningsUSDC / 1000000;
+      const rank = index + 1;
+      
+      // Calculate accuracy (placeholder - we'd need prediction data for real accuracy)
+      const baseAccuracy = 65;
+      const performanceBonus = Math.min(15, (earningsInDollars / Math.max(user.potsWon, 1)) * 2);
+      const accuracy = Math.min(95, baseAccuracy + performanceBonus);
+      
+      return {
+        rank,
+        walletAddress: user.walletAddress,
+        name: `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`,
+        earnings: `$${earningsInDollars.toFixed(2)}`,
+        earningsRaw: earningsInDollars,
+        marketsWon: user.potsWon,
+        accuracy: `${accuracy.toFixed(1)}%`,
+        imageUrl: user.imageUrl || null, // Include profile image if available
+        isCurrentUser: currentUserAddress ? user.walletAddress === currentUserAddress.toLowerCase() : false,
+      };
+    };
+
+    // Get top 10 users
+    const top10 = allUsers.slice(0, 10).map((user, index) => formatUser(user, index));
+
+    // If we have a current user, find their position
+    if (currentUserAddress) {
+      const normalizedCurrentUser = currentUserAddress.toLowerCase();
+      const userIndex = allUsers.findIndex(user => 
+        user.walletAddress === normalizedCurrentUser
+      );
+
+      if (userIndex >= 0) {
+        const userRank = userIndex + 1;
+        
+        // If user is not in top 10, add them separately
+        if (userRank > 10) {
+          const currentUser = formatUser(allUsers[userIndex], userIndex);
+          
+          // Return top 10 + separator + user position
+          return {
+            users: top10,
+            currentUser: currentUser,
+            showSeparator: true,
+            totalUsers: allUsers.length
+          };
+        }
+      }
+    }
+
+    // If user is in top 10 or no current user, just return top 10
+    return {
+      users: top10,
+      currentUser: null,
+      showSeparator: false,
+      totalUsers: allUsers.length
+    };
+
+  } catch (error) {
+    console.error("Error getting leaderboard:", error);
+    return {
+      users: [],
+      currentUser: null,
+      showSeparator: false,
+      totalUsers: 0
+    };
+  }
+}
+
+/**
+ * Get user's rank in the leaderboard
+ */
+export async function getUserRank(walletAddress: string) {
+  try {
+    // Get all users ordered by earnings, then find the user's position
+    const users = await db
+      .select({
+        walletAddress: UsersTable.walletAddress,
+        totalEarningsUSDC: UsersTable.totalEarningsUSDC,
+        potsWon: UsersTable.potsWon,
+      })
+      .from(UsersTable)
+      .where(sql`${UsersTable.potsWon} > 0 OR ${UsersTable.totalEarningsUSDC} > 0`)
+      .orderBy(
+        sql`${UsersTable.totalEarningsUSDC} DESC`, 
+        sql`${UsersTable.potsWon} DESC`
+      );
+
+    const userIndex = users.findIndex(user => 
+      user.walletAddress === walletAddress.toLowerCase()
+    );
+
+    return userIndex >= 0 ? userIndex + 1 : null; // Return rank (1-based) or null if not found
+  } catch (error) {
+    console.error("Error getting user rank:", error);
     return null;
   }
 }

@@ -118,7 +118,6 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
   // Check if user has entered the pot
   const checkPotEntry = async () => {
-    console.log('Checking pot entry - address:', address, 'participants:', participants);
     if (!address || !participants) {
       console.log('No address or participants, setting hasEnteredPot to false');
       setHasEnteredPot(false);
@@ -270,7 +269,6 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   // Initialize and setup smart fetching with loading screen
   useEffect(() => {
     const initializeQuestions = async () => {
-      console.log('Starting initialization with loading screen');
       // Show loading for at least 2 seconds
       const loadingPromise = new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -287,9 +285,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       setupSmartFetching();
       
       // Wait for loading screen duration
-      console.log('Waiting for loading screen duration...');
       await loadingPromise;
-      console.log('Loading screen duration complete, setting isLoading to false');
       setIsLoading(false);
     };
 
@@ -386,9 +382,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       }
       
       try {
-        console.log('Loading user prediction for address:', address);
         const prediction = await getUserLivePrediction(address);
-        console.log('Received prediction from API:', prediction);
         
         if (prediction && (prediction.prediction === 'positive' || prediction.prediction === 'negative')) {
           console.log('Setting user prediction to:', prediction.prediction);
