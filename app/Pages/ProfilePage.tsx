@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap, MessageCircle } from 'lucide-react';
+import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { saveImageUrl, getLatestImageUrl, getUserStats, getLeaderboard, getUserRank } from '../Database/actions';
@@ -27,6 +27,7 @@ const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
   const defaultProfileImage = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center';
   const [profileImage, setProfileImage] = useState(defaultProfileImage);
   const [hasCustomImage, setHasCustomImage] = useState(false);
+  const [isMyStatsExpanded, setIsMyStatsExpanded] = useState(true);
 
   const { address, isConnected } = useAccount();
 
@@ -278,109 +279,127 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
           </div>
         )}
 
-        {/* Profile Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
-          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-
-            {/* Profile Image Section */}
-            <div className="flex-shrink-0 w-full sm:w-auto flex flex-col items-center lg:items-start">
-              <div className="relative group w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-lg overflow-hidden border border-gray-200">
-                <img 
-                  src={profileImage} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
-                />
-                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 cursor-pointer">
-                  <Upload className="text-white opacity-0 group-hover:opacity-100 w-5 h-5 sm:w-6 sm:h-6" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              {!hasCustomImage && (
-                <p className="text-xs text-gray-500 mt-2 text-center lg:text-left">Set profile image</p>
-              )}
-            </div>
-
-            {/* Main Info Section */}
-            <div className="flex flex-col w-full gap-6 lg:gap-8">
-              
-              {/* Stats Grid - Responsive Layout */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">
-                    {isLoadingStats ? (
-                      <div className="animate-pulse bg-gray-300 h-6 w-16 rounded mx-auto sm:mx-0"></div>
-                    ) : (
-                      userStats.totalEarnings
-                    )}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Total Earnings</div>
-                </div>
-                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">
-                    {isLoadingStats ? (
-                      <div className="animate-pulse bg-gray-300 h-6 w-12 rounded mx-auto sm:mx-0"></div>
-                    ) : (
-                      userStats.marketsWon
-                    )}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Pots Won</div>
-                </div>
-                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">
-                    {isLoadingStats ? (
-                      <div className="animate-pulse bg-gray-300 h-6 w-14 rounded mx-auto sm:mx-0"></div>
-                    ) : (
-                      userStats.accuracy
-                    )}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Win Rate</div>
-                </div>
-                <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
-                  <div className="text-xl sm:text-2xl font-semibold text-gray-900">
-                    {isLoadingStats ? (
-                      <div className="animate-pulse bg-gray-300 h-6 w-12 rounded mx-auto sm:mx-0"></div>
-                    ) : (
-                      userStats.rank ? `#${userStats.rank}` : 'Unranked'
-                    )}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Global Rank</div>
-                </div>
-              </div>
-
-              {/* Trading Profile Content */}
-              <div className="lg:flex-1">
-                <h1 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">Prediction History</h1>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="text-center sm:text-left">
-                    <div className="text-gray-900 font-medium">
-                      {isLoadingStats ? (
-                        <div className="animate-pulse bg-gray-300 h-5 w-8 rounded mx-auto sm:mx-0"></div>
-                      ) : (
-                        `${userStats.totalPredictions}+`
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">Est. Predictions</div>
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <div className="text-gray-900 font-medium">
-                      {isLoadingStats ? (
-                        <div className="animate-pulse bg-gray-300 h-5 w-12 rounded mx-auto sm:mx-0"></div>
-                      ) : (
-                        userStats.marketsWon > 0 ? 'Active' : 'New Trader'
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">Status</div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
+        {/* My Stats - Collapsible Section */}
+        <div className="bg-white rounded-lg border border-gray-200 mb-4 sm:mb-6">
+          {/* Header with toggle */}
+          <div 
+            className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => setIsMyStatsExpanded(!isMyStatsExpanded)}
+          >
+            <h2 className="text-lg font-semibold text-gray-900">My Stats</h2>
+            {isMyStatsExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-500" />
+            )}
           </div>
+
+          {/* Collapsible Content */}
+          {isMyStatsExpanded && (
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-100">
+              <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start pt-4">
+
+                {/* Profile Image Section */}
+                <div className="flex-shrink-0 w-full sm:w-auto flex flex-col items-center lg:items-start">
+                  <div className="relative group w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-lg overflow-hidden border border-gray-200">
+                    <img 
+                      src={profileImage} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                    <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 cursor-pointer">
+                      <Upload className="text-white opacity-0 group-hover:opacity-100 w-5 h-5 sm:w-6 sm:h-6" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                  {!hasCustomImage && (
+                    <p className="text-xs text-gray-500 mt-2 text-center lg:text-left">Set profile image</p>
+                  )}
+                </div>
+
+                {/* Main Info Section */}
+                <div className="flex flex-col w-full gap-6 lg:gap-8">
+                  
+                  {/* Stats Grid - Responsive Layout */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900">
+                        {isLoadingStats ? (
+                          <div className="animate-pulse bg-gray-300 h-6 w-16 rounded mx-auto sm:mx-0"></div>
+                        ) : (
+                          userStats.totalEarnings
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Total Earnings</div>
+                    </div>
+                    <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900">
+                        {isLoadingStats ? (
+                          <div className="animate-pulse bg-gray-300 h-6 w-12 rounded mx-auto sm:mx-0"></div>
+                        ) : (
+                          userStats.marketsWon
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Pots Won</div>
+                    </div>
+                    <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900">
+                        {isLoadingStats ? (
+                          <div className="animate-pulse bg-gray-300 h-6 w-14 rounded mx-auto sm:mx-0"></div>
+                        ) : (
+                          userStats.accuracy
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Win Rate</div>
+                    </div>
+                    <div className="text-center sm:text-left p-4 bg-gray-50 rounded-lg">
+                      <div className="text-xl sm:text-2xl font-semibold text-gray-900">
+                        {isLoadingStats ? (
+                          <div className="animate-pulse bg-gray-300 h-6 w-12 rounded mx-auto sm:mx-0"></div>
+                        ) : (
+                          userStats.rank ? `#${userStats.rank}` : 'Unranked'
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide">Global Rank</div>
+                    </div>
+                  </div>
+
+                  {/* Trading Profile Content */}
+                  <div className="lg:flex-1">
+                    <h1 className="text-lg font-semibold text-gray-900 mb-4 text-center sm:text-left">Prediction History</h1>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="text-center sm:text-left">
+                        <div className="text-gray-900 font-medium">
+                          {isLoadingStats ? (
+                            <div className="animate-pulse bg-gray-300 h-5 w-8 rounded mx-auto sm:mx-0"></div>
+                          ) : (
+                            `${userStats.totalPredictions}+`
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wide">Est. Predictions</div>
+                      </div>
+                      <div className="text-center sm:text-left">
+                        <div className="text-gray-900 font-medium">
+                          {isLoadingStats ? (
+                            <div className="animate-pulse bg-gray-300 h-5 w-12 rounded mx-auto sm:mx-0"></div>
+                          ) : (
+                            userStats.marketsWon > 0 ? 'Active' : 'New Trader'
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wide">Status</div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Leaderboard */}
