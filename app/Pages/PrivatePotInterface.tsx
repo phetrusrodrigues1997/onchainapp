@@ -17,7 +17,11 @@ import {
   getParticipants,
   getParticipantsWithDetails,
   getPredictionsForDate,
-  cleanupPotTables
+  cleanupPotTables,
+  castVoteToClose,
+  hasUserVoted,
+  getVotingStatus,
+  isPotReadyForDistribution
 } from '../Database/actions2';
 
 import {
@@ -189,6 +193,9 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   const [showParticipantsModal, setShowParticipantsModal] = useState(false); // Participants modal state
   const [participantsData, setParticipantsData] = useState<any[]>([]); // Participants with details
   const [loadingParticipants, setLoadingParticipants] = useState(false); // Loading state for participants
+  const [hasVoted, setHasVoted] = useState(false); // Track if user has voted
+  const [votingStatus, setVotingStatus] = useState<any>(null); // Voting status data
+  const [isVoting, setIsVoting] = useState(false); // Loading state for vote submission
   const { alertState, showAlert, closeAlert } = useCustomAlert();
   
   const { address, isConnected } = useAccount();
@@ -301,6 +308,13 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         const userPred = await getUserPrediction(contractAddress, address, today);
         setUserPrediction(userPred);
         setPredictionDate(today);
+
+        // Load voting status and check if user has voted
+        const votingData = await getVotingStatus(contractAddress);
+        setVotingStatus(votingData);
+
+        const userVoted = await hasUserVoted(contractAddress, address);
+        setHasVoted(userVoted);
       } else if (!details) {
         console.error('Pot not found in database for address:', contractAddress);
       }
@@ -620,6 +634,30 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
+  // Handle voting to close the pot (participants only)
+  const handleVoteToClose = async () => {
+    if (!address || !userParticipant || hasVoted) return;
+
+    setIsVoting(true);
+    try {
+      const result = await castVoteToClose(contractAddress, address);
+      
+      if (result.success) {
+        showAlert('Vote cast successfully!', 'success', 'Vote Recorded');
+        setHasVoted(true);
+        // Refresh voting status
+        const votingData = await getVotingStatus(contractAddress);
+        setVotingStatus(votingData);
+      } else {
+        showAlert(result.error || 'Failed to cast vote', 'error', 'Vote Failed');
+      }
+    } catch (error) {
+      console.error('Error casting vote:', error);
+      showAlert('Failed to cast vote', 'error', 'Vote Failed');
+    }
+    setIsVoting(false);
+  };
+
   // Start editing mode
   const startEditingDetails = () => {
     setEditingPotName(potDetails?.potName || '');
@@ -639,6 +677,12 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   // Handle the two-step distribution process
   const handleDistributePot = async () => {
     if (!address || !isCreator) return;
+
+    // Check if majority vote is achieved before allowing distribution
+    if (!votingStatus?.readyForDistribution) {
+      showAlert(`Cannot distribute yet. Need ${votingStatus?.requiredVotes || 0} votes, currently have ${votingStatus?.votesToClose || 0}.`, 'warning', 'Vote Required');
+      return;
+    }
 
     if (distributionStep === 'ready') {
       // Step 1: Confirm distribution parameters
@@ -1052,24 +1096,30 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               </div>
               
               <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">End game (Must set outcome first)</label>
+                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">
+                  End game {votingStatus && !votingStatus.readyForDistribution && `(Need ${votingStatus.requiredVotes - votingStatus.votesToClose} more votes)`}
+                </label>
                 <div className="space-y-2 sm:space-y-3">
                   
                   
                   <button
                     onClick={handleDistributePot}
-                    disabled={isLoading || isPending || isConfirming}
+                    disabled={isLoading || isPending || isConfirming || !votingStatus?.readyForDistribution}
                     className={`w-full py-2 sm:py-3 rounded-none transition-colors font-light text-sm sm:text-base ${
-                      distributionStep === 'ready' 
-                        ? 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-400'
-                        : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400'
+                      !votingStatus?.readyForDistribution
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : distributionStep === 'ready' 
+                          ? 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-400'
+                          : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400'
                     }`}
                   >
                     {(isLoading && lastAction === 'distributePot') || isPending || isConfirming 
                       ? 'Processing Distribution...' 
-                      : distributionStep === 'ready'
-                        ? 'Begin Distribution'
-                        : 'Distribute'}
+                      : !votingStatus?.readyForDistribution
+                        ? 'Waiting for Votes'
+                        : distributionStep === 'ready'
+                          ? 'Begin Distribution'
+                          : 'Distribute'}
                   </button>
                 </div>
               </div>
@@ -1099,11 +1149,32 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                   <span className="text-sm text-gray-600">Participants:</span>
                   <span className="text-sm font-medium text-black">{potParticipants?.length || 0}</span>
                 </div>
+                {votingStatus && (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Votes to Close:</span>
+                      <span className="text-sm font-medium text-black">{votingStatus.votesToClose} / {votingStatus.requiredVotes}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Ready for Distribution:</span>
+                      <span className="text-sm font-medium text-black">
+                        {votingStatus.readyForDistribution ? '✅ Yes' : '❌ No'}
+                      </span>
+                    </div>
+                  </>
+                )}
                 
-                {!distributionCompleted && Number(formatUSDC(potBalance)) > 0 && (
+                {!distributionCompleted && Number(formatUSDC(potBalance)) > 0 && votingStatus?.readyForDistribution && (
                   <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                     <p className="text-xs text-blue-700">
-                      💡 <strong>Ready for Distribution</strong> - You can distribute ${formatUSDC(potBalance)} to winners anytime.
+                      💡 <strong>Ready for Distribution</strong> - You can distribute ${formatUSDC(potBalance)} to winners now.
+                    </p>
+                  </div>
+                )}
+                {!distributionCompleted && !votingStatus?.readyForDistribution && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <p className="text-xs text-yellow-700">
+                      ⏳ <strong>Waiting for Community Vote</strong> - Need {votingStatus?.requiredVotes || 0} votes to enable distribution.
                     </p>
                   </div>
                 )}
@@ -1258,16 +1329,96 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             </div>
           )}
 
-          {/* Status - Only show to participants
-          {userParticipant && (
-            <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-light text-black mb-3 sm:mb-4">You're In!</h2>
-              <p className="text-sm sm:text-base text-gray-600">You've successfully joined this prediction market.</p>
-              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-                <p className="text-xs sm:text-sm text-gray-500">You can now make predictions and compete with other participants.</p>
+          {/* Voting Section - Only show to participants */}
+          {userParticipant && votingStatus && (
+            <div className="bg-white/90 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-gray-900/5 relative overflow-hidden">
+              {/* Subtle animated background */}
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-pulse"></div>
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">📊 Community Vote</h2>
+                  <p className="text-gray-600 text-sm sm:text-base">Vote to close this market and enable distribution</p>
+                  <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-3 rounded-full"></div>
+                </div>
+
+                {/* Voting Status Display */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-4 sm:p-6 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
+                      <div className="text-lg sm:text-xl font-black text-gray-900">{votingStatus.votesToClose}</div>
+                      <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Votes Cast</div>
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
+                      <div className="text-lg sm:text-xl font-black text-gray-900">{votingStatus.requiredVotes}</div>
+                      <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Required</div>
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
+                      <div className={`text-lg sm:text-xl font-black ${votingStatus.readyForDistribution ? 'text-green-600' : 'text-orange-600'}`}>
+                        {votingStatus.readyForDistribution ? '✅' : '⏳'}
+                      </div>
+                      <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Status</div>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="mt-4">
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-3 rounded-full transition-all duration-500 ${
+                          votingStatus.readyForDistribution 
+                            ? 'bg-gradient-to-r from-green-400 to-green-600' 
+                            : 'bg-gradient-to-r from-blue-400 to-purple-600'
+                        }`}
+                        style={{ 
+                          width: `${Math.min(100, (votingStatus.votesToClose / votingStatus.requiredVotes) * 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2 text-center">
+                      {votingStatus.readyForDistribution 
+                        ? 'Ready for distribution!' 
+                        : `${votingStatus.requiredVotes - votingStatus.votesToClose} more votes needed`
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vote Button */}
+                {!hasVoted ? (
+                  <div className="text-center">
+                    <button
+                      onClick={handleVoteToClose}
+                      disabled={isVoting}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 sm:px-10 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      {isVoting ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Casting Vote...
+                        </div>
+                      ) : (
+                        '🗳️ Vote to Close Market'
+                      )}
+                    </button>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Your vote helps the community decide when to end this market
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 sm:p-6">
+                      <div className="text-2xl mb-2">✅</div>
+                      <h3 className="text-base sm:text-lg font-bold text-green-800 mb-1">Vote Recorded</h3>
+                      <p className="text-sm text-green-700">Thank you for participating in the community decision!</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          )} */}
+          )}
         </div>
       </div>
       
