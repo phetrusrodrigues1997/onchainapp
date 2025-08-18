@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits } from 'viem';
 import { useQueryClient } from '@tanstack/react-query';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Settings, Share2, ArrowLeft, CheckCircle2, Clock, Vote, Target, Info } from 'lucide-react';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
 import { checkEmailExists, saveUserEmail, getUserEmail } from '../Database/emailActions';
@@ -806,46 +806,21 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     return (Number(amount) / 1_000_000).toFixed(2);
   };
 
-  // const isApprovalNeeded = () => {
-  //   if (!entryAmount || !usdcAllowance) return false;
-  //   const amount = Math.floor(parseFloat(entryAmount) * 1_000_000);
-  //   return Number(usdcAllowance) < amount;
-  // };
-
-
   // Show loading screen for first 2 seconds
   if (isInitialLoading) {
     return (
-      <div className="min-h-screen bg-invisible p-4 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center">
-          <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 animate-pulse"></div>
-            </div>
-            
-            <div className="relative z-10">
-              {/* Spinning icon */}
-              <div className="w-20 h-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-gray-900/25 animate-spin">
-                <span className="text-3xl font-black text-white drop-shadow-lg">🎯</span>
-              </div>
-              
-              <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
-                Loading Private Market
-              </h1>
-              
-              {/* Loading dots animation */}
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce delay-100"></div>
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce delay-200"></div>
-              </div>
-              
-              <p className="text-gray-600 text-sm">
-                Preparing your prediction market...
-              </p>
-            </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-6 mx-auto animate-pulse">
+            <Target className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-4">Loading Market</h1>
+          <div className="flex justify-center space-x-1 mb-4">
+            <div className="w-2 h-2 bg-black rounded-full animate-bounce"></div>
+            <div className="w-2 h-2 bg-black rounded-full animate-bounce delay-100"></div>
+            <div className="w-2 h-2 bg-black rounded-full animate-bounce delay-200"></div>
+          </div>
+          <p className="text-gray-600">Preparing your prediction market...</p>
         </div>
       </div>
     );
@@ -854,7 +829,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   // Show loading while pot details are being fetched
   if (isPotLoading && !isInitialLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading market details...</p>
@@ -866,25 +841,26 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   // Show error if pot doesn't exist after loading attempt
   if (!potDetails && !isPotLoading && !isInitialLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center p-8">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-light text-black mb-4">Market Not Found</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Market Not Found</h2>
           <p className="text-gray-600 mb-6">
             This prediction market doesn't exist or hasn't been registered in our system yet.
           </p>
-          <div className="space-y-3">
+          <div className="space-y-3 mb-6">
             <p className="text-sm text-gray-500">Contract Address:</p>
-            <code className="block text-xs bg-gray-100 p-2 rounded break-all">{contractAddress}</code>
+            <code className="block text-xs bg-gray-100 p-3 rounded-lg break-all font-mono">{contractAddress}</code>
           </div>
           <button
             onClick={onBack}
-            className="mt-6 bg-black text-white px-6 py-3 rounded hover:bg-gray-900 transition-colors"
+            className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 mx-auto"
           >
+            <ArrowLeft className="w-4 h-4" />
             Go Back
           </button>
         </div>
@@ -893,329 +869,222 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 sm:p-8">
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      {/* Clean Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 py-6">
           <button
             onClick={onBack}
-            className="text-gray-600 hover:text-black mb-4 sm:mb-6 flex items-center gap-2 font-light transition-colors"
+            className="text-gray-600 hover:text-black mb-6 flex items-center gap-2 font-medium transition-colors"
           >
-            ← Back to Private Markets
+            <ArrowLeft className="w-4 h-4" />
+            Back to Markets
           </button>
           
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
-            <div className="max-w-3xl flex-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-5xl font-light text-black mb-3 sm:mb-4">{potDetails.potName}</h1>
+            <div className="flex-1">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{potDetails.potName}</h1>
+              {potDetails?.description && (
+                <p className="text-lg text-gray-600 max-w-2xl">{potDetails.description}</p>
+              )}
             </div>
             
-            {/* Only show share and control buttons if user is a participant or creator */}
+            {/* Action Buttons */}
             {(userParticipant || isCreator) && (
-              <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 w-full lg:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={copyShareUrl}
-                  className="bg-gray-100 text-black px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-200 font-light transition-colors text-sm sm:text-base w-full lg:w-auto flex items-center justify-center gap-2"
+                  className="bg-gray-100 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-200 font-medium transition-colors flex items-center justify-center gap-2"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                  </svg>
+                  <Share2 className="w-4 h-4" />
                   {shareUrlCopied ? 'Copied!' : 'Share'}
                 </button>
                 {isCreator && (
                   <button
                     onClick={() => setShowCreatorPanel(!showCreatorPanel)}
-                    className="bg-[#aa0000] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
+                    className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 font-medium transition-colors flex items-center justify-center gap-2"
                   >
-                    {showCreatorPanel ? 'Hide' : 'Manage ⚙'}
+                    <Settings className="w-4 h-4" />
+                    {showCreatorPanel ? 'Hide' : 'Manage'}
                   </button>
                 )}
               </div>
             )}
           </div>
-          
-          {/* Market stats - centered across full width */}
-          {(userParticipant || isCreator) && (
-            <div className="w-full flex justify-center mt-8">
-              <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl shadow-xl p-5 max-w-sm relative overflow-hidden">
-                {/* Subtle animated background */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 animate-pulse"></div>
-                
-                <div className="grid grid-cols-2 gap-4 relative z-10">
-                  {/* Balance Card */}
-                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl shadow-md border border-green-200 transform hover:scale-105 transition-all duration-300">
-                    <div className="text-2xl mb-2">💰</div>
-                    <div className="text-lg font-black text-gray-900">${formatUSDC(potBalance)}</div>
-                    <div className="text-xs font-semibold text-green-700 mt-1 tracking-wide">PRIZE POOL</div>
-                  </div>
-                  
-                  {/* Participants Card */}
-                  <button
-                    onClick={handleParticipantsClick}
-                    className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl shadow-md border-2 border-blue-300 transform hover:scale-105 hover:from-blue-100 hover:to-cyan-200 transition-all duration-300 group relative overflow-hidden"
-                  >
-                    {/* Subtle shine effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-                    
-                    <div className="relative z-10">
-                      <div className="text-2xl mb-2 group-hover:animate-bounce">👥</div>
-                      <div className="text-lg font-black text-gray-900">{potParticipants?.length || 0}</div>
-                      <div className="text-xs font-semibold text-blue-700 mt-1 tracking-wide">PLAYERS</div>
-                      <div className="flex items-center justify-center gap-1 mt-2">
-                        <div className="text-xs font-medium text-blue-600">Tap to view</div>
-                        <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4 sm:p-8">
-        {/* Creator Panel - Only show to creators */}
-        {isCreator && showCreatorPanel && (
-              <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 mb-6">
-            <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Creator Panel</h2>
-            
-            {/* Edit Pot Details Section */}
-            <div className="bg-gray-50 border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base sm:text-lg font-medium text-black">Market Details</h3>
-                {!isEditingDetails ? (
-                  <button
-                    onClick={startEditingDetails}
-                    className="text-black hover:text-gray-700 transition-colors font-light text-sm flex items-center gap-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={cancelEditingDetails}
-                      className="text-gray-600 hover:text-black transition-colors font-light text-sm"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleUpdatePotDetails}
-                      className="bg-black text-white px-3 py-1 rounded-none hover:bg-gray-900 transition-colors font-light text-sm"
-                    >
-                      Save
-                    </button>
-                  </div>
-                )}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Market Stats */}
+        {(userParticipant || isCreator) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Prize Pool</p>
+                  <p className="text-2xl font-bold text-gray-900">${formatUSDC(potBalance)}</p>
+                </div>
               </div>
-              
-              {!isEditingDetails ? (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Market Name</label>
-                    <p className="text-sm text-black">{potDetails?.potName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Description</label>
-                    <p className="text-sm text-black">{potDetails?.description}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-2">Market Name</label>
-                    <input
-                      type="text"
-                      value={editingPotName}
-                      onChange={(e) => setEditingPotName(e.target.value)}
-                      placeholder="Enter market name"
-                      className="w-full p-2 border border-gray-200 rounded-none focus:border-black focus:outline-none text-sm"
-                      style={{ color: '#000000', backgroundColor: '#ffffff' }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-2">Description</label>
-                    <textarea
-                      value={editingDescription}
-                      onChange={(e) => setEditingDescription(e.target.value)}
-                      placeholder="Enter market description"
-                      rows={3}
-                      className="w-full p-2 border border-gray-200 rounded-none focus:border-black focus:outline-none text-sm resize-none"
-                      style={{ color: '#000000', backgroundColor: '#ffffff' }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
+            
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Participants</p>
+                  <p className="text-2xl font-bold text-gray-900">{potParticipants?.length || 0}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleParticipantsClick}
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                View Details →
+              </button>
+            </div>
+          </div>
+        )}
 
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Entry Amount (USDC)</label>
-                {/* <div className="mb-2 p-2 bg-transparent text-sm text-gray-600">
-                  Current: ${(potDetails?.entryAmount / 1_000_000).toFixed(2)}
-                </div> */}
+        {/* Creator Panel */}
+        {isCreator && showCreatorPanel && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Creator Panel</h2>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Entry Amount Update */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">Entry Amount (USDC)</label>
                 <input
                   type="text"
                   placeholder="0.01"
                   value={newEntryAmount}
                   onChange={(e) => setNewEntryAmount(e.target.value)}
-                  className="w-full p-2 sm:p-3 border border-gray-200 rounded-none focus:border-black focus:outline-none mb-2 sm:mb-3 text-sm sm:text-base"
-                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 />
                 <button
                   onClick={handleUpdateEntryAmount}
                   disabled={!newEntryAmount}
-                  className="w-full bg-blue-600 text-white py-2 sm:py-3 rounded-none hover:bg-blue-700 disabled:bg-black transition-colors font-light text-sm sm:text-base"
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 font-medium transition-colors"
                 >
                   Update Entry Amount
                 </button>
               </div>
 
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">Set Outcome</label>
+              {/* Outcome Setting */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">Set Outcome</label>
                 <select
                   value={outcomeToSet}
                   onChange={(e) => setOutcomeToSet(e.target.value as 'positive' | 'negative')}
-                  className="w-full p-2 sm:p-3 border border-gray-200 rounded-none focus:border-black focus:outline-none text-sm sm:text-base"
-                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="positive">Positive</option>
                   <option value="negative">Negative</option>
                 </select>
                 <button
                   onClick={handleSetOutcome}
-                  className="w-full mt-2 sm:mt-3 bg-black text-white py-2 sm:py-3 rounded-none hover:bg-gray-900 transition-colors font-light text-sm sm:text-base"
+                  className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 font-medium transition-colors"
                 >
                   Set Outcome
                 </button>
               </div>
-              
-              <div className="sm:col-span-2 lg:col-span-1">
-                <label className="block text-xs sm:text-sm font-medium text-black mb-2 sm:mb-3">
-                  End game {votingStatus && !votingStatus.readyForDistribution && `(Need ${votingStatus.requiredVotes - votingStatus.votesToClose} more votes)`}
-                </label>
-                <div className="space-y-2 sm:space-y-3">
-                  
-                  
-                  <button
-                    onClick={handleDistributePot}
-                    disabled={isLoading || isPending || isConfirming || !votingStatus?.readyForDistribution}
-                    className={`w-full py-2 sm:py-3 rounded-none transition-colors font-light text-sm sm:text-base ${
-                      !votingStatus?.readyForDistribution
-                        ? 'bg-gray-400 text-white cursor-not-allowed'
-                        : distributionStep === 'ready' 
-                          ? 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-400'
-                          : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400'
-                    }`}
-                  >
-                    {(isLoading && lastAction === 'distributePot') || isPending || isConfirming 
-                      ? 'Processing Distribution...' 
-                      : !votingStatus?.readyForDistribution
-                        ? 'Waiting for Votes'
-                        : distributionStep === 'ready'
-                          ? 'Begin Distribution'
-                          : 'Distribute'}
-                  </button>
-                </div>
-              </div>
             </div>
 
-            {/* Debug: Pot State Display */}
-            <div className="bg-yellow-50 border border-yellow-200 p-4 sm:p-6 mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-medium text-black mb-3">🔧 Information</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Accepting Entries:</span>
-                  <span className="text-sm font-medium text-black">
-                    {isAcceptingEntries ? '🟢 Yes' : '🔴 No'}
+            {/* Distribution */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Distribution</h3>
+                {votingStatus && !votingStatus.readyForDistribution && (
+                  <span className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                    Need {votingStatus.requiredVotes - votingStatus.votesToClose} more votes
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleDistributePot}
+                disabled={isLoading || isPending || isConfirming || !votingStatus?.readyForDistribution}
+                className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                  !votingStatus?.readyForDistribution
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : distributionStep === 'ready' 
+                      ? 'bg-orange-600 text-white hover:bg-orange-700'
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+              >
+                {(isLoading && lastAction === 'distributePot') || isPending || isConfirming 
+                  ? 'Processing Distribution...' 
+                  : !votingStatus?.readyForDistribution
+                    ? 'Waiting for Votes'
+                    : distributionStep === 'ready'
+                      ? 'Begin Distribution'
+                      : 'Distribute'}
+              </button>
+            </div>
+
+            {/* Status Info */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Market Status</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Accepting Entries:</span>
+                  <span className={isAcceptingEntries ? 'text-green-600' : 'text-red-600'}>
+                    {isAcceptingEntries ? 'Yes' : 'No'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Distribution Completed:</span>
-                  <span className="text-sm font-medium text-black">
-                    {distributionCompleted ? '✅ Yes' : '⏳ No'}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Distribution Complete:</span>
+                  <span className={distributionCompleted ? 'text-green-600' : 'text-amber-600'}>
+                    {distributionCompleted ? 'Yes' : 'No'}
                   </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Pot Balance:</span>
-                  <span className="text-sm font-medium text-black">${formatUSDC(potBalance)} USDC</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Participants:</span>
-                  <span className="text-sm font-medium text-black">{potParticipants?.length || 0}</span>
                 </div>
                 {votingStatus && (
                   <>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Votes to Close:</span>
-                      <span className="text-sm font-medium text-black">{votingStatus.votesToClose} / {votingStatus.requiredVotes}</span>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Votes:</span>
+                      <span className="text-gray-900">{votingStatus.votesToClose} / {votingStatus.requiredVotes}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Ready for Distribution:</span>
-                      <span className="text-sm font-medium text-black">
-                        {votingStatus.readyForDistribution ? '✅ Yes' : '❌ No'}
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Ready for Distribution:</span>
+                      <span className={votingStatus.readyForDistribution ? 'text-green-600' : 'text-amber-600'}>
+                        {votingStatus.readyForDistribution ? 'Yes' : 'No'}
                       </span>
                     </div>
                   </>
                 )}
-                
-                {!distributionCompleted && Number(formatUSDC(potBalance)) > 0 && votingStatus?.readyForDistribution && (
-                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
-                    <p className="text-xs text-blue-700">
-                      💡 <strong>Ready for Distribution</strong> - You can distribute ${formatUSDC(potBalance)} to winners now.
-                    </p>
-                  </div>
-                )}
-                {!distributionCompleted && !votingStatus?.readyForDistribution && (
-                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                    <p className="text-xs text-yellow-700">
-                      ⏳ <strong>Waiting for Community Vote</strong> - Need {votingStatus?.requiredVotes || 0} votes to enable distribution.
-                    </p>
-                  </div>
-                )}
-                {distributionCompleted && (
-                  <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded">
-                    <p className="text-xs text-green-700">
-                      ✅ <strong>Distribution Complete</strong> - This pot has finished its lifecycle.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
-            
-              </div>
-            )}
+          </div>
+        )}
 
-        {/* User Interface */}
-        <div className="grid lg:grid-cols-1 lg:justify-items-center gap-6 lg:gap-8">
-          {/* Enter Market - Only show if not a participant and pot is accepting entries */}
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Enter Market */}
           {!userParticipant && isAcceptingEntries && (
-            <div className="bg-white border border-gray-200 rounded-none p-4 sm:p-8 lg:max-w-md lg:w-full">
-              <h2 className="text-xl sm:text-2xl font-light text-black mb-4 sm:mb-6">Enter Market</h2>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Enter Market</h2>
               
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 border border-gray-200">
-                <div className="flex justify-between items-center mb-2 sm:mb-3">
-                  <span className="font-medium text-black text-sm sm:text-base">Entry Amount:</span>
-                  <span className="text-lg sm:text-xl lg:text-2xl font-light text-black">${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC</span>
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Entry Amount:</span>
+                  <span className="text-xl font-bold text-gray-900">${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm sm:text-base">Your USDC Balance:</span>
-                  <span className="font-medium text-black text-sm sm:text-base">{formatUSDC(usdcBalance)} USDC</span>
+                  <span className="text-gray-600">Your Balance:</span>
+                  <span className="font-medium text-gray-900">{formatUSDC(usdcBalance)} USDC</span>
                 </div>
               </div>
 
               {isApprovalNeeded() ? (
-                // STEP 1: FORCE USDC APPROVAL FIRST
                 <div>
                   <button
                     onClick={handleApprove}
                     disabled={!potDetails?.entryAmount || isPending || isConfirming}
-                    className="w-full bg-black text-white py-3 sm:py-4 rounded-none hover:bg-orange-700 disabled:bg-gray-400 transition-colors font-light text-base sm:text-lg"
+                    className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 transition-colors font-medium"
                   >
                     {isPending || isConfirming ? (
                       <div className="flex items-center justify-center gap-3">
@@ -1226,23 +1095,22 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                       'Approve USDC Spending'
                     )}
                   </button>
-
-                  <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-xs text-gray-600 text-center">
-                    This is a one-time approval that allows the contract to spend your USDC
-                  </div>
+                  <p className="text-xs text-gray-500 mt-3 text-center">
+                    One-time approval to allow the contract to spend your USDC
+                  </p>
                 </div>
               ) : (
-                // STEP 2: ENTER POT (ONLY AFTER APPROVAL)
                 <div>
-                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200">
-                    <h3 className="text-xs sm:text-sm font-medium text-black mb-2">✅ Step 2: Enter Market</h3>
-                    <p className="text-xs text-green-700">USDC approved! Now you can enter the market.</p>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span className="text-sm font-medium">USDC approved! Ready to enter market.</span>
+                    </div>
                   </div>
-
                   <button
                     onClick={handleEnterPot}
                     disabled={!potDetails?.entryAmount || isPending || isConfirming || userParticipant}
-                    className="w-full bg-black text-white py-3 sm:py-4 rounded-none hover:bg-gray-900 disabled:bg-gray-400 transition-colors font-light text-base sm:text-lg"
+                    className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 transition-colors font-medium"
                   >
                     {userParticipant ? (
                       'Already Entered'
@@ -1252,168 +1120,144 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                         Entering Market...
                       </div>
                     ) : (
-                      `Press to Enter`
+                      'Enter Market'
                     )}
                   </button>
+                </div>
+              )}
+            </div>
+          )}
 
-                  <div className="mt-4 p-3 bg-gray-50 border border-gray-200 text-xs text-gray-600 text-center">
-                    This will transfer ${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC to the market
+          {/* Make Prediction - Full Width */}
+          {userParticipant && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8 lg:col-span-2">
+              <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Make Your Prediction</h2>
+                <p className="text-gray-600 text-sm sm:text-base">What do you think will happen?</p>
+              </div>
+
+              {userPrediction ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-6 sm:p-8 text-center max-w-md mx-auto">
+                  <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mx-auto mb-3" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-green-800 mb-2">Prediction Submitted</h3>
+                  <p className="text-green-700 text-sm sm:text-base">You predicted: <span className="font-bold">{userPrediction.prediction === 'positive' ? 'YES' : 'NO'}</span></p>
+                </div>
+              ) : (
+                <div className="max-w-2xl mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <button
+                      onClick={() => handleMakePrediction('positive')}
+                      className="group bg-green-50 border-2 border-green-200 hover:border-green-400 hover:bg-green-100 rounded-xl p-6 sm:p-8 transition-all duration-200 text-center transform hover:scale-105 hover:-translate-y-1 shadow-sm hover:shadow-lg"
+                    >
+                      <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+                      <span className="text-xl sm:text-2xl font-bold text-green-800">YES</span>
+                      <p className="text-xs sm:text-sm text-green-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Predict positive outcome
+                      </p>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleMakePrediction('negative')}
+                      className="group bg-red-50 border-2 border-red-200 hover:border-red-400 hover:bg-red-100 rounded-xl p-6 sm:p-8 transition-all duration-200 text-center transform hover:scale-105 hover:-translate-y-1 shadow-sm hover:shadow-lg"
+                    >
+                      <TrendingDown className="w-10 h-10 sm:w-12 sm:h-12 text-red-600 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
+                      <span className="text-xl sm:text-2xl font-bold text-red-800">NO</span>
+                      <p className="text-xs sm:text-sm text-red-600 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Predict negative outcome
+                      </p>
+                    </button>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* Make Prediction - Only show to participants */}
-          {userParticipant && (
-            <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
-              {/* Subtle animated background */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 animate-pulse"></div>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="text-center mb-6 sm:mb-10">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-2 tracking-tight">Your Call?</h2>
-                  {/* <p className="text-gray-600 text-lg mb-4">
-                    {new Date(predictionDate).toLocaleDateString()}
-                  </p> */}
-                  <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>
-                </div>
-
-                {userPrediction ? (
-                  <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-green-50/80 backdrop-blur-sm border border-green-200/50 rounded-2xl text-center">
-                    <h3 className="text-base sm:text-lg font-bold text-green-800 mb-2">✅ Prediction Submitted</h3>
-                    <p className="text-sm sm:text-base text-green-700">You predicted: <span className="font-black">{userPrediction.prediction === 'positive' ? 'YES' : 'NO'}</span></p>
-                    <p className="text-xs sm:text-sm text-green-600 mt-1">Your prediction has been recorded.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Premium Positive Button */}
-                    <button
-                      onClick={() => handleMakePrediction('positive')}
-                      className="group relative bg-gradient-to-br from-gray-900 via-gray-800 to-black hover:from-gray-800 hover:via-gray-700 hover:to-gray-900 text-white p-4 sm:p-6 lg:p-10 rounded-3xl font-black text-lg sm:text-xl lg:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/25 overflow-hidden"
-                    >
-                      {/* Subtle shine effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      
-                      <div className="relative z-10 flex flex-col items-center justify-center">
-                        <div className="p-2 sm:p-3 bg-white/10 rounded-2xl mb-3 sm:mb-4 lg:mb-6 backdrop-blur-sm flex items-center justify-center">
-                          <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 group-hover:scale-110 transition-transform duration-300" />
-                        </div>
-                        <div className="tracking-wide">YES</div>
-                      </div>
-                      
-                      {/* Glow effect */}
-                      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-gray-900 to-black opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
-                    </button>
-
-                    {/* Premium Negative Button */}
-                    <button
-                      onClick={() => handleMakePrediction('negative')}
-                      className="group relative bg-gradient-to-br from-white via-gray-50 to-gray-100 hover:from-gray-50 hover:via-gray-100 hover:to-gray-200 border-2 border-gray-200 hover:border-gray-300 text-gray-900 p-4 sm:p-6 lg:p-10 rounded-3xl font-black text-lg sm:text-xl lg:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/10 overflow-hidden"
-                    >
-                      {/* Subtle pattern overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                      
-                      <div className="relative z-10 flex flex-col items-center justify-center">
-                        <div className="p-2 sm:p-3 bg-gray-900/10 rounded-2xl mb-3 sm:mb-4 lg:mb-6 backdrop-blur-sm flex items-center justify-center">
-                          <TrendingDown className="w-8 h-8 sm:w-10 sm:h-10 lg:w-14 lg:h-14 group-hover:scale-110 transition-transform duration-300" />
-                        </div>
-                        <div className="tracking-wide">NO</div>
-                      </div>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Voting Section - Only show to participants */}
+          {/* Voting Section - Full Width */}
           {userParticipant && votingStatus && (
-            <div className="bg-white/90 backdrop-blur-xl border border-gray-200/50 rounded-2xl p-6 sm:p-8 shadow-xl shadow-gray-900/5 relative overflow-hidden">
-              {/* Subtle animated background */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-pulse"></div>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8 lg:col-span-2">
+              <div className="text-center mb-6 sm:mb-8">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Vote className="w-6 h-6 text-blue-600" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">Community Vote</h2>
+                <p className="text-gray-600 text-sm sm:text-base">Vote to close this market and enable distribution</p>
               </div>
-              
-              <div className="relative z-10">
-                <div className="text-center mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">📊 Community Vote</h2>
-                  <p className="text-gray-600 text-sm sm:text-base">Vote to close this market and enable distribution</p>
-                  <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-3 rounded-full"></div>
-                </div>
 
-                {/* Voting Status Display */}
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-4 sm:p-6 mb-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
-                      <div className="text-lg sm:text-xl font-black text-gray-900">{votingStatus.votesToClose}</div>
-                      <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Votes Cast</div>
-                    </div>
-                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
-                      <div className="text-lg sm:text-xl font-black text-gray-900">{votingStatus.requiredVotes}</div>
-                      <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Required</div>
-                    </div>
-                    <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-gray-200/50">
-                      <div className={`text-lg sm:text-xl font-black ${votingStatus.readyForDistribution ? 'text-green-600' : 'text-orange-600'}`}>
-                        {votingStatus.readyForDistribution ? '✅' : '⏳'}
-                      </div>
-                      <div className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wide">Status</div>
-                    </div>
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="mt-4">
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                      <div 
-                        className={`h-3 rounded-full transition-all duration-500 ${
-                          votingStatus.readyForDistribution 
-                            ? 'bg-gradient-to-r from-green-400 to-green-600' 
-                            : 'bg-gradient-to-r from-blue-400 to-purple-600'
-                        }`}
-                        style={{ 
-                          width: `${Math.min(100, (votingStatus.votesToClose / votingStatus.requiredVotes) * 100)}%` 
-                        }}
-                      ></div>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-2 text-center">
-                      {votingStatus.readyForDistribution 
-                        ? 'Ready for distribution!' 
-                        : `${votingStatus.requiredVotes - votingStatus.votesToClose} more votes needed`
-                      }
-                    </div>
+              {/* Voting Progress - Enhanced for full width */}
+              <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4 mb-4">
+                  <span className="text-sm sm:text-base text-gray-600 text-center sm:text-left">Voting Progress</span>
+                  <div className="flex items-center justify-center sm:justify-end gap-4">
+                    <span className="text-sm sm:text-base font-medium text-gray-900">
+                      {votingStatus.votesToClose} / {votingStatus.requiredVotes} votes
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      votingStatus.readyForDistribution 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {votingStatus.readyForDistribution ? 'Ready' : 'In Progress'}
+                    </span>
                   </div>
                 </div>
+                
+                {/* Enhanced progress bar */}
+                <div className="w-full bg-gray-200 rounded-full h-4 sm:h-5 overflow-hidden shadow-inner">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-700 ease-out ${
+                      votingStatus.readyForDistribution 
+                        ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                    }`}
+                    style={{ 
+                      width: `${Math.min(100, (votingStatus.votesToClose / votingStatus.requiredVotes) * 100)}%` 
+                    }}
+                  ></div>
+                </div>
+                
+                <div className="flex justify-between items-center mt-3">
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    {votingStatus.readyForDistribution 
+                      ? '🎉 Ready for distribution!' 
+                      : `${votingStatus.requiredVotes - votingStatus.votesToClose} more votes needed`
+                    }
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-400">
+                    {Math.round((votingStatus.votesToClose / votingStatus.requiredVotes) * 100)}%
+                  </p>
+                </div>
+              </div>
 
-                {/* Vote Button */}
+              {/* Vote Button - Enhanced layout */}
+              <div className="text-center">
                 {!hasVoted ? (
-                  <div className="text-center">
+                  <div className="space-y-4">
                     <button
                       onClick={handleVoteToClose}
                       disabled={isVoting}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 sm:px-10 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      className="bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 font-medium transition-all duration-200 inline-flex items-center gap-2 transform hover:scale-105 disabled:hover:scale-100 shadow-lg hover:shadow-xl"
                     >
                       {isVoting ? (
-                        <div className="flex items-center gap-3">
+                        <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Casting Vote...
-                        </div>
+                          <span className="text-sm sm:text-base">Casting Vote...</span>
+                        </>
                       ) : (
-                        '🗳️ Vote to Close Market'
+                        <>
+                          <Vote className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="text-sm sm:text-base">Vote to Close Market</span>
+                        </>
                       )}
                     </button>
-                    <p className="text-xs text-gray-500 mt-3">
-                      Your vote helps the community decide when to end this market
+                    <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
+                      Your vote helps the community decide when to end this market and distribute rewards
                     </p>
                   </div>
                 ) : (
-                  <div className="text-center">
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 sm:p-6">
-                      <div className="text-2xl mb-2">✅</div>
-                      <h3 className="text-base sm:text-lg font-bold text-green-800 mb-1">Vote Recorded</h3>
-                      <p className="text-sm text-green-700">Thank you for participating in the community decision!</p>
-                    </div>
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-6 sm:p-8 max-w-md mx-auto">
+                    <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mx-auto mb-3" />
+                    <h3 className="text-lg sm:text-xl font-semibold text-green-800 mb-2">Vote Recorded</h3>
+                    <p className="text-green-700 text-sm sm:text-base">Thank you for participating in the community decision!</p>
                   </div>
                 )}
               </div>
@@ -1442,26 +1286,26 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
       {/* Participants Modal */}
       {showParticipantsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
-                <h2 className="text-xl sm:text-2xl font-light text-black">Market Participants</h2>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">{participantsData.length} participants in this market</p>
+                <h2 className="text-xl font-semibold text-gray-900">Market Participants</h2>
+                <p className="text-sm text-gray-500 mt-1">{participantsData.length} participants</p>
               </div>
               <button
                 onClick={() => setShowParticipantsModal(false)}
-                className="text-gray-400 hover:text-black transition-colors p-1 sm:p-2 hover:bg-gray-100 rounded-full"
+                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-6">
               {loadingParticipants ? (
                 <div className="text-center py-12">
                   <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -1469,185 +1313,67 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 </div>
               ) : participantsData.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-medium text-black mb-2">No Participants Yet</h3>
+                  <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Participants Yet</h3>
                   <p className="text-gray-500">This market doesn't have any participants yet.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {/* Desktop Table Header - Hidden on Mobile */}
-                  <div className="hidden md:grid md:grid-cols-4 gap-4 pb-3 border-b border-gray-200 text-sm font-medium text-gray-500 uppercase tracking-wide">
-                    <div>Participant</div>
-                    <div>Entry Amount</div>
-                    <div>Prediction</div>
-                    <div>Joined</div>
-                  </div>
-
-                  {/* Participants List */}
+                <div className="space-y-4">
                   {participantsData.map((participant, index) => (
-                    <React.Fragment key={participant.wallet_address}>
-                      {/* Mobile Card Layout */}
-                      <div className="block md:hidden bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors mb-3">
-                        <div className="flex items-start space-x-3 mb-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div key={participant.wallet_address} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium">
                             {participant.email ? participant.email.charAt(0).toUpperCase() : (index + 1)}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-black text-sm mb-1 truncate">
+                          <div>
+                            <div className="font-medium text-gray-900">
                               {participant.email || `${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
                             </div>
-                            {participant.email && (
-                              <div className="text-xs text-gray-500 break-all">
-                                {participant.wallet_address.slice(0, 12)}...{participant.wallet_address.slice(-8)}
-                              </div>
-                            )}
+                            <div className="text-xs text-gray-500">
+                              ${(participant.entry_amount / 1_000_000).toFixed(2)} USDC • {new Date(participant.joined_at).toLocaleDateString()}
+                            </div>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-3 gap-3 text-sm">
-                          <div>
-                            <div className="text-xs text-gray-500 mb-1">Entry</div>
-                            <div className="font-medium text-black">
-                              ${(participant.entry_amount / 1_000_000).toFixed(2)}
-                              <span className="text-gray-500 text-xs ml-1">USDC</span>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-gray-500 mb-1">Prediction</div>
-                            {participant.predictionStatus === 'Pending' ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
-                                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Pending
-                              </span>
-                            ) : participant.predictionStatus === 'positive' ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 font-medium">
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                YES
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 font-medium">
-                                <TrendingDown className="w-3 h-3 mr-1" />
-                                NO
-                              </span>
-                            )}
-                          </div>
-                          <div>
-                            <div className="text-xs text-gray-500 mb-1">Joined</div>
-                            <div className="text-xs text-gray-600">
-                              {new Date(participant.joined_at).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric'
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Desktop Table Row */}
-                      <div className="hidden md:grid md:grid-cols-4 gap-4 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors rounded-lg">
-                        {/* Participant Name/Address */}
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3">
-                            {participant.email ? participant.email.charAt(0).toUpperCase() : (index + 1)}
-                          </div>
-                          <div>
-                            <div className="font-medium text-black">
-                              {participant.email || `${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
-                            </div>
-                            {participant.email && (
-                              <div className="text-xs text-gray-500 break-all">
-                                {participant.wallet_address.slice(0, 12)}...{participant.wallet_address.slice(-8)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Entry Amount */}
-                        <div className="flex items-center">
-                          <span className="text-gray-900 font-medium">
-                            ${(participant.entry_amount / 1_000_000).toFixed(2)}
-                          </span>
-                          <span className="text-gray-500 text-sm ml-1">USDC</span>
-                        </div>
-
-                        {/* Prediction Status */}
-                        <div className="flex items-center">
+                        <div className="text-right">
                           {participant.predictionStatus === 'Pending' ? (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">
-                              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                              <Clock className="w-3 h-3 mr-1" />
                               Pending
                             </span>
                           ) : participant.predictionStatus === 'positive' ? (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 font-medium">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">
                               <TrendingUp className="w-3 h-3 mr-1" />
                               YES
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800 font-medium">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-red-100 text-red-800">
                               <TrendingDown className="w-3 h-3 mr-1" />
                               NO
                             </span>
                           )}
                         </div>
-
-                        {/* Join Date */}
-                        <div className="flex items-center">
-                          <span className="text-gray-600 text-sm">
-                            {new Date(participant.joined_at).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
-                        </div>
                       </div>
-                    </React.Fragment>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-gray-200 p-3 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                <div className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
-                  <span className="font-medium text-black">{participantsData.filter(p => p.predictionStatus !== 'Pending').length}</span> 
-                  {' '}of {participantsData.length} participants have made predictions
+            <div className="border-t border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                  <span className="font-medium text-gray-900">{participantsData.filter(p => p.predictionStatus !== 'Pending').length}</span> 
+                  {' '}of {participantsData.length} have made predictions
                 </div>
                 <button
                   onClick={() => setShowParticipantsModal(false)}
-                  className="w-full sm:w-auto bg-black text-white px-6 py-2 rounded hover:bg-gray-900 transition-colors text-sm sm:text-base"
+                  className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
                 >
                   Close
                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Market Description - Bottom Section */}
-      {potDetails?.description && (
-        <div className="max-w-4xl mx-auto mt-16 mb-8 p-6 sm:p-8">
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-l-4 border-gray-900 rounded-r-xl p-6 sm:p-8 shadow-lg">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">About This Market</h3>
-                <p className="text-gray-700 leading-relaxed text-base sm:text-lg">{potDetails.description}</p>
               </div>
             </div>
           </div>
