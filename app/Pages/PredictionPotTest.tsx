@@ -157,6 +157,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   
   // Track successful pot entry for enhanced UI feedback
   const [justEnteredPot, setJustEnteredPot] = useState(false);
+  const [postEntryLoading, setPostEntryLoading] = useState(false);
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -709,7 +710,9 @@ useEffect(() => {
   queryClient.invalidateQueries({ queryKey: ['readContract'] });
 }, 1000);
     } else if (lastAction === 'enterPot') {
-      setIsLoading(false);
+      // Keep loading state active while background processes complete
+      setIsLoading(false); // Clear transaction loading
+      setPostEntryLoading(true); // Start post-entry loading
       setJustEnteredPot(true);
       showMessage('Successfully entered the pot! Welcome to the prediction game!');
       
@@ -742,6 +745,8 @@ useEffect(() => {
         queryClient.invalidateQueries({ queryKey: ['readContract'] });
         queryClient.removeQueries({ queryKey: ['readContract'] });
         console.log('🔄 Force refresh #4 - 5000ms');
+        // Clear post-entry loading state after background processes complete
+        setPostEntryLoading(false);
       }, 5000);
       
       // Clear the "just entered" state after showing success for a while
@@ -850,8 +855,8 @@ useEffect(() => {
   }
 }, [isConfirmed, lastAction]);
 
-  // Show loading screen for first 2 seconds
-  if (isInitialLoading) {
+  // Show loading screen for first 2 seconds or during post-entry processing
+  if (isInitialLoading || postEntryLoading) {
     return (
       <div className="min-h-screen bg-invisible p-4 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center">
@@ -1034,7 +1039,7 @@ useEffect(() => {
           )}
 
           {/* User Actions - Show different content if already a participant */}
-          {isConnected && contractAddress && isParticipant && !reEntryFee && (
+          {isConnected && contractAddress && isParticipant && !reEntryFee && !postEntryLoading && (
             <div className="mb-6">
               <div className={`rounded-xl border p-8 text-center transition-all duration-500 ${
                 justEnteredPot 
@@ -1063,6 +1068,7 @@ useEffect(() => {
               </div>
             </div>
           )}
+
 
           {/* User Actions - Show countdown or pot entry based on day */}
           {isConnected && contractAddress && !isParticipant && !reEntryFee && (

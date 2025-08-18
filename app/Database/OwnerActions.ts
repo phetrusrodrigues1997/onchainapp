@@ -115,10 +115,19 @@ export async function setDailyOutcome(
         .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
     }
     
-    // Clear ALL processed predictions (both right and wrong have been handled)
-    await db
-      .delete(betsTable)
-      .where(inArray(betsTable.walletAddress, allPredictors.map(p => p.walletAddress)));
+    // Only clear ALL predictions on non-Saturday days
+    // On Saturday, keep correct predictions for winner determination
+    const today = new Date();
+    const dayOfWeek = today.getUTCDay(); // 0 = Sunday, 6 = Saturday
+    
+    if (dayOfWeek !== 6) {
+      // Clear ALL processed predictions (both right and wrong have been handled)
+      await db
+        .delete(betsTable)
+        .where(inArray(betsTable.walletAddress, allPredictors.map(p => p.walletAddress)));
+    } else {
+      console.log("Saturday detected - keeping correct predictions in table for winner determination");
+    }
       
   } catch (error) {
     console.error("Error processing outcome:", error);
