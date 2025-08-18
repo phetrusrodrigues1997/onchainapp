@@ -27,7 +27,7 @@ const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
   const defaultProfileImage = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center';
   const [profileImage, setProfileImage] = useState(defaultProfileImage);
   const [hasCustomImage, setHasCustomImage] = useState(false);
-  const [isMyStatsExpanded, setIsMyStatsExpanded] = useState(true);
+  const [isMyStatsExpanded, setIsMyStatsExpanded] = useState(false);
 
   const { address, isConnected } = useAccount();
 
@@ -286,7 +286,7 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
             className="flex items-center justify-between p-4 sm:p-6 cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => setIsMyStatsExpanded(!isMyStatsExpanded)}
           >
-            <h2 className="text-lg font-semibold text-gray-900">My Stats</h2>
+            <h2 className="text-lg font-semibold text-gray-900">My Stats & Earnings</h2>
             {isMyStatsExpanded ? (
               <ChevronUp className="w-5 h-5 text-gray-500" />
             ) : (
