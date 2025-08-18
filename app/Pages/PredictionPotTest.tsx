@@ -158,6 +158,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   // Track successful pot entry for enhanced UI feedback
   const [justEnteredPot, setJustEnteredPot] = useState(false);
   const [postEntryLoading, setPostEntryLoading] = useState(false);
+  const [usedDiscountedEntry, setUsedDiscountedEntry] = useState(false);
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -534,17 +535,15 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     
     setIsLoading(true);
     setLastAction('enterPot');
+    setUsedDiscountedEntry(useDiscounted); // Track if discounted entry was attempted
     
     try {
-      // If using discounted entry, check and consume free entry from database
-      if (useDiscounted) {
-        const freeEntryUsed = await consumeFreeEntry(address!);
-        if (!freeEntryUsed) {
-          showMessage('No discounted entries available', true);
-          setIsLoading(false);
-          setLastAction('');
-          return;
-        }
+      // Don't consume free entry yet - wait for transaction confirmation
+      if (useDiscounted && freeEntriesAvailable === 0) {
+        showMessage('No discounted entries available', true);
+        setIsLoading(false);
+        setLastAction('');
+        return;
       }
       
       // Handle referral code if provided for paid entries (run in background)
@@ -577,6 +576,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       showMessage('Enter pot failed. Check console for details.', true);
       setLastAction('');
       setIsLoading(false);
+      setUsedDiscountedEntry(false); // Reset flag on error
     }
   };
 
@@ -714,6 +714,18 @@ useEffect(() => {
       setIsLoading(false); // Clear transaction loading
       setPostEntryLoading(true); // Start post-entry loading
       setJustEnteredPot(true);
+      
+      // Now consume the free entry after successful transaction
+      if (usedDiscountedEntry && address) {
+        consumeFreeEntry(address).then((success) => {
+          if (success) {
+            console.log('Free entry consumed successfully after transaction confirmation');
+          } else {
+            console.error('Failed to consume free entry after transaction confirmation');
+          }
+        });
+      }
+      
       showMessage('Successfully entered the pot! Welcome to the prediction game!');
       
       // Aggressive refresh strategy for both free entries and normal entries
@@ -752,6 +764,7 @@ useEffect(() => {
       // Clear the "just entered" state after showing success for a while
       setTimeout(() => {
         setJustEnteredPot(false);
+        setUsedDiscountedEntry(false); // Reset discounted entry flag
       }, 8000); // Extended to 8 seconds for better visibility
       
       // Reload free entries count to reflect the used entry
@@ -1139,42 +1152,84 @@ useEffect(() => {
                   
                   {/* Free Entry Option */}
                   {freeEntriesAvailable > 0 && (
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <h3 className="text-black font-bold mb-2">🎉 Discounted Entry Available!</h3>
-                      <p className="text-gray-600 text-sm mb-3">
-                        Discounted price: {formatBigIntValue(entryAmount)} USDC (regular: {formatBigIntValue(baseEntryAmount)} USDC)
-                      </p>
-                      <p className="text-orange-600 text-xs mb-3 font-medium">
-                        💡 Note: After using your free entry, please REFRESH the page to see your updated status.
-                      </p>
+                    <div className="relative bg-gradient-to-br from-emerald-50 to-green-50 p-6 rounded-2xl border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                      {/* Decorative background elements */}
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-100/50 rounded-full blur-xl"></div>
+                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-green-100/50 rounded-full blur-lg"></div>
                       
-                      {!hasEnoughAllowance ? (
-                        <button
-                          onClick={handleApprove}
-                          disabled={isActuallyLoading}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mr-2"
-                        >
-                          {isActuallyLoading && lastAction === 'approve'
-                            ? 'Approving...'
-                            : `Approve ${formatBigIntValue(entryAmount)} USDC`}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleEnterPot(true)}
-                          disabled={isActuallyLoading || !hasEnoughBalance}
-                          className="bg-green-600 text-white px-4 py-2 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isActuallyLoading && lastAction === 'enterPot'
-                            ? 'Using Discounted Entry...'
-                            : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
-                        </button>
-                      )}
-                      {!hasEnoughBalance && (
-                        <p className="text-red-400 text-sm mt-2">Insufficient USDC balance for discounted entry</p>
-                      )}
-                      {/* {!hasEnoughAllowance && (
-                        <p className="text-yellow-400 text-sm mt-2">Need to approve {formatBigIntValue(entryAmount)} USDC first</p>
-                      )} */}
+                      <div className="relative z-10">
+                        {/* Header with icon */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <span className="text-white text-lg font-bold">✨</span>
+                          </div>
+                          <div>
+                            <h3 className="text-emerald-900 text-lg font-bold leading-tight">Special Discount Available</h3>
+                            <p className="text-emerald-700/80 text-sm">Congratulations!!!</p>
+                          </div>
+                        </div>
+                        
+                        {/* Pricing comparison */}
+                        <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl mb-4 border border-emerald-100">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-gray-500 text-sm line-through">Regular: {formatBigIntValue(baseEntryAmount)} USDC</span>
+                              <div className="text-emerald-800 text-xl font-bold">
+                                Your Price: {formatBigIntValue(entryAmount)} USDC
+                              </div>
+                            </div>
+                            <div className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                              SAVE {((Number(baseEntryAmount) - Number(entryAmount)) / 1000000).toFixed(2)} USDC
+                            </div>
+                          </div>
+                        </div>
+                        
+                       
+                        
+                        {/* Action buttons */}
+                        <div className="space-y-3">
+                          {!hasEnoughAllowance ? (
+                            <button
+                              onClick={handleApprove}
+                              disabled={isActuallyLoading}
+                              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                            >
+                              {isActuallyLoading && lastAction === 'approve'
+                                ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Approving...
+                                  </div>
+                                )
+                                : `Approve ${formatBigIntValue(entryAmount)} USDC`}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleEnterPot(true)}
+                              disabled={isActuallyLoading || !hasEnoughBalance}
+                              className="w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                            >
+                              {isActuallyLoading && lastAction === 'enterPot'
+                                ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Using Discount...
+                                  </div>
+                                )
+                                : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
+                            </button>
+                          )}
+                          
+                          {!hasEnoughBalance && (
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-red-500 text-sm">⚠️</span>
+                                <p className="text-red-700 text-sm font-medium">Insufficient USDC balance for discounted entry</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                   
