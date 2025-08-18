@@ -88,7 +88,14 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     }
 
     setUserPots(participatingPots);
-  }, [participants1, participants2, address, isConnected]);
+
+    // Check if user is already a participant in the selected market and redirect to predictions
+    const selectedMarketAddress = Cookies.get('selectedMarket');
+    if (selectedMarketAddress && participatingPots.includes(selectedMarketAddress)) {
+      console.log('User is already a participant in selected market, redirecting to predictions');
+      setActiveSection('makePrediction');
+    }
+  }, [participants1, participants2, address, isConnected, setActiveSection]);
 
   useEffect(() => {
     const updateDashboard = () => {

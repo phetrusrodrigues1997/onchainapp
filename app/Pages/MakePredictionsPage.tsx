@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee } from '../Database/actions';
-import { TrendingUp, TrendingDown, Shield, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload } from 'lucide-react';
 import Cookies from 'js-cookie';
 
 // Define table identifiers instead of passing table objects
@@ -31,6 +31,26 @@ interface TodaysBet {
   createdAt: Date;
 }
 
+interface MarketOutcome {
+  id: number;
+  contractAddress: string;
+  outcome: 'positive' | 'negative';
+  setAt: Date;
+  evidenceWindowExpires: Date;
+  finalOutcome?: 'positive' | 'negative';
+  isDisputed: boolean;
+}
+
+interface EvidenceSubmission {
+  id: number;
+  walletAddress: string;
+  contractAddress: string;
+  evidence: string;
+  submittedAt: Date;
+  paymentTxHash: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 export default function MakePredicitions() {
   const { address, isConnected } = useAccount();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -43,6 +63,13 @@ export default function MakePredicitions() {
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
   const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
   const [marketQuestion, setMarketQuestion] = useState<string>('');
+  
+  // Evidence submission system state
+  const [marketOutcome, setMarketOutcome] = useState<MarketOutcome | null>(null);
+  const [evidenceText, setEvidenceText] = useState<string>('');
+  const [isSubmittingEvidence, setIsSubmittingEvidence] = useState<boolean>(false);
+  const [userEvidenceSubmission, setUserEvidenceSubmission] = useState<EvidenceSubmission | null>(null);
+  const [timeUntilEvidenceExpires, setTimeUntilEvidenceExpires] = useState<number>(0);
 
   // Check if betting is allowed (Sunday through Friday)
   const isBettingAllowed = (): boolean => {
@@ -56,6 +83,30 @@ export default function MakePredicitions() {
     const now = new Date();
     const day = now.getDay();
     return day === 6; // Saturday
+  };
+
+  // Check if outcome has been set for this market
+  const hasOutcomeBeenSet = (): boolean => {
+    return marketOutcome !== null;
+  };
+
+  // Check if evidence submission window is active (within 1 hour of outcome being set)
+  const isEvidenceWindowActive = (): boolean => {
+    if (!marketOutcome) return false;
+    const now = new Date();
+    return now < marketOutcome.evidenceWindowExpires;
+  };
+
+  // Format time remaining in evidence window
+  const formatTimeRemaining = (milliseconds: number): string => {
+    const minutes = Math.floor(milliseconds / 60000);
+    const seconds = Math.floor((milliseconds % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Check if user has already submitted evidence
+  const hasUserSubmittedEvidence = (): boolean => {
+    return userEvidenceSubmission !== null;
   };
 
   // Add useEffect to handle cookie retrieval
@@ -125,8 +176,62 @@ export default function MakePredicitions() {
   useEffect(() => {
     if (address && isParticipant) {
       loadBets();
+      loadMarketOutcome();
+      loadUserEvidenceSubmission();
     }
-  }, [address, isParticipant, selectedTableType, loadBets]);
+  }, [address, isParticipant, selectedTableType, loadBets, loadMarketOutcome, loadUserEvidenceSubmission]);
+
+  // Timer effect for evidence window countdown
+  useEffect(() => {
+    if (!isEvidenceWindowActive()) return;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const expiry = marketOutcome?.evidenceWindowExpires.getTime() || 0;
+      const remaining = expiry - now;
+      
+      if (remaining <= 0) {
+        setTimeUntilEvidenceExpires(0);
+        clearInterval(timer);
+      } else {
+        setTimeUntilEvidenceExpires(remaining);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [marketOutcome]);
+
+  // Load market outcome for current contract
+  const loadMarketOutcome = useCallback(async () => {
+    if (!contractAddress) return;
+    
+    try {
+      // TODO: Implement getMarketOutcome in Database/actions
+      // const outcome = await getMarketOutcome(contractAddress);
+      // setMarketOutcome(outcome);
+      
+      // For now, simulate an outcome being set (remove this in production)
+      // This simulates admin setting an outcome
+      console.log('Loading market outcome for contract:', contractAddress);
+    } catch (error) {
+      console.error('Error loading market outcome:', error);
+    }
+  }, [contractAddress]);
+
+  // Load user's evidence submission if any
+  const loadUserEvidenceSubmission = useCallback(async () => {
+    if (!address || !contractAddress) return;
+    
+    try {
+      // TODO: Implement getUserEvidenceSubmission in Database/actions
+      // const submission = await getUserEvidenceSubmission(address, contractAddress);
+      // setUserEvidenceSubmission(submission);
+      
+      console.log('Loading evidence submission for user:', address);
+    } catch (error) {
+      console.error('Error loading evidence submission:', error);
+    }
+  }, [address, contractAddress]);
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -153,6 +258,55 @@ export default function MakePredicitions() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEvidenceSubmission = async () => {
+    if (!address || !evidenceText.trim() || !contractAddress) return;
+    
+    setIsSubmittingEvidence(true);
+    try {
+      // TODO: Implement evidence submission with $5 USDC payment
+      // This would involve:
+      // 1. USDC approval for $5 (5000000 with 6 decimals)
+      // 2. Contract call to submit evidence and payment
+      // 3. Database record of evidence submission
+      
+      // For now, simulate the submission
+      console.log('Submitting evidence:', evidenceText);
+      console.log('Payment: $5 USDC');
+      
+      // TODO: Implement submitEvidence in Database/actions
+      // await submitEvidence(address, contractAddress, evidenceText, txHash);
+      
+      showMessage('Evidence submitted successfully! Payment of $5 USDC processed.');
+      setEvidenceText('');
+      await loadUserEvidenceSubmission();
+    } catch (error: unknown) {
+      console.error('Error submitting evidence:', error);
+      showMessage(error instanceof Error ? error.message : 'Failed to submit evidence. Please try again.');
+    } finally {
+      setIsSubmittingEvidence(false);
+    }
+  };
+
+  // Temporary test function to simulate admin setting outcome (remove in production)
+  const simulateOutcomeSet = (outcome: 'positive' | 'negative') => {
+    const now = new Date();
+    const evidenceExpiry = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+    
+    setMarketOutcome({
+      id: 1,
+      contractAddress,
+      outcome,
+      setAt: now,
+      evidenceWindowExpires: evidenceExpiry,
+      isDisputed: false
+    });
+    
+    // Initialize countdown timer
+    setTimeUntilEvidenceExpires(60 * 60 * 1000); // 1 hour in milliseconds
+    
+    showMessage(`Test: Market outcome set to ${outcome.toUpperCase()}. Evidence window: 1 hour.`);
   };
 
   // Rest of your component remains the same...
@@ -327,8 +481,169 @@ export default function MakePredicitions() {
                   </p>
                 </div>
               </div>
+            ) : hasOutcomeBeenSet() ? (
+              // Market outcome has been set - show outcome and evidence submission interface
+              <div className="space-y-6">
+                {/* Market Outcome Display */}
+                <div className={`bg-gradient-to-br backdrop-blur-xl border-2 rounded-3xl p-10 mb-8 shadow-2xl relative overflow-hidden ${
+                  marketOutcome?.outcome === 'positive' 
+                    ? 'from-green-50 via-white to-green-50 border-green-200 shadow-green-900/10' 
+                    : 'from-red-50 via-white to-red-50 border-red-200 shadow-red-900/10'
+                }`}>
+                  <div className="text-center">
+                    <div className={`w-24 h-24 bg-gradient-to-br rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg ${
+                      marketOutcome?.outcome === 'positive' 
+                        ? 'from-green-500 to-green-600' 
+                        : 'from-red-500 to-red-600'
+                    }`}>
+                      {marketOutcome?.outcome === 'positive' ? (
+                        <TrendingUp className="w-12 h-12 text-white" />
+                      ) : (
+                        <TrendingDown className="w-12 h-12 text-white" />
+                      )}
+                    </div>
+                    <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Market Outcome Set</h2>
+                    <div className={`inline-flex items-center gap-4 px-8 py-4 rounded-2xl bg-gradient-to-br backdrop-blur-sm border shadow-lg ${
+                      marketOutcome?.outcome === 'positive' 
+                        ? 'from-green-50/80 to-white/80 border-green-200/30' 
+                        : 'from-red-50/80 to-white/80 border-red-200/30'
+                    }`}>
+                      <div className={`text-4xl font-black tracking-tight ${
+                        marketOutcome?.outcome === 'positive' ? 'text-green-700' : 'text-red-700'
+                      }`}>
+                        {marketOutcome?.outcome === 'positive' ? 'YES' : 'NO'}
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-lg mt-6 font-medium">
+                      Official outcome determined by admin
+                    </p>
+                    {marketOutcome?.finalOutcome && marketOutcome.finalOutcome !== marketOutcome.outcome && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mt-4">
+                        <p className="text-yellow-800 font-semibold">
+                          ⚠️ Outcome was disputed and updated to: <span className="font-bold">
+                            {marketOutcome.finalOutcome === 'positive' ? 'YES' : 'NO'}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Evidence Submission Interface */}
+                {isEvidenceWindowActive() && !hasUserSubmittedEvidence() && (
+                  <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 backdrop-blur-xl border-2 border-orange-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-orange-900/10 relative overflow-hidden">
+                    <div className="text-center mb-8">
+                      <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                        <AlertTriangle className="w-12 h-12 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Dispute the Outcome?</h3>
+                      <div className="bg-orange-100 rounded-2xl p-4 border border-orange-200 mb-6">
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                          <Clock className="w-5 h-5 text-orange-600" />
+                          <p className="text-orange-800 font-bold">
+                            Evidence window expires in: {formatTimeRemaining(timeUntilEvidenceExpires)}
+                          </p>
+                        </div>
+                        <p className="text-orange-700 text-sm">
+                          Submit evidence against this outcome within the time limit
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-gray-700 font-bold mb-3">
+                          Evidence Against Outcome ($5 USDC required)
+                        </label>
+                        <textarea
+                          value={evidenceText}
+                          onChange={(e) => setEvidenceText(e.target.value)}
+                          placeholder="Provide detailed evidence why this outcome is incorrect. Include links, sources, or explanations..."
+                          className="w-full h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                          disabled={isSubmittingEvidence}
+                        />
+                      </div>
+
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+                          <div className="text-yellow-800">
+                            <p className="font-bold mb-2">Evidence Submission Terms:</p>
+                            <ul className="text-sm space-y-1">
+                              <li>• $5 USDC fee required to submit evidence</li>
+                              <li>• Fee is refunded if your evidence is accepted</li>
+                              <li>• Fee is lost if evidence is rejected</li>
+                              <li>• Admin will review within 24 hours</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleEvidenceSubmission}
+                        disabled={!evidenceText.trim() || isSubmittingEvidence}
+                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3"
+                      >
+                        {isSubmittingEvidence ? (
+                          <>
+                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Processing Payment...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-6 h-6" />
+                            Submit Evidence ($5 USDC)
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Evidence Submitted Status */}
+                {hasUserSubmittedEvidence() && (
+                  <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 backdrop-blur-xl border-2 border-blue-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-blue-900/10">
+                    <div className="text-center">
+                      <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                        <FileText className="w-12 h-12 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Evidence Submitted</h3>
+                      <div className="bg-blue-100 rounded-2xl p-6 border border-blue-200 mb-6">
+                        <p className="text-blue-800 font-bold mb-2">Status: {userEvidenceSubmission?.status === 'pending' ? 'Under Review' : userEvidenceSubmission?.status}</p>
+                        <p className="text-blue-700 text-sm">
+                          Admin will review your evidence within 24 hours
+                        </p>
+                      </div>
+                      <div className="text-gray-600 text-sm">
+                        <p className="mb-1">📄 Evidence submitted: {userEvidenceSubmission?.submittedAt.toLocaleString()}</p>
+                        <p>💰 $5 USDC payment processed</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Evidence Window Expired */}
+                {!isEvidenceWindowActive() && !hasUserSubmittedEvidence() && (
+                  <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 backdrop-blur-xl border-2 border-gray-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10">
+                    <div className="text-center">
+                      <div className="w-24 h-24 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                        <Clock className="w-12 h-12 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Evidence Window Closed</h3>
+                      <p className="text-gray-600 text-lg mb-6">
+                        The 1-hour evidence submission window has expired
+                      </p>
+                      <div className="bg-gray-100 rounded-2xl p-6 border border-gray-200">
+                        <p className="text-gray-700 font-medium">
+                          The market outcome is now final and pot distribution will proceed
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : isResultsDay() ? (
-              // Saturday - Results Day message
+              // Saturday - Results Day message (when no outcome set yet)
               <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 backdrop-blur-xl border-2 border-blue-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-blue-900/10 relative overflow-hidden">
                 <div className="text-center">
                   <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
@@ -336,7 +651,7 @@ export default function MakePredicitions() {
                   </div>
                   <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Results Day! 🎉</h2>
                   <p className="text-gray-700 text-lg mb-6 font-medium">
-                    Today is Saturday - winners are being determined!
+                    Today is Saturday - waiting for admin to set the outcome
                   </p>
                   <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-2xl p-6 border border-blue-200 mb-6">
                     <div className="flex items-center justify-center gap-3 mb-3">
@@ -345,15 +660,34 @@ export default function MakePredicitions() {
                       <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-200"></div>
                     </div>
                     <p className="text-blue-800 font-bold text-lg">
-                      Sit tight and wait for the results!
+                      Outcome will be set soon!
                     </p>
                     <p className="text-blue-600 text-sm mt-2">
-                      Winners will be announced and market distributed automatically
+                      You'll have 1 hour to submit evidence if you disagree
                     </p>
                   </div>
                   <div className="text-gray-600 text-sm">
                     <p className="mb-1">📊 Your predictions are locked in</p>
-                    <p>🏆 Check back after midnight for results</p>
+                    <p>⚖️ Evidence submission window opens after outcome is set</p>
+                  </div>
+                  
+                  {/* Temporary test buttons for simulating admin actions */}
+                  <div className="mt-8 pt-6 border-t border-blue-200">
+                    <p className="text-sm text-gray-500 mb-4 font-medium">🧪 Test Functions (Admin Only - Remove in Production)</p>
+                    <div className="flex gap-3 justify-center">
+                      <button
+                        onClick={() => simulateOutcomeSet('positive')}
+                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+                      >
+                        Set Outcome: YES
+                      </button>
+                      <button
+                        onClick={() => simulateOutcomeSet('negative')}
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+                      >
+                        Set Outcome: NO
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
