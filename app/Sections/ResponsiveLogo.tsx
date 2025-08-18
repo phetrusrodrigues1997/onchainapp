@@ -25,30 +25,29 @@ const ResponsiveLogo = () => {
     <div className="logo-container">
       <span className="relative inline-block font-sans">
         {isMobile ? (
-          // Mobile version - just the eagle emoji with smaller text
-          <span className="text-xl font-bold tracking-tight text-[#000000]">PrediWin.com
-          <Image
-      src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
-      alt="Icon"
-      width={28}
-      height={16}
-      className="inline w-7 h-4 ml-2 align-middle"
-    />
+          // Mobile version - prevent text and image wrapping
+          <span className="flex items-center whitespace-nowrap text-xl font-bold tracking-tight text-[#000000]">
+            PrediWin.com
+            <Image
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
+              alt="Icon"
+              width={28}
+              height={16}
+              className="w-7 h-4 ml-2 flex-shrink-0"
+            />
           </span>
           
         ) : (
-          <span className="text-3xl">
-  <span className="text-3xl font-bold tracking-tight bg-clip-text text-[#000000]">
-    PrediWin.com
-    <Image
-      src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
-      alt="Icon"
-      width={28}
-      height={16}
-      className="inline w-7 h-4 ml-2 align-middle"
-    />
-  </span>
-</span>
+          <span className="flex items-center whitespace-nowrap text-3xl font-bold tracking-tight text-[#000000]">
+            PrediWin.com
+            <Image
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
+              alt="Icon"
+              width={28}
+              height={16}
+              className="w-7 h-4 ml-2 flex-shrink-0"
+            />
+          </span>
 
         )}
       </span>
