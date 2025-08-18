@@ -165,64 +165,58 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
         
         {/* Wallet Balance Section */}
         {isConnected && address && (
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-6 mb-6 text-white shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                <Wallet className="w-6 h-6" />
+          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-4 mb-4 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm">
+                <Wallet className="w-4 h-4" />
               </div>
-              <h2 className="text-xl font-bold">Wallet Balance</h2>
+              <h2 className="text-lg font-bold">Wallet Balance</h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* USDC Balance */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <DollarSign className="w-4 h-4 text-white" />
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <DollarSign className="w-3 h-3 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-gray-300">USDC Balance</div>
-                    <div className="text-2xl font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
+                    <div className="text-xs text-gray-300">USDC Balance</div>
+                    <div className="text-lg font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
                   </div>
                 </div>
-                {/* <div className="text-xs text-gray-400 mt-2">
-                  For your predictions
-                </div> */}
               </div>
               
               {/* ETH Balance */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-white" />
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                    <Zap className="w-3 h-3 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-gray-300">ETH Balance</div>
-                    <div className="text-2xl font-bold">{formatEthBalanceUSD()}</div>
+                    <div className="text-xs text-gray-300">ETH Balance</div>
+                    <div className="text-lg font-bold">{formatEthBalanceUSD()}</div>
                   </div>
                 </div>
-                {/* <div className="text-xs text-gray-400 mt-2">
-                  For gas fees
-                </div> */}
               </div>
             </div>
             
             {/* Action Buttons */}
-            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <div className="mt-3 flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => setActiveSection('messagesPage')}
-                className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 transition-all duration-200 group"
+                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 transition-all duration-200 group"
               >
-                <MessageCircle className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-white font-medium">Messages</span>
+                <MessageCircle className="w-4 h-4 text-white group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-white text-sm font-medium">Messages</span>
               </button>
               
               <button
                 onClick={() => setActiveSection('referralProgram')}
-                className="flex items-center justify-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/20 transition-all duration-200 group"
+                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 transition-all duration-200 group"
               >
-                <Trophy className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-white font-medium">Referrals</span>
+                <Trophy className="w-4 h-4 text-white group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-white text-sm font-medium">Referrals</span>
               </button>
             </div>
            

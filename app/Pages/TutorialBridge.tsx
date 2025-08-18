@@ -250,18 +250,80 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             <Users className="w-6 h-6 text-black" />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Mobile: Stack layout with Active Markets after Make Predictions */}
+          <div className="md:hidden space-y-4">
             <button 
               onClick={() => setShowActiveMarkets(!showActiveMarkets)}
-              className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+              className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
               <h4 className="font-semibold mb-1">Make Predictions</h4>
               <p className="text-sm text-gray-600">Predict on markets you've already entered</p>
             </button>
             
+            {/* User's Active Markets - Mobile: Show right after Make Predictions button */}
+            {showActiveMarkets && isConnected && userPots.length > 0 && (
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold">Your Active Markets</h3>
+                  <Trophy className="w-5 h-5 text-black" />
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  {userPots.map((contractAddress) => {
+                    const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
+                    const marketName = marketType === 'featured' ? 'Featured Market' : 'Crypto Market';
+                    
+                    const handleMarketClick = () => {
+                      Cookies.set('selectedMarket', contractAddress);
+                      setActiveSection('bitcoinPot');
+                    };
+                    
+                    return (
+                      <button 
+                        key={contractAddress}
+                        onClick={handleMarketClick}
+                        className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-green-800 text-sm">{marketName}</h4>
+                            <p className="text-xs text-green-600">You're participating</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-green-500 text-xs">✓</div>
+                            <ArrowRight className="w-4 h-4 text-green-600" />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {/* Mobile: Show message if no active markets */}
+            {showActiveMarkets && isConnected && userPots.length === 0 && (
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-gray-600 mb-3">You haven't entered any markets yet.</p>
+                <button 
+                  onClick={() => setActiveSection('bitcoinPot')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  Enter a Market →
+                </button>
+              </div>
+            )}
+            
+            {/* Mobile: Show connect wallet message */}
+            {showActiveMarkets && !isConnected && (
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-gray-600">Connect your wallet to see your active markets.</p>
+              </div>
+            )}
+            
             <button 
               onClick={() => setActiveSection('createPot')}
-              className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+              className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
               <h4 className="font-semibold mb-1">Create Private Market</h4>
               <p className="text-sm text-gray-600">Deploy your own prediction market</p>
@@ -269,75 +331,102 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             
             <button 
               onClick={() => setActiveSection('AI')}
-              className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+              className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
               <h4 className="font-semibold mb-1">Play Games</h4>
               <p className="text-sm text-gray-600">AI trivia and other games</p>
             </button>
           </div>
-          
-          {/* User's Active Markets - Show/Hide */}
-          {showActiveMarkets && isConnected && userPots.length > 0 && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold">Your Active Markets</h3>
-                <Trophy className="w-5 h-5 text-black" />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {userPots.map((contractAddress) => {
-                  const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                  const marketName = marketType === 'featured' ? 'Featured Market' : 'Crypto Market';
-                  
-                  const handleMarketClick = () => {
-                    // Set the selected market in cookies
-                    Cookies.set('selectedMarket', contractAddress);
-                    // Navigate to PredictionPotTest
-                    setActiveSection('bitcoinPot');
-                  };
-                  
-                  return (
-                    <button 
-                      key={contractAddress}
-                      onClick={handleMarketClick}
-                      className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-green-800 text-sm">{marketName}</h4>
-                          <p className="text-xs text-green-600">You're participating</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="text-green-500 text-xs">✓</div>
-                          <ArrowRight className="w-4 h-4 text-green-600" />
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          
-          {/* Show message if no active markets */}
-          {showActiveMarkets && isConnected && userPots.length === 0 && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg text-center">
-              <p className="text-gray-600 mb-3">You haven't entered any markets yet.</p>
+
+          {/* Desktop: Grid layout with Active Markets at bottom */}
+          <div className="hidden md:block">
+            <div className="grid grid-cols-3 gap-4 mb-6">
               <button 
-                onClick={() => setActiveSection('bitcoinPot')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                onClick={() => setShowActiveMarkets(!showActiveMarkets)}
+                className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
               >
-                Enter a Market →
+                <h4 className="font-semibold mb-1">Make Predictions</h4>
+                <p className="text-sm text-gray-600">Predict on markets you've already entered</p>
+              </button>
+              
+              <button 
+                onClick={() => setActiveSection('createPot')}
+                className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+              >
+                <h4 className="font-semibold mb-1">Create Private Market</h4>
+                <p className="text-sm text-gray-600">Deploy your own prediction market</p>
+              </button>
+              
+              <button 
+                onClick={() => setActiveSection('AI')}
+                className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
+              >
+                <h4 className="font-semibold mb-1">Play Games</h4>
+                <p className="text-sm text-gray-600">AI trivia and other games</p>
               </button>
             </div>
-          )}
-          
-          {/* Show connect wallet message */}
-          {showActiveMarkets && !isConnected && (
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg text-center">
-              <p className="text-gray-600">Connect your wallet to see your active markets.</p>
-            </div>
-          )}
+
+            {/* User's Active Markets - Desktop: Show below all buttons */}
+            {showActiveMarkets && isConnected && userPots.length > 0 && (
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold">Your Active Markets</h3>
+                  <Trophy className="w-5 h-5 text-black" />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {userPots.map((contractAddress) => {
+                    const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
+                    const marketName = marketType === 'featured' ? 'Featured Market' : 'Crypto Market';
+                    
+                    const handleMarketClick = () => {
+                      Cookies.set('selectedMarket', contractAddress);
+                      setActiveSection('bitcoinPot');
+                    };
+                    
+                    return (
+                      <button 
+                        key={contractAddress}
+                        onClick={handleMarketClick}
+                        className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold text-green-800 text-sm">{marketName}</h4>
+                            <p className="text-xs text-green-600">You're participating</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-green-500 text-xs">✓</div>
+                            <ArrowRight className="w-4 h-4 text-green-600" />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {/* Desktop: Show message if no active markets */}
+            {showActiveMarkets && isConnected && userPots.length === 0 && (
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-gray-600 mb-3">You haven't entered any markets yet.</p>
+                <button 
+                  onClick={() => setActiveSection('bitcoinPot')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                >
+                  Enter a Market →
+                </button>
+              </div>
+            )}
+            
+            {/* Desktop: Show connect wallet message */}
+            {showActiveMarkets && !isConnected && (
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-gray-600">Connect your wallet to see your active markets.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Back to Home */}
