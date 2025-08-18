@@ -958,13 +958,13 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             <div className="grid md:grid-cols-2 gap-6">
               {/* Entry Amount Update */}
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">Entry Amount (USDC)</label>
+                <label className="block text-sm font-medium text-gray-700">Entry Fee (USDC)</label>
                 <input
                   type="text"
-                  placeholder="0.01"
+                  placeholder="Enter new $ amount"
                   value={newEntryAmount}
                   onChange={(e) => setNewEntryAmount(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 />
                 <button
                   onClick={handleUpdateEntryAmount}
@@ -981,7 +981,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 <select
                   value={outcomeToSet}
                   onChange={(e) => setOutcomeToSet(e.target.value as 'positive' | 'negative')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="positive">Positive</option>
                   <option value="negative">Negative</option>
