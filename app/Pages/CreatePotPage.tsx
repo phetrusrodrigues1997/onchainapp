@@ -353,7 +353,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                       setShowMyPots(false);
                       setShowCreateForm(true);
                     }}
-                    className="bg-[#0000aa] text-white py-2 px-6 rounded hover:bg-gray-900"
+                    className="bg-[#aa0000] text-white py-2 px-6 rounded hover:bg-gray-900"
                   >
                     Create Market
                   </button>
@@ -615,7 +615,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
           {/* Main Create Button */}
           <button
             onClick={() => setShowCreateForm(true)}
-            className="w-full bg-[#0000aa] text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 flex items-center justify-center gap-3"
+            className="w-full bg-[#aa0000] text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 flex items-center justify-center gap-3"
           >
             <Plus className="w-5 h-5" />
             Create Prediction Market

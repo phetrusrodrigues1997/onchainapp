@@ -267,7 +267,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
                   <button
                     onClick={handleApproveUsdc}
                     disabled={isLoading || isPending || !hasEnoughUsdc}
-                    className="w-full bg-[#0000aa] hover:bg-black disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg"
+                    className="w-full bg-[#aa0000] hover:bg-black disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg"
                   >
                     {isLoading && lastAction === 'approve' ? (
                       <>

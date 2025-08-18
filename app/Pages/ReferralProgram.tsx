@@ -108,7 +108,7 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
                     navigator.clipboard.writeText(referralCode);
                     showMessage('Code copied to clipboard');
                   }}
-                  className="p-4 bg-[#0000aa] text-white border border-gray-300 hover:border-black hover:bg-black hover:text-white transition-all duration-200"
+                  className="p-4 bg-[#aa0000] text-white border border-gray-300 hover:border-black hover:bg-black hover:text-white transition-all duration-200"
                 >
                   <span className="text-sm tracking-wide uppercase">🗐 Copy</span>
 

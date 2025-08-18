@@ -186,7 +186,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           {/* Enter Market Button - Positioned absolutely in top right, responsive */}
           <button
   onClick={() => setActiveSection(marketInfo.section)}
-  className="absolute top-4 right-4 md:top-6 md:right-6 bg-[#0000aa] text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm md:text-base font-medium shadow-lg hover:shadow-xl"
+  className="absolute top-4 right-4 md:top-6 md:right-6 bg-[#aa0000] text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm md:text-base font-medium shadow-lg hover:shadow-xl"
   style={{
     animation: 'subtlePulse 2s infinite'
   }}

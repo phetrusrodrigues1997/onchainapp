@@ -885,7 +885,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 {isCreator && (
                   <button
                     onClick={() => setShowCreatorPanel(!showCreatorPanel)}
-                    className="bg-[#0000aa] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
+                    className="bg-[#aa0000] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-none hover:bg-gray-900 font-light transition-colors text-sm sm:text-base w-full lg:w-auto"
                   >
                     {showCreatorPanel ? 'Hide' : 'Manage ⚙'}
                   </button>
