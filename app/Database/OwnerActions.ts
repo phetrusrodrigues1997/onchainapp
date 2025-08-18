@@ -3,7 +3,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions, UsersTable, MarketOutcomes } from "../Database/schema";
-import { eq, inArray, lt, asc, sql } from "drizzle-orm";
+import { eq, inArray, lt, asc, sql, and } from "drizzle-orm";
 
 // Database setup
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -62,8 +62,10 @@ export async function setProvisionalOutcome(
     // Check if there's already an outcome for this market and date
     const existingOutcome = await db.select()
       .from(MarketOutcomes)
-      .where(eq(MarketOutcomes.marketType, tableType))
-      .where(eq(MarketOutcomes.outcomeDate, targetDate));
+      .where(and(
+        eq(MarketOutcomes.marketType, tableType),
+        eq(MarketOutcomes.outcomeDate, targetDate)
+      ));
 
     if (existingOutcome.length > 0) {
       // Update existing outcome
@@ -104,8 +106,10 @@ export async function getProvisionalOutcome(tableType: string, outcomeDate?: str
     // Get outcome record for the specified market type and date
     const result = await db.select()
       .from(MarketOutcomes)
-      .where(eq(MarketOutcomes.marketType, tableType))
-      .where(eq(MarketOutcomes.outcomeDate, targetDate))
+      .where(and(
+        eq(MarketOutcomes.marketType, tableType),
+        eq(MarketOutcomes.outcomeDate, targetDate)
+      ))
       .limit(1);
 
     if (result.length === 0) {
