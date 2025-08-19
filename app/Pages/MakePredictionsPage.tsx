@@ -429,9 +429,9 @@ export default function MakePredicitions() {
         ) : (
           <>
             {/* Today's Bet Results (if any) */}
-            {todaysBet && (
+            {/*{todaysBet && (
               <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-8 mb-6 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
-                <div className="relative z-10">
+                 <div className="relative z-10">
                   <h3 className="text-lg font-bold text-gray-700 mb-4">Today's Prediction Results</h3>
                   <div className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-lg">
                     {todaysBet.prediction === 'positive' ? (
@@ -452,9 +452,9 @@ export default function MakePredicitions() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> 
               </div>
-            )}
+            )}*/}
 
             {/* Tomorrow's Bet Interface */}
             {tomorrowsBet ? (
@@ -488,47 +488,49 @@ export default function MakePredicitions() {
             ) : hasOutcomeBeenSet() ? (
               // Market outcome has been set - show outcome and evidence submission interface
               <div className="space-y-6">
-                {/* Market Outcome Display */}
-                <div className={`bg-gradient-to-br backdrop-blur-xl border-2 rounded-3xl p-10 mb-8 shadow-2xl relative overflow-hidden ${
+                {/* Market Outcome Display - Compressed */}
+                <div className={`bg-gradient-to-br backdrop-blur-xl border-2 rounded-2xl p-6 mb-6 mt-16 shadow-xl relative overflow-hidden ${
                   marketOutcome?.outcome === 'positive' 
                     ? 'from-green-50 via-white to-green-50 border-green-200 shadow-green-900/10' 
                     : 'from-red-50 via-white to-red-50 border-red-200 shadow-red-900/10'
                 }`}>
-                  <div className="text-center">
-                    <div className={`w-24 h-24 bg-gradient-to-br rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg ${
+                  <div className="flex items-center justify-center gap-6">
+                    <div className={`w-16 h-16 bg-gradient-to-br rounded-xl flex items-center justify-center shadow-lg ${
                       marketOutcome?.outcome === 'positive' 
                         ? 'from-green-500 to-green-600' 
                         : 'from-red-500 to-red-600'
                     }`}>
                       {marketOutcome?.outcome === 'positive' ? (
-                        <TrendingUp className="w-12 h-12 text-white" />
+                        <TrendingUp className="w-8 h-8 text-white" />
                       ) : (
-                        <TrendingDown className="w-12 h-12 text-white" />
+                        <TrendingDown className="w-8 h-8 text-white" />
                       )}
                     </div>
-                    <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Market Outcome Set</h2>
-                    <div className={`inline-flex items-center gap-4 px-8 py-4 rounded-2xl bg-gradient-to-br backdrop-blur-sm border shadow-lg ${
-                      marketOutcome?.outcome === 'positive' 
-                        ? 'from-green-50/80 to-white/80 border-green-200/30' 
-                        : 'from-red-50/80 to-white/80 border-red-200/30'
-                    }`}>
-                      <div className={`text-4xl font-black tracking-tight ${
-                        marketOutcome?.outcome === 'positive' ? 'text-green-700' : 'text-red-700'
+                    <div className="text-center">
+                      <h2 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Daily Outcome Set</h2>
+                      <div className={`inline-flex items-center px-6 py-2 rounded-xl bg-gradient-to-br backdrop-blur-sm border shadow-md ${
+                        marketOutcome?.outcome === 'positive' 
+                          ? 'from-green-50/80 to-white/80 border-green-200/30' 
+                          : 'from-red-50/80 to-white/80 border-red-200/30'
                       }`}>
-                        {marketOutcome?.outcome === 'positive' ? 'YES' : 'NO'}
+                        <div className={`text-2xl font-black tracking-tight ${
+                          marketOutcome?.outcome === 'positive' ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                          {marketOutcome?.outcome === 'positive' ? 'YES' : 'NO'}
+                        </div>
                       </div>
                     </div>
-                    
-                    {marketOutcome?.finalOutcome && marketOutcome.finalOutcome !== marketOutcome.outcome && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mt-4">
-                        <p className="text-yellow-800 font-semibold">
-                          ⚠️ Outcome was disputed and updated to: <span className="font-bold">
-                            {marketOutcome.finalOutcome === 'positive' ? 'YES' : 'NO'}
-                          </span>
-                        </p>
-                      </div>
-                    )}
                   </div>
+                  
+                  {marketOutcome?.finalOutcome && marketOutcome.finalOutcome !== marketOutcome.outcome && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mt-4">
+                      <p className="text-yellow-800 font-semibold text-sm text-center">
+                        ⚠️ Outcome disputed and updated to: <span className="font-bold">
+                          {marketOutcome.finalOutcome === 'positive' ? 'YES' : 'NO'}
+                        </span>
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Evidence Submission Interface - Collapsible */}

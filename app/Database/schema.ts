@@ -16,9 +16,7 @@ export const FeaturedBets = pgTable("featured_bets", {
   prediction: text("prediction").notNull(), // "positive" or "negative"
   betDate: text("bet_date").notNull(), // Date of the bet (YYYY-MM-DD format)
   createdAt: timestamp("created_at").defaultNow().notNull(), // When the bet was placed
-  provisionalOutcome: text("provisional_outcome"), // "positive" or "negative" - set by admin, triggers 1-hour evidence window
-  provisionalOutcomeSetAt: timestamp("provisional_outcome_set_at"), // When provisional outcome was set
-  evidenceWindowExpires: timestamp("evidence_window_expires"), // When 1-hour evidence window expires
+  
 });
 
 export const WrongPredictions = pgTable("wrong_Predictions", {
@@ -42,9 +40,7 @@ export const CryptoBets = pgTable("crypto_bets", {
   prediction: text("prediction").notNull(), // "positive" or "negative"
   betDate: text("bet_date").notNull(), // Date of the bet (YYYY-MM-DD format)
   createdAt: timestamp("created_at").defaultNow().notNull(), // When the bet was placed
-  provisionalOutcome: text("provisional_outcome"), // "positive" or "negative" - set by admin, triggers 1-hour evidence window
-  provisionalOutcomeSetAt: timestamp("provisional_outcome_set_at"), // When provisional outcome was set
-  evidenceWindowExpires: timestamp("evidence_window_expires"), // When 1-hour evidence window expires
+  
 });
 
 // Referral system tables

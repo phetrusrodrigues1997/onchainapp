@@ -568,12 +568,12 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
             {/* Toggle Arrow - Always visible in top right */}
             <button
               onClick={toggleHeader}
-              className="absolute top-4 right-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all duration-300 group"
+              className="absolute top-8 md:top-4 right-4 z-10 w-12 h-12 bg-[#aa0000] rounded-full shadow-lg flex items-center justify-center hover:bg-red-700 hover:shadow-xl transition-all duration-300 group"
             >
               {isHeaderCollapsed ? (
-                <ChevronUp className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors" />
+                <ChevronUp className="w-5 h-5 text-white transition-colors" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors animate-bounce" />
+                <ChevronDown className="w-5 h-5 text-white transition-colors animate-bounce" />
               )}
             </button>
             
