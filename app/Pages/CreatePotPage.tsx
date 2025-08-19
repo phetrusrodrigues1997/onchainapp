@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Trophy, Target, Plus, ArrowLeft, Check, Copy, Search, ExternalLink } from 'lucide-react';
+import { Users, Trophy, Target, Plus, ArrowLeft, Check, Copy, Search, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { createPrivatePot, getPotsByCreator, getPotDetails } from '../Database/actions2';
@@ -62,6 +62,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   const [myPots, setMyPots] = useState<any[]>([]);
   const [joinAddress, setJoinAddress] = useState('');
   const [isLoadingMyPots, setIsLoadingMyPots] = useState(false);
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
   const { alertState, showAlert, closeAlert } = useCustomAlert();
 
 
@@ -279,6 +280,10 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     } catch (err) {
       console.error('Failed to copy:', err);
     }
+  };
+
+  const toggleHeader = () => {
+    setIsHeaderCollapsed(!isHeaderCollapsed);
   };
 
   // Debug logging
@@ -555,18 +560,72 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   return (
     <div className="min-h-screen bg-white flex flex-col md:translate-y-0 -translate-y-8">
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-4xl w-full">
+      <div className={`flex-1 flex justify-center p-4 ${isHeaderCollapsed ? 'items-center' : 'items-center'}`}>
+        <div className={`max-w-4xl w-full ${isHeaderCollapsed ? 'pt-16' : ''}`}>
           
-          {/* Header Section */}
-          <div className="text-center mb-2 pt-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-black rounded-full mb-8">
-              <Users className="w-12 h-12 text-white" />
+          {/* Header Section - Collapsible */}
+          <div className="relative">
+            {/* Toggle Arrow - Always visible in top right */}
+            <button
+              onClick={toggleHeader}
+              className="absolute top-4 right-4 z-10 w-12 h-12 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:shadow-xl transition-all duration-300 group"
+            >
+              {isHeaderCollapsed ? (
+                <ChevronUp className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors animate-bounce" />
+              )}
+            </button>
+            
+            {/* Collapsible Header Content */}
+            <div className={`text-center transition-all duration-500 ease-in-out ${isHeaderCollapsed ? 'opacity-0 max-h-0 overflow-hidden pt-16' : 'opacity-100 mb-12 pt-16'}`}>
+              {/* Icon cluster with subtle animation */}
+              <div className="relative inline-block mb-8">
+                <div className="w-32 h-32 bg-gradient-to-br from-black to-gray-700 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
+                  <div className="relative">
+                    <Target className="w-16 h-16 text-white opacity-90" />
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#aa0000] rounded-full flex items-center justify-center">
+                      <Plus className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Floating accent elements */}
+                <div className="absolute -top-4 -left-4 w-8 h-8 bg-gray-200 rounded-full opacity-40 animate-pulse"></div>
+                <div className="absolute -bottom-2 -right-6 w-4 h-4 bg-[#aa0000] rounded-full opacity-60 animate-pulse delay-300"></div>
+              </div>
+              
+              {/* Title and subtitle with better typography */}
+              <div className="space-y-4 max-w-3xl mx-auto">
+                <h1 className="text-5xl md:text-6xl font-extralight text-black leading-tight tracking-tight">
+                  Build Your
+                  <span className="block text-[#aa0000] font-light">Prediction Universe</span>
+                </h1>
+                
+                <p className="text-xl md:text-2xl text-gray-500 font-light leading-relaxed max-w-2xl mx-auto">
+                  Deploy custom prediction markets in seconds. 
+                  <span className="block mt-2 text-lg text-gray-400">
+                    Your community, your rules, your rewards.
+                  </span>
+                </p>
+                
+                {/* Key benefits in a subtle row */}
+                <div className="flex flex-wrap justify-center gap-6 mt-6 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Gas-efficient deployment</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Full ownership control</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span>Instant USDC payouts</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            {/* <h1 className="text-6xl font-light text-black mb-6">Create Pot</h1> */}
-            <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
-              Start your own prediction market and invite friends.
-            </p>
           </div>
 
           {/* Features Grid */}
@@ -609,7 +668,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
       </div>
 
       {/* Action Buttons */}
-      <div className="bg-white border-t border-gray-200 p-6">
+      <div className={`bg-white border-t border-gray-200 p-6 ${isHeaderCollapsed ? 'mb-32' : ''}`}>
         <div className="max-w-4xl mx-auto space-y-4">
           
           {/* Main Create Button */}
