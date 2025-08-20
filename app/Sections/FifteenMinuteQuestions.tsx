@@ -506,27 +506,52 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
     setIsProcessing(true);
     try {
+      console.log('Calling setProvisionalOutcome with:', { outcome: outcomeInput, tableType: 'live' });
+      
       // setProvisionalOutcome returns raw DB result on success, throws on error
-      await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
+      const result = await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
+      console.log('setProvisionalOutcome result:', result);
       
       setProcessMessage('Provisional outcome set! Evidence window is now open.');
       
       // Reload market outcome and evidence data
+      console.log('Loading market outcome...');
       const outcome = await getProvisionalOutcome('live');
+      console.log('Market outcome loaded:', outcome);
       setMarketOutcome(outcome);
       
       // Also reload user evidence data if outcome was set
       if (outcome && address) {
         const outcomeDate = outcome.setAt.split('T')[0];
+        console.log('Loading user evidence for date:', outcomeDate);
         const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
+        console.log('User evidence loaded:', userEvidence);
         setUserEvidenceSubmission(userEvidence);
       }
       
       setTimeout(() => setProcessMessage(''), 5000);
     } catch (error) {
       console.error('Failed to set outcome:', error);
-      setProcessMessage(error instanceof Error ? error.message : 'Failed to set outcome');
-      setTimeout(() => setProcessMessage(''), 5000);
+      console.error('Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      // Show more specific error message
+      let errorMessage = 'Failed to set outcome';
+      if (error instanceof Error) {
+        if (error.message.includes('relation') && error.message.includes('does not exist')) {
+          errorMessage = 'Database table missing - please run database migrations';
+        } else if (error.message.includes('connection')) {
+          errorMessage = 'Database connection error - check DATABASE_URL';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setProcessMessage(errorMessage);
+      setTimeout(() => setProcessMessage(''), 8000); // Longer timeout for error messages
     } finally {
       setIsProcessing(false);
     }
