@@ -1263,7 +1263,7 @@ const isValidEthereumAddress = (address: string): boolean => {
 };
 
 const isValidTableType = (tableType: string): boolean => {
-  return tableType === 'featured' || tableType === 'crypto';
+  return tableType === 'featured' || tableType === 'crypto' || tableType === 'live';
 };
 
 const sanitizeString = (input: string): string => {

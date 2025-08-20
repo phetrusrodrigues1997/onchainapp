@@ -460,17 +460,49 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
   // Handle evidence submission
   const handleEvidenceSubmission = async () => {
-    if (!address || !evidenceText.trim() || !marketOutcome) return;
+    console.log('Evidence submission triggered!');
+    console.log('Validation check:', {
+      address: !!address,
+      evidenceText: evidenceText.length,
+      marketOutcome: !!marketOutcome
+    });
     
+    if (!address) {
+      console.log('No address - user not connected');
+      setProcessMessage('Please connect your wallet first.');
+      setTimeout(() => setProcessMessage(''), 3000);
+      return;
+    }
+    
+    if (!evidenceText.trim()) {
+      console.log('No evidence text provided');
+      setProcessMessage('Please enter evidence text.');
+      setTimeout(() => setProcessMessage(''), 3000);
+      return;
+    }
+    
+    if (!marketOutcome) {
+      console.log('No market outcome available');
+      setProcessMessage('No market outcome available for evidence submission.');
+      setTimeout(() => setProcessMessage(''), 3000);
+      return;
+    }
+    
+    console.log('All validation passed, submitting evidence...');
     setIsSubmittingEvidence(true);
+    
     try {
       const outcomeDate = marketOutcome.setAt.split('T')[0]; // setAt is already a string from toISOString()
+      console.log('Submitting evidence for date:', outcomeDate);
+      
       const result = await submitEvidence(
         address,
         'live',
         outcomeDate,
         evidenceText.trim()
       );
+      
+      console.log('Evidence submission result:', result);
       
       if (result.success) {
         setProcessMessage('Evidence submitted successfully! Awaiting admin review.');
