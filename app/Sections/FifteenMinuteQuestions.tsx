@@ -506,7 +506,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
     setIsProcessing(true);
     try {
-      const result = await setProvisionalOutcome('live', outcomeInput as 'positive' | 'negative');
+      const result = await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
       
       if (result.success) {
         setProcessMessage('Provisional outcome set! Evidence window is now open.');
