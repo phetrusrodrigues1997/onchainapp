@@ -506,30 +506,26 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
     setIsProcessing(true);
     try {
-      const result = await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
+      // setProvisionalOutcome returns raw DB result on success, throws on error
+      await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
       
-      if (result.success) {
-        setProcessMessage('Provisional outcome set! Evidence window is now open.');
-        
-        // Reload market outcome and evidence data
-        const outcome = await getProvisionalOutcome('live');
-        setMarketOutcome(outcome);
-        
-        // Also reload user evidence data if outcome was set
-        if (outcome && address) {
-          const outcomeDate = outcome.setAt.split('T')[0];
-          const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
-          setUserEvidenceSubmission(userEvidence);
-        }
-        
-        setTimeout(() => setProcessMessage(''), 5000);
-      } else {
-        setProcessMessage(result.error || 'Failed to set outcome');
-        setTimeout(() => setProcessMessage(''), 5000);
+      setProcessMessage('Provisional outcome set! Evidence window is now open.');
+      
+      // Reload market outcome and evidence data
+      const outcome = await getProvisionalOutcome('live');
+      setMarketOutcome(outcome);
+      
+      // Also reload user evidence data if outcome was set
+      if (outcome && address) {
+        const outcomeDate = outcome.setAt.split('T')[0];
+        const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
+        setUserEvidenceSubmission(userEvidence);
       }
+      
+      setTimeout(() => setProcessMessage(''), 5000);
     } catch (error) {
       console.error('Failed to set outcome:', error);
-      setProcessMessage('Failed to set outcome');
+      setProcessMessage(error instanceof Error ? error.message : 'Failed to set outcome');
       setTimeout(() => setProcessMessage(''), 5000);
     } finally {
       setIsProcessing(false);
