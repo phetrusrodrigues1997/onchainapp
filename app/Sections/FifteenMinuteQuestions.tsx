@@ -71,6 +71,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   
   // Owner functionality state
   const [outcomeInput, setOutcomeInput] = useState<'positive' | 'negative' | ''>('');
+  const [finalOutcomeInput, setFinalOutcomeInput] = useState<'positive' | 'negative' | ''>(''); // Separate state for final outcome
   const [isProcessing, setIsProcessing] = useState(false);
   const [processMessage, setProcessMessage] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
@@ -423,7 +424,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
         
         if (outcome) {
           // Load user's evidence submission
-          const outcomeDate = outcome.setAt.toISOString().split('T')[0];
+          const outcomeDate = outcome.setAt.split('T')[0]; // setAt is already a string from toISOString()
           const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
           setUserEvidenceSubmission(userEvidence);
           
@@ -438,7 +439,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     };
 
     loadMarketData();
-  }, [address]);
+  }, [address]); // Note: We'll reload this manually when needed
   
   // Load admin evidence submissions
   useEffect(() => {
@@ -446,7 +447,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       if (!isOwner || !marketOutcome) return;
       
       try {
-        const outcomeDate = marketOutcome.setAt.toISOString().split('T')[0];
+        const outcomeDate = marketOutcome.setAt.split('T')[0]; // setAt is already a string from toISOString()
         const evidence = await getAllEvidenceSubmissions('live', outcomeDate);
         setAllEvidenceSubmissions(evidence);
       } catch (error) {
@@ -463,7 +464,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     
     setIsSubmittingEvidence(true);
     try {
-      const outcomeDate = marketOutcome.setAt.toISOString().split('T')[0];
+      const outcomeDate = marketOutcome.setAt.split('T')[0]; // setAt is already a string from toISOString()
       const result = await submitEvidence(
         address,
         'live',
@@ -510,9 +511,16 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       if (result.success) {
         setProcessMessage('Provisional outcome set! Evidence window is now open.');
         
-        // Reload market outcome
+        // Reload market outcome and evidence data
         const outcome = await getProvisionalOutcome('live');
         setMarketOutcome(outcome);
+        
+        // Also reload user evidence data if outcome was set
+        if (outcome && address) {
+          const outcomeDate = outcome.setAt.split('T')[0];
+          const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
+          setUserEvidenceSubmission(userEvidence);
+        }
         
         setTimeout(() => setProcessMessage(''), 5000);
       } else {
@@ -530,10 +538,10 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
   // Handle automated winner processing and pot distribution
   const handleProcessWinners = async () => {
-    if (!address || !outcomeInput.trim() || isProcessing) return;
+    if (!address || !finalOutcomeInput.trim() || isProcessing) return;
 
-    if (outcomeInput !== "positive" && outcomeInput !== "negative") {
-      setProcessMessage("Please enter 'positive' or 'negative'");
+    if (finalOutcomeInput !== "positive" && finalOutcomeInput !== "negative") {
+      setProcessMessage("Please select final outcome");
       return;
     }
 
@@ -541,9 +549,9 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     setLastAction('processWinners');
     
     try {
-      // Step 1: Determine winners
-      setProcessMessage("Step 1/3: Determining winners...");
-      const winnersString = await determineWinnersLive(outcomeInput as "positive" | "negative");
+      // Step 1: Determine winners using final outcome
+      setProcessMessage("Step 1/3: Determining winners based on final outcome...");
+      const winnersString = await determineWinnersLive(finalOutcomeInput as "positive" | "negative");
       
       if (!winnersString || winnersString.trim() === "") {
         setProcessMessage("No winners found for this question");
@@ -591,6 +599,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
           await clearLivePredictions();
           setProcessMessage("🎉 Winners processed successfully! Pot distributed and predictions cleared!");
           setOutcomeInput('');
+          setFinalOutcomeInput('');
           setTimeout(() => {
             setProcessMessage('');
           }, 5000);
@@ -1170,8 +1179,8 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
                     Final Outcome (After Evidence Review)
                   </label>
                   <select
-                    value={outcomeInput}
-                    onChange={(e) => setOutcomeInput(e.target.value as 'positive' | 'negative' | '')}
+                    value={finalOutcomeInput}
+                    onChange={(e) => setFinalOutcomeInput(e.target.value as 'positive' | 'negative' | '')}
                     className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
                   >
                     <option value="">Select final outcome...</option>
@@ -1182,21 +1191,21 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
                 <button
                   onClick={handleProcessWinners}
-                  disabled={!outcomeInput || isProcessing || isPending}
+                  disabled={!finalOutcomeInput || isProcessing || isPending}
                   style={{
                     width: '100%',
-                    backgroundColor: outcomeInput ? 'green' : 'gray',
+                    backgroundColor: finalOutcomeInput ? 'green' : 'gray',
                     color: 'white',
                     padding: '12px 24px',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '16px',
                     fontWeight: 'bold',
-                    cursor: outcomeInput ? 'pointer' : 'not-allowed',
+                    cursor: finalOutcomeInput ? 'pointer' : 'not-allowed',
                     pointerEvents: 'all',
                     position: 'relative',
                     zIndex: 9999,
-                    opacity: outcomeInput ? 1 : 0.6
+                    opacity: finalOutcomeInput ? 1 : 0.6
                   }}
                 >
                   {isProcessing || isPending ? (
