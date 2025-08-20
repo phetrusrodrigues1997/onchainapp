@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'viem';
-import { placeLivePrediction, getUserLivePrediction } from '../Database/actions';
-import { determineWinnersLive, clearLivePredictions } from '../Database/OwnerActions';
+import { AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
+import { placeLivePrediction, getUserLivePrediction, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions } from '../Database/actions';
+import { determineWinnersLive, clearLivePredictions, setProvisionalOutcome, getProvisionalOutcome } from '../Database/OwnerActions';
 
 // Configure the time interval for new questions (in minutes)
 const QUESTION_INTERVAL_MINUTES = 60;
@@ -73,6 +74,16 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   const [isProcessing, setIsProcessing] = useState(false);
   const [processMessage, setProcessMessage] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
+  
+  // Evidence submission state
+  const [evidenceText, setEvidenceText] = useState<string>('');
+  const [isSubmittingEvidence, setIsSubmittingEvidence] = useState(false);
+  const [userEvidenceSubmission, setUserEvidenceSubmission] = useState<any>(null);
+  const [isEvidenceSectionExpanded, setIsEvidenceSectionExpanded] = useState(true);
+  const [marketOutcome, setMarketOutcome] = useState<any>(null);
+  const [allEvidenceSubmissions, setAllEvidenceSubmissions] = useState<any[]>([]);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [timeUntilEvidenceExpires, setTimeUntilEvidenceExpires] = useState<number>(0);
   
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -400,6 +411,123 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     loadUserPrediction();
   }, [address]);
 
+  // Load market outcome and evidence data
+  useEffect(() => {
+    const loadMarketData = async () => {
+      if (!address) return;
+      
+      try {
+        // Get provisional outcome set by admin
+        const outcome = await getProvisionalOutcome('live');
+        setMarketOutcome(outcome);
+        
+        if (outcome) {
+          // Load user's evidence submission
+          const outcomeDate = outcome.setAt.toISOString().split('T')[0];
+          const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
+          setUserEvidenceSubmission(userEvidence);
+          
+          // Calculate time until evidence expires
+          const now = new Date().getTime();
+          const expiry = new Date(outcome.evidenceWindowExpires).getTime();
+          setTimeUntilEvidenceExpires(Math.max(0, Math.floor((expiry - now) / 1000)));
+        }
+      } catch (error) {
+        console.error('Failed to load market data:', error);
+      }
+    };
+
+    loadMarketData();
+  }, [address]);
+  
+  // Load admin evidence submissions
+  useEffect(() => {
+    const loadAllEvidence = async () => {
+      if (!isOwner || !marketOutcome) return;
+      
+      try {
+        const outcomeDate = marketOutcome.setAt.toISOString().split('T')[0];
+        const evidence = await getAllEvidenceSubmissions('live', outcomeDate);
+        setAllEvidenceSubmissions(evidence);
+      } catch (error) {
+        console.error('Failed to load evidence submissions:', error);
+      }
+    };
+
+    loadAllEvidence();
+  }, [isOwner, marketOutcome, showAdminPanel]);
+
+  // Handle evidence submission
+  const handleEvidenceSubmission = async () => {
+    if (!address || !evidenceText.trim() || !marketOutcome) return;
+    
+    setIsSubmittingEvidence(true);
+    try {
+      const outcomeDate = marketOutcome.setAt.toISOString().split('T')[0];
+      const result = await submitEvidence(
+        address,
+        'live',
+        outcomeDate,
+        evidenceText.trim()
+      );
+      
+      if (result.success) {
+        setProcessMessage('Evidence submitted successfully! Awaiting admin review.');
+        setEvidenceText('');
+        
+        // Reload evidence submission
+        const userEvidence = await getUserEvidenceSubmission(address, 'live', outcomeDate);
+        setUserEvidenceSubmission(userEvidence);
+        
+        setTimeout(() => setProcessMessage(''), 5000);
+      } else {
+        setProcessMessage(result.error || 'Failed to submit evidence. Please try again.');
+        setTimeout(() => setProcessMessage(''), 5000);
+      }
+    } catch (error) {
+      console.error('Error submitting evidence:', error);
+      setProcessMessage('Failed to submit evidence. Please try again.');
+      setTimeout(() => setProcessMessage(''), 5000);
+    } finally {
+      setIsSubmittingEvidence(false);
+    }
+  };
+
+  // Handle setting provisional outcome (admin only)
+  const handleSetOutcome = async () => {
+    if (!address || !outcomeInput.trim() || isProcessing) return;
+
+    if (outcomeInput !== "positive" && outcomeInput !== "negative") {
+      setProcessMessage("Please select 'positive' or 'negative'");
+      setTimeout(() => setProcessMessage(''), 3000);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const result = await setProvisionalOutcome('live', outcomeInput as 'positive' | 'negative');
+      
+      if (result.success) {
+        setProcessMessage('Provisional outcome set! Evidence window is now open.');
+        
+        // Reload market outcome
+        const outcome = await getProvisionalOutcome('live');
+        setMarketOutcome(outcome);
+        
+        setTimeout(() => setProcessMessage(''), 5000);
+      } else {
+        setProcessMessage(result.error || 'Failed to set outcome');
+        setTimeout(() => setProcessMessage(''), 5000);
+      }
+    } catch (error) {
+      console.error('Failed to set outcome:', error);
+      setProcessMessage('Failed to set outcome');
+      setTimeout(() => setProcessMessage(''), 5000);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Handle automated winner processing and pot distribution
   const handleProcessWinners = async () => {
     if (!address || !outcomeInput.trim() || isProcessing) return;
@@ -477,6 +605,56 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       finishProcessing();
     }
   }, [isDistributionConfirmed, receipt, isProcessing, lastAction]);
+
+  // Helper functions for evidence system
+  const isEvidenceWindowActive = () => {
+    if (!marketOutcome) return false;
+    const now = new Date().getTime();
+    const expiry = new Date(marketOutcome.evidenceWindowExpires).getTime();
+    return now < expiry;
+  };
+
+  const hasUserSubmittedEvidence = () => {
+    return userEvidenceSubmission !== null;
+  };
+
+  const formatTimeRemaining = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${remainingSeconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    } else {
+      return `${remainingSeconds}s`;
+    }
+  };
+
+  const toggleAdminPanel = () => {
+    setShowAdminPanel(!showAdminPanel);
+  };
+
+  // Update evidence countdown timer
+  useEffect(() => {
+    if (!isEvidenceWindowActive()) return;
+
+    const interval = setInterval(() => {
+      if (marketOutcome) {
+        const now = new Date().getTime();
+        const expiry = new Date(marketOutcome.evidenceWindowExpires).getTime();
+        const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
+        setTimeUntilEvidenceExpires(remaining);
+        
+        if (remaining <= 0) {
+          clearInterval(interval);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [marketOutcome]);
 
   // Show loading screen
   console.log('Render check - isLoading:', isLoading, 'hasEnteredPot:', hasEnteredPot, 'isOwner:', isOwner);
@@ -707,45 +885,255 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
           </div>
         </div>
 
+        {/* Evidence Submission Interface - For Participants */}
+        {!isOwner && marketOutcome && isEvidenceWindowActive() && !hasUserSubmittedEvidence() && hasEnteredPot && (
+          <div className="max-w-4xl mx-auto mt-6">
+            <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 backdrop-blur-xl border-2 border-orange-200 rounded-3xl p-8 mb-8 shadow-2xl shadow-orange-900/10 relative overflow-hidden">
+              {/* Collapsible Header */}
+              <div 
+                className="cursor-pointer"
+                onClick={() => setIsEvidenceSectionExpanded(!isEvidenceSectionExpanded)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <AlertTriangle className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Dispute the Outcome?</h3>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-orange-600" />
+                        <p className="text-orange-800 font-bold text-sm">
+                          {formatTimeRemaining(timeUntilEvidenceExpires)} remaining
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-orange-600">
+                    {isEvidenceSectionExpanded ? (
+                      <ChevronUp className="w-8 h-8" />
+                    ) : (
+                      <ChevronDown className="w-8 h-8" />
+                    )}
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-4 bg-orange-100 rounded-2xl">
+                  <p className="text-orange-900 font-bold text-center">
+                    Admin set outcome: <span className="px-2 py-1 bg-orange-200 rounded font-black">
+                      {marketOutcome.outcome.toUpperCase()}
+                    </span>
+                  </p>
+                </div>
+              </div>
 
-        {/* Owner Controls - Simplified */}
+              {/* Collapsible Content */}
+              {isEvidenceSectionExpanded && (
+                <div className="mt-6 space-y-6">
+                  <textarea
+                    value={evidenceText}
+                    onChange={(e) => setEvidenceText(e.target.value)}
+                    placeholder="Provide detailed evidence to dispute this outcome. Include sources, links, or clear explanations..."
+                    className="w-full h-32 p-4 border-2 border-orange-200 rounded-2xl focus:border-orange-400 focus:outline-none resize-none bg-white/80 backdrop-blur-sm text-gray-800 placeholder-orange-400"
+                    maxLength={1000}
+                    disabled={isSubmittingEvidence}
+                  />
+                  <div className="flex justify-between text-sm text-orange-600">
+                    <span>Character count: {evidenceText.length}/1000</span>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
+                      <div className="text-yellow-800">
+                        <p className="font-bold mb-2">Evidence Submission Terms:</p>
+                        <ul className="text-sm space-y-1">
+                          <li>• Submit detailed evidence to dispute the outcome</li>
+                          <li>• Include sources, links, or clear explanations</li>
+                          <li>• Admin will review within 24 hours</li>
+                          <li>• One submission per outcome per user</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleEvidenceSubmission}
+                    disabled={!evidenceText.trim() || isSubmittingEvidence}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3"
+                  >
+                    {isSubmittingEvidence ? (
+                      <>
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Submitting Evidence...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-6 h-6" />
+                        Submit Evidence
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Evidence Submitted Status */}
+        {!isOwner && hasUserSubmittedEvidence() && (
+          <div className="max-w-4xl mx-auto mt-6">
+            <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 backdrop-blur-xl border-2 border-blue-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-blue-900/10">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                  <FileText className="w-12 h-12 text-white" />
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Evidence Submitted!</h3>
+                <p className="text-blue-700 text-lg font-medium mb-6">
+                  Your evidence has been submitted for admin review.
+                </p>
+                <div className="bg-blue-100 rounded-2xl p-6">
+                  <p className="text-blue-800 font-bold text-sm mb-2">Your Evidence:</p>
+                  <p className="text-blue-700 text-sm italic">
+                    "{userEvidenceSubmission?.evidence}"
+                  </p>
+                  <p className="text-blue-600 text-xs mt-2">
+                    Submitted: {userEvidenceSubmission ? new Date(userEvidenceSubmission.submittedAt).toLocaleString() : 'Unknown'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Owner Controls - Manual Outcome Setting + Evidence Review */}
         {isOwner && (
           <div className="max-w-4xl mx-auto mt-6" style={{ position: 'relative', zIndex: 1000 }}>
             <div style={{ backgroundColor: 'black', color: 'white', padding: '20px', border: '2px solid red', borderRadius: '12px' }}>
               <h2 style={{ marginBottom: '10px' }}>🔧 OWNER CONTROLS</h2>
               
               <div style={{ marginBottom: '20px' }}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Question Outcome
-                  </label>
-                  <select
-                    value={outcomeInput}
-                    onChange={(e) => {
-                      console.log('Dropdown changed to:', e.target.value);
-                      setOutcomeInput(e.target.value as 'positive' | 'negative' | '');
-                    }}
-                    onClick={(e) => {
-                      console.log('Dropdown clicked');
-                      e.stopPropagation();
-                    }}
-                    onFocus={() => console.log('Dropdown focused')}
-                    style={{ pointerEvents: 'all', zIndex: 9999 }}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent relative"
-                  >
-                    <option value="">Select outcome...</option>
-                    <option value="positive">Positive</option>
-                    <option value="negative">Negative</option>
-                  </select>
-                </div>
+                {/* Set Provisional Outcome */}
+                {!marketOutcome && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Set Question Outcome (Opens Evidence Window)
+                    </label>
+                    <select
+                      value={outcomeInput}
+                      onChange={(e) => setOutcomeInput(e.target.value as 'positive' | 'negative' | '')}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+                    >
+                      <option value="">Select outcome...</option>
+                      <option value="positive">Positive</option>
+                      <option value="negative">Negative</option>
+                    </select>
+                    
+                    <button
+                      onClick={handleSetOutcome}
+                      disabled={!outcomeInput || isProcessing}
+                      className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-colors"
+                    >
+                      {isProcessing ? 'Setting...' : 'Set Outcome & Open Evidence Window'}
+                    </button>
+                  </div>
+                )}
 
-                {/* Debug State Info */}
-                <div className="mb-4 p-3 bg-blue-900 text-blue-200 rounded text-xs">
-                  <div>outcomeInput: "{outcomeInput}"</div>
-                  <div>isProcessing: {isProcessing.toString()}</div>
-                  <div>isPending: {isPending.toString()}</div>
-                  <div>Button should be disabled: {(isProcessing || isPending || !outcomeInput).toString()}</div>
-                </div>
+                {/* Current Outcome Status */}
+                {marketOutcome && (
+                  <div className="mb-4 p-4 bg-gray-800 rounded-lg">
+                    <div className="text-sm text-gray-300">
+                      <div className="flex justify-between mb-2">
+                        <span>Current Outcome:</span>
+                        <span className="px-2 py-1 bg-blue-600 text-white rounded font-bold">
+                          {marketOutcome.outcome.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mb-2">
+                        <span>Evidence Window:</span>
+                        <span className={`font-bold ${isEvidenceWindowActive() ? 'text-green-400' : 'text-red-400'}`}>
+                          {isEvidenceWindowActive() ? 'ACTIVE' : 'EXPIRED'}
+                        </span>
+                      </div>
+                      {isEvidenceWindowActive() && (
+                        <div className="flex justify-between">
+                          <span>Time Remaining:</span>
+                          <span className="text-orange-400 font-bold">
+                            {formatTimeRemaining(timeUntilEvidenceExpires)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin Evidence Review Panel */}
+                {marketOutcome && (
+                  <div className="mb-4">
+                    <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 border-2 border-blue-200 rounded-3xl p-6 shadow-2xl">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                            <FileText className="w-8 h-8 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-black text-gray-900 tracking-tight">Admin Panel</h3>
+                            <p className="text-blue-700 font-medium">Review Evidence Submissions</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={toggleAdminPanel}
+                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                          {showAdminPanel ? (
+                            <>
+                              <ChevronUp className="w-4 h-4" />
+                              Hide
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-4 h-4" />
+                              Show Evidence ({allEvidenceSubmissions.length})
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Evidence List */}
+                      {showAdminPanel && (
+                        <div className="mt-6 space-y-4">
+                          {allEvidenceSubmissions.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                              <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                              <p className="font-medium">No evidence submissions yet</p>
+                            </div>
+                          ) : (
+                            allEvidenceSubmissions.map((evidence: any) => (
+                              <div key={evidence.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                                <div className="flex justify-between items-start mb-4">
+                                  <div>
+                                    <p className="font-bold text-gray-900">Submission #{evidence.id}</p>
+                                    <p className="text-sm text-gray-600">
+                                      From: {evidence.walletAddress.slice(0, 8)}...{evidence.walletAddress.slice(-6)}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {new Date(evidence.submittedAt).toLocaleString()}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="bg-gray-50 rounded-xl p-4">
+                                  <p className="text-sm text-gray-800 italic">
+                                    "{evidence.evidence}"
+                                  </p>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Generate Questions Button */}
                 <button 
@@ -776,25 +1164,39 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
                   Generate Questions for Current Time
                 </button>
 
+                {/* Final Distribution Controls */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Final Outcome (After Evidence Review)
+                  </label>
+                  <select
+                    value={outcomeInput}
+                    onChange={(e) => setOutcomeInput(e.target.value as 'positive' | 'negative' | '')}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+                  >
+                    <option value="">Select final outcome...</option>
+                    <option value="positive">Positive</option>
+                    <option value="negative">Negative</option>
+                  </select>
+                </div>
+
                 <button
-                  onClick={(e) => {
-                    console.log('Process Winners button clicked!');
-                    console.log('outcomeInput:', outcomeInput);
-                    handleProcessWinners();
-                  }}
+                  onClick={handleProcessWinners}
+                  disabled={!outcomeInput || isProcessing || isPending}
                   style={{
                     width: '100%',
-                    backgroundColor: 'green',
+                    backgroundColor: outcomeInput ? 'green' : 'gray',
                     color: 'white',
                     padding: '12px 24px',
                     border: 'none',
                     borderRadius: '8px',
                     fontSize: '16px',
                     fontWeight: 'bold',
-                    cursor: 'pointer',
+                    cursor: outcomeInput ? 'pointer' : 'not-allowed',
                     pointerEvents: 'all',
                     position: 'relative',
-                    zIndex: 9999
+                    zIndex: 9999,
+                    opacity: outcomeInput ? 1 : 0.6
                   }}
                 >
                   {isProcessing || isPending ? (
@@ -819,9 +1221,9 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
                 <div className="mt-4 p-3 bg-gray-800 rounded-lg">
                   <p className="text-xs text-gray-400">
-                    <strong>Instructions:</strong> Enter "positive" or "negative" as the correct answer for the current question. 
-                    The system will automatically find winners who predicted correctly, distribute the pot equally among them, 
-                    and clear today's predictions.
+                    <strong>Evidence-Based Process:</strong> Set the initial outcome to open the evidence window. 
+                    Participants can submit disputes during this period. Review all evidence before making the final 
+                    distribution decision. Winners are determined based on the final outcome you set.
                   </p>
                 </div>
               </div>
