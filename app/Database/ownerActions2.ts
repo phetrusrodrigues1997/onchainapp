@@ -77,6 +77,54 @@ export async function setPotOutcome(
       return { success: false, error: "Not authorized - only pot creator can set outcomes" };
     }
 
+    // Check outcome voting results - creator can only set outcome that achieved majority
+    const outcomeVotesTable = getTableName(sanitizedContractAddress, 'outcome_votes');
+    const outcomeVotesResult = await db2.execute(sql`
+      SELECT outcome_vote, COUNT(*) as count 
+      FROM ${sql.identifier(outcomeVotesTable)} 
+      GROUP BY outcome_vote
+    `);
+
+    // Get total participants for majority calculation
+    const participantsTable = getTableName(sanitizedContractAddress, 'participants');
+    const participantsResult = await db2.execute(sql`
+      SELECT COUNT(*) as count FROM ${sql.identifier(participantsTable)}
+    `);
+
+    const totalParticipants = parseInt(participantsResult.rows[0]?.count as string || '0');
+    const requiredVotes = Math.floor(totalParticipants / 2) + 1;
+
+    if (totalParticipants > 0 && outcomeVotesResult.rows.length > 0) {
+      let positiveVotes = 0;
+      let negativeVotes = 0;
+      
+      outcomeVotesResult.rows.forEach((row: any) => {
+        if (row.outcome_vote === 'positive') {
+          positiveVotes = parseInt(row.count);
+        } else if (row.outcome_vote === 'negative') {
+          negativeVotes = parseInt(row.count);
+        }
+      });
+
+      // Check if any outcome achieved majority
+      const majorityAchieved = Math.max(positiveVotes, negativeVotes) >= requiredVotes;
+      
+      if (majorityAchieved) {
+        const majorityOutcome = positiveVotes > negativeVotes ? 'positive' : 'negative';
+        
+        // Creator can only set the outcome that achieved majority
+        if (sanitizedOutcome !== majorityOutcome) {
+          return { 
+            success: false, 
+            error: `Cannot set ${sanitizedOutcome} outcome. Participants voted for ${majorityOutcome} (${majorityOutcome === 'positive' ? positiveVotes : negativeVotes} votes vs ${requiredVotes} required).` 
+          };
+        }
+      } else {
+        // If no majority achieved, warn but allow (for backwards compatibility)
+        console.warn(`No majority vote achieved. Positive: ${positiveVotes}, Negative: ${negativeVotes}, Required: ${requiredVotes}`);
+      }
+    }
+
     const predictionsTable = getTableName(sanitizedContractAddress, 'predictions');
     const wrongPredictionsTable = getTableName(sanitizedContractAddress, 'wrong_predictions');
 

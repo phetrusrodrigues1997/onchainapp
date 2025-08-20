@@ -6,6 +6,7 @@ import {  Messages, FeaturedBets, CryptoBets, LivePredictions } from "./schema";
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
+import { EvidenceSubmissions, MarketOutcomes } from "./schema";
 import { desc } from "drizzle-orm";
 
 // Initialize database connection
@@ -1249,6 +1250,280 @@ export async function getUserRank(walletAddress: string) {
   } catch (error) {
     console.error("Error getting user rank:", error);
     return null;
+  }
+}
+
+// ========== EVIDENCE SUBMISSION SYSTEM ==========
+
+/**
+ * Input validation and sanitization functions
+ */
+const isValidEthereumAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+};
+
+const isValidTableType = (tableType: string): boolean => {
+  return tableType === 'featured' || tableType === 'crypto';
+};
+
+const sanitizeString = (input: string): string => {
+  // Remove null bytes, control characters, and trim whitespace
+  return input.replace(/[\x00-\x1f\x7f-\x9f]/g, '').trim();
+};
+
+const isValidDateString = (dateString: string): boolean => {
+  // Check if it's a valid YYYY-MM-DD format
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(dateString)) return false;
+  
+  // Check if it's a valid date
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+/**
+ * Submit evidence for disputing a market outcome
+ * Includes comprehensive input validation and sanitization
+ */
+export async function submitEvidence(
+  walletAddress: string, 
+  marketType: string, 
+  outcomeDate: string, 
+  evidence: string,
+  paymentTxHash?: string
+) {
+  try {
+    // Input validation
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      return { success: false, error: "Invalid wallet address" };
+    }
+    if (!marketType || typeof marketType !== 'string') {
+      return { success: false, error: "Invalid market type" };
+    }
+    if (!outcomeDate || typeof outcomeDate !== 'string') {
+      return { success: false, error: "Invalid outcome date" };
+    }
+    if (!evidence || typeof evidence !== 'string') {
+      return { success: false, error: "Evidence text is required" };
+    }
+
+    // Sanitize inputs
+    const sanitizedWalletAddress = sanitizeString(walletAddress);
+    const sanitizedMarketType = sanitizeString(marketType);
+    const sanitizedOutcomeDate = sanitizeString(outcomeDate);
+    const sanitizedEvidence = sanitizeString(evidence);
+    const sanitizedPaymentTxHash = paymentTxHash ? sanitizeString(paymentTxHash) : null;
+
+    // Validate Ethereum address format
+    if (!isValidEthereumAddress(sanitizedWalletAddress)) {
+      return { success: false, error: "Invalid wallet address format" };
+    }
+
+    // Validate market type
+    if (!isValidTableType(sanitizedMarketType)) {
+      return { success: false, error: "Invalid market type. Must be 'featured' or 'crypto'" };
+    }
+
+    // Validate date format
+    if (!isValidDateString(sanitizedOutcomeDate)) {
+      return { success: false, error: "Invalid date format. Must be YYYY-MM-DD" };
+    }
+
+    // Validate evidence length (prevent extremely long inputs)
+    if (sanitizedEvidence.length < 10) {
+      return { success: false, error: "Evidence must be at least 10 characters long" };
+    }
+    if (sanitizedEvidence.length > 5000) {
+      return { success: false, error: "Evidence must be less than 5000 characters" };
+    }
+
+    // Validate payment hash format if provided
+    if (sanitizedPaymentTxHash && !isValidEthereumAddress(sanitizedPaymentTxHash)) {
+      // Transaction hashes are 66 characters (0x + 64 hex chars)
+      if (!/^0x[a-fA-F0-9]{64}$/.test(sanitizedPaymentTxHash)) {
+        return { success: false, error: "Invalid payment transaction hash format" };
+      }
+    }
+
+    // Check if market outcome exists and evidence window is active
+    const marketOutcome = await db
+      .select()
+      .from(MarketOutcomes)
+      .where(
+        and(
+          eq(MarketOutcomes.marketType, sanitizedMarketType),
+          eq(MarketOutcomes.outcomeDate, sanitizedOutcomeDate)
+        )
+      )
+      .limit(1);
+
+    if (marketOutcome.length === 0) {
+      return { success: false, error: "Market outcome not found" };
+    }
+
+    // Check if evidence window is still active
+    const now = new Date();
+    const evidenceExpiry = new Date(marketOutcome[0].evidenceWindowExpires);
+    if (now > evidenceExpiry) {
+      return { success: false, error: "Evidence submission window has expired" };
+    }
+
+    // Check if user has already submitted evidence for this outcome
+    const existingEvidence = await db
+      .select()
+      .from(EvidenceSubmissions)
+      .where(
+        and(
+          eq(EvidenceSubmissions.walletAddress, sanitizedWalletAddress.toLowerCase()),
+          eq(EvidenceSubmissions.marketType, sanitizedMarketType),
+          eq(EvidenceSubmissions.outcomeDate, sanitizedOutcomeDate)
+        )
+      )
+      .limit(1);
+
+    if (existingEvidence.length > 0) {
+      return { success: false, error: "You have already submitted evidence for this outcome" };
+    }
+
+    // Insert evidence submission
+    const result = await db
+      .insert(EvidenceSubmissions)
+      .values({
+        walletAddress: sanitizedWalletAddress.toLowerCase(),
+        marketType: sanitizedMarketType,
+        outcomeDate: sanitizedOutcomeDate,
+        evidence: sanitizedEvidence,
+        paymentTxHash: sanitizedPaymentTxHash,
+        status: 'pending'
+      })
+      .returning({ id: EvidenceSubmissions.id });
+
+    // Mark market as disputed
+    await db
+      .update(MarketOutcomes)
+      .set({ isDisputed: true })
+      .where(
+        and(
+          eq(MarketOutcomes.marketType, sanitizedMarketType),
+          eq(MarketOutcomes.outcomeDate, sanitizedOutcomeDate)
+        )
+      );
+
+    return { 
+      success: true, 
+      submissionId: result[0].id,
+      message: "Evidence submitted successfully" 
+    };
+
+  } catch (error) {
+    console.error("Error submitting evidence:", error);
+    return { success: false, error: "Failed to submit evidence. Please try again." };
+  }
+}
+
+/**
+ * Get user's evidence submission for a specific market outcome
+ */
+export async function getUserEvidenceSubmission(
+  walletAddress: string, 
+  marketType: string, 
+  outcomeDate: string
+) {
+  try {
+    // Input validation and sanitization
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      return null;
+    }
+    if (!marketType || typeof marketType !== 'string') {
+      return null;
+    }
+    if (!outcomeDate || typeof outcomeDate !== 'string') {
+      return null;
+    }
+
+    const sanitizedWalletAddress = sanitizeString(walletAddress);
+    const sanitizedMarketType = sanitizeString(marketType);
+    const sanitizedOutcomeDate = sanitizeString(outcomeDate);
+
+    if (!isValidEthereumAddress(sanitizedWalletAddress)) {
+      return null;
+    }
+    if (!isValidTableType(sanitizedMarketType)) {
+      return null;
+    }
+    if (!isValidDateString(sanitizedOutcomeDate)) {
+      return null;
+    }
+
+    const evidence = await db
+      .select({
+        id: EvidenceSubmissions.id,
+        evidence: EvidenceSubmissions.evidence,
+        submittedAt: EvidenceSubmissions.submittedAt,
+        status: EvidenceSubmissions.status,
+        reviewedAt: EvidenceSubmissions.reviewedAt,
+        reviewNotes: EvidenceSubmissions.reviewNotes,
+      })
+      .from(EvidenceSubmissions)
+      .where(
+        and(
+          eq(EvidenceSubmissions.walletAddress, sanitizedWalletAddress.toLowerCase()),
+          eq(EvidenceSubmissions.marketType, sanitizedMarketType),
+          eq(EvidenceSubmissions.outcomeDate, sanitizedOutcomeDate)
+        )
+      )
+      .limit(1);
+
+    return evidence.length > 0 ? evidence[0] : null;
+
+  } catch (error) {
+    console.error("Error getting user evidence submission:", error);
+    return null;
+  }
+}
+
+/**
+ * Get all evidence submissions for a market outcome (admin function)
+ */
+export async function getAllEvidenceSubmissions(
+  marketType: string, 
+  outcomeDate: string
+) {
+  try {
+    // Input validation and sanitization
+    if (!marketType || typeof marketType !== 'string') {
+      return [];
+    }
+    if (!outcomeDate || typeof outcomeDate !== 'string') {
+      return [];
+    }
+
+    const sanitizedMarketType = sanitizeString(marketType);
+    const sanitizedOutcomeDate = sanitizeString(outcomeDate);
+
+    if (!isValidTableType(sanitizedMarketType)) {
+      return [];
+    }
+    if (!isValidDateString(sanitizedOutcomeDate)) {
+      return [];
+    }
+
+    const submissions = await db
+      .select()
+      .from(EvidenceSubmissions)
+      .where(
+        and(
+          eq(EvidenceSubmissions.marketType, sanitizedMarketType),
+          eq(EvidenceSubmissions.outcomeDate, sanitizedOutcomeDate)
+        )
+      )
+      .orderBy(EvidenceSubmissions.submittedAt);
+
+    return submissions;
+
+  } catch (error) {
+    console.error("Error getting evidence submissions:", error);
+    return [];
   }
 }
 

@@ -114,3 +114,19 @@ export const MarketOutcomes = pgTable("market_outcomes", {
   isDisputed: boolean("is_disputed").default(false).notNull(),
 });
 
+// Evidence submissions for disputing market outcomes
+export const EvidenceSubmissions = pgTable("evidence_submissions", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(), // Who submitted the evidence
+  marketType: text("market_type").notNull(), // "featured" or "crypto"
+  outcomeDate: text("outcome_date").notNull(), // Date of the disputed outcome (YYYY-MM-DD)
+  evidence: text("evidence").notNull(), // The evidence text submitted by user
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(), // When evidence was submitted
+  paymentTxHash: text("payment_tx_hash"), // Transaction hash for the $5 USDC payment (for future implementation)
+  status: text("status").notNull().default('pending'), // "pending", "approved", "rejected"
+  reviewedBy: text("reviewed_by"), // Admin who reviewed the evidence
+  reviewedAt: timestamp("reviewed_at"), // When the evidence was reviewed
+  reviewNotes: text("review_notes"), // Admin notes about the decision
+  refundTxHash: text("refund_tx_hash"), // If approved, transaction hash for refund (for future implementation)
+});
+

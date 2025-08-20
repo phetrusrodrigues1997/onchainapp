@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
-import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee } from '../Database/actions';
+import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions } from '../Database/actions';
 import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
@@ -72,6 +72,12 @@ export default function MakePredicitions() {
   const [userEvidenceSubmission, setUserEvidenceSubmission] = useState<EvidenceSubmission | null>(null);
   const [timeUntilEvidenceExpires, setTimeUntilEvidenceExpires] = useState<number>(0);
   const [isEvidenceSectionExpanded, setIsEvidenceSectionExpanded] = useState<boolean>(false);
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  
+  // Admin evidence review state
+  const [allEvidenceSubmissions, setAllEvidenceSubmissions] = useState<any[]>([]);
+  const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
+  const [isLoadingEvidence, setIsLoadingEvidence] = useState<boolean>(false);
 
   // Check if betting is allowed (Sunday through Friday)
   const isBettingAllowed = (): boolean => {
@@ -148,6 +154,36 @@ export default function MakePredicitions() {
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
 
+  // Load user's evidence submission if any - now takes outcomeDate parameter to avoid race condition
+  const loadUserEvidenceSubmission = useCallback(async (outcomeDate: string) => {
+    if (!address || !selectedTableType) return null;
+    
+    try {
+      const submission = await getUserEvidenceSubmission(
+        address, 
+        selectedTableType, 
+        outcomeDate
+      );
+      
+      const formattedSubmission = submission ? {
+        id: submission.id,
+        walletAddress: address,
+        contractAddress,
+        evidence: submission.evidence,
+        submittedAt: submission.submittedAt,
+        paymentTxHash: '', // Will be implemented with payment system
+        status: submission.status as 'pending' | 'approved' | 'rejected'
+      } : null;
+      
+      setUserEvidenceSubmission(formattedSubmission);
+      console.log('Loading evidence submission for user:', address, formattedSubmission);
+      return formattedSubmission;
+    } catch (error) {
+      console.error('Error loading evidence submission:', error);
+      return null;
+    }
+  }, [address, selectedTableType, contractAddress]);
+
   // Load market outcome for current contract
   const loadMarketOutcome = useCallback(async () => {
     if (!contractAddress || !selectedTableType) return;
@@ -156,14 +192,16 @@ export default function MakePredicitions() {
       const provisionalOutcomeData = await getProvisionalOutcome(selectedTableType);
       
       if (provisionalOutcomeData) {
-        setMarketOutcome({
+        const marketOutcomeData = {
           id: 1,
           contractAddress,
           outcome: provisionalOutcomeData.outcome,
           setAt: new Date(provisionalOutcomeData.setAt),
           evidenceWindowExpires: new Date(provisionalOutcomeData.evidenceWindowExpires),
           isDisputed: false
-        });
+        };
+        
+        setMarketOutcome(marketOutcomeData);
         
         // Calculate remaining time
         const now = new Date().getTime();
@@ -171,33 +209,25 @@ export default function MakePredicitions() {
         const remaining = Math.max(0, expiry - now);
         setTimeUntilEvidenceExpires(remaining);
         
+        // Load evidence submission AFTER market outcome is set
+        if (address) {
+          const outcomeDate = marketOutcomeData.setAt.toISOString().split('T')[0];
+          await loadUserEvidenceSubmission(outcomeDate);
+        }
+        
         console.log('Loaded provisional outcome:', provisionalOutcomeData);
       } else {
         setMarketOutcome(null);
+        setUserEvidenceSubmission(null); // Clear evidence if no outcome
         console.log('No provisional outcome set yet');
       }
     } catch (error) {
       console.error('Error loading market outcome:', error);
     }
-  }, [contractAddress, selectedTableType]);
-
-  // Load user's evidence submission if any
-  const loadUserEvidenceSubmission = useCallback(async () => {
-    if (!address || !contractAddress) return;
-    
-    try {
-      // TODO: Implement getUserEvidenceSubmission in Database/actions
-      // const submission = await getUserEvidenceSubmission(address, contractAddress);
-      // setUserEvidenceSubmission(submission);
-      
-      console.log('Loading evidence submission for user:', address);
-    } catch (error) {
-      console.error('Error loading evidence submission:', error);
-    }
-  }, [address, contractAddress]);
+  }, [contractAddress, selectedTableType, address, loadUserEvidenceSubmission]);
 
   const loadBets = useCallback(async () => {
-    if (!address) return;
+    if (!address || !selectedTableType) return;
 
     setIsBetLoading(true);
     try {
@@ -211,7 +241,7 @@ export default function MakePredicitions() {
       setTomorrowsBet(tomorrowBet);
       setTodaysBet(todayBet);
       setReEntryFee(reEntryAmount);
-      setAllReEntryFees(allReEntryFees);
+      // Remove problematic allReEntryFees dependency
     } catch (error) {
       console.error("Error loading bets:", error);
       setTomorrowsBet(null);
@@ -222,23 +252,35 @@ export default function MakePredicitions() {
     }
   }, [address, selectedTableType]);
 
-  // Load bets on component mount and when address changes
+  // Load data on component mount and when key dependencies change
   useEffect(() => {
-    if (address && isParticipant) {
-      loadBets();
-      loadMarketOutcome();
-      loadUserEvidenceSubmission();
-    }
-  }, [address, isParticipant, selectedTableType, loadBets, loadMarketOutcome, loadUserEvidenceSubmission]);
+    const loadAllData = async () => {
+      if (address && isParticipant && selectedTableType) {
+        setIsDataLoaded(false);
+        try {
+          await Promise.all([
+            loadBets(),
+            loadMarketOutcome() // This will also load evidence submission after outcome is loaded
+          ]);
+        } finally {
+          setIsDataLoaded(true);
+        }
+      } else {
+        setIsDataLoaded(true); // Set to true even if we can't load data
+      }
+    };
+    
+    loadAllData();
+  }, [address, isParticipant, selectedTableType, loadBets, loadMarketOutcome]);
 
   // Timer effect for evidence window countdown
   useEffect(() => {
-    if (!isEvidenceWindowActive()) return;
+    if (!marketOutcome || !isEvidenceWindowActive()) return;
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
-      const expiry = marketOutcome?.evidenceWindowExpires.getTime() || 0;
-      const remaining = expiry - now;
+      const expiry = marketOutcome.evidenceWindowExpires.getTime();
+      const remaining = Math.max(0, expiry - now);
       
       if (remaining <= 0) {
         setTimeUntilEvidenceExpires(0);
@@ -249,7 +291,7 @@ export default function MakePredicitions() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [marketOutcome]);
+  }, [marketOutcome, isEvidenceWindowActive]);
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -279,26 +321,28 @@ export default function MakePredicitions() {
   };
 
   const handleEvidenceSubmission = async () => {
-    if (!address || !evidenceText.trim() || !contractAddress) return;
+    if (!address || !evidenceText.trim() || !selectedTableType || !marketOutcome) return;
     
     setIsSubmittingEvidence(true);
     try {
-      // TODO: Implement evidence submission with $5 USDC payment
-      // This would involve:
-      // 1. USDC approval for $5 (5000000 with 6 decimals)
-      // 2. Contract call to submit evidence and payment
-      // 3. Database record of evidence submission
+      // Submit evidence to database (without payment for now)
+      const outcomeDate = marketOutcome.setAt.toISOString().split('T')[0]; // Convert to YYYY-MM-DD
+      const result = await submitEvidence(
+        address,
+        selectedTableType,
+        outcomeDate,
+        evidenceText.trim()
+        // paymentTxHash will be added when payment system is implemented
+      );
       
-      // For now, simulate the submission
-      console.log('Submitting evidence:', evidenceText);
-      console.log('Payment: $5 USDC');
-      
-      // TODO: Implement submitEvidence in Database/actions
-      // await submitEvidence(address, contractAddress, evidenceText, txHash);
-      
-      showMessage('Evidence submitted successfully! Payment of $5 USDC processed.');
-      setEvidenceText('');
-      await loadUserEvidenceSubmission();
+      if (result.success) {
+        showMessage('Evidence submitted successfully! Awaiting admin review.');
+        setEvidenceText('');
+        // Reload evidence submission with proper parameters
+        await loadUserEvidenceSubmission(outcomeDate);
+      } else {
+        showMessage(result.error || 'Failed to submit evidence. Please try again.');
+      }
     } catch (error: unknown) {
       console.error('Error submitting evidence:', error);
       showMessage(error instanceof Error ? error.message : 'Failed to submit evidence. Please try again.');
@@ -307,10 +351,56 @@ export default function MakePredicitions() {
     }
   };
 
+  // Load all evidence submissions for admin review
+  const loadAllEvidenceSubmissions = async () => {
+    if (!marketOutcome || !selectedTableType) return;
+    
+    setIsLoadingEvidence(true);
+    try {
+      const outcomeDate = marketOutcome.setAt.toISOString().split('T')[0];
+      const submissions = await getAllEvidenceSubmissions(selectedTableType, outcomeDate);
+      setAllEvidenceSubmissions(submissions);
+      console.log('Loaded all evidence submissions:', submissions);
+    } catch (error) {
+      console.error('Error loading evidence submissions:', error);
+      showMessage('Failed to load evidence submissions');
+    } finally {
+      setIsLoadingEvidence(false);
+    }
+  };
+
+  // Toggle admin panel and load evidence if opening
+  const toggleAdminPanel = async () => {
+    if (!showAdminPanel) {
+      await loadAllEvidenceSubmissions();
+    }
+    setShowAdminPanel(!showAdminPanel);
+  };
+
   // Reload market outcome data (useful for refreshing after admin sets provisional outcome)
-  const refreshMarketData = () => {
-    loadMarketOutcome();
-    showMessage('Market data refreshed');
+  const refreshMarketData = async () => {
+    try {
+      await loadMarketOutcome();
+      showMessage('Market data refreshed');
+    } catch (error) {
+      console.error('Error refreshing market data:', error);
+      showMessage('Failed to refresh market data');
+    }
+  };
+
+  // Check if user is admin/owner (for main prediction markets)
+  // In a real app, this would check against a list of admin addresses
+  const isAdmin = () => {
+    // For now, we'll check if the user has a specific admin address
+    // You can modify this logic based on your admin system
+    const adminAddresses = [
+      // Add admin wallet addresses here
+      // '0x1234567890123456789012345678901234567890'
+    ];
+    
+    // For development, allow any connected user to see admin panel
+    // Remove this in production and use proper admin check
+    return address && isConnected;
   };
 
   // Rest of your component remains the same...
@@ -377,14 +467,14 @@ export default function MakePredicitions() {
       </div>
       
       <div className="max-w-lg mx-auto pt-12 relative z-10">
-        {isBetLoading ? (
+        {(isBetLoading || !isDataLoaded) ? (
           <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center">
             <div className="inline-flex items-center gap-3 text-gray-600">
               <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
               <span className="font-medium">Loading your bet...</span>
             </div>
           </div>
-        ) : reEntryFee ? (
+        ) : reEntryFee && reEntryFee > 0 ? (
           // Re-entry Required Message
           <div className="bg-orange-50/80 backdrop-blur-xl border-2 border-orange-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-orange-900/10 relative overflow-hidden">
             <div className="text-center">
@@ -485,7 +575,7 @@ export default function MakePredicitions() {
                   </p>
                 </div>
               </div>
-            ) : hasOutcomeBeenSet() ? (
+            ) : hasOutcomeBeenSet() && marketOutcome ? (
               // Market outcome has been set - show outcome and evidence submission interface
               <div className="space-y-6">
                 {/* Market Outcome Display - Compressed */}
@@ -579,13 +669,13 @@ export default function MakePredicitions() {
 
                         <div>
                           <label className="block text-gray-700 font-bold mb-3">
-                            Evidence Against Outcome ($5 USDC required)
+                            Evidence Against Outcome
                           </label>
                           <textarea
                             value={evidenceText}
                             onChange={(e) => setEvidenceText(e.target.value)}
                             placeholder="Provide detailed evidence why this outcome is incorrect. Include links, sources, or explanations..."
-                            className="w-full h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                            className="w-full text-black h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                             disabled={isSubmittingEvidence}
                           />
                         </div>
@@ -596,10 +686,10 @@ export default function MakePredicitions() {
                             <div className="text-yellow-800">
                               <p className="font-bold mb-2">Evidence Submission Terms:</p>
                               <ul className="text-sm space-y-1">
-                                <li>• $5 USDC fee required to submit evidence</li>
-                                <li>• Fee is refunded if your evidence is accepted</li>
-                                <li>• Fee is lost if evidence is rejected</li>
+                                <li>• Submit detailed evidence to dispute the outcome</li>
+                                <li>• Include sources, links, or clear explanations</li>
                                 <li>• Admin will review within 24 hours</li>
+                                <li>• One submission per outcome per user</li>
                               </ul>
                             </div>
                           </div>
@@ -613,12 +703,12 @@ export default function MakePredicitions() {
                           {isSubmittingEvidence ? (
                             <>
                               <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Processing Payment...
+                              Submitting Evidence...
                             </>
                           ) : (
                             <>
                               <Upload className="w-6 h-6" />
-                              Submit Evidence ($5 USDC)
+                              Submit Evidence
                             </>
                           )}
                         </button>
@@ -643,7 +733,7 @@ export default function MakePredicitions() {
                       </div>
                       <div className="text-gray-600 text-sm">
                         <p className="mb-1">📄 Evidence submitted: {userEvidenceSubmission?.submittedAt.toLocaleString()}</p>
-                        <p>💰 $5 USDC payment processed</p>
+                        <p>⏳ Status: {userEvidenceSubmission?.status === 'pending' ? 'Under Review' : userEvidenceSubmission?.status}</p>
                       </div>
                     </div>
                   </div>
@@ -840,6 +930,128 @@ export default function MakePredicitions() {
             <div className="relative z-10 text-gray-700 text-sm font-bold tracking-wide">
               Predict tomorrow's outcome • Wrong predictions require re-entry fee
             </div>
+          </div>
+        )}
+
+        {/* Admin Evidence Review Panel - Only visible to admins/owners */}
+        {isAdmin() && hasOutcomeBeenSet() && marketOutcome && (
+          <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 backdrop-blur-xl border-2 border-blue-200 rounded-3xl p-8 mt-8 shadow-2xl shadow-blue-900/10 relative overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <FileText className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900 tracking-tight">Admin Panel</h3>
+                  <p className="text-blue-700 font-medium">Review Evidence Submissions</p>
+                </div>
+              </div>
+              <button
+                onClick={toggleAdminPanel}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                {showAdminPanel ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    Hide
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    Show Evidence ({allEvidenceSubmissions.length})
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Evidence List */}
+            {showAdminPanel && (
+              <div className="space-y-4">
+                {isLoadingEvidence ? (
+                  <div className="text-center py-8">
+                    <div className="inline-flex items-center gap-3 text-blue-600">
+                      <div className="w-6 h-6 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin"></div>
+                      <span className="font-medium">Loading evidence submissions...</span>
+                    </div>
+                  </div>
+                ) : allEvidenceSubmissions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <FileText className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <p className="text-gray-600 font-medium">No evidence submissions yet</p>
+                    <p className="text-gray-500 text-sm">Evidence will appear here when users dispute the outcome</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-blue-100 rounded-xl p-4 mb-4">
+                      <h4 className="font-bold text-blue-900 mb-2">📋 Evidence Summary</h4>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="text-center">
+                          <div className="font-bold text-blue-800">{allEvidenceSubmissions.length}</div>
+                          <div className="text-blue-600">Total</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-bold text-orange-800">{allEvidenceSubmissions.filter(e => e.status === 'pending').length}</div>
+                          <div className="text-orange-600">Pending</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-bold text-green-800">{allEvidenceSubmissions.filter(e => e.status === 'approved').length}</div>
+                          <div className="text-green-600">Approved</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {allEvidenceSubmissions.map((submission, index) => (
+                        <div key={submission.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h5 className="font-bold text-gray-900">Evidence #{index + 1}</h5>
+                              <p className="text-sm text-gray-600">
+                                From: {submission.walletAddress.slice(0, 6)}...{submission.walletAddress.slice(-4)}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Submitted: {new Date(submission.submittedAt).toLocaleString()}
+                              </p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              submission.status === 'pending' 
+                                ? 'bg-orange-100 text-orange-800'
+                                : submission.status === 'approved'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {submission.status.toUpperCase()}
+                            </span>
+                          </div>
+                          
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <h6 className="font-semibold text-gray-700 mb-2">Evidence:</h6>
+                            <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
+                              {submission.evidence}
+                            </p>
+                          </div>
+
+                          {submission.reviewNotes && (
+                            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                              <h6 className="font-semibold text-blue-700 mb-1">Admin Review:</h6>
+                              <p className="text-blue-800 text-sm">{submission.reviewNotes}</p>
+                              {submission.reviewedAt && (
+                                <p className="text-blue-600 text-xs mt-1">
+                                  Reviewed: {new Date(submission.reviewedAt).toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

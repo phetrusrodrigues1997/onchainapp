@@ -253,8 +253,23 @@ const handleMarketClick = (marketId: string) => {
           100% { transform: translateX(0); }
         }
         
+        @keyframes pulse-glow {
+          0%, 100% { 
+            transform: scale(1); 
+            box-shadow: 0 0 0 0 rgba(170, 0, 0, 0.2);
+          }
+          50% { 
+            transform: scale(1.02); 
+            box-shadow: 0 0 0 3px rgba(170, 0, 0, 0.08), 0 0 10px rgba(170, 0, 0, 0.1);
+          }
+        }
+        
         .animate-pulse-right {
           animation: pulse-right 6s ease-in-out infinite;
+        }
+        
+        .animate-pulse-glow {
+          animation: pulse-glow 3s ease-in-out infinite;
         }
       `}</style>
       
@@ -277,13 +292,13 @@ const handleMarketClick = (marketId: string) => {
             <div className="mb-6 -translate-y-1/4">
               <button 
                 onClick={() => setActiveSection('liveMarkets')}
-                className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105"
+                className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105 animate-pulse-glow"
               >
                 {/* Live indicator dot */}
                 <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
                 
                 <span className="relative">
-                  Join Live Markets
+                  Try 60-minute markets
                 </span>
                 
                 {/* Arrow with hover animation */}

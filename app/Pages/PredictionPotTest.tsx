@@ -1595,44 +1595,7 @@ useEffect(() => {
       </button>
     </div>
 
-    
-    {/* DEBUG SECTION - Clear Specific Wallet */}
-    <div className="bg-red-900/20 border border-red-500 p-4 rounded-lg mb-4">
-      <h3 className="text-red-400 font-medium mb-2">🚨 DEBUG: Clear Wrong Predictions for Wallet</h3>
-      <p className="text-red-300 text-sm mb-3">
-        Clear all wrong predictions for a specific wallet (useful if data got corrupted by old logic)
-      </p>
-      <input
-        type="text"
-        placeholder="Enter wallet address"
-        value={winnerAddresses}
-        onChange={(e) => setWinnerAddresses(e.target.value)}
-        className="w-full px-3 py-2 bg-black/50 border border-red-500 rounded-md text-red-300 placeholder-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 mb-3"
-      />
-      <button
-        onClick={async () => {
-          if (!winnerAddresses.trim()) {
-            showMessage("Please enter a wallet address", true);
-            return;
-          }
-          setIsLoading(true);
-          try {
-            await clearWrongPredictionsForWallet(winnerAddresses.trim());
-            showMessage("Wrong predictions cleared for wallet!");
-            setWinnerAddresses("");
-            loadReferralData(); // Refresh data
-          } catch (error) {
-            showMessage("Failed to clear wrong predictions", true);
-          } finally {
-            setIsLoading(false);
-          }
-        }}
-        disabled={isActuallyLoading}
-        className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isActuallyLoading ? "Clearing..." : "Clear Wrong Predictions"}
-      </button>
-    </div>
+  
     
   </div>
 )}

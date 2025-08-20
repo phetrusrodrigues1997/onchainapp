@@ -156,12 +156,14 @@ export async function createPotTables(contractAddress: string) {
       )
     `);
 
-    // Create votes table
-    const votesTableName = `pot_${cleanAddress}_votes`;
+
+    // Create outcome votes table
+    const outcomeVotesTableName = `pot_${cleanAddress}_outcome_votes`;
     await db2.execute(sql`
-      CREATE TABLE IF NOT EXISTS ${sql.identifier(votesTableName)} (
+      CREATE TABLE IF NOT EXISTS ${sql.identifier(outcomeVotesTableName)} (
         id SERIAL PRIMARY KEY,
         wallet_address TEXT NOT NULL UNIQUE,
+        outcome_vote TEXT NOT NULL,
         voted_at TIMESTAMP DEFAULT NOW() NOT NULL
       )
     `);
@@ -518,7 +520,7 @@ export async function cleanupPotTables(contractAddress: string) {
       getTableName(contractAddress, 'predictions'),
       getTableName(contractAddress, 'participants'), 
       getTableName(contractAddress, 'wrong_predictions'),
-      getTableName(contractAddress, 'votes')
+      getTableName(contractAddress, 'outcome_votes')
     ];
 
     // Drop all tables for this contract
@@ -543,10 +545,13 @@ export async function cleanupPotTables(contractAddress: string) {
 
 // ========== VOTING SYSTEM ==========
 
+
+// ========== OUTCOME VOTING ==========
+
 /**
- * Cast a vote to close the pot (only participants can vote)
+ * Cast a vote for the pot outcome (positive or negative)
  */
-export async function castVoteToClose(contractAddress: string, walletAddress: string) {
+export async function castOutcomeVote(contractAddress: string, walletAddress: string, outcome: 'positive' | 'negative') {
   try {
     // Input validation
     if (!contractAddress || typeof contractAddress !== 'string') {
@@ -554,6 +559,9 @@ export async function castVoteToClose(contractAddress: string, walletAddress: st
     }
     if (!walletAddress || typeof walletAddress !== 'string') {
       return { success: false, error: "Invalid wallet address" };
+    }
+    if (!isValidPrediction(outcome)) {
+      return { success: false, error: "Invalid outcome vote" };
     }
 
     // Sanitize inputs
@@ -576,44 +584,106 @@ export async function castVoteToClose(contractAddress: string, walletAddress: st
     `);
 
     if (participantCheck.rows.length === 0) {
-      return { success: false, error: "Only participants can vote" };
+      return { success: false, error: "Only participants can vote on outcomes" };
     }
 
-    // Check if user already voted
-    const votesTable = getTableName(sanitizedContractAddress, 'votes');
+    const outcomeVotesTable = getTableName(sanitizedContractAddress, 'outcome_votes');
+
+    // Check if user already voted on outcome
     const existingVote = await db2.execute(sql`
-      SELECT * FROM ${sql.identifier(votesTable)} 
+      SELECT * FROM ${sql.identifier(outcomeVotesTable)} 
       WHERE wallet_address = ${sanitizedWalletAddress.toLowerCase()}
     `);
 
     if (existingVote.rows.length > 0) {
-      return { success: false, error: "You have already voted" };
+      // Update existing vote
+      await db2.execute(sql`
+        UPDATE ${sql.identifier(outcomeVotesTable)}
+        SET outcome_vote = ${outcome}, voted_at = NOW()
+        WHERE wallet_address = ${sanitizedWalletAddress.toLowerCase()}
+      `);
+    } else {
+      // Insert new vote
+      await db2.execute(sql`
+        INSERT INTO ${sql.identifier(outcomeVotesTable)} (wallet_address, outcome_vote)
+        VALUES (${sanitizedWalletAddress.toLowerCase()}, ${outcome})
+      `);
     }
-
-    // Insert vote
-    await db2.execute(sql`
-      INSERT INTO ${sql.identifier(votesTable)} (wallet_address)
-      VALUES (${sanitizedWalletAddress.toLowerCase()})
-    `);
-
-    // Update vote count in PrivatePots table
-    await db2.update(PrivatePots)
-      .set({ 
-        votesToClose: sql`votes_to_close + 1`
-      })
-      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()));
 
     return { success: true };
   } catch (error) {
-    console.error("Error casting vote:", error);
-    return { success: false, error: "Failed to cast vote" };
+    console.error("Error casting outcome vote:", error);
+    return { success: false, error: "Failed to cast outcome vote" };
   }
 }
 
 /**
- * Check if user has voted to close the pot
+ * Get outcome voting status for a pot
  */
-export async function hasUserVoted(contractAddress: string, walletAddress: string) {
+export async function getOutcomeVotingStatus(contractAddress: string) {
+  try {
+    // Input validation
+    if (!contractAddress || typeof contractAddress !== 'string') {
+      return null;
+    }
+
+    const sanitizedContractAddress = sanitizeString(contractAddress);
+    
+    if (!isValidEthereumAddress(sanitizedContractAddress)) {
+      return null;
+    }
+
+    // Get total participants
+    const participantsTable = getTableName(sanitizedContractAddress, 'participants');
+    const participantsResult = await db2.execute(sql`
+      SELECT COUNT(*) as count FROM ${sql.identifier(participantsTable)}
+    `);
+
+    const totalParticipants = parseInt(participantsResult.rows[0]?.count as string || '0');
+
+    // Get outcome votes
+    const outcomeVotesTable = getTableName(sanitizedContractAddress, 'outcome_votes');
+    const votesResult = await db2.execute(sql`
+      SELECT outcome_vote, COUNT(*) as count 
+      FROM ${sql.identifier(outcomeVotesTable)} 
+      GROUP BY outcome_vote
+    `);
+
+    let positiveVotes = 0;
+    let negativeVotes = 0;
+    
+    votesResult.rows.forEach((row: any) => {
+      if (row.outcome_vote === 'positive') {
+        positiveVotes = parseInt(row.count);
+      } else if (row.outcome_vote === 'negative') {
+        negativeVotes = parseInt(row.count);
+      }
+    });
+
+    const totalOutcomeVotes = positiveVotes + negativeVotes;
+    const requiredVotes = Math.floor(totalParticipants / 2) + 1; // More than half
+    const majorityAchieved = Math.max(positiveVotes, negativeVotes) >= requiredVotes;
+    const majorityOutcome = positiveVotes > negativeVotes ? 'positive' : negativeVotes > positiveVotes ? 'negative' : null;
+
+    return {
+      totalParticipants,
+      totalOutcomeVotes,
+      positiveVotes,
+      negativeVotes,
+      requiredVotes,
+      majorityAchieved,
+      majorityOutcome
+    };
+  } catch (error) {
+    console.error("Error getting outcome voting status:", error);
+    return null;
+  }
+}
+
+/**
+ * Check if user has voted on outcome
+ */
+export async function hasUserVotedOutcome(contractAddress: string, walletAddress: string) {
   try {
     // Input validation
     if (!contractAddress || typeof contractAddress !== 'string') {
@@ -630,76 +700,15 @@ export async function hasUserVoted(contractAddress: string, walletAddress: strin
       return false;
     }
 
-    const votesTable = getTableName(sanitizedContractAddress, 'votes');
+    const outcomeVotesTable = getTableName(sanitizedContractAddress, 'outcome_votes');
     const result = await db2.execute(sql`
-      SELECT * FROM ${sql.identifier(votesTable)} 
+      SELECT * FROM ${sql.identifier(outcomeVotesTable)} 
       WHERE wallet_address = ${sanitizedWalletAddress.toLowerCase()}
     `);
 
-    return result.rows.length > 0;
+    return result.rows[0] || null;
   } catch (error) {
-    console.error("Error checking user vote:", error);
-    return false;
-  }
-}
-
-/**
- * Get voting status for a pot
- */
-export async function getVotingStatus(contractAddress: string) {
-  try {
-    // Input validation
-    if (!contractAddress || typeof contractAddress !== 'string') {
-      return null;
-    }
-
-    const sanitizedContractAddress = sanitizeString(contractAddress);
-    
-    if (!isValidEthereumAddress(sanitizedContractAddress)) {
-      return null;
-    }
-
-    // Get pot details including vote count
-    const potDetails = await db2.select().from(PrivatePots)
-      .where(eq(PrivatePots.contractAddress, sanitizedContractAddress.toLowerCase()))
-      .limit(1);
-
-    if (potDetails.length === 0) {
-      return null;
-    }
-
-    // Get total participants
-    const participantsTable = getTableName(sanitizedContractAddress, 'participants');
-    const participantsResult = await db2.execute(sql`
-      SELECT COUNT(*) as count FROM ${sql.identifier(participantsTable)}
-    `);
-
-    const totalParticipants = parseInt(participantsResult.rows[0]?.count as string || '0');
-    const votesToClose = potDetails[0].votesToClose;
-    const requiredVotes = Math.floor(totalParticipants / 2) + 1; // More than half
-    const readyForDistribution = votesToClose >= requiredVotes && totalParticipants > 0;
-
-    return {
-      totalParticipants,
-      votesToClose,
-      requiredVotes,
-      readyForDistribution
-    };
-  } catch (error) {
-    console.error("Error getting voting status:", error);
+    console.error("Error checking user outcome vote:", error);
     return null;
-  }
-}
-
-/**
- * Check if pot is ready for distribution based on voting
- */
-export async function isPotReadyForDistribution(contractAddress: string) {
-  try {
-    const votingStatus = await getVotingStatus(contractAddress);
-    return votingStatus?.readyForDistribution || false;
-  } catch (error) {
-    console.error("Error checking if pot ready for distribution:", error);
-    return false;
   }
 }

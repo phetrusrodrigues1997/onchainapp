@@ -8,7 +8,6 @@ export const PrivatePots = pgTable("private_pots", {
   potName: text("pot_name").notNull(), // Name of the prediction pot
   description: text("description").notNull(), // What users are predicting
   entryAmount: integer("entry_amount").default(10000).notNull(), // Entry amount in USDC micros (default 0.01 USDC)
-  votesToClose: integer("votes_to_close").default(0).notNull(), // Number of participants who voted to close
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -54,12 +53,14 @@ export function createPotWrongPredictionsTable(contractAddress: string) {
   });
 }
 
-export function createPotVotesTable(contractAddress: string) {
-  const tableName = `pot_${contractAddress.toLowerCase().slice(2)}_votes`;
+
+export function createPotOutcomeVotesTable(contractAddress: string) {
+  const tableName = `pot_${contractAddress.toLowerCase().slice(2)}_outcome_votes`;
   
   return pgTable(tableName, {
     id: serial("id").primaryKey(),
-    walletAddress: text("wallet_address").notNull().unique(), // One vote per participant
+    walletAddress: text("wallet_address").notNull().unique(), // One outcome vote per participant
+    outcomeVote: text("outcome_vote").notNull(), // "positive" or "negative"
     votedAt: timestamp("voted_at").defaultNow().notNull(),
   });
 }
