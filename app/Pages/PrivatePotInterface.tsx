@@ -24,7 +24,6 @@ import {
 } from '../Database/actions2';
 
 import {
-  setPotOutcome,
   getPotStats,
   clearWrongPredictionsForUser,
   getWrongPredictors,
@@ -177,7 +176,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   const [isCreator, setIsCreator] = useState(false);
   const [potStats, setPotStats] = useState<any>(null);
   const [showCreatorPanel, setShowCreatorPanel] = useState(false);
-  const [outcomeToSet, setOutcomeToSet] = useState<'positive' | 'negative'>('positive');
   const [predictionDate, setPredictionDate] = useState('');
   const [distributionStep, setDistributionStep] = useState<'ready' | 'confirmed'>('ready'); // Track distribution flow
   const [pendingTransactionType, setPendingTransactionType] = useState<'approval' | 'potEntry' | null>(null); // Track what transaction is pending
@@ -460,12 +458,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   }, [isConfirmed, hash, pendingTransactionType, address, potDetails?.entryAmount, contractAddress, refetchPotBalance, refetchPotParticipants, queryClient]);
 
-  // Auto-set outcome to majority vote if achieved
-  useEffect(() => {
-    if (outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome) {
-      setOutcomeToSet(outcomeVotingStatus.majorityOutcome);
-    }
-  }, [outcomeVotingStatus]);
 
   // Simplified pot entry
   const handleEnterPot = async () => {
@@ -566,28 +558,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
-  // Handle setting outcome (creator only)
-  const handleSetOutcome = async () => {
-    if (!address || !isCreator) return;
-
-    try {
-      const result = await setPotOutcome(contractAddress, address, predictionDate, outcomeVotingStatus?.majorityOutcome || outcomeToSet);
-      
-      if (result.success) {
-        showAlert(`Outcome set! ${result.totalWinners} winners, ${result.totalLosers} losers`, 'success', 'Outcome Set');
-        // Refresh stats
-        const stats = await getPotStats(contractAddress, address);
-        if (stats.success) {
-          setPotStats(stats.stats);
-        }
-      } else {
-        showAlert(result.error || 'Failed to set outcome', 'error', 'Error');
-      }
-    } catch (error) {
-      console.error('Error setting outcome:', error);
-      showAlert('Failed to set outcome', 'error', 'Operation Failed');
-    }
-  };
 
   // Handle updating entry amount (creator only)
   const handleUpdateEntryAmount = async () => {
@@ -985,67 +955,75 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 </button>
               </div>
 
-              {/* Outcome Setting */}
+              {/* Participant Outcome Voting Results - Read Only */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <label className="block text-sm font-medium text-gray-700">Set Outcome</label>
+                  <label className="block text-sm font-medium text-gray-700">Participant Outcome Voting</label>
                   {outcomeVotingStatus?.majorityAchieved && (
                     <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      Majority: {outcomeVotingStatus.majorityOutcome?.toUpperCase()}
+                      Decided: {outcomeVotingStatus.majorityOutcome?.toUpperCase()}
                     </span>
                   )}
                 </div>
                 
                 {/* Show outcome voting results */}
-                {outcomeVotingStatus && outcomeVotingStatus.totalOutcomeVotes > 0 && (
-                  <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                    <div className="text-sm text-gray-600 mb-2">Participant Votes:</div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-green-700">
-                        YES: {outcomeVotingStatus.positiveVotes} votes
-                      </span>
-                      <span className="text-red-700">
-                        NO: {outcomeVotingStatus.negativeVotes} votes
-                      </span>
+                {outcomeVotingStatus && outcomeVotingStatus.totalOutcomeVotes > 0 ? (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="text-sm text-gray-600 mb-3">Current Votes:</div>
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div className="text-center">
+                        <div className={`text-lg font-bold ${outcomeVotingStatus.positiveVotes > outcomeVotingStatus.negativeVotes ? 'text-green-700' : 'text-gray-600'}`}>
+                          {outcomeVotingStatus.positiveVotes}
+                        </div>
+                        <div className="text-xs text-gray-600">YES Votes</div>
+                      </div>
+                      <div className="text-center">
+                        <div className={`text-lg font-bold ${outcomeVotingStatus.negativeVotes > outcomeVotingStatus.positiveVotes ? 'text-red-700' : 'text-gray-600'}`}>
+                          {outcomeVotingStatus.negativeVotes}
+                        </div>
+                        <div className="text-xs text-gray-600">NO Votes</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Required for majority: {outcomeVotingStatus.requiredVotes} votes
+                    
+                    {outcomeVotingStatus.majorityAchieved ? (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                        <div className="text-green-800 font-bold text-sm">
+                          ✓ Majority Achieved: {outcomeVotingStatus.majorityOutcome?.toUpperCase()}
+                        </div>
+                        <div className="text-green-700 text-xs mt-1">
+                          Ready for distribution
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                        <div className="text-amber-800 font-bold text-sm">
+                          Waiting for Majority Vote
+                        </div>
+                        <div className="text-amber-700 text-xs mt-1">
+                          Need {outcomeVotingStatus.requiredVotes} votes (currently {outcomeVotingStatus.totalOutcomeVotes})
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-gray-100 rounded-lg p-4 text-center">
+                    <div className="text-gray-600 font-medium text-sm">
+                      No outcome votes yet
+                    </div>
+                    <div className="text-gray-500 text-xs mt-1">
+                      Participants will vote on the outcome when ready
                     </div>
                   </div>
                 )}
                 
-                <select
-                  value={outcomeToSet}
-                  onChange={(e) => setOutcomeToSet(e.target.value as 'positive' | 'negative')}
-                  className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                  disabled={outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome !== outcomeToSet}
-                >
-                  <option value="positive" disabled={outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome !== 'positive'}>
-                    Positive {outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome === 'positive' ? '(Majority Vote)' : ''}
-                  </option>
-                  <option value="negative" disabled={outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome !== 'negative'}>
-                    Negative {outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome === 'negative' ? '(Majority Vote)' : ''}
-                  </option>
-                </select>
-                
-                {outcomeVotingStatus?.majorityAchieved && outcomeVotingStatus.majorityOutcome !== outcomeToSet && (
-                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
-                    You can only set the outcome that achieved majority vote from participants.
-                  </p>
-                )}
-                
-                {/* Auto-set outcome to majority if achieved */}
-                {outcomeVotingStatus?.majorityAchieved && (
-                  <div className="text-xs text-green-600">
-                    ✓ Participants voted for {outcomeVotingStatus.majorityOutcome?.toUpperCase()} outcome
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="text-blue-800 text-xs font-medium">
+                    ℹ️ Outcome decided by participant majority vote
                   </div>
-                )}
-                <button
-                  onClick={handleSetOutcome}
-                  className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 font-medium transition-colors"
-                >
-                  Set Outcome
-                </button>
+                  <div className="text-blue-700 text-xs mt-1">
+                    As the pot owner, you can distribute funds once participants reach consensus
+                  </div>
+                </div>
               </div>
             </div>
 
