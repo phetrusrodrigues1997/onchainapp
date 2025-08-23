@@ -1,5 +1,8 @@
 "use server";
 
+// TESTING TOGGLE - Set to false to allow betting on Saturdays for testing
+const ENFORCE_SATURDAY_RESTRICTIONS = false; // Toggle this on/off as needed
+
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import {  Messages, FeaturedBets, CryptoBets, LivePredictions } from "./schema"; // Import the schema
@@ -8,6 +11,7 @@ import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes } from "./schema";
 import { desc } from "drizzle-orm";
+import { getPrice } from '../Constants/getPrice';
 
 // Initialize database connection
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -311,11 +315,13 @@ export async function processReEntry(walletAddress: string, typeTable: string): 
 
 export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string) {
   try {
-    // Server-side schedule validation - betting only allowed Sunday-Friday
-    const now = new Date();
-    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
-    if (day === 6) {
-      throw new Error('Betting is not allowed on Saturdays (Results Day).');
+    // Server-side schedule validation - betting only allowed Sunday-Friday (unless testing toggle is disabled)
+    if (ENFORCE_SATURDAY_RESTRICTIONS) {
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+      if (day === 6) {
+        throw new Error('Betting is not allowed on Saturdays (Results Day).');
+      }
     }
     
     // Get tomorrow's date for the prediction
@@ -1056,11 +1062,11 @@ export async function getLastWordlePlay(walletAddress: string): Promise<Date | n
 /**
  * Updates winner statistics after a pot is distributed
  * @param winnerAddresses - Array of winner wallet addresses
- * @param potAmountPerWinner - Amount each winner received in micro-USDC (6 decimals)
+ * @param potAmountPerWinner - Amount each winner received in ETH wei (18 decimals)
  */
-export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: number) {
+export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: bigint) {
   try {
-    console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} micro-USDC each`);
+    console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} ETH wei each`);
     
     for (const address of winnerAddresses) {
       // Upsert user entry and update stats
@@ -1069,13 +1075,13 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
         .values({
           walletAddress: address,
           potsWon: 1,
-          totalEarningsUSDC: potAmountPerWinner,
+          totalEarningsETH: potAmountPerWinner,
         })
         .onConflictDoUpdate({
           target: UsersTable.walletAddress,
           set: {
             potsWon: sql`${UsersTable.potsWon} + 1`,
-            totalEarningsUSDC: sql`${UsersTable.totalEarningsUSDC} + ${potAmountPerWinner}`,
+            totalEarningsETH: sql`${UsersTable.totalEarningsETH} + ${potAmountPerWinner}`,
           },
         });
     }
@@ -1100,7 +1106,7 @@ export async function getUserStats(walletAddress: string) {
     const user = await db
       .select({
         potsWon: UsersTable.potsWon,
-        totalEarningsUSDC: UsersTable.totalEarningsUSDC,
+        totalEarningsETH: UsersTable.totalEarningsETH, // ETH values in wei (18 decimals)
       })
       .from(UsersTable)
       .where(eq(UsersTable.walletAddress, normalizedAddress))
@@ -1109,24 +1115,31 @@ export async function getUserStats(walletAddress: string) {
     if (user.length === 0) {
       return {
         potsWon: 0,
-        totalEarningsUSDC: 0,
+        totalEarningsETH: BigInt(0),
         totalEarnings: '$0.00', // Formatted for display
       };
     }
 
-    // Convert micro-USDC to dollars for display
-    const earningsInDollars = user[0].totalEarningsUSDC / 1000000;
+    // Convert ETH wei to USD for display
+    const ethAmount = Number(user[0].totalEarningsETH) / 1000000000000000000; // Convert wei to ETH
+    let ethPriceUSD = 4700; // Fallback ETH price
+    try {
+      ethPriceUSD = await getPrice('ETH') || 4700;
+    } catch (error) {
+      console.warn('Failed to fetch ETH price, using fallback:', error);
+    }
+    const earningsInDollars = ethAmount * ethPriceUSD;
     
     return {
       potsWon: user[0].potsWon,
-      totalEarningsUSDC: user[0].totalEarningsUSDC,
+      totalEarningsETH: user[0].totalEarningsETH,
       totalEarnings: `$${earningsInDollars.toFixed(2)}`, // Formatted for display
     };
   } catch (error) {
     console.error("Error getting user stats:", error);
     return {
       potsWon: 0,
-      totalEarningsUSDC: 0,
+      totalEarningsETH: BigInt(0),
       totalEarnings: '$0.00',
     };
   }
@@ -1143,19 +1156,29 @@ export async function getLeaderboard(currentUserAddress?: string) {
       .select({
         walletAddress: UsersTable.walletAddress,
         potsWon: UsersTable.potsWon,
-        totalEarningsUSDC: UsersTable.totalEarningsUSDC,
+        totalEarningsETH: UsersTable.totalEarningsETH,
         imageUrl: UsersTable.imageUrl,
       })
       .from(UsersTable)
-      .where(sql`${UsersTable.potsWon} > 0 OR ${UsersTable.totalEarningsUSDC} > 0`) // Only users with activity
+      .where(sql`${UsersTable.potsWon} > 0 OR ${UsersTable.totalEarningsETH} > 0`) // Only users with activity
       .orderBy(
-        sql`${UsersTable.totalEarningsUSDC} DESC`, 
+        sql`${UsersTable.totalEarningsETH} DESC`, 
         sql`${UsersTable.potsWon} DESC`
       );
 
+    // Get ETH price once for all users
+    let ethPriceUSD = 4700; // Fallback ETH price
+    try {
+      ethPriceUSD = await getPrice('ETH') || 4700;
+    } catch (error) {
+      console.warn('Failed to fetch ETH price for leaderboard, using fallback:', error);
+    }
+
     // Helper function to format user data
     const formatUser = (user: any, index: number) => {
-      const earningsInDollars = user.totalEarningsUSDC / 1000000;
+      // Convert ETH wei to USD for display
+      const ethAmount = Number(user.totalEarningsETH) / 1000000000000000000; // Convert wei to ETH
+      const earningsInDollars = ethAmount * ethPriceUSD;
       const rank = index + 1;
       
       // Calculate accuracy (placeholder - we'd need prediction data for real accuracy)
@@ -1232,13 +1255,13 @@ export async function getUserRank(walletAddress: string) {
     const users = await db
       .select({
         walletAddress: UsersTable.walletAddress,
-        totalEarningsUSDC: UsersTable.totalEarningsUSDC,
+        totalEarningsETH: UsersTable.totalEarningsETH,
         potsWon: UsersTable.potsWon,
       })
       .from(UsersTable)
-      .where(sql`${UsersTable.potsWon} > 0 OR ${UsersTable.totalEarningsUSDC} > 0`)
+      .where(sql`${UsersTable.potsWon} > 0 OR ${UsersTable.totalEarningsETH} > 0`)
       .orderBy(
-        sql`${UsersTable.totalEarningsUSDC} DESC`, 
+        sql`${UsersTable.totalEarningsETH} DESC`, 
         sql`${UsersTable.potsWon} DESC`
       );
 

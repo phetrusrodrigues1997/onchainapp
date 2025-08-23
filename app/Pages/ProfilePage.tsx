@@ -3,6 +3,7 @@ import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap, MessageCircle, C
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { saveImageUrl, getLatestImageUrl, getUserStats, getLeaderboard, getUserRank } from '../Database/actions';
+import { getPrice } from '../Constants/getPrice';
 
 
 // Profile now tracks ETH earnings instead of USDC
@@ -11,6 +12,15 @@ interface ProfilePageProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
 }
+
+const ETHToken = {
+  chainId: 8453,
+  decimals: 18,
+  name: "Ethereum",
+  symbol: "ETH",
+  image:"https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
+
+};
 
 const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
   const defaultProfileImage = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop&crop=center';
@@ -59,25 +69,37 @@ const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
   useEffect(() => {
     const fetchEthPrice = async () => {
       try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-        const data = await response.json();
-        setEthPrice(data.ethereum?.usd || 0);
+        const price = await getPrice('ETH');
+        setEthPrice(price ?? 4700);
       } catch (error) {
-        console.error('Error fetching ETH price:', error);
-        setEthPrice(3500); // Fallback price
+        console.error('Failed to fetch ETH price:', error);
+        setEthPrice(4700); // Fallback price
       }
     };
+
     fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Removed USDC balance formatting
 
+  // Helper function to convert ETH to USD
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
+
   // Format ETH balance in USD
   const formatEthBalanceUSD = (): string => {
-    if (!ethBalance?.value || !ethPrice) return '$0.00';
+    if (!ethBalance?.value) return '$0.00';
     try {
-      const ethAmount = parseFloat(formatUnits(ethBalance.value, 18));
-      const usdValue = ethAmount * ethPrice;
+      const usdValue = ethToUsd(ethBalance.value);
       return `$${usdValue.toFixed(2)}`;
     } catch {
       return '$0.00';
@@ -117,7 +139,10 @@ useEffect(() => {
       
       // Calculate placeholder accuracy (we'd need prediction data for real accuracy)
       const baseAccuracy = 65;
-      const earningsInDollars = stats.totalEarningsUSDC / 1000000000000000000; // Convert from wei to ETH
+      // Note: Database still stores values as totalEarningsUSDC but they're now ETH values in wei
+      // The database actions already convert to dollars, so stats.totalEarnings is already in USD format
+      const earningsString = stats.totalEarnings || '$0.00';
+      const earningsInDollars = parseFloat(earningsString.replace('$', '')) || 0;
       const performanceBonus = Math.min(15, (earningsInDollars / Math.max(stats.potsWon, 1)) * 2);
       const accuracy = Math.min(95, baseAccuracy + performanceBonus);
       
@@ -194,59 +219,70 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
         
         {/* Wallet Balance Section */}
         {isConnected && address && (
-          <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-3 mb-3 text-white shadow-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-1 bg-white/10 rounded-lg backdrop-blur-sm">
-                <Wallet className="w-3 h-3" />
-              </div>
-              <h2 className="text-base font-bold">Wallet Balance</h2>
-            </div>
+          <div className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-xl md:rounded-2xl p-3 md:p-4 mb-3 md:mb-4 text-white shadow-2xl shadow-purple-900/20 overflow-hidden">
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-indigo-600/10"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-2xl"></div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {/* USDC Balance */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                    <DollarSign className="w-2.5 h-2.5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-gray-300">ETH Balance</div>
-                    <div className="text-base font-bold">Check Wallet</div>
-                  </div>
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                <div className="p-1.5 md:p-2 bg-gradient-to-br from-white/20 to-white/10 rounded-lg md:rounded-xl backdrop-blur-sm border border-white/20 shadow-lg">
+                  <Wallet className="w-3 h-3 md:w-4 md:h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base md:text-lg font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+                    Wallet Overview
+                  </h2>
+                 
                 </div>
               </div>
               
-              {/* ETH Balance */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 border border-white/20">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
-                    <Zap className="w-2.5 h-2.5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-gray-300">ETH Balance</div>
-                    <div className="text-base font-bold">{formatEthBalanceUSD()}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
+                {/* ETH Balance - Takes 2/3 on desktop */}
+                <div className="md:col-span-2 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-xl rounded-lg md:rounded-xl p-3 md:p-4 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 group">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-transparent rounded-lg md:rounded-xl flex items-center justify-center  group-hover:scale-105 transition-transform duration-300">
+                      <img 
+      src={ETHToken.image} 
+      alt="ETH"
+      className="w-8 h-8 md:w-12 md:h-12 object-cover" // match approx. text-md size (~1.25rem = 20px)
+    />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-xs text-gray-300 font-medium uppercase tracking-wider mb-0.5">
+                        Portfolio Value
+                      </div>
+                      <div className="text-xl md:text-2xl font-black bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent">
+                        {formatEthBalanceUSD()}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        ETH on Base Network
+                      </div>
+                    </div>
                   </div>
                 </div>
+                
+                {/* Action Buttons - Takes 1/3 on desktop, full width on mobile */}
+                <div className="md:col-span-1 flex flex-col gap-1.5 md:gap-2">
+                  <button
+                    onClick={() => setActiveSection('messagesPage')}
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-lg md:rounded-xl px-3 py-2 md:py-2.5 border border-blue-500/50 transition-all duration-300 group shadow-lg hover:shadow-blue-500/25 hover:scale-105"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
+                    <span className="text-white text-xs md:text-sm font-semibold">Messages</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setActiveSection('referralProgram')}
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 rounded-lg md:rounded-xl px-3 py-2 md:py-2.5 border border-emerald-500/50 transition-all duration-300 group shadow-lg hover:shadow-emerald-500/25 hover:scale-105"
+                  >
+                    <Trophy className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
+                    <span className="text-white text-xs md:text-sm font-semibold">Referrals</span>
+                  </button>
+                </div>
               </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="mt-2 flex flex-col sm:flex-row gap-1.5">
-              <button
-                onClick={() => setActiveSection('messagesPage')}
-                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/20 transition-all duration-200 group"
-              >
-                <MessageCircle className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-white text-xs font-medium">Messages</span>
-              </button>
-              
-              <button
-                onClick={() => setActiveSection('referralProgram')}
-                className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg px-2.5 py-1.5 border border-white/20 transition-all duration-200 group"
-              >
-                <Trophy className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-white text-xs font-medium">Referrals</span>
-              </button>
             </div>
            
           </div>

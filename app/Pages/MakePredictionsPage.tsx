@@ -54,6 +54,10 @@ interface EvidenceSubmission {
 
 export default function MakePredicitions() {
   const { address, isConnected } = useAccount();
+  
+  // TESTING TOGGLE - Set to false to test prediction logic on Saturdays
+  const SHOW_RESULTS_DAY_INFO = false; // Toggle this on/off as needed
+  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [tomorrowsBet, setTomorrowsBet] = useState<TodaysBet | null>(null);
@@ -79,15 +83,21 @@ export default function MakePredicitions() {
   const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
   const [isLoadingEvidence, setIsLoadingEvidence] = useState<boolean>(false);
 
-  // Check if betting is allowed (Sunday through Friday)
+  // Check if betting is allowed (Sunday through Friday, unless testing toggle is off)
   const isBettingAllowed = (): boolean => {
+    if (!SHOW_RESULTS_DAY_INFO) {
+      return true; // Always allow betting when testing toggle is off
+    }
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
     return day !== 6; // All days except Saturday
   };
 
-  // Check if today is Saturday (results day)
+  // Check if today is Saturday (results day) - only when toggle is enabled
   const isResultsDay = (): boolean => {
+    if (!SHOW_RESULTS_DAY_INFO) {
+      return false; // Never show results day when testing toggle is off
+    }
     const now = new Date();
     const day = now.getDay();
     return day === 6; // Saturday
@@ -391,16 +401,17 @@ export default function MakePredicitions() {
   // Check if user is admin/owner (for main prediction markets)
   // In a real app, this would check against a list of admin addresses
   const isAdmin = () => {
-    // For now, we'll check if the user has a specific admin address
-    // You can modify this logic based on your admin system
+    if (!address || !isConnected) return false;
+    
+    // Add specific admin wallet addresses here
     const adminAddresses = [
-      // Add admin wallet addresses here
+      // Add your admin wallet addresses here (lowercase)
       // '0x1234567890123456789012345678901234567890'
     ];
     
-    // For development, allow any connected user to see admin panel
-    // Remove this in production and use proper admin check
-    return address && isConnected;
+    // Check if current user is in admin list
+    const normalizedAddress = address.toLowerCase();
+    return adminAddresses.includes(normalizedAddress);
   };
 
   // Rest of your component remains the same...
@@ -767,9 +778,7 @@ export default function MakePredicitions() {
                     <Zap className="w-12 h-12 text-white animate-pulse" />
                   </div>
                   <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Results Day! 🎉</h2>
-                  <p className="text-gray-700 text-lg mb-6 font-medium">
-                    Today is Saturday - waiting for admin to set the outcome
-                  </p>
+                  
                   <div className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-2xl p-6 border border-blue-200 mb-6">
                     <div className="flex items-center justify-center gap-3 mb-3">
                       <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>

@@ -399,12 +399,12 @@ export async function clearLivePredictions() {
  * Updates winner statistics after a pot is distributed
  * This should be called AFTER the smart contract distributes the pot
  * @param winnerAddresses - Array of winner wallet addresses (from determineWinners)
- * @param potAmountPerWinner - Amount each winner received in micro-USDC (6 decimals)
+ * @param potAmountPerWinner - Amount each winner received in ETH wei (18 decimals)
  */
-export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: number) {
+export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: bigint) {
   try {
     console.log(`🔍 updateWinnerStats called with:`, { winnerAddresses, potAmountPerWinner });
-    console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} micro-USDC each`);
+    console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} ETH wei each`);
     
     // Ensure we have an array of addresses
     const addresses = Array.isArray(winnerAddresses) ? winnerAddresses : [];
@@ -438,7 +438,7 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
           .update(UsersTable)
           .set({
             potsWon: sql`${UsersTable.potsWon} + 1`,
-            totalEarningsUSDC: sql`${UsersTable.totalEarningsUSDC} + ${potAmountPerWinner}`,
+            totalEarningsETH: sql`${UsersTable.totalEarningsETH} + ${potAmountPerWinner}`,
           })
           .where(eq(UsersTable.walletAddress, normalizedAddress))
           .returning();
@@ -450,7 +450,7 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
           .values({
             walletAddress: normalizedAddress,
             potsWon: 1,
-            totalEarningsUSDC: potAmountPerWinner,
+            totalEarningsETH: potAmountPerWinner,
           })
           .returning();
       }

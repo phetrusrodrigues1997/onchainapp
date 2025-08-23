@@ -358,7 +358,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
       3: 0.04, // Wednesday: $0.04
       4: 0.05, // Thursday: $0.05
       5: 0.06, // Friday: $0.06
-      6: 1.50, // Saturday: Closed (fallback to Sunday price)
+      6: 0.01, // Saturday: Closed (fallback to Sunday price)
     };
     
     const usdPrice = usdPrices[day as keyof typeof usdPrices];
@@ -840,17 +840,17 @@ useEffect(() => {
             console.log("- Number of addresses:", addresses.length);
             
             if (addresses.length > 0) {
-              const totalPotWei = Number(potBalance);
-              const amountPerWinnerWei = Math.floor(totalPotWei / addresses.length);
-              const amountPerWinnerETH = amountPerWinnerWei / 1000000000000000000;
+              const totalPotWei = potBalance; // Keep as bigint
+              const amountPerWinnerWei = totalPotWei / BigInt(addresses.length);
+              const amountPerWinnerETH = Number(amountPerWinnerWei) / 1000000000000000000;
               
               console.log("🔍 Calculated amounts:");
-              console.log("- totalPotWei:", totalPotWei);
-              console.log("- amountPerWinnerWei:", amountPerWinnerWei);
+              console.log("- totalPotWei:", totalPotWei.toString());
+              console.log("- amountPerWinnerWei:", amountPerWinnerWei.toString());
               console.log("- amountPerWinnerETH:", amountPerWinnerETH);
               
               try {
-                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerWei });
+                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerWei: amountPerWinnerWei.toString() });
                 const result = await updateWinnerStats(addresses, amountPerWinnerWei);
                 console.log("✅ updateWinnerStats completed successfully, result:", result);
                 showMessage(`Step 2/3: Updated stats for ${addresses.length} winner(s) with ${amountPerWinnerETH.toFixed(6)} ETH each`);
@@ -921,17 +921,17 @@ useEffect(() => {
             console.log("- Number of addresses:", addresses.length);
             
             if (addresses.length > 0) {
-              const totalPotWei = Number(potBalance);
-              const amountPerWinnerWei = Math.floor(totalPotWei / addresses.length);
-              const amountPerWinnerETH = amountPerWinnerWei / 1000000000000000000;
+              const totalPotWei = potBalance; // Keep as bigint
+              const amountPerWinnerWei = totalPotWei / BigInt(addresses.length);
+              const amountPerWinnerETH = Number(amountPerWinnerWei) / 1000000000000000000;
               
               console.log("🔍 Calculated amounts:");
-              console.log("- totalPotWei:", totalPotWei);
-              console.log("- amountPerWinnerWei:", amountPerWinnerWei);
+              console.log("- totalPotWei:", totalPotWei.toString());
+              console.log("- amountPerWinnerWei:", amountPerWinnerWei.toString());
               console.log("- amountPerWinnerETH:", amountPerWinnerETH);
               
               try {
-                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerWei });
+                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerWei: amountPerWinnerWei.toString() });
                 const result = await updateWinnerStats(addresses, amountPerWinnerWei);
                 console.log("✅ updateWinnerStats completed successfully, result:", result);
                 showMessage(`Step 3/4: Updated stats for ${addresses.length} winner(s) with ${amountPerWinnerETH.toFixed(6)} ETH each`);

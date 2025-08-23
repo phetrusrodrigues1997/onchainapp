@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, serial, timestamp, integer, bigint } from "drizzle-orm/pg-core";
 
 
 export const Messages = pgTable("Messages", {
@@ -82,7 +82,7 @@ export const UsersTable = pgTable("users_table", {
   lastWordlePlay: timestamp("last_wordle_play"), // Last time user played Wordle
   wordlePlaysToday: integer("wordle_plays_today").default(0).notNull(), // Number of plays today
   potsWon: integer("pots_won").default(0).notNull(), // Total pots won across all markets
-  totalEarningsUSDC: integer("total_earnings_usdc").default(0).notNull(), // Total earnings in micro-USDC (6 decimals)
+  totalEarningsETH: bigint("total_earnings_eth", { mode: "bigint" }).default(BigInt(0)).notNull(), // Total earnings in ETH wei (18 decimals)
 });
 
 // Synchronized questions for prediction market
