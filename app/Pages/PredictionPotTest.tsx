@@ -366,7 +366,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     // If ETH price is not loaded yet, use a reasonable fallback
     if (!ethPrice) {
       // Fallback: assume $3000 ETH price
-      const ethAmount = usdPrice / 3000;
+      const ethAmount = usdPrice / 4700;
       return parseEther(ethAmount.toString());
     }
     
@@ -377,7 +377,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   
   // Helper function to convert USD to ETH
   const usdToEth = (usdAmount: number): bigint => {
-    const fallbackEthPrice = 3000; // Fallback price if ETH price not loaded
+    const fallbackEthPrice = 4700; // Fallback price if ETH price not loaded
     const currentEthPrice = ethPrice || fallbackEthPrice;
     const ethAmount = usdAmount / currentEthPrice;
     return parseEther(ethAmount.toString());
@@ -450,8 +450,14 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   //   return participants.length;
   // };
 
+  // TESTING TOGGLE - Set to true to allow Saturday pot entries for testing
+  const SATURDAY_TESTING_MODE = true; // Toggle this on/off as needed
+  
   // Utility functions for countdown
   const isPotEntryBlocked = (): boolean => {
+    if (SATURDAY_TESTING_MODE) {
+      return false; // Never block if testing mode is enabled
+    }
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
     return day === 6; // Saturday only - pot entry blocked (winner determination day)
@@ -1133,7 +1139,7 @@ useEffect(() => {
                 >
                   {isActuallyLoading && lastAction === 'reEntry'
                     ? 'Processing Re-entry...'
-                    : `Pay ${formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH to Re-enter`}
+                    : `Pay ${ethToUsd(potBalance ?? BigInt(0)).toFixed(2)} USD to Re-enter`}
                 </button>
                 
                 {!hasEnoughReEntryBalance && (
@@ -1293,7 +1299,7 @@ useEffect(() => {
                                   Using Discount...
                                 </div>
                               )
-                              : `Pay ${formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH to Enter`}
+                              : `Pay ${ethToUsd(potBalance ?? BigInt(0)).toFixed(2)} USD to Enter`}
                           </button>
                           
                           {!hasEnoughBalance && (
@@ -1339,7 +1345,7 @@ useEffect(() => {
                       >
                         {isActuallyLoading && lastAction === 'enterPot'
                           ? t.enterPotProcessing
-                          : `Pay ${formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH to Enter`}
+                          : `Pay ${ethToUsd(potBalance ?? BigInt(0)).toFixed(2)} USD to Enter`}
                       </button>
                       {!hasEnoughBalance && (
                         <p className="text-red-400 text-sm mt-2">Insufficient ETH balance</p>
