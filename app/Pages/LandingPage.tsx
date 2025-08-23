@@ -256,11 +256,11 @@ const handleMarketClick = (marketId: string) => {
         @keyframes pulse-glow {
           0%, 100% { 
             transform: scale(1); 
-            box-shadow: 0 0 0 0 rgba(170, 0, 0, 0.2);
+            box-shadow: 0 0 0 0 rgba(17, 0, 0, 0.2);
           }
           50% { 
             transform: scale(1.02); 
-            box-shadow: 0 0 0 3px rgba(170, 0, 0, 0.08), 0 0 10px rgba(170, 0, 0, 0.1);
+            box-shadow: 0 0 0 3px rgba(17, 0, 0, 0.08), 0 0 10px rgba(170, 0, 0, 0.1);
           }
         }
         
@@ -573,10 +573,10 @@ const handleMarketClick = (marketId: string) => {
             <div className="flex flex-col justify-center items-center text-center h-full">
               <div className="space-y-3 mb-16">
                 <h2 className="text-3xl font-light text-gray-900 tracking-tight">
-                  <span style={{ color: 'red' }}>Thousands</span> of players,
+                  <span style={{ color: 'red' }}>Thousands</span> of winners,
                 </h2>
                 <h3 className="text-2xl font-black text-gray-900 tracking-tight">
-                  one weekly winner
+                  will you be next?
                 </h3>
               </div>
               
@@ -607,10 +607,10 @@ const handleMarketClick = (marketId: string) => {
       <section id="call-to-action" className="relative z-10 px-6 mt-16 mb-16 md:hidden">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
-            <span style={{ color: 'red' }}>Thousands</span> of players,
+            <span style={{ color: 'red' }}>Thousands</span> of winners,
           </h2>
           <h3 className="text-xl font-black text-gray-900 mb-10 tracking-tight">
-            one weekly winner
+            will you be next?
           </h3>
           
           {/* Minimalist Entry Button - Mobile */}

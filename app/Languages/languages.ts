@@ -153,7 +153,7 @@ export const translations: Record<Language, Translations> = {
     enteredPotMessage: "You can now place your predictions!",
     goToBetting: 'Go to Prediction Page',
     entryAmount: 'Entry Amount',
-    amountBalance: 'Pot Balance', // Added for consistency with other sections
+    amountBalance: 'Market Balance', // Added for consistency with other sections
     approveSpending: '1. Approve USDC Spending',
     allowContracts: 'Allow the contract to spend your USDC. Current allowance:',
     enterPot: '2. Enter Prediction Pot',

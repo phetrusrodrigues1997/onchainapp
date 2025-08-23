@@ -495,6 +495,14 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     return nextSaturday;
   };
 
+  
+    const ethToUsd = (ethAmount: bigint): number => {
+        const fallbackEthPrice = 4700;
+        const currentEthPrice = ethPrice || fallbackEthPrice;
+        const ethValue = Number(formatUnits(ethAmount, 18));
+        return ethValue * currentEthPrice;
+      };
+
   const updateCountdown = () => {
     const now = new Date();
     const target = getNextSundayMidnight();
@@ -1042,10 +1050,10 @@ useEffect(() => {
                   <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
                     <div className="text-sm font-semibold text-[#111111]">Today's Entry Price</div>
                     <div className="text-[#666666] font-semibold text-lg">
-                      {formatBigIntValue(baseEntryAmount)} ETH
+                      {getCurrentDayUsdPrice()}
                     </div>
                     <div className="text-xs text-[#888888] mt-1">
-                      {getCurrentDayUsdPrice()} • {getCurrentDayName()}
+                      Sunday has the lowest price!
                     </div>
                   </div>
                 </div>
@@ -1060,9 +1068,9 @@ useEffect(() => {
                     </button>
                   )}
                   <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
-                    <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Pot Balance'}</div>
+                    <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Balance'}</div>
                     <div className="text-[#666666] font-semibold text-lg">
-                      {formatBigIntValue(potBalance)} ETH
+                      ${ethToUsd(potBalance ?? BigInt(0)).toFixed(2)} USD
                     </div>
                     <div className="text-xs text-[#888888] mt-1">
                       Total pool amount
