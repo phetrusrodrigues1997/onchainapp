@@ -7,6 +7,7 @@ import { formatUnits } from 'viem';
 import { AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import { placeLivePrediction, getUserLivePrediction, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions } from '../Database/actions';
 import { determineWinnersLive, clearLivePredictions, setProvisionalOutcome, getProvisionalOutcome } from '../Database/OwnerActions';
+import { getPrice } from '../Constants/getPrice';
 
 // Configure the time interval for new questions (in minutes)
 const QUESTION_INTERVAL_MINUTES = 60;
@@ -63,11 +64,14 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [userPrediction, setUserPrediction] = useState<'positive' | 'negative' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
   
   // Loading and pot entry state
   const [isLoading, setIsLoading] = useState(true);
   const [hasEnteredPot, setHasEnteredPot] = useState(false);
   const [isCheckingPotEntry, setIsCheckingPotEntry] = useState(false);
+    const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
+  
   
   // Owner functionality state
   const [outcomeInput, setOutcomeInput] = useState<'positive' | 'negative' | ''>('');
@@ -354,6 +358,28 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [currentQuestion.questionId]);
+
+  // Fetch ETH price
+    useEffect(() => {
+      const fetchEthPrice = async () => {
+        try {
+          const price = await getPrice('ETH');
+          setEthPrice(price);
+          setIsLoadingPrice(false);
+        } catch (error) {
+          console.error('Failed to fetch ETH price:', error);
+          setEthPrice(3000); // Fallback price
+          setIsLoadingPrice(false);
+        }
+      };
+  
+      fetchEthPrice();
+      
+      // Refresh price every 5 minutes
+      const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+      
+      return () => clearInterval(interval);
+    }, []);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -680,6 +706,13 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     return userEvidenceSubmission !== null;
   };
 
+  const ethToUsd = (ethAmount: bigint): number => {
+      const fallbackEthPrice = 4700;
+      const currentEthPrice = ethPrice || fallbackEthPrice;
+      const ethValue = Number(formatUnits(ethAmount, 18));
+      return ethValue * currentEthPrice;
+    };
+
   const formatTimeRemaining = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -827,7 +860,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
             {/* Pot Balance Display - Top Right */}
             <div className="flex justify-end mb-2">
               <div className="text-xs text-gray-500 font-mono">
-                Total Predictions: <span className='text-sm text-green-400'>{formatEthBalance(potBalance)} ETH</span>
+                Total Value: <span className='text-sm text-green-400'>${ethToUsd(potBalance ?? BigInt(0)).toFixed(2)} USD</span>
               </div>
             </div>
 
