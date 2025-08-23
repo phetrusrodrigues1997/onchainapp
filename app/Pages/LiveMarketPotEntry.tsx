@@ -60,7 +60,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
         setIsLoadingPrice(false);
       } catch (error) {
         console.error('Failed to fetch ETH price:', error);
-        setEthPrice(3000); // Fallback price
+        setEthPrice(4700); // Fallback price
         setIsLoadingPrice(false);
       }
     };
@@ -75,7 +75,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
 
   // Helper function to convert USD to ETH
   const usdToEth = (usdAmount: number): bigint => {
-    const fallbackEthPrice = 3000; // Fallback price if ETH price not loaded
+    const fallbackEthPrice = 4700; // Fallback price if ETH price not loaded
     const currentEthPrice = ethPrice || fallbackEthPrice;
     const ethAmount = usdAmount / currentEthPrice;
     return parseEther(ethAmount.toString());
