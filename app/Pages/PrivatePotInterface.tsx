@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
-import { formatUnits } from 'viem';
+import { formatUnits, parseEther } from 'viem';
 import { useQueryClient } from '@tanstack/react-query';
+import { getPrice } from '../Constants/getPrice';
 import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Settings, Share2, ArrowLeft, CheckCircle2, Clock, Vote, Target, Info } from 'lucide-react';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
@@ -31,13 +32,13 @@ import {
   updatePotDetails
 } from '../Database/ownerActions2';
 
-// Contract ABI for individual pot contracts (clones) - Updated for simplified contract
+// Contract ABI for individual pot contracts (clones) - Updated for ETH-based contract
 const PRIVATE_POT_ABI = [
   {
-    "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+    "inputs": [],
     "name": "enterPot",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -130,32 +131,7 @@ const PRIVATE_POT_ABI = [
   }
 ] as const;
 
-// USDC Contract ABI (minimal)
-const USDC_ABI = [
-  {
-    "inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}],
-    "name": "approve",
-    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "owner", "type": "address"}, {"internalType": "address", "name": "spender", "type": "address"}],
-    "name": "allowance",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
-
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
+// Removed USDC ABI and constants - not needed for ETH-based contract
 
 interface PrivatePotInterfaceProps {
   contractAddress: string;
@@ -168,7 +144,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   onBack,
   activeSection = 'PrivatePot' 
 }) => {
-  const [newEntryAmount, setNewEntryAmount] = useState(''); // For creator to set new entry amount
+  const [newEntryAmount, setNewEntryAmount] = useState(''); // For creator to set new entry amount in USD
   const [prediction, setPrediction] = useState<'positive' | 'negative' | null>(null);
   const [potDetails, setPotDetails] = useState<any>(null);
   const [userParticipant, setUserParticipant] = useState(false);
@@ -176,9 +152,11 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   const [isCreator, setIsCreator] = useState(false);
   const [potStats, setPotStats] = useState<any>(null);
   const [showCreatorPanel, setShowCreatorPanel] = useState(false);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
   const [predictionDate, setPredictionDate] = useState('');
   const [distributionStep, setDistributionStep] = useState<'ready' | 'confirmed'>('ready'); // Track distribution flow
-  const [pendingTransactionType, setPendingTransactionType] = useState<'approval' | 'potEntry' | null>(null); // Track what transaction is pending
+  const [pendingTransactionType, setPendingTransactionType] = useState<'potEntry' | null>(null); // Track what transaction is pending
   const [isInitialLoading, setIsInitialLoading] = useState(true); // Loading screen state
   const [isLoading, setIsLoading] = useState(false); // Transaction loading state
   const [isPotLoading, setIsPotLoading] = useState(true); // Pot details loading state
@@ -242,21 +220,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   });
 
 
-  const { data: usdcBalance } = useReadContract({
-    address: USDC_ADDRESS,
-    abi: USDC_ABI,
-    functionName: 'balanceOf',
-    args: [address!],
-    query: { enabled: !!address }, // Only query when address is available
-  });
-
-  const { data: usdcAllowance } = useReadContract({
-    address: USDC_ADDRESS,
-    abi: USDC_ABI,
-    functionName: 'allowance',
-    args: [address!, contractAddress as `0x${string}`],
-    query: { enabled: !!address }, // Only query when address is available
-  });
+  // ETH balance is handled by the wallet, no need for separate contract reads
 
   // Transaction hooks
   const { data: hash, writeContract, isPending, error } = useWriteContract();
@@ -269,6 +233,28 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }, 2000); // 2 seconds loading screen
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+        setIsLoadingPrice(false);
+      } catch (error) {
+        console.error('Failed to fetch ETH price:', error);
+        setEthPrice(3000); // Fallback price
+        setIsLoadingPrice(false);
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Load pot details and user data
@@ -404,29 +390,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
-  // Simplified approval check
-  const isApprovalNeeded = () => {
-    if (!potDetails?.entryAmount) return true;
-    if (!usdcAllowance) return true;
-    // Simple comparison - if allowance is less than needed, approve
-    return Number(usdcAllowance) < potDetails.entryAmount;
-  };
-
-  // Handle USDC approval - approve a large amount to avoid repeated approvals
-  const handleApprove = () => {
-    if (!potDetails?.entryAmount || !address) return;
-
-    // Approve a large amount (1000 USDC) so users don't need to approve every time
-    const largeApprovalAmount = BigInt(1000 * 1_000_000); // 1000 USDC in micros
-    
-    setPendingTransactionType('approval'); // Mark that we're doing an approval
-    writeContract({
-      address: USDC_ADDRESS,
-      abi: USDC_ABI,
-      functionName: 'approve',
-      args: [contractAddress as `0x${string}`, largeApprovalAmount],
-    });
-  };
+  // ETH doesn't need approval - functions removed
 
   // Track when transactions are confirmed and handle database updates
   useEffect(() => {
@@ -445,13 +409,8 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         addToDatabase();
       }
       
-      // Handle USDC approval confirmation - refresh contract data so UI updates
-      if (pendingTransactionType === 'approval') {
-        setTimeout(() => {
-          // Force refetch of all contract data (especially USDC allowance)
-          queryClient.invalidateQueries({ queryKey: ['readContract'] });
-        }, 2000);
-      }
+      // Handle ETH transaction confirmation - refresh contract data so UI updates
+      // Note: ETH doesn't need approval, so no approval handling needed
       
       // Reset pending transaction type after handling
       setPendingTransactionType(null);
@@ -471,11 +430,16 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
     // Try the transaction - let the contract handle validation
     setPendingTransactionType('potEntry');
+    
+    // Convert USD entry amount to ETH (returns bigint)
+    // const ethAmount = usdToEth(potDetails.entryAmount);
+
     writeContract({
       address: contractAddress as `0x${string}`,
       abi: PRIVATE_POT_ABI,
       functionName: 'enterPot',
-      args: [BigInt(potDetails.entryAmount)],
+      args: [], // No args for ETH-based contract
+      value: potDetails.entryAmount, // Send ETH as value (bigint)
     });
   };
 
@@ -564,7 +528,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     if (!address || !isCreator || !newEntryAmount) return;
 
     try {
-      const amount = Math.floor(parseFloat(newEntryAmount) * 1_000_000); // Convert to USDC micros
+      const amount = parseFloat(newEntryAmount); // Direct USD amount for database
       const result = await updatePotEntryAmount(contractAddress, address, amount);
       
       if (result.success) {
@@ -781,9 +745,31 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     }
   };
 
+  // Helper functions for ETH and USD conversion
+  const formatETH = (amount: bigint | undefined) => {
+    if (!amount) return '0.0000';
+    return formatUnits(amount, 18);
+  };
+
+  const usdToEth = (usdAmount: number): bigint => {
+    const fallbackEthPrice = 4700; // Fallback price if ETH price not loaded
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethAmount = usdAmount / currentEthPrice;
+    return parseEther(ethAmount.toString());
+  };
+
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
+
   const formatUSDC = (amount: bigint | undefined) => {
     if (!amount) return '0.00';
-    return (Number(amount) / 1_000_000).toFixed(2);
+    // If this is ETH amount, convert to USD
+    const usdValue = ethToUsd(amount);
+    return usdValue.toFixed(2);
   };
 
   // Show loading screen for first 2 seconds
@@ -938,7 +924,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             <div className="grid md:grid-cols-2 gap-6">
               {/* Entry Amount Update */}
               <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">Entry Fee (USDC)</label>
+                <label className="block text-sm font-medium text-gray-700">Entry Fee (USD)</label>
                 <input
                   type="text"
                   placeholder="Enter new $ amount"
@@ -1103,42 +1089,15 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Entry Amount:</span>
-                  <span className="text-xl font-bold text-gray-900">${(potDetails?.entryAmount / 1_000_000).toFixed(2)} USDC</span>
+                  <span className="text-xl font-bold text-gray-900">${ethToUsd(potDetails?.entryAmount)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Your Balance:</span>
-                  <span className="font-medium text-gray-900">{formatUSDC(usdcBalance)} USDC</span>
+                  <span className="text-gray-600">Payment Method:</span>
+                  <span className="font-medium text-gray-900">ETH (wallet balance)</span>
                 </div>
               </div>
 
-              {isApprovalNeeded() ? (
-                <div>
-                  <button
-                    onClick={handleApprove}
-                    disabled={!potDetails?.entryAmount || isPending || isConfirming}
-                    className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 transition-colors font-medium"
-                  >
-                    {isPending || isConfirming ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Approving USDC...
-                      </div>
-                    ) : (
-                      'Approve USDC Spending'
-                    )}
-                  </button>
-                  <p className="text-xs text-gray-500 mt-3 text-center">
-                    One-time approval to allow the contract to spend your USDC
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center gap-2 text-green-700">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span className="text-sm font-medium">USDC approved! Ready to enter market.</span>
-                    </div>
-                  </div>
+              <div>
                   <button
                     onClick={handleEnterPot}
                     disabled={!potDetails?.entryAmount || isPending || isConfirming || userParticipant}
@@ -1156,7 +1115,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                     )}
                   </button>
                 </div>
-              )}
             </div>
           )}
 
@@ -1375,9 +1333,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                             <div className="font-medium text-gray-900">
                               {participant.email || `${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
                             </div>
-                            <div className="text-xs text-gray-500">
-                              ${(participant.entry_amount / 1_000_000).toFixed(2)} USDC • {new Date(participant.joined_at).toLocaleDateString()}
-                            </div>
+                            
                           </div>
                         </div>
                         

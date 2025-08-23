@@ -7,8 +7,8 @@ import Cookies from 'js-cookie';
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "featured",
-  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "crypto",
+  "0x6d6e91A810F760393937186717D287539bF78E38": "featured",
+  "0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
@@ -135,7 +135,7 @@ export default function MakePredicitions() {
       setSelectedTableType(tableType);
     } else {
       // Fallback to default contract if no valid cookie is found
-      setContractAddress('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
+      setContractAddress('0x6d6e91A810F760393937186717D287539bF78E38');
       setSelectedTableType('featured');
       console.log('No valid contract cookie found, using default');
     }

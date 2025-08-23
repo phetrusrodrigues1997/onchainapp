@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, serial, timestamp, integer, bigint } from "drizzle-orm/pg-core";
 
 // Master table to track all created pots
 export const PrivatePots = pgTable("private_pots", {
@@ -36,7 +36,7 @@ export function createPotParticipantsTable(contractAddress: string) {
   return pgTable(tableName, {
     id: serial("id").primaryKey(),
     walletAddress: text("wallet_address").notNull(),
-    entryAmount: integer("entry_amount").notNull(), // Amount in USDC micros (6 decimals)
+    entryAmount: bigint("entry_amount", { mode: "bigint" }).notNull(),
     joinedAt: timestamp("joined_at").defaultNow().notNull(),
     transactionHash: text("transaction_hash"), // Optional: track the blockchain transaction
   });
@@ -48,7 +48,6 @@ export function createPotWrongPredictionsTable(contractAddress: string) {
   return pgTable(tableName, {
     id: serial("id").primaryKey(),
     walletAddress: text("wallet_address").notNull(),
-    reEntryFee: integer("re_entry_fee").notNull(), // Re-entry fee in USDC micros
     createdAt: timestamp("created_at").defaultNow().notNull(),
   });
 }

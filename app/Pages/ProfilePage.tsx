@@ -5,18 +5,7 @@ import { formatUnits } from 'viem';
 import { saveImageUrl, getLatestImageUrl, getUserStats, getLeaderboard, getUserRank } from '../Database/actions';
 
 
-// USDC Contract ABI (minimal)
-const USDC_ABI = [
-  {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+// Profile now tracks ETH earnings instead of USDC
 
 interface ProfilePageProps {
   activeSection: string;
@@ -55,14 +44,7 @@ const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
 
-  // Get USDC balance
-  const { data: userUsdcBalance } = useReadContract({
-    address: USDC_ADDRESS as `0x${string}`,
-    abi: USDC_ABI,
-    functionName: 'balanceOf',
-    args: [address],
-    query: { enabled: !!address && isConnected }
-  }) as { data: bigint | undefined };
+  // Removed USDC balance reading - now using ETH
 
   // Get ETH balance
   const { data: ethBalance } = useBalance({
@@ -88,16 +70,7 @@ const ProfilePage = ({ setActiveSection }: ProfilePageProps) => {
     fetchEthPrice();
   }, []);
 
-  // Format USDC balance
-  const formatUsdcBalance = (balance: bigint | undefined): string => {
-    if (!balance) return '0.00';
-    try {
-      const formatted = formatUnits(balance, 6);
-      return parseFloat(formatted).toFixed(2);
-    } catch {
-      return '0.00';
-    }
-  };
+  // Removed USDC balance formatting
 
   // Format ETH balance in USD
   const formatEthBalanceUSD = (): string => {
@@ -144,7 +117,7 @@ useEffect(() => {
       
       // Calculate placeholder accuracy (we'd need prediction data for real accuracy)
       const baseAccuracy = 65;
-      const earningsInDollars = stats.totalEarningsUSDC / 1000000;
+      const earningsInDollars = stats.totalEarningsUSDC / 1000000000000000000; // Convert from wei to ETH
       const performanceBonus = Math.min(15, (earningsInDollars / Math.max(stats.potsWon, 1)) * 2);
       const accuracy = Math.min(95, baseAccuracy + performanceBonus);
       
@@ -237,8 +210,8 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
                     <DollarSign className="w-2.5 h-2.5 text-white" />
                   </div>
                   <div>
-                    <div className="text-xs text-gray-300">USDC Balance</div>
-                    <div className="text-base font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
+                    <div className="text-xs text-gray-300">ETH Balance</div>
+                    <div className="text-base font-bold">Check Wallet</div>
                   </div>
                 </div>
               </div>

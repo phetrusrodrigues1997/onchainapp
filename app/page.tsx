@@ -33,18 +33,7 @@ import MessagingPage from './Pages/MessagingPage';
 
 
 
-// USDC Contract ABI (minimal)
-const USDC_ABI = [
-  {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+// Contract now uses ETH directly - no USDC needed
 const LIVE_POT_ADDRESS = '0xbaA1ef49db42a483B42477D633E9ABc77EFdF965';
 
 export default function App() {
@@ -99,25 +88,9 @@ export default function App() {
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
-  // Get USDC balance
-  const { data: userUsdcBalance } = useReadContract({
-    address: USDC_ADDRESS as `0x${string}`,
-    abi: USDC_ABI,
-    functionName: 'balanceOf',
-    args: [address],
-    query: { enabled: !!address && isConnected }
-  }) as { data: bigint | undefined };
+  // Removed USDC balance reading - now using ETH directly
 
-  // Format USDC balance
-  const formatUsdcBalance = (balance: bigint | undefined): string => {
-    if (!balance) return '0.00';
-    try {
-      const formatted = formatUnits(balance, 6);
-      return parseFloat(formatted).toFixed(2);
-    } catch {
-      return '0.00';
-    }
-  };
+  // Removed USDC balance formatting - now using ETH directly
 
   
 
@@ -171,16 +144,7 @@ export default function App() {
             </div>
             
             <div className="flex items-center justify-end flex-1">
-            {/* USDC Balance Display - Desktop Only */}
-            {isConnected && address && (
-              <div 
-                onClick={() => setActiveSection('buy')}
-                className="hidden md:flex flex-col items-end cursor-pointer hover:opacity-80 transition-opacity duration-200"
-              >
-                <div className="text-xs text-gray-500 font-medium">Balance</div>
-                <div className="text-sm text-[#00aa00] font-bold">${formatUsdcBalance(userUsdcBalance)}</div>
-              </div>
-            )}
+            {/* Balance display removed - ETH balance handled by wallet */}
             
             <div className={`wallet-container ${isMobile ? '-ml-2' : 'ml-4'}`}>
               <Wallet>

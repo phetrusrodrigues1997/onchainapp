@@ -133,17 +133,18 @@ export async function createPotTables(contractAddress: string) {
       )
     `);
 
-    // Create participants table  
-    const participantsTableName = `pot_${cleanAddress}_participants`;
-    await db2.execute(sql`
-      CREATE TABLE IF NOT EXISTS ${sql.identifier(participantsTableName)} (
-        id SERIAL PRIMARY KEY,
-        wallet_address TEXT NOT NULL,
-        entry_amount INTEGER NOT NULL,
-        joined_at TIMESTAMP DEFAULT NOW() NOT NULL,
-        transaction_hash TEXT
-      )
-    `);
+    // Create participants table
+const participantsTableName = `pot_${cleanAddress}_participants`;
+await db2.execute(sql`
+  CREATE TABLE IF NOT EXISTS ${sql.identifier(participantsTableName)} (
+    id SERIAL PRIMARY KEY,
+    wallet_address TEXT NOT NULL,
+    entry_amount BIGINT NOT NULL,        -- ✅ use BIGINT for wei/USDC micros
+    joined_at TIMESTAMP DEFAULT NOW() NOT NULL,
+    transaction_hash TEXT
+  )
+`);
+
 
     // Create wrong predictions table
     const wrongPredictionsTableName = `pot_${cleanAddress}_wrong_predictions`;
@@ -151,7 +152,6 @@ export async function createPotTables(contractAddress: string) {
       CREATE TABLE IF NOT EXISTS ${sql.identifier(wrongPredictionsTableName)} (
         id SERIAL PRIMARY KEY,
         wallet_address TEXT NOT NULL,
-        re_entry_fee INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       )
     `);

@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
-import { formatUnits } from 'viem';
+import { formatUnits, parseEther } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
+import { getPrice } from '../Constants/getPrice';
 import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
 import { 
@@ -23,23 +24,23 @@ import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794": "featured",
-  "0xD4B6F1CF1d063b760628952DDf32a44974129697": "crypto",
+  "0x6d6e91A810F760393937186717D287539bF78E38": "featured",
+  "0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
-// Updated Contract ABI for PredictionPot (reflecting modified contract)
+// Updated Contract ABI for SimplePredictionPot (ETH-based)
 const PREDICTION_POT_ABI = [
   {
-    "inputs": [{"internalType": "address", "name": "_usdc", "type": "address"}],
+    "inputs": [],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
   {
-    "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+    "inputs": [],
     "name": "enterPot",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -79,30 +80,7 @@ const PREDICTION_POT_ABI = [
   }
 ];
 
-// USDC Contract ABI (minimal)
-const USDC_ABI = [
-  {
-    "inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}],
-    "name": "approve",
-    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "owner", "type": "address"}, {"internalType": "address", "name": "spender", "type": "address"}],
-    "name": "allowance",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
+// Contract now uses ETH directly - no USDC ABI needed
 
 interface PredictionPotProps {
   activeSection: string;
@@ -121,7 +99,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [provisionalOutcomeInput, setProvisionalOutcomeInput] = useState<string>('');
   // Contract addresses
   const [contractAddress, setContractAddress] = useState<string>('');
-  const [usdcAddress, setUsdcAddress] = useState<string>('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'); 
+  // Removed usdcAddress - now using ETH directly 
   
 
   // State
@@ -130,6 +108,8 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [winnerAddresses, setWinnerAddresses] = useState<string>('');
   const [lastAction, setLastAction] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
   
   // Referral system state (simplified for navigation button)
   const [inputReferralCode, setInputReferralCode] = useState<string>('');
@@ -194,7 +174,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
     } else {
       // Fallback to default contract if no valid cookie is found
-      setContractAddress('0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794');
+      setContractAddress('0x6d6e91A810F760393937186717D287539bF78E38');
       setSelectedTableType('featured');
       console.log('No valid contract cookie found, using default');
     }
@@ -214,6 +194,28 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }, 2000); // 2 seconds loading screen
 
     return () => clearTimeout(timer);
+  }, []);
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+        setIsLoadingPrice(false);
+      } catch (error) {
+        console.error('Failed to fetch ETH price:', error);
+        setEthPrice(3000); // Fallback price
+        setIsLoadingPrice(false);
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   // Countdown timer effect
@@ -343,44 +345,49 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     return days[new Date().getDay()];
   };
   
-  // Get dynamic entry amount based on day of week
+  // Get dynamic entry amount based on day of week (USD equivalent in ETH)
   const getDynamicEntryAmount = (): bigint => {
     const now = new Date();
     const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
     
-    // Dynamic pricing: Sunday 0.01 to Friday 0.06 USDC
-    const basePrices = {
-      0: 10000, // Sunday: 0.01 USDC
-      1: 20000, // Monday: 0.02 USDC  
-      2: 30000, // Tuesday: 0.03 USDC
-      3: 40000, // Wednesday: 0.04 USDC
-      4: 50000, // Thursday: 0.05 USDC
-      5: 60000, // Friday: 0.06 USDC
-      6: 10000, // Saturday: Closed (fallback to Sunday price)
+    // USD pricing that we want to maintain
+    const usdPrices = {
+      0: 0.01, // Sunday: $0.01
+      1: 0.02, // Monday: $0.02  
+      2: 0.03, // Tuesday: $0.03
+      3: 0.04, // Wednesday: $0.04
+      4: 0.05, // Thursday: $0.05
+      5: 0.06, // Friday: $0.06
+      6: 0.01, // Saturday: Closed (fallback to Sunday price)
     };
     
-    return BigInt(basePrices[day as keyof typeof basePrices]);
+    const usdPrice = usdPrices[day as keyof typeof usdPrices];
+    
+    // If ETH price is not loaded yet, use a reasonable fallback
+    if (!ethPrice) {
+      // Fallback: assume $3000 ETH price
+      const ethAmount = usdPrice / 3000;
+      return parseEther(ethAmount.toString());
+    }
+    
+    // Convert USD to ETH
+    const ethAmount = usdPrice / ethPrice;
+    return parseEther(ethAmount.toString());
   };
   
+  // Helper function to convert USD to ETH
+  const usdToEth = (usdAmount: number): bigint => {
+    const fallbackEthPrice = 3000; // Fallback price if ETH price not loaded
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethAmount = usdAmount / currentEthPrice;
+    return parseEther(ethAmount.toString());
+  };
+
   // Current entry amount based on day and free entries
   const baseEntryAmount = getDynamicEntryAmount();
-  const entryAmount = freeEntriesAvailable > 0 ? BigInt(20000) : baseEntryAmount; // Fixed 0.02 USDC if using free entry, otherwise daily price
+  const entryAmount = freeEntriesAvailable > 0 ? usdToEth(0.02) : baseEntryAmount; // Fixed $0.02 if using free entry, otherwise daily price
 
-  const { data: userUsdcBalance } = useReadContract({
-    address: usdcAddress as `0x${string}`,
-    abi: USDC_ABI,
-    functionName: 'balanceOf',
-    args: [address],
-    query: { enabled: !!address && !!usdcAddress }
-  }) as { data: bigint | undefined };
-
-  const { data: allowance } = useReadContract({
-    address: usdcAddress as `0x${string}`,
-    abi: USDC_ABI,
-    functionName: 'allowance',
-    args: [address, contractAddress],
-    query: { enabled: !!address && !!contractAddress && !!usdcAddress }
-  }) as { data: bigint | undefined };
+  // ETH balance is handled by the wallet - no need for contract reads
 
   // Check if the user is a participant
   const isParticipant = address && participants && Array.isArray(participants) 
@@ -402,13 +409,39 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   }, [address, participants, isParticipant, justEnteredPot, reEntryFee]);
 
   // Type-safe helpers
-  const formatBigIntValue = (value: bigint | undefined, decimals: number = 6): string => {
+  const formatBigIntValue = (value: bigint | undefined, decimals: number = 18): string => {
     if (!value) return '0';
     try {
       return formatUnits(value, decimals);
     } catch {
       return '0';
     }
+  };
+
+  const formatETH = (value: bigint): string => {
+    try {
+      const formatted = formatUnits(value, 18);
+      return parseFloat(formatted).toFixed(4);
+    } catch {
+      return '0.0000';
+    }
+  };
+
+  // Helper to get USD equivalent of ETH amount
+  const getUsdEquivalent = (ethAmount: bigint): string => {
+    if (!ethPrice) return '~$?.??';
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    const usdValue = ethValue * ethPrice;
+    return `~$${usdValue.toFixed(4)}`;
+  };
+
+  // Helper to get the USD price for current day
+  const getCurrentDayUsdPrice = (): string => {
+    const now = new Date();
+    const day = now.getDay();
+    const usdPrices = { 0: 0.01, 1: 0.02, 2: 0.03, 3: 0.04, 4: 0.05, 5: 0.06, 6: 0.01 };
+    const usdPrice = usdPrices[day as keyof typeof usdPrices];
+    return `$${usdPrice.toFixed(2)}`;
   };
 
 
@@ -505,26 +538,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  const handleApprove = async () => {
-    if (!contractAddress || !entryAmount) return;
-    
-    setIsLoading(true);
-    setLastAction('approve');
-    try {
-      await writeContract({
-        address: usdcAddress as `0x${string}`,
-        abi: USDC_ABI,
-        functionName: 'approve',
-        args: [contractAddress, entryAmount],
-      });
-      showMessage('USDC approval transaction submitted! Waiting for confirmation...');
-    } catch (error) {
-      console.error('Approval failed:', error);
-      showMessage('Approval failed. Check console for details.', true);
-      setLastAction('');
-      setIsLoading(false);
-    }
-  };
+  // Removed handleApprove - not needed for ETH transactions
 
   const handleEnterPot = async (useDiscounted: boolean = false) => {
     if (!contractAddress) return;
@@ -554,12 +568,13 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
           });
       }
       
-      // Always use the regular enterPot function with dynamic amount
+      // Always use the regular enterPot function with ETH value
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
-        args: [entryAmount], // Pass the dynamic entryAmount (0.02 if discounted, 0.01 if regular)
+        args: [], // No args needed - ETH sent via value
+        value: entryAmount, // Send ETH as value
       });
       
       const message = useDiscounted 
@@ -575,26 +590,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  const handleReEntryApprove = async () => {
-    if (!contractAddress || !reEntryFee) return;
-    
-    setIsLoading(true);
-    setLastAction('approveReEntry');
-    try {
-      await writeContract({
-        address: usdcAddress as `0x${string}`,
-        abi: USDC_ABI,
-        functionName: 'approve',
-        args: [contractAddress, entryAmount],
-      });
-      showMessage('USDC approval for re-entry submitted! Waiting for confirmation...');
-    } catch (error) {
-      console.error('Re-entry approval failed:', error);
-      showMessage('Re-entry approval failed. Check console for details.', true);
-      setLastAction('');
-      setIsLoading(false);
-    }
-  };
+  // Removed handleReEntryApprove - not needed for ETH transactions
 
   const handleReEntry = async () => {
     if (!contractAddress || !reEntryFee) return;
@@ -604,13 +600,12 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     
     try {
       // Process re-entry payment using the smart contract with re-entry fee amount
-      // Convert to BigInt the same way as normal pot entry
-      
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
-        args: [entryAmount],
+        args: [],
+        value: entryAmount, // Send ETH as value
       });
       
       showMessage('Re-entry payment submitted! Waiting for confirmation...');
@@ -657,42 +652,13 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase();
   
-  const hasEnoughAllowance = (() => {
-    if (!allowance || !entryAmount) return false;
-    try {
-      return allowance >= entryAmount;
-    } catch {
-      return false;
-    }
-  })();
+  const hasEnoughAllowance = true; // Always true for ETH - no allowance needed
   
-  const hasEnoughBalance = (() => {
-    if (!userUsdcBalance || !entryAmount) return false;
-    try {
-      return userUsdcBalance >= entryAmount;
-    } catch {
-      return false;
-    }
-  })();
+  const hasEnoughBalance = true; // For ETH, let wallet handle balance validation
 
-  // Re-entry allowance and balance checks (use same entryAmount as normal entry)
-  const hasEnoughReEntryAllowance = (() => {
-    if (!allowance || !reEntryFee) return false;
-    try {
-      return allowance >= entryAmount;
-    } catch {
-      return false;
-    }
-  })();
-  
-  const hasEnoughReEntryBalance = (() => {
-    if (!userUsdcBalance || !reEntryFee) return false;
-    try {
-      return userUsdcBalance >= entryAmount;
-    } catch {
-      return false;
-    }
-  })();
+  // Re-entry checks - simplified for ETH
+  const hasEnoughReEntryAllowance = true; // Always true for ETH
+  const hasEnoughReEntryBalance = true; // Let wallet handle balance validation
 
   const queryClient = useQueryClient();
 useEffect(() => {
@@ -705,7 +671,7 @@ useEffect(() => {
   
   if (isConfirmed) {
     console.log("🔍 ✅ Transaction IS CONFIRMED! Processing lastAction:", lastAction);
-    console.log("🔍 Available lastAction options: approve, enterPot, approveReEntry, reEntry, distributePot, processWinners");
+    console.log("🔍 Available lastAction options: enterPot, reEntry, distributePot, processWinners");
     
     if (lastAction === 'processWinners') {
       console.log("🔍 🎯 MATCH! lastAction is processWinners - proceeding to handler");
@@ -713,14 +679,7 @@ useEffect(() => {
       console.log("🔍 ⚠️ lastAction is NOT processWinners, it is:", lastAction);
     }
     
-    if (lastAction === 'approve') {
-      setIsLoading(false);
-      showMessage('USDC approval confirmed! You can now enter the pot.');
-      setTimeout(() => {
-  // Force refetch of all contract data
-  queryClient.invalidateQueries({ queryKey: ['readContract'] });
-}, 1000);
-    } else if (lastAction === 'enterPot') {
+    if (lastAction === 'enterPot') {
       // Keep loading state active while background processes complete
       setIsLoading(false); // Clear transaction loading
       setPostEntryLoading(true); // Start post-entry loading
@@ -805,13 +764,6 @@ useEffect(() => {
           handleReferralConfirmation();
         }, 4000); // Run after initial contract refreshes complete
       }
-    } else if (lastAction === 'approveReEntry') {
-      setIsLoading(false);
-      showMessage('USDC approval for re-entry confirmed! You can now pay the re-entry fee.');
-      setTimeout(() => {
-        // Force refetch of all contract data to update allowance
-        queryClient.invalidateQueries({ queryKey: ['readContract'] });
-      }, 1000);
     } else if (lastAction === 'reEntry') {
       // Handle re-entry confirmation
       const completeReEntry = async () => {
@@ -874,20 +826,20 @@ useEffect(() => {
             console.log("- Number of addresses:", addresses.length);
             
             if (addresses.length > 0) {
-              const totalPotMicroUSDC = Number(potBalance);
-              const amountPerWinnerMicroUSDC = Math.floor(totalPotMicroUSDC / addresses.length);
-              const amountPerWinnerUSDC = amountPerWinnerMicroUSDC / 1000000;
+              const totalPotWei = Number(potBalance);
+              const amountPerWinnerWei = Math.floor(totalPotWei / addresses.length);
+              const amountPerWinnerETH = amountPerWinnerWei / 1000000000000000000;
               
               console.log("🔍 Calculated amounts:");
-              console.log("- totalPotMicroUSDC:", totalPotMicroUSDC);
-              console.log("- amountPerWinnerMicroUSDC:", amountPerWinnerMicroUSDC);
-              console.log("- amountPerWinnerUSDC:", amountPerWinnerUSDC);
+              console.log("- totalPotWei:", totalPotWei);
+              console.log("- amountPerWinnerWei:", amountPerWinnerWei);
+              console.log("- amountPerWinnerETH:", amountPerWinnerETH);
               
               try {
-                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerMicroUSDC });
-                const result = await updateWinnerStats(addresses, amountPerWinnerMicroUSDC);
+                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerWei });
+                const result = await updateWinnerStats(addresses, amountPerWinnerWei);
                 console.log("✅ updateWinnerStats completed successfully, result:", result);
-                showMessage(`Step 2/3: Updated stats for ${addresses.length} winner(s) with $${amountPerWinnerUSDC.toFixed(6)} each`);
+                showMessage(`Step 2/3: Updated stats for ${addresses.length} winner(s) with ${amountPerWinnerETH.toFixed(6)} ETH each`);
               } catch (statsError) {
                 console.error("❌ Failed to update winner stats:", statsError);
                 showMessage("Pot distributed but failed to update winner statistics. Stats can be updated manually later.");
@@ -955,20 +907,20 @@ useEffect(() => {
             console.log("- Number of addresses:", addresses.length);
             
             if (addresses.length > 0) {
-              const totalPotMicroUSDC = Number(potBalance);
-              const amountPerWinnerMicroUSDC = Math.floor(totalPotMicroUSDC / addresses.length);
-              const amountPerWinnerUSDC = amountPerWinnerMicroUSDC / 1000000;
+              const totalPotWei = Number(potBalance);
+              const amountPerWinnerWei = Math.floor(totalPotWei / addresses.length);
+              const amountPerWinnerETH = amountPerWinnerWei / 1000000000000000000;
               
               console.log("🔍 Calculated amounts:");
-              console.log("- totalPotMicroUSDC:", totalPotMicroUSDC);
-              console.log("- amountPerWinnerMicroUSDC:", amountPerWinnerMicroUSDC);
-              console.log("- amountPerWinnerUSDC:", amountPerWinnerUSDC);
+              console.log("- totalPotWei:", totalPotWei);
+              console.log("- amountPerWinnerWei:", amountPerWinnerWei);
+              console.log("- amountPerWinnerETH:", amountPerWinnerETH);
               
               try {
-                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerMicroUSDC });
-                const result = await updateWinnerStats(addresses, amountPerWinnerMicroUSDC);
+                console.log("🚀 About to call updateWinnerStats with:", { addresses, amountPerWinnerWei });
+                const result = await updateWinnerStats(addresses, amountPerWinnerWei);
                 console.log("✅ updateWinnerStats completed successfully, result:", result);
-                showMessage(`Step 3/4: Updated stats for ${addresses.length} winner(s) with $${amountPerWinnerUSDC.toFixed(6)} each`);
+                showMessage(`Step 3/4: Updated stats for ${addresses.length} winner(s) with ${amountPerWinnerETH.toFixed(6)} ETH each`);
               } catch (statsError) {
                 console.error("❌ Failed to update winner stats:", statsError);
                 showMessage("Pot distributed but failed to update winner statistics. Stats can be updated manually later.");
@@ -1090,10 +1042,10 @@ useEffect(() => {
                   <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
                     <div className="text-sm font-semibold text-[#111111]">Today's Entry Price</div>
                     <div className="text-[#666666] font-semibold text-lg">
-                      {formatBigIntValue(baseEntryAmount)} USDC
+                      {formatBigIntValue(baseEntryAmount)} ETH
                     </div>
                     <div className="text-xs text-[#888888] mt-1">
-                      {getCurrentDayName()} • Lowest on Sundays
+                      {getCurrentDayUsdPrice()} • {getCurrentDayName()}
                     </div>
                   </div>
                 </div>
@@ -1110,7 +1062,7 @@ useEffect(() => {
                   <div className="bg-[#ffffff] p-4 rounded-lg border border-[#dedede]">
                     <div className="text-sm text-[#111111] font-semibold">{t.amountBalance || 'Pot Balance'}</div>
                     <div className="text-[#666666] font-semibold text-lg">
-                      {formatBigIntValue(potBalance)} USDC
+                      {formatBigIntValue(potBalance)} ETH
                     </div>
                     <div className="text-xs text-[#888888] mt-1">
                       Total pool amount
@@ -1163,33 +1115,21 @@ useEffect(() => {
                 
                 
                 <div className="text-gray-500 text-sm mb-6 font-light">
-                  {hasEnoughReEntryAllowance ? 'Pay the re-entry fee to resume predicting in this market' : 'Approve USDC spending first, then pay re-entry fee'}
+                  Pay the re-entry fee to resume predicting in this market
                 </div>
                 
-                {!hasEnoughReEntryAllowance ? (
-                  <button
-                    onClick={handleReEntryApprove}
-                    disabled={isActuallyLoading || !hasEnoughReEntryBalance}
-                    className="px-8 py-3 bg-gray-900 text-white font-light rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isActuallyLoading && lastAction === 'approveReEntry'
-                      ? 'Approving...'
-                      : `Approve ${(Number(entryAmount) / 1000000).toFixed(2)} USDC`}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleReEntry}
-                    disabled={isActuallyLoading || !hasEnoughReEntryBalance}
-                    className="px-8 py-3 bg-gray-900 text-white font-light rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isActuallyLoading && lastAction === 'reEntry'
-                      ? 'Processing Re-entry...'
-                      : `Pay ${(Number(entryAmount) / 1000000).toFixed(2)} USDC to Re-enter`}
-                  </button>
-                )}
+                <button
+                  onClick={handleReEntry}
+                  disabled={isActuallyLoading || !hasEnoughReEntryBalance}
+                  className="px-8 py-3 bg-gray-900 text-white font-light rounded-lg hover:bg-gray-800 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isActuallyLoading && lastAction === 'reEntry'
+                    ? 'Processing Re-entry...'
+                    : `Pay ${formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH to Re-enter`}
+                </button>
                 
                 {!hasEnoughReEntryBalance && (
-                  <p className="text-gray-400 text-sm mt-3 font-light">Insufficient USDC balance for re-entry</p>
+                  <p className="text-gray-400 text-sm mt-3 font-light">Insufficient ETH balance for re-entry</p>
                 )}
                 
               </div>
@@ -1318,13 +1258,13 @@ useEffect(() => {
                         <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl mb-4 border border-emerald-100">
                           <div className="flex items-center justify-between">
                             <div>
-                              <span className="text-gray-500 text-sm line-through">Regular: {formatBigIntValue(baseEntryAmount)} USDC</span>
+                              <span className="text-gray-500 text-sm line-through">Regular: ${(Number(baseEntryAmount) / 1000000).toFixed(2)} ({formatETH(usdToEth(Number(baseEntryAmount) / 1000000))} ETH)</span>
                               <div className="text-emerald-800 text-xl font-bold">
-                                Your Price: {formatBigIntValue(entryAmount)} USDC
+                                Your Price: ${(Number(entryAmount) / 1000000).toFixed(2)} ({formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH)
                               </div>
                             </div>
                             <div className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                              SAVE {((Number(baseEntryAmount) - Number(entryAmount)) / 1000000).toFixed(2)} USDC
+                              SAVE ${((Number(baseEntryAmount) - Number(entryAmount)) / 1000000).toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -1333,43 +1273,26 @@ useEffect(() => {
                         
                         {/* Action buttons */}
                         <div className="space-y-3">
-                          {!hasEnoughAllowance ? (
-                            <button
-                              onClick={handleApprove}
-                              disabled={isActuallyLoading}
-                              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
-                            >
-                              {isActuallyLoading && lastAction === 'approve'
-                                ? (
-                                  <div className="flex items-center justify-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Approving...
-                                  </div>
-                                )
-                                : `Approve ${formatBigIntValue(entryAmount)} USDC`}
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleEnterPot(true)}
-                              disabled={isActuallyLoading || !hasEnoughBalance}
-                              className="w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
-                            >
-                              {isActuallyLoading && lastAction === 'enterPot'
-                                ? (
-                                  <div className="flex items-center justify-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Using Discount...
-                                  </div>
-                                )
-                                : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handleEnterPot(true)}
+                            disabled={isActuallyLoading || !hasEnoughBalance}
+                            className="w-full bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                          >
+                            {isActuallyLoading && lastAction === 'enterPot'
+                              ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                  Using Discount...
+                                </div>
+                              )
+                              : `Pay ${formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH to Enter`}
+                          </button>
                           
                           {!hasEnoughBalance && (
                             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                               <div className="flex items-center gap-2">
                                 <span className="text-red-500 text-sm">⚠️</span>
-                                <p className="text-red-700 text-sm font-medium">Insufficient USDC balance for discounted entry</p>
+                                <p className="text-red-700 text-sm font-medium">Insufficient ETH balance for discounted entry</p>
                               </div>
                             </div>
                           )}
@@ -1378,33 +1301,13 @@ useEffect(() => {
                     </div>
                   )}
                   
-                  {/* Approve USDC - Only show if no free entries available */}
-                  {freeEntriesAvailable === 0 && (
-                    <div className="bg-[#2C2C47] p-4 rounded-lg">
-                      <h3 className="text-[#F5F5F5] font-medium mb-2">{t.approveSpending || '1. Approve USDC Spending'}</h3>
-                      <p className="text-[#A0A0B0] text-sm mb-3">
-                        {t.allowContracts || 'Allow the contract to spend your USDC. Current allowance:'} {formatBigIntValue(allowance)} USDC
-                      </p>
-                      <button
-                        onClick={handleApprove}
-                        disabled={isActuallyLoading || hasEnoughAllowance}
-                        className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isActuallyLoading && lastAction === 'approve'
-                          ? t.approveProcessing
-                          : hasEnoughAllowance
-                          ? t.alreadyApproved
-                          : t.approveUSDC}
-                      </button>
-                    </div>
-                  )}
 
                   {/* Enter Pot - Only show if no free entries available */}
                   {freeEntriesAvailable === 0 && (
                     <div className="bg-[#2C2C47] p-4 rounded-lg">
-                      <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '2. Enter Prediction Pot'}</h3>
+                      <h3 className="text-[#F5F5F5] font-medium mb-2">{t.enterPot || '1. Enter Prediction Pot'}</h3>
                       <p className="text-[#A0A0B0] text-sm mb-3">
-                      Approve USDC spending first.
+                      Pay entry fee in ETH to join the prediction market.
                       </p>
                       
                       {/* Referral Code Input */}
@@ -1423,18 +1326,15 @@ useEffect(() => {
                       
                       <button
                         onClick={() => handleEnterPot(false)}
-                        disabled={isActuallyLoading || !hasEnoughAllowance || !hasEnoughBalance}
+                        disabled={isActuallyLoading || !hasEnoughBalance}
                         className="bg-[#6A5ACD] text-black px-4 py-2 rounded-md font-medium hover:bg-[#c4b517] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isActuallyLoading && lastAction === 'enterPot'
                           ? t.enterPotProcessing
-                          : `Pay ${formatBigIntValue(entryAmount)} USDC to Enter`}
+                          : `Pay ${formatETH(usdToEth(Number(entryAmount) / 1000000))} ETH to Enter`}
                       </button>
                       {!hasEnoughBalance && (
-                        <p className="text-red-400 text-sm mt-2">{t.insufficientUSDC || 'Insufficient USDC balance'}</p>
-                      )}
-                      {!hasEnoughAllowance && hasEnoughBalance && (
-                        <p className="text-yellow-400 text-sm mt-2">{t.pleaseApproveFirst || 'Please approve USDC spending first'}</p>
+                        <p className="text-red-400 text-sm mt-2">Insufficient ETH balance</p>
                       )}
                     </div>
                   )}

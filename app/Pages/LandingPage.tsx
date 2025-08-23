@@ -13,8 +13,8 @@ interface LandingPageProps {
 }
 
 const contractAddresses = {
-  Featured: '0xe3DAE4BC36fDe8F83c1F0369028bdA5813394794',
-  Crypto: '0xD4B6F1CF1d063b760628952DDf32a44974129697',
+  Featured: '0x6d6e91A810F760393937186717D287539bF78E38',
+  Crypto: '0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5',
   solana: '0xSolanaAddress...'
 } as const;
 

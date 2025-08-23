@@ -36,8 +36,8 @@ const LIVE_POT_ABI = [
   }
 ];
 
-// Live pot contract address
-const LIVE_POT_ADDRESS = '0xbaA1ef49db42a483B42477D633E9ABc77EFdF965';
+// Live pot contract address - SimplePredictionPot (ETH-based)
+const LIVE_POT_ADDRESS = '0xd43CE8d625EA2Db962e7e3C628eE13F00332247B';
 
 interface FifteenMinuteQuestionsProps {
   className?: string;
@@ -361,13 +361,13 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const formatUsdcBalance = (balance: bigint | undefined): string => {
-    if (!balance) return '0.00';
+  const formatEthBalance = (balance: bigint | undefined): string => {
+    if (!balance) return '0.0000';
     try {
-      const formatted = formatUnits(balance, 6);
-      return parseFloat(formatted).toFixed(2);
+      const formatted = formatUnits(balance, 18);
+      return parseFloat(formatted).toFixed(4);
     } catch {
-      return '0.00';
+      return '0.0000';
     }
   };
 
@@ -827,7 +827,7 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
             {/* Pot Balance Display - Top Right */}
             <div className="flex justify-end mb-2">
               <div className="text-xs text-gray-500 font-mono">
-                Total Predictions: <span className='text-sm text-green-400'>${formatUsdcBalance(potBalance)}</span>
+                Total Predictions: <span className='text-sm text-green-400'>{formatEthBalance(potBalance)} ETH</span>
               </div>
             </div>
 

@@ -9,11 +9,10 @@ import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
 import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
-// Contract ABI for PredictionPot (simplified contract)
+// Contract ABI for ETH-based PredictionPot cloner
 const PREDICTION_POT_CLONING_ABI = [
   {
     "inputs": [
-      {"internalType": "address", "name": "_usdc", "type": "address"},
       {"internalType": "string", "name": "_potName", "type": "string"},
       {"internalType": "string", "name": "_description", "type": "string"}
     ],
@@ -24,26 +23,8 @@ const PREDICTION_POT_CLONING_ABI = [
   }
 ] as const;
 
-// USDC Contract ABI (minimal)
-const USDC_ABI = [
-  {
-    "inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}],
-    "name": "approve",
-    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
 
-const FACTORY_CONTRACT_ADDRESS = '0x1344e4614719ff4D491280f0d2707e87354ed823' as const;
-const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
+const FACTORY_CONTRACT_ADDRESS = '0x8A4927599Ce20aF7fAB7b363EfB4a5a1ec96A4AF' as const;
 
 interface CreatePotPageProps {
   activeSection: string;
@@ -264,7 +245,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
         address: FACTORY_CONTRACT_ADDRESS,
         abi: PREDICTION_POT_CLONING_ABI,
         functionName: 'createClone',
-        args: [USDC_ADDRESS, potName.trim(), description.trim()],
+        args: [potName.trim(), description.trim()],
       });
     } catch (error) {
       console.error('Error creating pot:', error);
@@ -515,7 +496,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-medium text-black mb-2">How it works:</h3>
                 <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Friends can enter with any USDC amount</li>
+                  <li>• Friends can enter with any ETH amount</li>
                   <li>• You decide the winners and distribute the market</li>
                   <li>• Winners split the total market equally</li>
                 </ul>
@@ -621,7 +602,7 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span>Instant USDC payouts</span>
+                    <span>Instant ETH payouts</span>
                   </div>
                 </div>
               </div>
