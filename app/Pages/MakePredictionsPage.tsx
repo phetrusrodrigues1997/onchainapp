@@ -404,9 +404,7 @@ export default function MakePredicitions() {
     if (!address || !isConnected) return false;
     
     // Add specific admin wallet addresses here
-    interface AdminAddresses extends Array<string> {}
-
-    const adminAddresses: AdminAddresses = [
+    const adminAddresses: string[] = [
       // Add your admin wallet addresses here (lowercase)
       // '0x1234567890123456789012345678901234567890'
     ];
