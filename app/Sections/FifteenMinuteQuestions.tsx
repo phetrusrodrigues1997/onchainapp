@@ -12,7 +12,7 @@ import { getPrice } from '../Constants/getPrice';
 // Configure the time interval for new questions (in minutes)
 const QUESTION_INTERVAL_MINUTES = 60;
 
-// Contract ABI for owner functions
+// Contract ABI matching PredictionPot.sol exactly
 const LIVE_POT_ABI = [
   {
     "inputs": [],
@@ -29,8 +29,8 @@ const LIVE_POT_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "clearParticipants",
+    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
+    "name": "enterPotFree",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -51,7 +51,7 @@ const LIVE_POT_ABI = [
   }
 ];
 
-// Live pot contract address - SimplePredictionPot (ETH-based)
+// Live pot contract address - PredictionPot (ETH-based, lightweight version)
 const LIVE_POT_ADDRESS = '0x3dfdEdC82B14B1dd5f45Ae0F2A5F3738A487096e';
 
 interface FifteenMinuteQuestionsProps {
@@ -690,18 +690,10 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       // This handles the combined action - pot distribution is confirmed, now clear predictions
       const finishProcessing = async () => {
         try {
-          setProcessMessage("Step 3/4: Clearing live predictions...");
+          setProcessMessage("Step 3/3: Clearing live predictions...");
           await clearLivePredictions();
           
-          // Step 4: Clear participants from the contract
-          setProcessMessage("Step 4/4: Clearing pot participants...");
-          await writeContract({
-            address: LIVE_POT_ADDRESS as `0x${string}`,
-            abi: LIVE_POT_ABI,
-            functionName: 'clearParticipants',
-            args: [],
-          });
-          
+          // Participants automatically cleared by distributePot contract function (delete participants)
           setProcessMessage("🎉 Winners processed successfully! Pot distributed, predictions cleared, and participants reset!");
           setOutcomeInput('');
           setFinalOutcomeInput('');
@@ -718,7 +710,9 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
           setTimeout(() => {
             setProcessMessage('');
           }, 5000);
+          
         } catch (error) {
+          console.error('Error in finishProcessing:', error);
           setProcessMessage("Pot distributed but failed to clear predictions. Please clear manually.");
         } finally {
           setIsProcessing(false);
