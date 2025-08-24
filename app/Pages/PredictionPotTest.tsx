@@ -54,20 +54,7 @@ const PREDICTION_POT_ABI = [
     "stateMutability": "nonpayable",
     "type": "function"
   },
-  {
-    "inputs": [],
-    "name": "clearParticipants",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
-    "name": "removeParticipant",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
+  
   {
     "inputs": [],
     "name": "getParticipants",
@@ -97,9 +84,6 @@ interface PredictionPotProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
 }
-
-
-
 
 
 const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotProps) => {
@@ -635,13 +619,10 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const isActuallyLoading = isLoading || isPending || isConfirming;
   
   const isOwner = address && owner && address.toLowerCase() === owner.toLowerCase();
-  
-  const hasEnoughAllowance = true; // Always true for ETH - no allowance needed
-  
+    
   const hasEnoughBalance = true; // For ETH, let wallet handle balance validation
 
   // Re-entry checks - simplified for ETH
-  const hasEnoughReEntryAllowance = true; // Always true for ETH
   const hasEnoughReEntryBalance = true; // Let wallet handle balance validation
 
   const queryClient = useQueryClient();
@@ -845,16 +826,7 @@ useEffect(() => {
           await clearWrongPredictions(selectedTableType);
           console.log("🔍 ✅ Successfully cleared wrong predictions");
 
-          // Step 3: Clear participants from the contract
-          console.log("🔍 Step 4: About to clear participants from contract");
-          showMessage("Step 4/4: Clearing pot participants...");
-          await writeContract({
-            address: contractAddress as `0x${string}`,
-            abi: PREDICTION_POT_ABI,
-            functionName: 'clearParticipants',
-            args: [],
-          });
-          console.log("🔍 ✅ Successfully cleared participants from contract");
+          
           showMessage("🎉 Pot distributed successfully! Winner stats updated, wrong predictions cleared, and participants reset!");
           
         } catch (error) {
@@ -891,8 +863,6 @@ useEffect(() => {
           console.log("- winnerAddresses:", winnerAddresses);
           console.log("- winnerAddresses.trim():", winnerAddresses.trim());
           console.log("- potBalance:", potBalance);
-          console.log("- potBalance type:", typeof potBalance);
-          console.log("- potBalance > 0:", potBalance ? potBalance > BigInt(0) : false);
           
           if (winnerAddresses.trim() && potBalance && potBalance > BigInt(0)) {
             console.log("🔍 ✅ Winner stats conditions MET - proceeding with update");
@@ -937,16 +907,7 @@ useEffect(() => {
           await clearWrongPredictions(selectedTableType);
           console.log("🔍 ✅ Successfully cleared wrong predictions");
 
-          // Step 5: Clear participants from the contract
-          console.log("🔍 Step 5: About to clear participants from contract");
-          showMessage("Step 5/5: Clearing pot participants...");
-          await writeContract({
-            address: contractAddress as `0x${string}`,
-            abi: PREDICTION_POT_ABI,
-            functionName: 'clearParticipants',
-            args: [],
-          });
-          console.log("🔍 ✅ Successfully cleared participants from contract");
+          
           showMessage("🎉 Winners processed successfully! Pot distributed, stats updated, wrong predictions cleared, and participants reset!");
           setTimeout(() => {
   // Force refetch of all contract data
@@ -965,17 +926,7 @@ useEffect(() => {
       console.log("🔍 About to call finishProcessing function");
       finishProcessing();
       return; // Don't execute the common cleanup below
-    } else if (lastAction === 'clearParticipants') {
-      // Handle clear participants confirmation
-      setIsLoading(false);
-      showMessage('All participants cleared from pot successfully!');
-      setLastAction('');
-      // Refresh contract data
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['readContract'] });
-      }, 1000);
-      return;
-    }
+    } 
     
     setLastAction('');
   }
@@ -1475,26 +1426,7 @@ useEffect(() => {
           }
           setIsLoading(true);
           try {
-            // Step 1: Get all wrong predictions for this market
-            const wrongPredictions = await getWrongPredictions(selectedTableType);
             
-            // Step 2: Remove wrong predictors from contract
-            if (wrongPredictions.length > 0) {
-              showMessage(`Removing ${wrongPredictions.length} wrong predictors from contract...`);
-              for (const wrongAddress of wrongPredictions) {
-                try {
-                  await writeContract({
-                    address: contractAddress as `0x${string}`,
-                    abi: PREDICTION_POT_ABI,
-                    functionName: 'removeParticipant',
-                    args: [wrongAddress as `0x${string}`],
-                  });
-                  console.log(`Removed ${wrongAddress} from contract`);
-                } catch (error) {
-                  console.error(`Failed to remove ${wrongAddress}:`, error);
-                }
-              }
-            }
             
             // Step 3: Set daily outcome (this will add new wrong predictions to the table)
             await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType, participants || []);
@@ -1584,40 +1516,7 @@ useEffect(() => {
       </button>
     </div>
 
-    {/* Clear All Participants */}
-    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4">
-      <h3 className="text-[#F5F5F5] font-medium mb-2">Clear All Participants</h3>
-      <p className="text-[#A0A0B0] text-sm mb-3">
-        Remove all participants from the pot without distributing funds. Use with caution.
-      </p>
-      <button
-        onClick={async () => {
-          if (!window.confirm("Are you sure you want to clear all participants? This action cannot be undone.")) {
-            return;
-          }
-          setIsLoading(true);
-          setLastAction('clearParticipants');
-          try {
-            await writeContract({
-              address: contractAddress as `0x${string}`,
-              abi: PREDICTION_POT_ABI,
-              functionName: 'clearParticipants',
-              args: [],
-            });
-            showMessage('Clear participants transaction submitted! Waiting for confirmation...');
-          } catch (error) {
-            console.error('Clear participants failed:', error);
-            showMessage('Clear participants failed. Check console for details.', true);
-            setLastAction('');
-            setIsLoading(false);
-          }
-        }}
-        disabled={isActuallyLoading}
-        className="bg-orange-600 text-[#F5F5F5] px-6 py-3 rounded-md font-medium hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed w-full"
-      >
-        {isActuallyLoading && lastAction === "clearParticipants" ? "Clearing Participants..." : "🧹 Clear All Participants"}
-      </button>
-    </div>
+    
     
   </div>
 )}
