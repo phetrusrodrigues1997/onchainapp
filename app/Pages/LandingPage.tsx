@@ -180,7 +180,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         const nextIndex = (currentIndex + 1) % currentMarketOptions.length;
         return currentMarketOptions[nextIndex].id;
       });
-    }, 12000);
+    }, 20000);
 
     return () => clearInterval(interval);
   }, [currentLanguage]);
