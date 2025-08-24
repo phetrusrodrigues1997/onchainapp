@@ -22,7 +22,7 @@ import { updateWinnerStats } from '../Database/OwnerActions';
 // Define table identifiers instead of passing table objects
 const tableMapping = {
   "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
-  "0xaAF6392f40fbb44Cc535027E56579D4d5Fe35E36": "crypto",
+  "0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];

@@ -52,7 +52,7 @@ const LIVE_POT_ABI = [
 ];
 
 // Live pot contract address - SimplePredictionPot (ETH-based)
-const LIVE_POT_ADDRESS = '0x69bbF0C68F051890a7e4bEC23019938cF670f9E1';
+const LIVE_POT_ADDRESS = '0x3dfdEdC82B14B1dd5f45Ae0F2A5F3738A487096e';
 
 interface FifteenMinuteQuestionsProps {
   className?: string;
