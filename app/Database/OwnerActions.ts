@@ -145,6 +145,43 @@ export async function setDailyOutcome(
   const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
 
   try {
+    // First, update the MarketOutcomes table to mark this as the final outcome
+    const today = new Date();
+    const targetDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    console.log(`🔴 Setting final outcome for ${tableType}: ${outcome} on ${targetDate}`);
+    
+    // Check if there's an existing outcome for this market and date
+    const existingOutcome = await db.select()
+      .from(MarketOutcomes)
+      .where(and(
+        eq(MarketOutcomes.marketType, tableType),
+        eq(MarketOutcomes.outcomeDate, targetDate)
+      ));
+
+    if (existingOutcome.length > 0) {
+      // Update existing outcome to mark it as final
+      await db.update(MarketOutcomes)
+        .set({
+          finalOutcome: outcome,
+          finalOutcomeSetAt: today,
+        })
+        .where(eq(MarketOutcomes.id, existingOutcome[0].id));
+      
+      console.log(`✅ Updated existing outcome to final for ${tableType} on ${targetDate}`);
+    } else {
+      // Create new outcome record (shouldn't happen in normal flow, but just in case)
+      console.warn(`⚠️ No existing provisional outcome found, creating final outcome directly`);
+      await db.insert(MarketOutcomes).values({
+        marketType: tableType,
+        outcomeDate: targetDate,
+        provisionalOutcome: outcome,
+        finalOutcome: outcome,
+        finalOutcomeSetAt: today,
+        evidenceWindowExpires: today, // Set to now since it's final
+        isDisputed: false
+      });
+    }
     // Get all users who made predictions
     const allPredictors = await db
       .select({ walletAddress: betsTable.walletAddress })
@@ -173,11 +210,11 @@ export async function setDailyOutcome(
       // Add non-predictors to wrong predictions table so they must pay re-entry fee
       if (nonPredictors.length > 0) {
         
-        const today = new Date().toISOString().split('T')[0];
+        const todayDateString = targetDate; // Use the same date string we calculated above
         
         const nonPredictorRecords = nonPredictors.map(participant => ({
           walletAddress: participant,
-          wrongPredictionDate: today,
+          wrongPredictionDate: todayDateString,
         }));
 
         await db
@@ -191,11 +228,11 @@ export async function setDailyOutcome(
     }
 
     if (wrongBets.length > 0) {
-      const today = new Date().toISOString().split('T')[0];
+      const wrongPredictionDate = targetDate; // Use the same date string we calculated above
       
       const wrongAddresses = wrongBets.map(bet => ({
         walletAddress: bet.walletAddress,
-        wrongPredictionDate: today,
+        wrongPredictionDate: wrongPredictionDate,
       }));
 
       await db
@@ -210,8 +247,8 @@ export async function setDailyOutcome(
     
     // Only clear ALL predictions on non-Saturday days
     // On Saturday, keep correct predictions for winner determination
-    const today = new Date();
-    const dayOfWeek = today.getUTCDay(); // 0 = Sunday, 6 = Saturday
+    const currentDay = new Date();
+    const dayOfWeek = currentDay.getUTCDay(); // 0 = Sunday, 6 = Saturday
     
     if (dayOfWeek !== 6) {
       // Clear ALL processed predictions (both right and wrong have been handled)

@@ -218,7 +218,8 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
           outcome: provisionalOutcomeData.outcome,
           setAt: new Date(provisionalOutcomeData.setAt),
           evidenceWindowExpires: new Date(provisionalOutcomeData.evidenceWindowExpires),
-          isDisputed: false
+          finalOutcome: provisionalOutcomeData.finalOutcome,
+          isDisputed: provisionalOutcomeData.isDisputed || false
         };
         
         setMarketOutcome(marketOutcomeData);
