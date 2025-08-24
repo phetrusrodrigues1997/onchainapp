@@ -385,7 +385,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
   // Landing page state
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-2xl mx-auto px-4 py-12  md:mt-24">
+      <div className="max-w-2xl mx-auto px-4 py-12 md:mt-8">
         
         {/* Simple Header */}
         <div className="text-center mb-12">

@@ -289,22 +289,41 @@ const handleMarketClick = (marketId: string) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-right mb-12 relative">
             {/* Live Markets Link */}
-            <div className="mb-6 -translate-y-1/4">
-              <button 
-                onClick={() => setActiveSection('liveMarkets')}
-                className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105 animate-pulse-glow"
-              >
-                {/* Live indicator dot */}
-                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                
-                <span className="relative">
-                  Join live markets
-                </span>
-                
-                {/* Arrow with hover animation */}
-                <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs animate-pulse-right">→</span>
-              </button>
-            </div>
+<div className="mb-6 -translate-y-1/4 flex justify-between">
+  {/* Left text button with question mark in circle */}
+
+<button 
+  onClick={() => setActiveSection('discord')}
+  className="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+>
+  {/* Smaller blue circle with question mark */}
+  <span className=" flex items-center justify-center w-3 h-3 rounded-full bg-blue-600 text-white text-[9px] font-bold">
+    ?
+  </span>
+  
+  {/* Larger text */}
+  <span className="text-blue-600">How it works</span>
+</button>
+
+
+
+  {/* Right button (your current one) */}
+  <button 
+    onClick={() => setActiveSection('liveMarkets')}
+    className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-200 hover:scale-105 animate-pulse-glow"
+  >
+    {/* Live indicator dot */}
+    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+    
+    <span className="relative">
+      Join live markets
+    </span>
+    
+    {/* Arrow with hover animation */}
+    <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs animate-pulse-right">→</span>
+  </button>
+</div>
+
             
             {/* Market Carousel */}
             <div className="relative -translate-y-1/3">
@@ -483,7 +502,7 @@ const handleMarketClick = (marketId: string) => {
               <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-12' : '-translate-y-12'}`}>
                 <div 
                   onClick={() => handleMarketClick(markets[0].id)}
-                  className="group bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-xl p-4 border border-gray-700 hover:border-gray-600 hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[480px] flex flex-col"
+                  className="group bg-transparent rounded-xl p-4 border border-gray-300 hover:border-gray-600 hover:shadow-xl transition-all duration-200 cursor-pointer relative overflow-hidden w-[28rem] h-[480px] flex flex-col"
                 >
                   {/* Background Gradient Accent */}
                   <div className="absolute top-0 left-0 right-0 h-1 "></div>
@@ -492,7 +511,7 @@ const handleMarketClick = (marketId: string) => {
                   <div className="flex justify-end mb-2">
                     <div className="text-sm text-gray-300 font-medium whitespace-nowrap">
                       <span className="text-xs text-gray-400 mr-2">{getCountdownLabel()}</span>
-                      <span className="text-sm font-bold text-white">
+                      <span className="text-sm font-bold text-gray-500">
                         {isShortCountdown() ? (
                           `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
                         ) : (
@@ -521,14 +540,14 @@ const handleMarketClick = (marketId: string) => {
                     </div>
 
                     <div className="text-center">
-                      <h2 className="text-lg font-bold text-white">{markets[0].name}</h2>
-                      <p className="text-sm text-gray-300 font-medium">{markets[0].symbol}</p>
+                      <h2 className="text-lg font-bold text-black">{markets[0].name}</h2>
+                      <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
                     </div>
                   </div>
 
                   {/* Question */}
                   <div className="mb-3 flex-1 flex items-center justify-center">
-                    <p className="text-base font-semibold text-white leading-snug text-center">
+                    <p className="text-base font-semibold text-black leading-snug text-center">
                       {markets[0].question}
                     </p>
                   </div>
@@ -544,7 +563,7 @@ const handleMarketClick = (marketId: string) => {
                   </div>
 
                   {/* Stats Footer */}
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-600">
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                     <div className="flex items-center space-x-2">
                       <div
                         className={`w-2.5 h-2.5 rounded-full ${
@@ -559,11 +578,11 @@ const handleMarketClick = (marketId: string) => {
                     </div>
                     
                     <div className="text-center">
-                      <div className="text-sm font-bold text-white">{markets[0].potSize}</div>
+                      <div className="text-sm font-bold text-black">{markets[0].potSize}</div>
                       <div className="text-xs text-gray-300">Volume</div>
                     </div>
                     
-                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-white group-hover:translate-x-1 transition-all duration-200" />
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-black group-hover:translate-x-1 transition-all duration-200" />
                   </div>
                 </div>
               </div>

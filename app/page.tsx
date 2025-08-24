@@ -121,8 +121,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
       
-      {/* Dark green header */}
-      <header className="z-50 bg-[#fdfdfd] px-4 py-3 shadow-md sticky top-0">
+      
+      <header className="z-50 bg-[#fdfdfd] px-4 py-3 md:py-5 shadow-md sticky top-0">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center">
             <div className="flex items-center flex-1">

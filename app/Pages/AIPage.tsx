@@ -660,21 +660,21 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
 
   // Main Games Hub Interface
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full text-center">
-        {/* Header */}
-        <div className="mb-16">
-          {/* <div className="inline-flex items-center justify-center w-12 h-12 bg-black rounded-full mb-8">
-            <Gamepad2 className="w-8 h-8 text-white" />
-          </div> */}
-          {/* <h1 className="text-6xl font-light text-black mb-6">Games Hub</h1>
-          <p className="text-2xl text-gray-600 font-light max-w-2xl mx-auto">
-            Challenge your mind with our collection of engaging games
-          </p> */}
+    <div className="min-h-screen bg-white">
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        
+        {/* Simple Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Games Hub
+          </h1>
+          <p className="text-lg text-gray-600 mb-8">
+            Challenge your mind and earn rewards <span className="text-4xl">👻</span>
+          </p>
         </div>
-
+        
         {/* Available Games */}
-        <div className="grid md:grid-cols-2 gap-8 mb-24 max-w-4xl mx-auto -translate-y-8">
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
           
 
           {/* Wordle Game */}
