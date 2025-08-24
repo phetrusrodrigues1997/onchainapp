@@ -21,13 +21,6 @@ const PREDICTION_POT_ABI = [
     "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
     "stateMutability": "view",
     "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
-    "name": "removeParticipant",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   }
 ];
 
@@ -120,9 +113,14 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     return marketOutcome !== null;
   };
 
-  // Check if evidence submission window is active (within 1 hour of outcome being set)
+  // Check if evidence submission window is active (within 1 hour of outcome being set AND final outcome not yet set)
   const isEvidenceWindowActive = (): boolean => {
     if (!marketOutcome) return false;
+    
+    // If final outcome is already set, evidence window is closed
+    if (marketOutcome.finalOutcome) return false;
+    
+    // Check if we're still within the time window
     const now = new Date();
     return now < marketOutcome.evidenceWindowExpires;
   };
