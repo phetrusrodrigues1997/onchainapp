@@ -38,7 +38,7 @@ interface MarketOutcome {
   outcome: 'positive' | 'negative';
   setAt: Date;
   evidenceWindowExpires: Date;
-  finalOutcome?: 'positive' | 'negative';
+  finalOutcome?: 'positive' | 'negative' | null;
   isDisputed: boolean;
 }
 
