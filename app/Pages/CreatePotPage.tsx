@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Users, Trophy, Target, Plus, ArrowLeft, Check, Copy, Search, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Check, ExternalLink, Search } from 'lucide-react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { createPrivatePot, getPotsByCreator, getPotDetails } from '../Database/actions2';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 
@@ -25,27 +24,31 @@ const PREDICTION_POT_CLONING_ABI = [
 const FACTORY_CONTRACT_ADDRESS = '0x8A4927599Ce20aF7fAB7b363EfB4a5a1ec96A4AF' as const;
 
 interface CreatePotPageProps {
-  activeSection: string;
-  setActiveSection: (section: string) => void;
   navigateToPrivatePot?: (contractAddress: string) => void;
 }
 
-const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }: CreatePotPageProps) => {
+const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showMyPots, setShowMyPots] = useState(false);
   const [showJoinPot, setShowJoinPot] = useState(false);
   const [potName, setPotName] = useState('');
   const [description, setDescription] = useState('');
   const [createdPotAddress, setCreatedPotAddress] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [myPots, setMyPots] = useState<any[]>([]);
-  const [joinAddress, setJoinAddress] = useState('');
+  const [myPots, setMyPots] = useState<Array<{
+    id: number;
+    contractAddress: string;
+    creatorAddress: string;
+    potName: string;
+    description: string;
+    entryAmount: number;
+    createdAt: Date;
+  }>>([]);
+  const [joinAddress] = useState('');
   const [isLoadingMyPots, setIsLoadingMyPots] = useState(false);
-  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false);
   const { alertState, showAlert, closeAlert } = useCustomAlert();
 
 
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const { data: hash, writeContract, isPending } = useWriteContract();
   
   
@@ -147,51 +150,45 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     }
   };
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
 
-  const toggleHeader = () => {
-    setIsHeaderCollapsed(!isHeaderCollapsed);
-  };
-
-  // Debug logging
-  React.useEffect(() => {
-    console.log('Transaction state:', { isPending, isConfirming, isConfirmed, hash, createdPotAddress });
-    if (receipt) {
-      console.log('Receipt:', receipt);
-    }
-  }, [isPending, isConfirming, isConfirmed, hash, createdPotAddress, receipt]);
 
   // Success state - show created pot details
   if (isConfirmed && (createdPotAddress || receipt)) {
-    const addressToShow = createdPotAddress || 'Check transaction on Basescan';
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <div className="max-w-2xl w-full text-center">
-          <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-8">
-            <Check className="w-12 h-12 text-white" />
-          </div>
-          
-          <h1 className="text-4xl font-light text-black mb-4">Market Created Successfully!</h1>
-          <p className="text-xl text-gray-600 mb-8">Your prediction market "{potName}" is now live</p>
-          
-          <div className="flex gap-4 justify-center">
-            {createdPotAddress && navigateToPrivatePot && (
-              <button
-                onClick={() => navigateToPrivatePot(createdPotAddress)}
-                className="bg-green-600 text-white py-3 px-8 rounded hover:bg-green-700 transition-colors"
-              >
-                Open Your Market
-              </button>
-            )}
+      <div className="min-h-screen bg-white">
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Check className="w-8 h-8 text-white" />
+            </div>
             
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Market Created!</h1>
+            <p className="text-lg text-gray-600 mb-8">
+              &quot;{potName}&quot; is now live and ready for participants
+            </p>
+            
+            <div className="flex gap-4 justify-center">
+              {createdPotAddress && navigateToPrivatePot && (
+                <button
+                  onClick={() => navigateToPrivatePot(createdPotAddress)}
+                  className="bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open Market
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setCreatedPotAddress(null);
+                  setPotName('');
+                  setDescription('');
+                }}
+                className="border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors"
+              >
+                Create Another
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -201,80 +198,61 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   // My Pots view
   if (showMyPots) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-4xl w-full">
-            
-            {/* Back Button */}
-            <button
-              onClick={() => setShowMyPots(false)}
-              className="flex items-center gap-2 text-gray-600 hover:text-black mb-8 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
-            
-            {/* Header */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
-                <Users className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-4xl font-light text-black mb-4">My Prediction Markets</h1>
-              <p className="text-lg text-gray-600">Manage your created prediction markets</p>
-            </div>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          
+          {/* Simple Back Button */}
+          <button
+            onClick={() => setShowMyPots(false)}
+            className="flex items-center gap-2 text-gray-600 hover:text-black mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+          
+          {/* Simple Header */}
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Markets</h1>
 
-            {/* My Pots List */}
-            <div className="space-y-4">
-              {myPots.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-600 mb-4">You haven't created any markets yet.</p>
-                  <button
-                    onClick={() => {
-                      setShowMyPots(false);
-                      setShowCreateForm(true);
-                    }}
-                    className="bg-[#aa0000] text-white py-2 px-6 rounded hover:bg-gray-900"
-                  >
-                    Create Market
-                  </button>
-                </div>
-              ) : (
-                myPots.map((pot) => (
-                  <div key={pot.contractAddress} className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:border-black transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-medium text-black mb-2">{pot.potName}</h3>
-                        <p className="text-gray-600 mb-3">{pot.description}</p>
-                        <div className="text-sm text-gray-500">
-                          <p>Created: {new Date(pot.createdAt).toLocaleDateString()}</p>
-                          {/* <p>Contract: {pot.contractAddress.slice(0, 6)}...{pot.contractAddress.slice(-4)}</p> */}
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        {/* <button
-                          onClick={() => copyToClipboard(pot.contractAddress)}
-                          className="p-2 text-gray-500 hover:text-black border border-gray-300 rounded hover:border-black"
-                          title="Copy address"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button> */}
-                        
-                        {navigateToPrivatePot && (
-                          <button
-                            onClick={() => navigateToPrivatePot(pot.contractAddress)}
-                            className="flex items-center gap-2 bg-black text-white py-2 px-4 rounded hover:bg-[#eaeaea] hover:text-black transition-colors"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Open
-                          </button>
-                        )}
+          {/* Markets List */}
+          <div className="space-y-4">
+            {myPots.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-6">You haven&apos;t created any markets yet.</p>
+                <button
+                  onClick={() => {
+                    setShowMyPots(false);
+                    setShowCreateForm(true);
+                  }}
+                  className="bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Create Your First Market
+                </button>
+              </div>
+            ) : (
+              myPots.map((pot) => (
+                <div key={pot.contractAddress} className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{pot.potName}</h3>
+                      <p className="text-gray-600 mb-3">{pot.description}</p>
+                      <div className="text-sm text-gray-500">
+                        <p>Created {pot.createdAt.toLocaleDateString()}</p>
                       </div>
                     </div>
+                    
+                    {navigateToPrivatePot && (
+                      <button
+                        onClick={() => navigateToPrivatePot(pot.contractAddress)}
+                        className="bg-black text-white py-2 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Open
+                      </button>
+                    )}
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -334,78 +312,54 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   // Create form state
   if (showCreateForm) {
     return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full">
-            
-            {/* Back Button */}
-            <button
-              onClick={() => setShowCreateForm(false)}
-              className="flex items-center gap-2 text-gray-600 hover:text-black mb-8 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
-            
-            {/* Form Header */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
-                <Plus className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-4xl font-light text-black mb-4">Create Prediction Market</h1>
-              <p className="text-lg text-gray-600">Set up a custom prediction market for your friends</p>
-            </div>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          
+          {/* Simple Back Button */}
+          <button
+            onClick={() => setShowCreateForm(false)}
+            className="flex items-center gap-2 text-gray-600 hover:text-black mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+          
+          {/* Simple Header */}
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Create Market</h1>
 
-            {/* Form */}
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  Market Name
-                </label>
-                <input
-                  type="text"
-                  value={potName}
-                  onChange={(e) => setPotName(e.target.value)}
-                  placeholder="e.g., Bitcoin December Prediction"
-                  className="w-full p-4 border border-gray-200 rounded-lg focus:border-black focus:outline-none text-lg placeholder-gray-400"
-                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
-                  maxLength={50}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g., Will Bitcoin be above $95,000 on December 15th, 2024?"
-                  className="w-full p-4 border border-gray-200 rounded-lg focus:border-black focus:outline-none text-lg h-32 resize-none placeholder-gray-400"
-                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
-                  maxLength={200}
-                />
-              </div>
-              
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-medium text-black mb-2">How it works:</h3>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• Friends can enter with any ETH amount</li>
-                  <li>• You decide the winners and distribute the market</li>
-                  <li>• Winners split the total market equally</li>
-                </ul>
-              </div>
+          {/* Simple Form */}
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Market Name
+              </label>
+              <input
+                type="text"
+                value={potName}
+                onChange={(e) => setPotName(e.target.value)}
+                placeholder="e.g., Bitcoin December Prediction"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:border-black focus:outline-none text-gray-900 placeholder-gray-500"
+                maxLength={50}
+              />
             </div>
-          </div>
-        </div>
-
-        {/* Create Button */}
-        <div className="bg-white border-t border-gray-200 p-6">
-          <div className="max-w-2xl mx-auto">
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Description
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g., Will Bitcoin be above $95,000 on December 15th, 2024?"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:border-black focus:outline-none text-gray-900 h-24 resize-none placeholder-gray-500"
+                maxLength={200}
+              />
+            </div>
+            
             <button
               onClick={handleCreatePot}
               disabled={!address || isPending || isConfirming || !potName.trim() || !description.trim()}
-              className="w-full bg-black text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2"
             >
               {isPending || isConfirming ? (
                 <>
@@ -413,16 +367,13 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
                   {isPending ? 'Creating...' : 'Confirming...'}
                 </>
               ) : (
-                <>
-                  <Plus className="w-5 h-5" />
-                  Create Prediction Market
-                </>
+                'Create Market'
               )}
             </button>
             
             {!address && (
-              <p className="text-center text-sm text-red-500 mt-3">
-                Please connect your wallet to create a market
+              <p className="text-center text-sm text-red-500">
+                Connect your wallet to create a market
               </p>
             )}
           </div>
@@ -433,150 +384,62 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
 
   // Landing page state
   return (
-    <div className="min-h-screen bg-white flex flex-col md:translate-y-0 -translate-y-8">
-      {/* Main Content */}
-      <div className={`flex-1 flex justify-center p-4 ${isHeaderCollapsed ? 'items-center' : 'items-center'}`}>
-        <div className={`max-w-4xl w-full ${isHeaderCollapsed ? 'pt-16' : ''}`}>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        
+        {/* Simple Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Create Prediction Markets
+          </h1>
+        
           
-          {/* Header Section - Collapsible */}
-          <div className="relative">
-            {/* Toggle Arrow - Always visible in top right */}
-            <button
-              onClick={toggleHeader}
-              className="absolute top-8 md:top-4 right-4 z-10 w-12 h-12 bg-[#aa0000] rounded-full shadow-lg flex items-center justify-center hover:bg-red-700 hover:shadow-xl transition-all duration-300 group"
-            >
-              {isHeaderCollapsed ? (
-                <ChevronUp className="w-5 h-5 text-white transition-colors" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-white transition-colors animate-bounce" />
-              )}
-            </button>
-            
-            {/* Collapsible Header Content */}
-            <div className={`text-center transition-all duration-500 ease-in-out ${isHeaderCollapsed ? 'opacity-0 max-h-0 overflow-hidden pt-16' : 'opacity-100 mb-12 pt-16'}`}>
-              {/* Icon cluster with subtle animation */}
-              <div className="relative inline-block mb-8">
-                <div className="w-32 h-32 bg-gradient-to-br from-black to-gray-700 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
-                  <div className="relative">
-                    <Target className="w-16 h-16 text-white opacity-90" />
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#aa0000] rounded-full flex items-center justify-center">
-                      <Plus className="w-3 h-3 text-white" />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating accent elements */}
-                <div className="absolute -top-4 -left-4 w-8 h-8 bg-gray-200 rounded-full opacity-40 animate-pulse"></div>
-                <div className="absolute -bottom-2 -right-6 w-4 h-4 bg-[#aa0000] rounded-full opacity-60 animate-pulse delay-300"></div>
+          {/* Visual benefits */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-8 md:mt-16 text-center">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                <span className="text-blue-600 text-xl">💰</span>
               </div>
-              
-              {/* Title and subtitle with better typography */}
-              <div className="space-y-4 max-w-3xl mx-auto">
-                <h1 className="text-5xl md:text-6xl font-extralight text-black leading-tight tracking-tight">
-                  Build Your
-                  <span className="block text-[#aa0000] font-light">Prediction Universe</span>
-                </h1>
-                
-                <p className="text-xl md:text-2xl text-gray-500 font-light leading-relaxed max-w-2xl mx-auto">
-                  Deploy custom prediction markets in seconds. 
-                  <span className="block mt-2 text-lg text-gray-400">
-                    Your community, your rules, your rewards.
-                  </span>
-                </p>
-                
-                {/* Key benefits in a subtle row */}
-                <div className="flex flex-wrap justify-center gap-6 mt-6 text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>Gas-efficient deployment</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span>Full ownership control</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span>Instant ETH payouts</span>
-                  </div>
-                </div>
+              <p className="text-sm text-gray-600">Anyone can enter with ETH</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                <span className="text-green-600 text-xl">👑</span>
               </div>
+              <p className="text-sm text-gray-600">You decide the winners</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                <span className="text-purple-600 text-xl">🏆</span>
+              </div>
+              <p className="text-sm text-gray-600">Winners split the pot equally</p>
             </div>
           </div>
-
-          {/* Features Grid */}
-          {/* <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="text-center p-8 border border-gray-200 rounded-lg hover:border-black transition-colors">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="w-8 h-8 text-black" />
-              </div>
-              <h3 className="text-xl font-medium text-black mb-3">Custom Markets</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Create prediction markets on any topic - crypto prices, sports outcomes, or world events
-              </p>
-            </div>
-            
-            <div className="text-center p-8 border border-gray-200 rounded-lg hover:border-black transition-colors">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-black" />
-              </div>
-              <h3 className="text-xl font-medium text-black mb-3">Private Groups</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Invite your friends and family to join your exclusive prediction competitions
-              </p>
-            </div>
-            
-            <div className="text-center p-8 border border-gray-200 rounded-lg hover:border-black transition-colors">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-8 h-8 text-black" />
-              </div>
-              <h3 className="text-xl font-medium text-black mb-3">Winner Takes All</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Set entry fees and prize pools - most accurate predictors split the winnings
-              </p>
-            </div>
-          </div> */}
-
-         
-
-          
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className={`bg-white border-t border-gray-200 p-6 ${isHeaderCollapsed ? 'mb-32' : ''}`}>
-        <div className="max-w-4xl mx-auto space-y-4">
-          
-          {/* Main Create Button */}
+        {/* Main Actions */}
+        <div className="space-y-4">
           <button
             onClick={() => setShowCreateForm(true)}
-            className="w-full bg-[#aa0000] text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 flex items-center justify-center gap-3"
+            className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors"
           >
-            <Plus className="w-5 h-5" />
-            Create Prediction Market
+            Create New Market
           </button>
           
-          {/* Secondary Actions */}
           <button
             onClick={handleMyMarketsClick}
             disabled={isLoadingMyPots}
-            className="w-full bg-gray-100 text-black py-3 px-6 font-light transition-all hover:bg-gray-200 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-lg text-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoadingMyPots ? (
               <>
-                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                 Loading...
               </>
             ) : (
-              <>
-                <Users className="w-4 h-4" />
-                My Markets
-              </>
+              'My Markets'
             )}
           </button>
-          
-          <footer className="relative z-10 px-6 py-10 bg-white text-center text-[#666666] text-sm">
-        &copy; {new Date().getFullYear()} PrediWin.com — All rights reserved.
-      </footer>
         </div>
       </div>
       
