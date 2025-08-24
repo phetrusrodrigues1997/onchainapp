@@ -5,7 +5,7 @@ import { formatUnits, parseEther } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getPrice } from '../Constants/getPrice';
-import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
+import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions, testDatabaseConnection } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
 import { 
   recordReferral, 
@@ -1113,6 +1113,37 @@ useEffect(() => {
   <div className="mb-6">
     <h2 className="text-xl font-semibold text-[#F5F5F5] mb-4">Owner Actions</h2>
     
+    {/* Database Connection Test */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-blue-500">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">🔍 Database Connection Test</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Test database connectivity and MarketOutcomes table access.
+      </p>
+      <button
+        onClick={async () => {
+          setIsLoading(true);
+          try {
+            console.log('🧪 Starting database connection test...');
+            const result = await testDatabaseConnection();
+            if (result.success) {
+              showMessage(`✅ Database Test Passed: ${result.message}`);
+            } else {
+              showMessage(`❌ Database Test Failed: ${result.message}`, true);
+            }
+          } catch (error) {
+            console.error('❌ Database test error:', error);
+            showMessage(`❌ Database test failed: ${error instanceof Error ? error.message : 'Unknown error'}`, true);
+          } finally {
+            setIsLoading(false);
+          }
+        }}
+        disabled={isActuallyLoading}
+        className="bg-blue-500 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isActuallyLoading ? "Testing..." : "Test Database Connection"}
+      </button>
+    </div>
+
     {/* Set Provisional Outcome (NEW) */}
     <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-orange-500">
       <h3 className="text-[#F5F5F5] font-medium mb-2">🟡 Set Provisional Outcome</h3>

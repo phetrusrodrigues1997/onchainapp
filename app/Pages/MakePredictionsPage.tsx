@@ -548,36 +548,8 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             )}*/}
 
             {/* Tomorrow's Bet Interface */}
-            {tomorrowsBet ? (
-              <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
-                <div className="relative z-10">
-                  <h3 className="text-xl font-bold text-gray-700 mb-6">Tomorrow's Prediction</h3>
-                  <div className="inline-flex items-center gap-6 px-10 py-8 rounded-3xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-xl">
-                    {tomorrowsBet.prediction === 'positive' ? (
-                      <div className="p-4 bg-[#00dd00] rounded-2xl shadow-lg">
-                        <TrendingUp className="w-12 h-12 text-white" />
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-[#dd0000] rounded-2xl shadow-lg">
-                        <TrendingDown className="w-12 h-12 text-white" />
-                      </div>
-                    )}
-                    <div className="text-left">
-                      <div className="text-4xl font-black text-gray-900 tracking-tight mb-1">
-                        {tomorrowsBet.prediction === 'positive' ? 'YES' : 'NO'}
-                      </div>
-                      <div className="text-gray-500 text-sm font-medium">
-                        {new Date(tomorrowsBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-gray-500 text-lg mt-6 font-medium">
-                    Prediction set for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            ) : hasOutcomeBeenSet() && marketOutcome ? (
-              // Market outcome has been set - show outcome and evidence submission interface
+            {(hasOutcomeBeenSet() && marketOutcome && isEvidenceWindowActive()) ? (
+              // PRIORITY: Evidence submission interface when window is active
               <div className="space-y-6">
                 {/* Market Outcome Display - Compressed */}
                 <div className={`bg-gradient-to-br backdrop-blur-xl border-2 rounded-2xl p-6 mb-6 mt-16 shadow-xl relative overflow-hidden ${
@@ -759,6 +731,34 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                     </div>
                   </div>
                 )}
+              </div>
+            ) : tomorrowsBet ? (
+              <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
+                <div className="relative z-10">
+                  <h3 className="text-xl font-bold text-gray-700 mb-6">Tomorrow's Prediction</h3>
+                  <div className="inline-flex items-center gap-6 px-10 py-8 rounded-3xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-xl">
+                    {tomorrowsBet.prediction === 'positive' ? (
+                      <div className="p-4 bg-[#00dd00] rounded-2xl shadow-lg">
+                        <TrendingUp className="w-12 h-12 text-white" />
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-[#dd0000] rounded-2xl shadow-lg">
+                        <TrendingDown className="w-12 h-12 text-white" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <div className="text-4xl font-black text-gray-900 tracking-tight mb-1">
+                        {tomorrowsBet.prediction === 'positive' ? 'YES' : 'NO'}
+                      </div>
+                      <div className="text-gray-500 text-sm font-medium">
+                        {new Date(tomorrowsBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-gray-500 text-lg mt-6 font-medium">
+                    Prediction set for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
             ) : isResultsDay() ? (
               // Saturday - Results Day message (when no outcome set yet)
