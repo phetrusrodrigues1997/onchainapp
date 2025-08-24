@@ -57,7 +57,8 @@ export async function setProvisionalOutcome(
   const evidenceWindowExpires = new Date(today.getTime() + 60 * 60 * 1000); // 1 hour from now
 
   try {
-    console.log(`Setting provisional outcome for ${tableType}: ${outcome} on ${targetDate}`);
+    console.log(`🟡 Setting provisional outcome for ${tableType}: ${outcome} on ${targetDate}`);
+    console.log(`🟡 Evidence window expires at: ${evidenceWindowExpires.toISOString()}`);
 
     // Check if there's already an outcome for this market and date
     const existingOutcome = await db.select()
@@ -94,8 +95,16 @@ export async function setProvisionalOutcome(
       return result;
     }
   } catch (error) {
-    console.error(`Error setting provisional outcome for ${tableType}:`, error);
-    throw new Error(`Failed to set provisional outcome for ${tableType}: ${error}`);
+    console.error(`❌ Error setting provisional outcome for ${tableType}:`, error);
+    console.error(`❌ Error details:`, {
+      outcome,
+      tableType,
+      targetDate,
+      evidenceWindowExpires: evidenceWindowExpires.toISOString(),
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : 'No stack trace'
+    });
+    throw new Error(`Failed to set provisional outcome for ${tableType}: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

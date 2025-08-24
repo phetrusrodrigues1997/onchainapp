@@ -1134,11 +1134,15 @@ useEffect(() => {
           }
           setIsLoading(true);
           try {
+            console.log('🟡 Setting provisional outcome:', { outcome: provisionalOutcomeInput, tableType: selectedTableType });
             await setProvisionalOutcome(provisionalOutcomeInput as "positive" | "negative", selectedTableType);
             showMessage("Provisional outcome set! Evidence window started (1 hour)");
             setProvisionalOutcomeInput("");
+            console.log('✅ Provisional outcome set successfully');
           } catch (error) {
-            showMessage("Failed to set provisional outcome", true);
+            console.error('❌ Provisional outcome setting failed:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            showMessage(`Failed to set provisional outcome: ${errorMessage}`, true);
           } finally {
             setIsLoading(false);
           }
