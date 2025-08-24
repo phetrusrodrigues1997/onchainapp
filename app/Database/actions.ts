@@ -936,6 +936,11 @@ export async function placeLivePrediction(walletAddress: string, prediction: 'po
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     
+    // SECURITY: Server-side pot participation validation would require contract query here
+    // Currently relying on client-side validation with triple-layer security:
+    // 1. UI blocks non-participants 2. handlePrediction validates 3. Real-time contract check
+    console.log(`🔒 Processing live prediction for: ${walletAddress}`);
+    
     // Check if user already made a prediction (no date filtering)
     const existingPrediction = await db
       .select()

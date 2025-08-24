@@ -412,14 +412,38 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   };
 
   const handlePrediction = async (prediction: 'positive' | 'negative') => {
-    if (!address || isSubmitting || isTransitioning) return;
+    // Security Layer 1: Basic validation
+    if (!address || isSubmitting || isTransitioning) {
+      console.warn('❌ Prediction blocked: Basic validation failed');
+      return;
+    }
+    
+    // Security Layer 2: Pot participation validation
+    if (!hasEnteredPot) {
+      console.error('❌ SECURITY: User attempted to predict without being in pot');
+      alert('❌ You must be a pot participant to make predictions!');
+      return;
+    }
+    
+    // Security Layer 3: Real-time contract validation
+    if (!participants || !participants.some(p => p.toLowerCase() === address.toLowerCase())) {
+      console.error('❌ SECURITY: User not found in contract participants');
+      alert('❌ You are not a confirmed pot participant!');
+      // Force refresh participant state
+      queryClient.invalidateQueries({ queryKey: ['readContract'] });
+      return;
+    }
+    
+    console.log('✅ Prediction security validation passed for:', address);
     
     setIsSubmitting(true);
     try {
       await placeLivePrediction(address, prediction);
       setUserPrediction(prediction);
+      console.log('✅ Prediction placed successfully:', { address, prediction });
     } catch (error) {
-      console.error('Failed to place prediction:', error);
+      console.error('❌ Failed to place prediction:', error);
+      alert('Failed to place prediction. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -955,9 +979,9 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
                 <button 
                   onClick={() => handlePrediction('positive')}
                   className={`group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95 ${
-                    isTransitioning || isSubmitting || !address ? 'opacity-60 cursor-wait' : ''
+                    isTransitioning || isSubmitting || !address || !hasEnteredPot ? 'opacity-60 cursor-wait' : ''
                   }`} 
-                  disabled={isTransitioning || isSubmitting || !address}
+                  disabled={isTransitioning || isSubmitting || !address || !hasEnteredPot}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
                   <div className="relative flex items-center justify-center space-x-2">
@@ -972,9 +996,9 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
                 <button 
                   onClick={() => handlePrediction('negative')}
                   className={`group relative bg-white border-4 border-black text-black font-black text-xl py-6 px-8 transition-all duration-200 hover:bg-black hover:text-white hover:shadow-2xl transform hover:scale-105 active:scale-95 ${
-                    isTransitioning || isSubmitting || !address ? 'opacity-60 cursor-wait' : ''
+                    isTransitioning || isSubmitting || !address || !hasEnteredPot ? 'opacity-60 cursor-wait' : ''
                   }`} 
-                  disabled={isTransitioning || isSubmitting || !address}
+                  disabled={isTransitioning || isSubmitting || !address || !hasEnteredPot}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
                   <div className="relative flex items-center justify-center space-x-2">
