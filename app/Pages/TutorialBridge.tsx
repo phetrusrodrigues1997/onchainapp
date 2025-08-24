@@ -52,6 +52,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
   const [needsReEntry, setNeedsReEntry] = useState<boolean>(false);
+  const [checkingReEntry, setCheckingReEntry] = useState<boolean>(false);
   
   const { address, isConnected } = useAccount();
 
@@ -120,43 +121,63 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
     // Check if user is already a participant in the selected market and redirect to predictions
     // BUT only if they are NOT the owner AND don't need to re-enter
+    // IMPORTANT: Wait for re-entry check to complete before making redirect decision
+    console.log('TutorialBridge redirect logic:', { 
+      selectedMarketAddress, 
+      participatingPots, 
+      isParticipant: participatingPots.includes(selectedMarketAddress),
+      isOwner, 
+      needsReEntry,
+      checkingReEntry
+    });
+    
     if (selectedMarketAddress && participatingPots.includes(selectedMarketAddress)) {
       if (!isOwner) {
-        if (needsReEntry) {
-          console.log('User is participant but needs to re-enter pot, staying on dashboard');
+        if (checkingReEntry) {
+          console.log('⏳ Still checking re-entry requirement, waiting...');
+          // Don't make redirect decision yet, wait for check to complete
+        } else if (needsReEntry) {
+          console.log('✅ User is participant but needs to re-enter pot, staying on dashboard');
           // Don't redirect - keep them on dashboard so they can access PredictionPotTest
         } else {
-          console.log('User is participant and no re-entry needed, redirecting to predictions');
+          console.log('✅ User is participant and no re-entry needed, redirecting to predictions');
           setActiveSection('makePrediction');
         }
       } else {
-        console.log('User is owner, keeping normal dashboard flow');
+        console.log('✅ User is owner, keeping normal dashboard flow');
       }
     }
-  }, [participants1, participants2, address, isConnected, setActiveSection, selectedMarketAddress, isOwner, needsReEntry]);
+  }, [participants1, participants2, address, isConnected, setActiveSection, selectedMarketAddress, isOwner, needsReEntry, checkingReEntry]);
 
   // Check if user needs to re-enter pot due to wrong predictions
   useEffect(() => {
     const checkReEntryRequirement = async () => {
       if (!address || !isConnected || !selectedMarketAddress) {
         setNeedsReEntry(false);
+        setCheckingReEntry(false);
         return;
       }
 
+      setCheckingReEntry(true);
       try {
         // Map contract address to table type
         const tableType = CONTRACT_ADDRESSES[selectedMarketAddress as keyof typeof CONTRACT_ADDRESSES];
         if (!tableType) {
           setNeedsReEntry(false);
+          setCheckingReEntry(false);
           return;
         }
 
         // Check if user has wrong predictions using the new function
+        console.log('TutorialBridge: Checking wrong predictions for:', { address, tableType });
         const hasWrongPrediction = await hasWrongPredictions(address, tableType);
+        console.log('TutorialBridge: hasWrongPredictions result:', hasWrongPrediction);
         setNeedsReEntry(hasWrongPrediction);
+        setCheckingReEntry(false);
       } catch (error) {
         console.error('Error checking re-entry requirement:', error);
         setNeedsReEntry(false);
+        setCheckingReEntry(false);
       }
     };
 

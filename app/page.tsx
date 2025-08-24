@@ -202,7 +202,7 @@ export default function App() {
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "makePrediction" && <MakePredicitions /> }
+          {activeSection === "makePrediction" && <MakePredicitions activeSection={activeSection} setActiveSection={setActiveSection} /> }
           {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "createPot" && <CreatePotPage activeSection={activeSection} setActiveSection={setActiveSection} navigateToPrivatePot={navigateToPrivatePot} />}
           {activeSection === "privatePot" && privatePotAddress && (

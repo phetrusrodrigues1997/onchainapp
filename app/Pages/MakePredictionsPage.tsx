@@ -52,7 +52,12 @@ interface EvidenceSubmission {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-export default function MakePredicitions() {
+interface MakePredictionsProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+export default function MakePredicitions({ activeSection, setActiveSection }: MakePredictionsProps) {
   const { address, isConnected } = useAccount();
   
   // TESTING TOGGLE - Set to false to test prediction logic on Saturdays
@@ -487,44 +492,23 @@ export default function MakePredicitions() {
           </div>
         ) : reEntryFee && reEntryFee > 0 ? (
           // Re-entry Required Message
-          <div className="bg-orange-50/80 backdrop-blur-xl border-2 border-orange-200 rounded-3xl p-10 mb-8 shadow-2xl shadow-orange-900/10 relative overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8 shadow-sm">
             <div className="text-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
-                <Shield className="w-12 h-12 text-white" />
+              <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Re-entry Required</h2>
-              <p className="text-orange-700 text-lg mb-4 font-medium">
-                You made a wrong prediction in <span className="font-bold">{selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}</span> and need to pay today's entry fee to re-enter this specific market.
+              
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Re-entry Required</h2>
+              <p className="text-gray-600 text-sm mb-6">
+                Wrong prediction in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}. Pay today's entry fee to continue.
               </p>
               
-              {/* Show info about other markets if they also need re-entry */}
-              {allReEntryFees.length > 1 && (
-                <div className="bg-orange-100 rounded-2xl p-4 border border-orange-200 mb-4">
-                  <div className="text-sm font-bold text-orange-900 mb-2">📋 All markets requiring re-entry:</div>
-                  <div className="space-y-1 text-sm text-orange-800">
-                    {allReEntryFees.map((entry) => (
-                      <div key={entry.market} className="flex justify-between">
-                        <span>{entry.market === 'featured' ? '₿ Featured Market' : '🪙 Crypto Market'}</span>
-                        <span className={entry.market === selectedTableType ? 'font-bold text-orange-900' : ''}>
-                          {(entry.fee / 1000000).toFixed(2)} USDC {entry.market === selectedTableType ? '← Current' : ''}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-xs text-orange-700 mt-2 italic">
-                    💡 Each market requires separate re-entry. You can re-enter them individually.
-                  </div>
-                </div>
-              )}
-              
-              <div className="bg-orange-100 rounded-2xl p-6 border border-orange-200 mb-6">
-                <p className="text-orange-800 font-bold text-lg mb-2">
-                  Return to market entry page to pay today's entry fee for this market
-                </p>
-                <p className="text-orange-600 text-sm">
-                  Then come back here to resume predicting in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}
-                </p>
-              </div>
+              <button
+                onClick={() => setActiveSection('bitcoinPot')}
+                className="w-full bg-black text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center gap-2"
+              >
+                Pay Entry Fee
+              </button>
             </div>
           </div>
         ) : (

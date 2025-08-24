@@ -15,7 +15,6 @@ import {
   getReEntryFee,
   processReEntry,
   debugWrongPredictions,
-  clearWrongPredictionsForWallet
 } from '../Database/actions';
 import { updateWinnerStats } from '../Database/OwnerActions';
 

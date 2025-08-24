@@ -267,27 +267,6 @@ export async function debugWrongPredictions(walletAddress: string): Promise<void
   }
 }
 
-/**
- * ADMIN FUNCTION: Clear wrong predictions for a specific wallet across all markets
- * This can help fix data that was created with the old buggy logic
- */
-export async function clearWrongPredictionsForWallet(walletAddress: string, tableType: string): Promise<void> {
-  try {
-    
-    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
-    // Clear from featured market table
-    const deleted = await db
-      .delete(wrongPredictionTable)
-      .where(eq(WrongPredictions.walletAddress, walletAddress))
-      .returning();
-    
-    
-    
-  } catch (error) {
-    console.error("Error clearing wrong predictions for wallet:", error);
-    throw error;
-  }
-}
 
 /**
  * Check if a wallet address has wrong predictions for a specific market type
@@ -305,7 +284,7 @@ export async function hasWrongPredictions(walletAddress: string, tableType: stri
       const result = await db
         .select()
         .from(wrongPredictionTable)
-        .where(eq(WrongPredictions.walletAddress, normalizedWalletAddress))
+        .where(eq(wrongPredictionTable.walletAddress, normalizedWalletAddress))
         .limit(1);
       return result.length > 0;
     
