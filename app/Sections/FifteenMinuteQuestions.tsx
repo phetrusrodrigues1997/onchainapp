@@ -6,7 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'viem';
 import { AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import { placeLivePrediction, getUserLivePrediction, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions } from '../Database/actions';
-import { determineWinnersLive, clearLivePredictions, setProvisionalOutcome, getProvisionalOutcome } from '../Database/OwnerActions';
+import { determineWinnersLive, clearLivePredictions, setProvisionalOutcome, getProvisionalOutcome, clearLiveMarketOutcome, clearLiveEvidenceSubmissions } from '../Database/OwnerActions';
 import { getPrice } from '../Constants/getPrice';
 
 // Configure the time interval for new questions (in minutes)
@@ -714,22 +714,25 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       // This handles the combined action - pot distribution is confirmed, now clear predictions
       const finishProcessing = async () => {
         try {
-          setProcessMessage("Step 3/3: Clearing live predictions...");
+          setProcessMessage("Step 3/5: Clearing live predictions...");
           await clearLivePredictions();
           
+          setProcessMessage("Step 4/5: Clearing market outcome...");
+          await clearLiveMarketOutcome();
+          
+          setProcessMessage("Step 5/5: Clearing evidence submissions...");
+          await clearLiveEvidenceSubmissions();
+          
           // Participants automatically cleared by distributePot contract function (delete participants)
-          setProcessMessage("🎉 Winners processed successfully! Pot distributed, predictions cleared, and participants reset!");
+          setProcessMessage("🎉 Winners processed successfully! Pot distributed, predictions cleared, outcome reset, and participants reset!");
           setOutcomeInput('');
           setFinalOutcomeInput('');
           
-          // Reload market outcome to reflect final outcome and hide evidence interface
-          try {
-            const updatedOutcome = await getProvisionalOutcome('live');
-            setMarketOutcome(updatedOutcome);
-            console.log('✅ Market outcome updated after final processing:', updatedOutcome);
-          } catch (error) {
-            console.error('Failed to reload market outcome after processing:', error);
-          }
+          // Clear the UI state since we've cleaned up the database
+          setMarketOutcome(null);
+          setUserEvidenceSubmission(null);
+          setAllEvidenceSubmissions([]);
+          console.log('✅ Complete cleanup finished - ready for next round');
           
           setTimeout(() => {
             setProcessMessage('');

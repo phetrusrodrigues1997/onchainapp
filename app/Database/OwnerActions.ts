@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions, UsersTable, MarketOutcomes } from "../Database/schema";
+import { WrongPredictions, WrongPredictionsCrypto, FeaturedBets, CryptoBets, LivePredictions, LiveQuestions, UsersTable, MarketOutcomes, EvidenceSubmissions } from "../Database/schema";
 import { eq, inArray, lt, asc, sql, and } from "drizzle-orm";
 
 // Database setup
@@ -550,6 +550,54 @@ export async function clearLivePredictions() {
   } catch (error) {
     console.error("Failed to clear live predictions:", error);
     throw new Error("Could not clear live predictions");
+  }
+}
+
+/**
+ * Clears market outcome for live predictions after pot distribution
+ */
+export async function clearLiveMarketOutcome() {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    console.log(`🗑️ Clearing live market outcome for ${today}`);
+    
+    // Clear market outcome for live table type
+    const result = await db
+      .delete(MarketOutcomes)
+      .where(and(
+        eq(MarketOutcomes.marketType, 'live'),
+        eq(MarketOutcomes.outcomeDate, today)
+      ));
+    
+    console.log(`✅ Cleared live market outcome, affected rows:`, result);
+  } catch (error) {
+    console.error("❌ Failed to clear live market outcome:", error);
+    throw new Error("Could not clear live market outcome");
+  }
+}
+
+/**
+ * Clears all evidence submissions for live predictions after pot distribution
+ */
+export async function clearLiveEvidenceSubmissions() {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    console.log(`🗑️ Clearing live evidence submissions for ${today}`);
+    
+    // Clear evidence submissions for live table type
+    const result = await db
+      .delete(EvidenceSubmissions)
+      .where(and(
+        eq(EvidenceSubmissions.marketType, 'live'),
+        eq(EvidenceSubmissions.outcomeDate, today)
+      ));
+    
+    console.log(`✅ Cleared live evidence submissions, affected rows:`, result);
+  } catch (error) {
+    console.error("❌ Failed to clear live evidence submissions:", error);
+    throw new Error("Could not clear live evidence submissions");
   }
 }
 
