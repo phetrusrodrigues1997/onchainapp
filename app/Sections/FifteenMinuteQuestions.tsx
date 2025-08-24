@@ -578,11 +578,11 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
 
     setIsProcessing(true);
     try {
-      console.log('Calling setProvisionalOutcome with:', { outcome: outcomeInput, tableType: 'live' });
+      console.log('🟡 Setting provisional outcome for live:', { outcome: outcomeInput, tableType: 'live' });
       
-      // setProvisionalOutcome returns raw DB result on success, throws on error
+      // setProvisionalOutcome returns plain object on success, throws on error
       const result = await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
-      console.log('setProvisionalOutcome result:', result);
+      console.log('✅ setProvisionalOutcome result:', result);
       
       setProcessMessage('Provisional outcome set! Evidence window is now open.');
       
@@ -603,17 +603,19 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       
       setTimeout(() => setProcessMessage(''), 5000);
     } catch (error) {
-      console.error('Failed to set outcome:', error);
-      console.error('Error details:', {
+      console.error('❌ Failed to set provisional outcome:', error);
+      console.error('❌ Error details:', {
         name: error instanceof Error ? error.name : 'Unknown',
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       });
       
       // Show more specific error message
-      let errorMessage = 'Failed to set outcome';
+      let errorMessage = 'Failed to set provisional outcome';
       if (error instanceof Error) {
-        if (error.message.includes('relation') && error.message.includes('does not exist')) {
+        if (error.message.includes('Only plain objects') || error.message.includes('Server Components')) {
+          errorMessage = 'Server component serialization error - contact support';
+        } else if (error.message.includes('relation') && error.message.includes('does not exist')) {
           errorMessage = 'Database table missing - please run database migrations';
         } else if (error.message.includes('connection')) {
           errorMessage = 'Database connection error - check DATABASE_URL';
@@ -1019,18 +1021,6 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
           </div>
         </div>
 
-        {/* Evidence System Debug */}
-        {(() => {
-          console.log('🔍 FifteenMinute Evidence Debug:', {
-            isOwner: !!isOwner,
-            marketOutcome: !!marketOutcome,
-            isEvidenceWindowActive: marketOutcome ? isEvidenceWindowActive() : 'no outcome',
-            hasUserSubmittedEvidence: hasUserSubmittedEvidence(),
-            hasEnteredPot: hasEnteredPot,
-            showEvidenceInterface: !isOwner && marketOutcome && isEvidenceWindowActive() && !hasUserSubmittedEvidence() && hasEnteredPot
-          });
-          return null;
-        })()}
 
         {/* Evidence Submission Interface - For Participants */}
         {!isOwner && marketOutcome && isEvidenceWindowActive() && !hasUserSubmittedEvidence() && hasEnteredPot && (

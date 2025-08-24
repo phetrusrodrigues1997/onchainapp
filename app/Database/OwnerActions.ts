@@ -83,8 +83,8 @@ export async function setProvisionalOutcome(
     throw new Error(`Invalid outcome: ${outcome}. Must be 'positive' or 'negative'`);
   }
   
-  if (!['featured', 'crypto'].includes(tableType)) {
-    throw new Error(`Invalid tableType: ${tableType}. Must be 'featured' or 'crypto'`);
+  if (!['featured', 'crypto', 'live'].includes(tableType)) {
+    throw new Error(`Invalid tableType: ${tableType}. Must be 'featured', 'crypto', or 'live'`);
   }
 
   // Check database connection
@@ -428,6 +428,45 @@ export async function determineWinners(typeTable: string, contractParticipants: 
  */
 export async function determineWinnersLive(correctAnswer: "positive" | "negative") {
   try {
+    // First, update the MarketOutcomes table to mark this as the final outcome
+    const now = Date.now();
+    const today = new Date(now);
+    const targetDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    console.log(`🔴 Setting final outcome for live: ${correctAnswer} on ${targetDate}`);
+    
+    // Check if there's an existing outcome for this market and date
+    const existingOutcome = await db.select()
+      .from(MarketOutcomes)
+      .where(and(
+        eq(MarketOutcomes.marketType, 'live'),
+        eq(MarketOutcomes.outcomeDate, targetDate)
+      ));
+
+    if (existingOutcome.length > 0) {
+      // Update existing outcome to mark it as final
+      await db.update(MarketOutcomes)
+        .set({
+          finalOutcome: correctAnswer,
+          finalOutcomeSetAt: today,
+        })
+        .where(eq(MarketOutcomes.id, existingOutcome[0].id));
+      
+      console.log(`✅ Updated existing outcome to final for live on ${targetDate}`);
+    } else {
+      // Create new outcome record (shouldn't happen in normal flow, but just in case)
+      console.warn(`⚠️ No existing provisional outcome found for live, creating final outcome directly`);
+      await db.insert(MarketOutcomes).values({
+        marketType: 'live',
+        outcomeDate: targetDate,
+        provisionalOutcome: correctAnswer,
+        finalOutcome: correctAnswer,
+        finalOutcomeSetAt: today,
+        evidenceWindowExpires: today, // Set to now since it's final
+        isDisputed: false
+      });
+    }
+    
     console.log(`Looking for winners with prediction: ${correctAnswer}`);
     
     // Get all users who predicted correctly (no date filtering)
