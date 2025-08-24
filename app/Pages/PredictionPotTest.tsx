@@ -5,7 +5,7 @@ import { formatUnits, parseEther } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getPrice } from '../Constants/getPrice';
-import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
+import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions, getWrongPredictions } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
 import { 
   recordReferral, 
@@ -21,8 +21,8 @@ import { updateWinnerStats } from '../Database/OwnerActions';
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22": "featured",
-  "0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198": "crypto",
+  "0xc8876c830116005860455b8af4906F22bf86cD8d": "featured",
+  "0xaAF6392f40fbb44Cc535027E56579D4d5Fe35E36": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
@@ -57,6 +57,13 @@ const PREDICTION_POT_ABI = [
   {
     "inputs": [],
     "name": "clearParticipants",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
+    "name": "removeParticipant",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -576,13 +583,13 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     setLastAction('reEntry');
     
     try {
-      // Process re-entry payment using the smart contract with re-entry fee amount
+      // Process re-entry payment using the same logic as normal pot entry
       await writeContract({
         address: contractAddress as `0x${string}`,
         abi: PREDICTION_POT_ABI,
         functionName: 'enterPot',
         args: [],
-        value: entryAmount, // Send ETH as value
+        value: entryAmount, // Use same entry amount as normal pot entry
       });
       
       showMessage('Re-entry payment submitted! Waiting for confirmation...');
@@ -1458,8 +1465,30 @@ useEffect(() => {
           }
           setIsLoading(true);
           try {
+            // Step 1: Get all wrong predictions for this market
+            const wrongPredictions = await getWrongPredictions(selectedTableType);
+            
+            // Step 2: Remove wrong predictors from contract
+            if (wrongPredictions.length > 0) {
+              showMessage(`Removing ${wrongPredictions.length} wrong predictors from contract...`);
+              for (const wrongAddress of wrongPredictions) {
+                try {
+                  await writeContract({
+                    address: contractAddress as `0x${string}`,
+                    abi: PREDICTION_POT_ABI,
+                    functionName: 'removeParticipant',
+                    args: [wrongAddress as `0x${string}`],
+                  });
+                  console.log(`Removed ${wrongAddress} from contract`);
+                } catch (error) {
+                  console.error(`Failed to remove ${wrongAddress}:`, error);
+                }
+              }
+            }
+            
+            // Step 3: Set daily outcome (this will add new wrong predictions to the table)
             await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType, participants || []);
-            showMessage("Final outcome set and pot distributed!");
+            showMessage("Final outcome set and wrong predictors removed from contract!");
             setOutcomeInput("");
           } catch (error) {
             showMessage("Failed to set final outcome", true);

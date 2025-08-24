@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign, TrendingUp, Trophy, Users, Clock, ArrowRight } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useAccount, useReadContract } from 'wagmi';
-import { hasWrongPredictions } from '../Database/actions';
 
 interface DashboardProps {
   activeSection: string;
@@ -14,8 +13,8 @@ interface DashboardProps {
 
 // Contract addresses mapping
 const CONTRACT_ADDRESSES = {
-  "0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22": "featured",
-  "0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198": "crypto",
+  "0xc8876c830116005860455b8af4906F22bf86cD8d": "featured",
+  "0xaAF6392f40fbb44Cc535027E56579D4d5Fe35E36": "crypto",
 } as const;
 
 // Prediction Pot ABI
@@ -40,6 +39,13 @@ const PREDICTION_POT_ABI = [
     "outputs": [{"internalType": "address", "name": "", "type": "address"}],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
+    "name": "removeParticipant",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ] as const;
 
@@ -51,8 +57,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [userPots, setUserPots] = useState<string[]>([]);
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
-  const [needsReEntry, setNeedsReEntry] = useState<boolean>(false);
-  const [checkingReEntry, setCheckingReEntry] = useState<boolean>(false);
   
   const { address, isConnected } = useAccount();
 
@@ -120,69 +124,17 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     setUserPots(participatingPots);
 
     // Check if user is already a participant in the selected market and redirect to predictions
-    // BUT only if they are NOT the owner AND don't need to re-enter
-    // IMPORTANT: Wait for re-entry check to complete before making redirect decision
-    console.log('TutorialBridge redirect logic:', { 
-      selectedMarketAddress, 
-      participatingPots, 
-      isParticipant: participatingPots.includes(selectedMarketAddress),
-      isOwner, 
-      needsReEntry,
-      checkingReEntry
-    });
-    
+    // BUT only if they are NOT the owner
     if (selectedMarketAddress && participatingPots.includes(selectedMarketAddress)) {
       if (!isOwner) {
-        if (checkingReEntry) {
-          console.log('⏳ Still checking re-entry requirement, waiting...');
-          // Don't make redirect decision yet, wait for check to complete
-        } else if (needsReEntry) {
-          console.log('✅ User is participant but needs to re-enter pot, staying on dashboard');
-          // Don't redirect - keep them on dashboard so they can access PredictionPotTest
-        } else {
-          console.log('✅ User is participant and no re-entry needed, redirecting to predictions');
-          setActiveSection('makePrediction');
-        }
+        console.log('User is participant but not owner, redirecting to predictions');
+        setActiveSection('makePrediction');
       } else {
-        console.log('✅ User is owner, keeping normal dashboard flow');
+        console.log('User is owner, keeping normal dashboard flow');
       }
     }
-  }, [participants1, participants2, address, isConnected, setActiveSection, selectedMarketAddress, isOwner, needsReEntry, checkingReEntry]);
+  }, [participants1, participants2, address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
 
-  // Check if user needs to re-enter pot due to wrong predictions
-  useEffect(() => {
-    const checkReEntryRequirement = async () => {
-      if (!address || !isConnected || !selectedMarketAddress) {
-        setNeedsReEntry(false);
-        setCheckingReEntry(false);
-        return;
-      }
-
-      setCheckingReEntry(true);
-      try {
-        // Map contract address to table type
-        const tableType = CONTRACT_ADDRESSES[selectedMarketAddress as keyof typeof CONTRACT_ADDRESSES];
-        if (!tableType) {
-          setNeedsReEntry(false);
-          setCheckingReEntry(false);
-          return;
-        }
-
-        // Check if user has wrong predictions using the new function
-        console.log('TutorialBridge: Checking wrong predictions for:', { address, tableType });
-        const hasWrongPrediction = await hasWrongPredictions(address, tableType);
-        console.log('TutorialBridge: hasWrongPredictions result:', hasWrongPrediction);
-        setNeedsReEntry(hasWrongPrediction);
-        setCheckingReEntry(false);
-      } catch (error) {
-        console.error('Error checking re-entry requirement:', error);
-        setNeedsReEntry(false);
-        setCheckingReEntry(false);
-      }
-    };
-
-    checkReEntryRequirement();
-  }, [address, isConnected, selectedMarketAddress]);
 
   useEffect(() => {
     const updateDashboard = () => {

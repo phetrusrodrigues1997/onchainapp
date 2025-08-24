@@ -466,3 +466,21 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
   }
 }
 
+/**
+ * Gets all wrong predictions for a specific market type (to remove from contract)
+ * @param tableType - Table type ('featured' or 'crypto')
+ */
+export async function getWrongPredictions(tableType: string): Promise<string[]> {
+  try {
+    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
+    const wrongPredictions = await db
+      .select({ walletAddress: wrongPredictionTable.walletAddress })
+      .from(wrongPredictionTable);
+    
+    return wrongPredictions.map(wp => wp.walletAddress);
+  } catch (error) {
+    console.error("Error getting wrong predictions:", error);
+    return [];
+  }
+}
+

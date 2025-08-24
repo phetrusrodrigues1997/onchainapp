@@ -5,6 +5,9 @@
       "Read(/C:\\Users\\grasi\\Contracts\\scripts/**)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\Users\\grasi\\Contracts"
+    ]
   }
 }

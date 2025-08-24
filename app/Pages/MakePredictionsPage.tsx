@@ -7,8 +7,8 @@ import Cookies from 'js-cookie';
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22": "featured",
-  "0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198": "crypto",
+  "0xc8876c830116005860455b8af4906F22bf86cD8d": "featured",
+  "0xaAF6392f40fbb44Cc535027E56579D4d5Fe35E36": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
@@ -20,6 +20,13 @@ const PREDICTION_POT_ABI = [
     "name": "getParticipants",
     "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "participant", "type": "address"}],
+    "name": "removeParticipant",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ];
