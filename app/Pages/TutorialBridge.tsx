@@ -13,7 +13,7 @@ interface DashboardProps {
 
 // Contract addresses mapping
 const CONTRACT_ADDRESSES = {
-  "0xc8876c830116005860455b8af4906F22bf86cD8d": "featured",
+  "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
   "0xaAF6392f40fbb44Cc535027E56579D4d5Fe35E36": "crypto",
 } as const;
 
@@ -243,7 +243,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
           
           {/* Custom CSS for subtle pulse */}
-          <style jsx>{`
+          <style>{`
             @keyframes subtlePulse {
               0%, 100% { transform: scale(1); opacity: 1; }
               50% { transform: scale(1.04); opacity: 0.8; }
