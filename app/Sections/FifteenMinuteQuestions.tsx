@@ -703,6 +703,16 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
           setProcessMessage("🎉 Winners processed successfully! Pot distributed, predictions cleared, and participants reset!");
           setOutcomeInput('');
           setFinalOutcomeInput('');
+          
+          // Reload market outcome to reflect final outcome and hide evidence interface
+          try {
+            const updatedOutcome = await getProvisionalOutcome('live');
+            setMarketOutcome(updatedOutcome);
+            console.log('✅ Market outcome updated after final processing:', updatedOutcome);
+          } catch (error) {
+            console.error('Failed to reload market outcome after processing:', error);
+          }
+          
           setTimeout(() => {
             setProcessMessage('');
           }, 5000);
@@ -721,6 +731,11 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
   // Helper functions for evidence system
   const isEvidenceWindowActive = () => {
     if (!marketOutcome) return false;
+    
+    // If final outcome is already set, evidence window is closed
+    if (marketOutcome.finalOutcome) return false;
+    
+    // Check if we're still within the time window
     const now = new Date().getTime();
     const expiry = new Date(marketOutcome.evidenceWindowExpires).getTime();
     return now < expiry;
@@ -1003,6 +1018,19 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
             
           </div>
         </div>
+
+        {/* Evidence System Debug */}
+        {(() => {
+          console.log('🔍 FifteenMinute Evidence Debug:', {
+            isOwner: !!isOwner,
+            marketOutcome: !!marketOutcome,
+            isEvidenceWindowActive: marketOutcome ? isEvidenceWindowActive() : 'no outcome',
+            hasUserSubmittedEvidence: hasUserSubmittedEvidence(),
+            hasEnteredPot: hasEnteredPot,
+            showEvidenceInterface: !isOwner && marketOutcome && isEvidenceWindowActive() && !hasUserSubmittedEvidence() && hasEnteredPot
+          });
+          return null;
+        })()}
 
         {/* Evidence Submission Interface - For Participants */}
         {!isOwner && marketOutcome && isEvidenceWindowActive() && !hasUserSubmittedEvidence() && hasEnteredPot && (
