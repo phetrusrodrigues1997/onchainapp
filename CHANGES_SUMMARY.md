@@ -3,8 +3,8 @@
 ## Key Changes Made:
 
 1. **Contract Addresses Updated:**
-   - Featured: `0x6d6e91A810F760393937186717D287539bF78E38`
-   - Crypto: `0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5`
+   - Featured: `0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22`
+   - Crypto: `0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198`
 
 2. **Contract ABI Updated:**
    - `enterPot()` is now payable (no args, uses value)

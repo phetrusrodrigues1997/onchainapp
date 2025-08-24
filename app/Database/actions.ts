@@ -78,7 +78,6 @@ export async function saveImageUrl(walletAddress: string, imageUrl: string) {
         .insert(UsersTable)
         .values({
           walletAddress: normalizedWalletAddress,
-          sourcePage: 'Profile', // Indicate this came from profile page
           imageUrl,
         })
         .returning();

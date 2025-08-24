@@ -18,14 +18,12 @@ import {
   clearWrongPredictionsForWallet
 } from '../Database/actions';
 import { updateWinnerStats } from '../Database/OwnerActions';
-import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
-import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0x6d6e91A810F760393937186717D287539bF78E38": "featured",
-  "0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5": "crypto",
+  "0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22": "featured",
+  "0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
@@ -53,6 +51,13 @@ const PREDICTION_POT_ABI = [
   {
     "inputs": [{"internalType": "address[]", "name": "winners", "type": "address[]"}],
     "name": "distributePot",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "clearParticipants",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -118,8 +123,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   
-  // Email collection hook
-  const { showModal: showEmailModal, isEmailCollected, showEmailModal: triggerEmailModal, hideEmailModal, markEmailCollected, setIsEmailCollected, isDismissed } = useEmailCollection(address);
   
   // Countdown state for when pot reopens (Sunday)
   const [timeUntilReopening, setTimeUntilReopening] = useState<{
@@ -174,7 +177,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
     } else {
       // Fallback to default contract if no valid cookie is found
-      setContractAddress('0x6d6e91A810F760393937186717D287539bF78E38');
+      setContractAddress('0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22');
       setSelectedTableType('featured');
       console.log('No valid contract cookie found, using default');
     }
@@ -277,45 +280,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
 
-  // Email collection effect - check if user's email exists when wallet connects
-  useEffect(() => {
-    const checkUserEmail = async () => {
-      if (address && !isEmailCollected) {
-        try {
-          const emailExists = await checkEmailExists(address);
-          if (emailExists) {
-            markEmailCollected();
-          } else {
-            // Show email modal after a short delay on first interaction
-            setTimeout(() => {
-              triggerEmailModal();
-            }, 2000);
-          }
-        } catch (error) {
-          console.error('Error checking email:', error);
-        }
-      }
-    };
-    
-    checkUserEmail();
-  }, [address, isEmailCollected, markEmailCollected, triggerEmailModal]);
-
-  // Handle email submission
-  const handleEmailSubmit = async (email: string) => {
-    if (!address) return;
-    
-    try {
-      const result = await saveUserEmail(address, email, 'PredictionPot');
-      if (result.success) {
-        markEmailCollected();
-      } else {
-        throw new Error(result.error || 'Failed to save email');
-      }
-    } catch (error) {
-      console.error('Error saving email:', error);
-      throw error; // Re-throw so modal can show error
-    }
-  };
 
   // Read contract data
   const { data: participants } = useReadContract({
@@ -871,10 +835,21 @@ useEffect(() => {
           
           // Step 2: Clear wrong predictions
           console.log("🔍 Step 3: About to clear wrong predictions");
-          showMessage("Step 3/3: Clearing wrong predictions...");
+          showMessage("Step 3/4: Clearing wrong predictions...");
           await clearWrongPredictions(selectedTableType);
           console.log("🔍 ✅ Successfully cleared wrong predictions");
-          showMessage("🎉 Pot distributed successfully! Winner stats updated and wrong predictions cleared!");
+
+          // Step 3: Clear participants from the contract
+          console.log("🔍 Step 4: About to clear participants from contract");
+          showMessage("Step 4/4: Clearing pot participants...");
+          await writeContract({
+            address: contractAddress as `0x${string}`,
+            abi: PREDICTION_POT_ABI,
+            functionName: 'clearParticipants',
+            args: [],
+          });
+          console.log("🔍 ✅ Successfully cleared participants from contract");
+          showMessage("🎉 Pot distributed successfully! Winner stats updated, wrong predictions cleared, and participants reset!");
           
         } catch (error) {
           console.error("❌ Error in finishDistribution:", error);
@@ -952,10 +927,21 @@ useEffect(() => {
           
           // Step 4: Clear wrong predictions
           console.log("🔍 Step 4: About to clear wrong predictions");
-          showMessage("Step 4/4: Clearing wrong predictions...");
+          showMessage("Step 4/5: Clearing wrong predictions...");
           await clearWrongPredictions(selectedTableType);
           console.log("🔍 ✅ Successfully cleared wrong predictions");
-          showMessage("🎉 Winners processed successfully! Pot distributed, stats updated, and wrong predictions cleared!");
+
+          // Step 5: Clear participants from the contract
+          console.log("🔍 Step 5: About to clear participants from contract");
+          showMessage("Step 5/5: Clearing pot participants...");
+          await writeContract({
+            address: contractAddress as `0x${string}`,
+            abi: PREDICTION_POT_ABI,
+            functionName: 'clearParticipants',
+            args: [],
+          });
+          console.log("🔍 ✅ Successfully cleared participants from contract");
+          showMessage("🎉 Winners processed successfully! Pot distributed, stats updated, wrong predictions cleared, and participants reset!");
           setTimeout(() => {
   // Force refetch of all contract data
   queryClient.invalidateQueries({ queryKey: ['readContract'] });
@@ -1573,14 +1559,6 @@ useEffect(() => {
           )}
         </div>
       </div>
-      
-      {/* Email Collection Modal */}
-      <EmailCollectionModal
-        isOpen={showEmailModal}
-        onClose={hideEmailModal}
-        onSubmit={handleEmailSubmit}
-        sourcePage="PredictionPot"
-      />
     </div>
   );
 };

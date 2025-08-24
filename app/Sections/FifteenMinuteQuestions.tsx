@@ -30,6 +30,20 @@ const LIVE_POT_ABI = [
   },
   {
     "inputs": [],
+    "name": "clearParticipants",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getParticipants",
+    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getBalance",
     "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
@@ -38,7 +52,7 @@ const LIVE_POT_ABI = [
 ];
 
 // Live pot contract address - SimplePredictionPot (ETH-based)
-const LIVE_POT_ADDRESS = '0xd43CE8d625EA2Db962e7e3C628eE13F00332247B';
+const LIVE_POT_ADDRESS = '0x69bbF0C68F051890a7e4bEC23019938cF670f9E1';
 
 interface FifteenMinuteQuestionsProps {
   className?: string;
@@ -674,9 +688,19 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
       // This handles the combined action - pot distribution is confirmed, now clear predictions
       const finishProcessing = async () => {
         try {
-          setProcessMessage("Step 3/3: Clearing live predictions...");
+          setProcessMessage("Step 3/4: Clearing live predictions...");
           await clearLivePredictions();
-          setProcessMessage("🎉 Winners processed successfully! Pot distributed and predictions cleared!");
+          
+          // Step 4: Clear participants from the contract
+          setProcessMessage("Step 4/4: Clearing pot participants...");
+          await writeContract({
+            address: LIVE_POT_ADDRESS as `0x${string}`,
+            abi: LIVE_POT_ABI,
+            functionName: 'clearParticipants',
+            args: [],
+          });
+          
+          setProcessMessage("🎉 Winners processed successfully! Pot distributed, predictions cleared, and participants reset!");
           setOutcomeInput('');
           setFinalOutcomeInput('');
           setTimeout(() => {

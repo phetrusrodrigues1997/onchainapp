@@ -6,8 +6,6 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { createPrivatePot, getPotsByCreator, getPotDetails } from '../Database/actions2';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
-import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
-import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 
 // Contract ABI for ETH-based PredictionPot cloner
 const PREDICTION_POT_CLONING_ABI = [
@@ -50,17 +48,6 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
   const { address, isConnected } = useAccount();
   const { data: hash, writeContract, isPending } = useWriteContract();
   
-  // Email collection modal
-  const emailModalRef = useRef<NodeJS.Timeout | null>(null);
-  const {
-    showModal: showEmailModal,
-    showEmailModal: triggerEmailModal,
-    hideEmailModal,
-    markEmailCollected,
-    setIsEmailCollected,
-    isDismissed,
-    isEmailCollected: hookEmailCollected
-  } = useEmailCollection(address);
   
   const { isLoading: isConfirming, isSuccess: isConfirmed, data: receipt } = useWaitForTransactionReceipt({
     hash,
@@ -94,99 +81,6 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
     }
   }, [isConfirmed, receipt]);
 
-  // Email collection logic - trigger 2 seconds after wallet connects
-  useEffect(() => {
-    const handleEmailCollection = async () => {
-      console.log('🔍 CreatePot Email Debug:', {
-        isConnected,
-        address,
-        activeSection,
-        hookEmailCollected,
-        isDismissed,
-        condition: isConnected && address && activeSection === 'createPot'
-      });
-
-      if (isConnected && address && activeSection === 'createPot') {
-        console.log('✅ Wallet connected on Create Pot page, checking email...');
-        console.log('📧 Hook email collected state:', hookEmailCollected);
-        console.log('📧 Dismissal state:', isDismissed);
-        
-        // First check the hook's state - it's the single source of truth
-        if (hookEmailCollected) {
-          console.log('📧 Hook says email already collected, not showing modal');
-          return;
-        }
-
-        if (isDismissed) {
-          console.log('📧 Modal was dismissed, not showing modal');
-          return;
-        }
-        
-        // Only check database if hook doesn't have email collected info yet
-        try {
-          const emailExists = await checkEmailExists(address);
-          console.log('📧 Database email check result:', emailExists);
-          
-          if (emailExists) {
-            console.log('📧 Database says email exists, updating hook state');
-            setIsEmailCollected(true);
-            return;
-          }
-          
-          // Clear any existing timer
-          if (emailModalRef.current) {
-            clearTimeout(emailModalRef.current);
-          }
-          
-          console.log('⏰ Setting 2-second timer for email modal...');
-          // Show modal after 2 seconds
-          emailModalRef.current = setTimeout(() => {
-            console.log('🎯 Timer triggered! Showing email modal...');
-            triggerEmailModal();
-          }, 2000);
-        } catch (error) {
-          console.error('❌ Error checking email status:', error);
-        }
-      } else {
-        console.log('❌ Conditions not met for email modal');
-        // Clear timer if wallet disconnects or user leaves page
-        if (emailModalRef.current) {
-          clearTimeout(emailModalRef.current);
-          emailModalRef.current = null;
-        }
-      }
-    };
-
-    handleEmailCollection();
-    
-    return () => {
-      if (emailModalRef.current) {
-        clearTimeout(emailModalRef.current);
-      }
-    };
-  }, [isConnected, address, activeSection, triggerEmailModal, setIsEmailCollected, isDismissed, hookEmailCollected]);
-
-  // Handle email submission
-  const handleEmailSubmit = async (email: string) => {
-    if (!address) return;
-    
-    console.log('📧 Starting email submission for CreatePot:', email);
-    try {
-      const result = await saveUserEmail(address, email, 'CreatePot');
-      console.log('📧 saveUserEmail result:', result);
-      
-      if (result.success) {
-        console.log('📧 Email saved successfully, marking as collected in hook...');
-        markEmailCollected(); // This should be the single source of truth
-        console.log('📧 Hook state updated with markEmailCollected()');
-      } else {
-        throw new Error(result.error || 'Failed to save email');
-      }
-    } catch (error) {
-      console.error('❌ Email submission error:', error);
-      throw error;
-    }
-  };
 
   // Note: Pot loading now happens in handleMyMarketsClick for better UX
 
@@ -694,14 +588,6 @@ const CreatePotPage = ({ activeSection, setActiveSection, navigateToPrivatePot }
         message={alertState.message}
         type={alertState.type}
         autoClose={alertState.autoClose}
-      />
-      
-      {/* Email Collection Modal */}
-      <EmailCollectionModal
-        isOpen={showEmailModal}
-        onClose={hideEmailModal}
-        onSubmit={handleEmailSubmit}
-        sourcePage="CreatePot"
       />
     </div>
   );

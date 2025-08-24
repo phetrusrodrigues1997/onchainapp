@@ -4,8 +4,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Brain, Check, X, RotateCcw, Trophy, Zap, Clock, Gamepad2, Grid3X3, Lock, Star } from 'lucide-react';
 import { getRandomQuestion } from '../Constants/triviaQuestions';
 import { useAccount } from 'wagmi';
-import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
-import { checkEmailExists, saveUserEmail } from '../Database/emailActions';
 import Wordle from './wordlePage';
 
 interface AIPageProps {
@@ -68,16 +66,6 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
   
   // Wallet and email collection
   const { address, isConnected } = useAccount();
-  const emailModalRef = useRef<NodeJS.Timeout | null>(null);
-  const {
-    showModal: showEmailModal,
-    showEmailModal: triggerEmailModal,
-    hideEmailModal,
-    markEmailCollected,
-    setIsEmailCollected,
-    isDismissed,
-    isEmailCollected: hookEmailCollected
-  } = useEmailCollection(address);
 
   // Load stats from localStorage and set current milestone
   useEffect(() => {
@@ -117,84 +105,6 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
     }
   };
 
-  // Email collection logic - trigger 2 seconds after wallet connects
-  useEffect(() => {
-    const handleEmailCollection = async () => {
-      
-
-      if (isConnected && address && activeSection === 'AI') {
-        
-        
-        // First check the hook's state - it's the single source of truth
-        if (hookEmailCollected) {
-          console.log('📧 Hook says email already collected, not showing modal');
-          return;
-        }
-
-        if (isDismissed) {
-          console.log('📧 Modal was dismissed, not showing modal');
-          return;
-        }
-        
-        // Only check database if hook doesn't have email collected info yet
-        try {
-          const emailExists = await checkEmailExists(address);
-          console.log('📧 Database email check result:', emailExists);
-          
-          if (emailExists) {
-            console.log('📧 Database says email exists, updating hook state');
-            setIsEmailCollected(true);
-            return;
-          }
-          
-          // Clear any existing timer
-          if (emailModalRef.current) {
-            clearTimeout(emailModalRef.current);
-          }
-          
-          // Show modal after 2 seconds
-          emailModalRef.current = setTimeout(() => {
-            triggerEmailModal();
-          }, 2000);
-        } catch (error) {
-          console.error('❌ Error checking email status:', error);
-        }
-      } else {
-        console.log('❌ Conditions not met for email modal');
-        // Clear timer if wallet disconnects or user leaves page
-        if (emailModalRef.current) {
-          clearTimeout(emailModalRef.current);
-          emailModalRef.current = null;
-        }
-      }
-    };
-
-    handleEmailCollection();
-    
-    return () => {
-      if (emailModalRef.current) {
-        clearTimeout(emailModalRef.current);
-      }
-    };
-  }, [isConnected, address, activeSection, triggerEmailModal, setIsEmailCollected, isDismissed, hookEmailCollected]);
-
-  // Handle email submission
-  const handleEmailSubmit = async (email: string) => {
-    if (!address) return;
-    
-    try {
-      const result = await saveUserEmail(address, email, 'AI');
-      
-      if (result.success) {
-        markEmailCollected(); // This should be the single source of truth
-      } else {
-        throw new Error(result.error || 'Failed to save email');
-      }
-    } catch (error) {
-      console.error('❌ Email submission error:', error);
-      throw error;
-    }
-  };
 
   // Inactivity timer - reset stats after 10 minutes of inactivity
   const resetInactivityTimer = useCallback(() => {
@@ -600,14 +510,6 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
             )}
           </div>
         </div>
-        
-        {/* Email Collection Modal */}
-        <EmailCollectionModal
-          isOpen={showEmailModal}
-          onClose={hideEmailModal}
-          onSubmit={handleEmailSubmit}
-          sourcePage="AI"
-        />
       </div>
     );
   }
@@ -752,14 +654,6 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
           </div>
         )}
         </div>
-        
-        {/* Email Collection Modal */}
-        <EmailCollectionModal
-          isOpen={showEmailModal}
-          onClose={hideEmailModal}
-          onSubmit={handleEmailSubmit}
-          sourcePage="AI"
-        />
       </div>
     );
   }
@@ -849,14 +743,6 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
             Stay tuned for updates and new game releases!
           </div>
         </div>
-        
-        {/* Email Collection Modal */}
-        <EmailCollectionModal
-          isOpen={showEmailModal}
-          onClose={hideEmailModal}
-          onSubmit={handleEmailSubmit}
-          sourcePage="AI"
-        />
       </div>
     </div>
   );

@@ -5,8 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getPrice } from '../Constants/getPrice';
 import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Settings, Share2, ArrowLeft, CheckCircle2, Clock, Vote, Target, Info } from 'lucide-react';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
-import { EmailCollectionModal, useEmailCollection } from '../Components/EmailCollectionModal';
-import { checkEmailExists, saveUserEmail, getUserEmail } from '../Database/emailActions';
 
 // Import new private pot database functions
 import { 
@@ -175,17 +173,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
   
   const { address, isConnected } = useAccount();
   
-  // Email collection modal
-  const emailModalRef = useRef<NodeJS.Timeout | null>(null);
-  const {
-    showModal: showEmailModal,
-    showEmailModal: triggerEmailModal,
-    hideEmailModal,
-    markEmailCollected,
-    setIsEmailCollected,
-    isDismissed,
-    isEmailCollected: hookEmailCollected
-  } = useEmailCollection(address);
   const queryClient = useQueryClient();
 
   // Contract read hooks
@@ -306,89 +293,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
     loadData();
   }, [address, contractAddress, isConfirmed]);
 
-  // Email collection logic - trigger 2 seconds after wallet connects
-  useEffect(() => {
-    const handleEmailCollection = async () => {
-      console.log('🔍 PrivatePot Email Debug:', {
-        isConnected,
-        address,
-        activeSection,
-        condition: isConnected && address && activeSection === 'privatePot'
-      });
-
-      if (isConnected && address && activeSection === 'privatePot') {
-        
-        
-        // First check the hook's state - it's the single source of truth
-        if (hookEmailCollected) {
-          return;
-        }
-
-        if (isDismissed) {
-          return;
-        }
-        
-        // Only check database if hook doesn't have email collected info yet
-        try {
-          const emailExists = await checkEmailExists(address);
-          
-          if (emailExists) {
-            console.log('📧 Database says email exists, updating hook state');
-            setIsEmailCollected(true);
-            return;
-          }
-          
-          // Clear any existing timer
-          if (emailModalRef.current) {
-            clearTimeout(emailModalRef.current);
-          }
-          
-          console.log('⏰ Setting 2-second timer for email modal...');
-          // Show modal after 2 seconds
-          emailModalRef.current = setTimeout(() => {
-            console.log('🎯 Timer triggered! Showing email modal...');
-            triggerEmailModal();
-          }, 2000);
-        } catch (error) {
-          console.error('❌ Error checking email status:', error);
-        }
-      } else {
-        console.log('❌ Conditions not met for email modal');
-        // Clear timer if wallet disconnects or user leaves page
-        if (emailModalRef.current) {
-          clearTimeout(emailModalRef.current);
-          emailModalRef.current = null;
-        }
-      }
-    };
-
-    handleEmailCollection();
-    
-    return () => {
-      if (emailModalRef.current) {
-        clearTimeout(emailModalRef.current);
-      }
-    };
-  }, [isConnected, address, activeSection, triggerEmailModal, setIsEmailCollected, isDismissed, hookEmailCollected]);
-
-  // Handle email submission
-  const handleEmailSubmit = async (email: string) => {
-    if (!address) return;
-    
-    try {
-      const result = await saveUserEmail(address, email, 'PrivatePot');
-      if (result.success) {
-        console.log('📧 Email saved successfully, marking as collected in hook...');
-        markEmailCollected(); // This should be the single source of truth
-        console.log('📧 Hook state updated with markEmailCollected()');
-      } else {
-        throw new Error(result.error || 'Failed to save email');
-      }
-    } catch (error) {
-      console.error('Email submission error:', error);
-      throw error;
-    }
-  };
 
   // ETH doesn't need approval - functions removed
 
@@ -700,18 +604,14 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const today = new Date().toISOString().split('T')[0];
       const participants = await getParticipantsWithDetails(contractAddress, today);
       
-      // Fetch emails for participants who have them
-      const participantsWithEmails = await Promise.all(
-        participants.map(async (participant: any) => {
-          const email = await getUserEmail(participant.wallet_address);
-          return {
-            ...participant,
-            email,
-            displayName: email || `${participant.wallet_address.slice(0, 6)}...${participant.wallet_address.slice(-4)}`,
-            predictionStatus: participant.prediction ? participant.prediction : 'Pending'
-          };
-        })
-      );
+      // Format participants without email functionality
+      const participantsWithEmails = participants.map((participant: any) => {
+        return {
+          ...participant,
+          displayName: `${participant.wallet_address.slice(0, 6)}...${participant.wallet_address.slice(-4)}`,
+          predictionStatus: participant.prediction ? participant.prediction : 'Pending'
+        };
+      });
       
       setParticipantsData(participantsWithEmails);
     } catch (error) {
@@ -1278,14 +1178,6 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         type={alertState.type}
         autoClose={alertState.autoClose}
       />
-      
-      {/* Email Collection Modal */}
-      <EmailCollectionModal
-        isOpen={showEmailModal}
-        onClose={hideEmailModal}
-        onSubmit={handleEmailSubmit}
-        sourcePage="PrivatePot"
-      />
 
       {/* Participants Modal */}
       {showParticipantsModal && (
@@ -1327,11 +1219,11 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium">
-                            {participant.email ? participant.email.charAt(0).toUpperCase() : (index + 1)}
+                            {index + 1}
                           </div>
                           <div>
                             <div className="font-medium text-gray-900">
-                              {participant.email || `${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
+                              {`${participant.wallet_address.slice(0, 8)}...${participant.wallet_address.slice(-6)}`}
                             </div>
                             
                           </div>

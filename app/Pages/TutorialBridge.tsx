@@ -13,8 +13,8 @@ interface DashboardProps {
 
 // Contract addresses mapping
 const CONTRACT_ADDRESSES = {
-  "0x6d6e91A810F760393937186717D287539bF78E38": "featured",
-  "0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5": "crypto",
+  "0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22": "featured",
+  "0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198": "crypto",
 } as const;
 
 // Prediction Pot ABI
@@ -62,7 +62,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
   // Read participants from first contract
   const { data: participants1 } = useReadContract({
-    address: '0x6d6e91A810F760393937186717D287539bF78E38' as `0x${string}`,
+    address: '0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22' as `0x${string}`,
     abi: PREDICTION_POT_ABI,
     functionName: 'getParticipants',
     query: { enabled: isConnected && !!address }
@@ -70,7 +70,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
   // Read participants from second contract  
   const { data: participants2 } = useReadContract({
-    address: '0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5' as `0x${string}`,
+    address: '0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198' as `0x${string}`,
     abi: PREDICTION_POT_ABI,
     functionName: 'getParticipants',
     query: { enabled: isConnected && !!address }
@@ -100,7 +100,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         (participant: string) => participant.toLowerCase() === address.toLowerCase()
       );
       if (isParticipant1) {
-        participatingPots.push('0x6d6e91A810F760393937186717D287539bF78E38');
+        participatingPots.push('0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22');
       }
     }
 
@@ -110,7 +110,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         (participant: string) => participant.toLowerCase() === address.toLowerCase()
       );
       if (isParticipant2) {
-        participatingPots.push('0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5');
+        participatingPots.push('0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198');
       }
     }
 
@@ -161,13 +161,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       console.log('Selected market address from cookie:', selectedMarketAddress);
       
       // Map contract addresses to market info
-      if (selectedMarketAddress === '0x6d6e91A810F760393937186717D287539bF78E38') {
+      if (selectedMarketAddress === '0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22') {
         setMarketInfo({ 
           name: '', 
           section: 'bitcoinPot',
           address: selectedMarketAddress 
         });
-      } else if (selectedMarketAddress === '0x0448D96dDf3Fe8F25438277660d1bf8f4eB09EA5') {
+      } else if (selectedMarketAddress === '0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198') {
         setMarketInfo({ 
           name: '', 
           section: 'bitcoinPot',  // Both markets use the same section, PredictionPotTest handles the difference
@@ -178,7 +178,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         setMarketInfo({ 
           name: 'Bitcoin Market', 
           section: 'bitcoinPot',
-          address: '0x6d6e91A810F760393937186717D287539bF78E38' 
+          address: '0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22' 
         });
       }
     };

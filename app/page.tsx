@@ -34,7 +34,7 @@ import MessagingPage from './Pages/MessagingPage';
 
 
 // Contract now uses ETH directly - no USDC needed
-const LIVE_POT_ADDRESS = '0xd43CE8d625EA2Db962e7e3C628eE13F00332247B';
+const LIVE_POT_ADDRESS = '0x69bbF0C68F051890a7e4bEC23019938cF670f9E1';
 
 export default function App() {
   const { address, isConnected } = useAccount();

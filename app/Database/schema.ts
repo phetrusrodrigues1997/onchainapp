@@ -75,8 +75,6 @@ export const FreeEntries = pgTable("free_entries", {
 export const UsersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
   walletAddress: text("wallet_address").notNull().unique(), // Each wallet can only have one entry
-  email: text("email"), // Optional email address
-  sourcePage: text("source_page"), // Optional: where the user data was collected from
   imageUrl: text("image_url"), // Optional profile image URL
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
   lastWordlePlay: timestamp("last_wordle_play"), // Last time user played Wordle

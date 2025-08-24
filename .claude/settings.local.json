@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\grasi\\Contracts\\scripts/**)",
+      "Read(/C:\\Users\\grasi\\Contracts\\scripts/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
