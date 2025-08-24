@@ -204,7 +204,7 @@ export default function App() {
           {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "makePrediction" && <MakePredicitions activeSection={activeSection} setActiveSection={setActiveSection} /> }
           {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "createPot" && <CreatePotPage activeSection={activeSection} setActiveSection={setActiveSection} navigateToPrivatePot={navigateToPrivatePot} />}
+          {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}
           {activeSection === "privatePot" && privatePotAddress && (
             <PrivatePotInterface 
               contractAddress={privatePotAddress} 
