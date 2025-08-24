@@ -252,13 +252,21 @@ export async function canUserBet(
  */
 export async function clearWrongPredictions(tableType: string) {
   try {
+    console.log(`🧹 Starting clearWrongPredictions for tableType: ${tableType}`);
     const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
     const betsTable = getTableFromType(tableType);
-    await db.delete(wrongPredictionTable);
-    await db.delete(betsTable);
-
+    
+    console.log(`🗑️ Clearing wrong predictions table...`);
+    const wrongPredictionsResult = await db.delete(wrongPredictionTable);
+    console.log(`✅ Cleared wrong predictions table, affected rows:`, wrongPredictionsResult);
+    
+    console.log(`🗑️ Clearing bets table (${tableType})...`);
+    const betsTableResult = await db.delete(betsTable);
+    console.log(`✅ Cleared bets table, affected rows:`, betsTableResult);
+    
+    console.log(`🎉 Successfully cleared both tables for ${tableType}`);
   } catch (err) {
-    console.error("Failed to clear tables", err);
+    console.error("❌ Failed to clear tables", err);
     throw new Error("Could not clear wrong predictions");
   }
 }

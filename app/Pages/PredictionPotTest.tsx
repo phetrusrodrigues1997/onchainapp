@@ -17,6 +17,7 @@ import {
   debugWrongPredictions,
 } from '../Database/actions';
 import { updateWinnerStats } from '../Database/OwnerActions';
+import { clear } from 'console';
 
 
 // Define table identifiers instead of passing table objects
@@ -536,36 +537,36 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  const handleDistributePot = async () => {
-    if (!contractAddress || !winnerAddresses.trim()) return;
+  // const handleDistributePot = async () => {
+  //   if (!contractAddress || !winnerAddresses.trim()) return;
 
-    const winners = winnerAddresses
-      .split(',')
-      .map(addr => addr.trim())
-      .filter(addr => addr.length > 0);
+  //   const winners = winnerAddresses
+  //     .split(',')
+  //     .map(addr => addr.trim())
+  //     .filter(addr => addr.length > 0);
     
-    if (winners.length === 0) {
-      showMessage('Please enter at least one winner address.', true);
-      return;
-    }
+  //   if (winners.length === 0) {
+  //     showMessage('Please enter at least one winner address.', true);
+  //     return;
+  //   }
 
-    setIsLoading(true);
-    setLastAction('distributePot');
-    try {
-      await writeContract({
-        address: contractAddress as `0x${string}`,
-        abi: PREDICTION_POT_ABI,
-        functionName: 'distributePot',
-        args: [winners],
-      });
-      showMessage('Distribute pot transaction submitted! Waiting for confirmation...');
-    } catch (error) {
-      console.error('Distribute pot failed:', error);
-      showMessage('Distribute pot failed. Check console for details.', true);
-      setLastAction('');
-      setIsLoading(false);
-    }
-  };
+  //   setIsLoading(true);
+  //   setLastAction('distributePot');
+  //   try {
+  //     await writeContract({
+  //       address: contractAddress as `0x${string}`,
+  //       abi: PREDICTION_POT_ABI,
+  //       functionName: 'distributePot',
+  //       args: [winners],
+  //     });
+  //     showMessage('Distribute pot transaction submitted! Waiting for confirmation...');
+  //   } catch (error) {
+  //     console.error('Distribute pot failed:', error);
+  //     showMessage('Distribute pot failed. Check console for details.', true);
+  //     setLastAction('');
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const isActuallyLoading = isLoading || isPending || isConfirming;
   
@@ -1236,6 +1237,7 @@ useEffect(() => {
             });
             
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
+            // Here maybe?
           } catch (error) {
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
