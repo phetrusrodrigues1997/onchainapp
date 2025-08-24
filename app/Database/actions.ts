@@ -271,19 +271,14 @@ export async function debugWrongPredictions(walletAddress: string): Promise<void
  * ADMIN FUNCTION: Clear wrong predictions for a specific wallet across all markets
  * This can help fix data that was created with the old buggy logic
  */
-export async function clearWrongPredictionsForWallet(walletAddress: string): Promise<void> {
+export async function clearWrongPredictionsForWallet(walletAddress: string, tableType: string): Promise<void> {
   try {
     
+    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
     // Clear from featured market table
-    const featuredDeleted = await db
-      .delete(WrongPredictions)
+    const deleted = await db
+      .delete(wrongPredictionTable)
       .where(eq(WrongPredictions.walletAddress, walletAddress))
-      .returning();
-    
-    // Clear from crypto market table  
-    const cryptoDeleted = await db
-      .delete(WrongPredictionsCrypto)
-      .where(eq(WrongPredictionsCrypto.walletAddress, walletAddress))
       .returning();
     
     
@@ -291,6 +286,34 @@ export async function clearWrongPredictionsForWallet(walletAddress: string): Pro
   } catch (error) {
     console.error("Error clearing wrong predictions for wallet:", error);
     throw error;
+  }
+}
+
+/**
+ * Check if a wallet address has wrong predictions for a specific market type
+ * @param walletAddress - User's wallet address
+ * @param tableType - Market type: "featured" or "crypto"
+ * @returns Promise<boolean> - true if user has wrong predictions, false otherwise
+ */
+export async function hasWrongPredictions(walletAddress: string, tableType: string): Promise<boolean> {
+  try {
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+
+    const wrongPredictionTable = getWrongPredictionsTableFromType(tableType);
+    
+    
+      const result = await db
+        .select()
+        .from(wrongPredictionTable)
+        .where(eq(WrongPredictions.walletAddress, normalizedWalletAddress))
+        .limit(1);
+      return result.length > 0;
+    
+    
+    return false;
+  } catch (error) {
+    console.error("Error checking wrong predictions:", error);
+    return false;
   }
 }
 
