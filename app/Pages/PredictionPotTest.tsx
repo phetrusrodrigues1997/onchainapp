@@ -270,7 +270,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
           setIsLoading(false);
           setLastAction('');
         }
-      }, 5000); // Increased to 5 seconds to give more time for confirmation
+      }, 30000); // 30 seconds to give plenty of time for wallet confirmation
     }
   }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
 
