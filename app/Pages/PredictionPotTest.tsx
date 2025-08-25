@@ -5,7 +5,7 @@ import { formatUnits, parseEther } from 'viem';
 import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getPrice } from '../Constants/getPrice';
-import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions, testDatabaseConnection } from '../Database/OwnerActions'; // Adjust path as needed
+import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions, testDatabaseConnection, getUserStats } from '../Database/OwnerActions'; // Adjust path as needed
 import { useQueryClient } from '@tanstack/react-query';
 import { 
   recordReferral, 
@@ -665,7 +665,15 @@ useEffect(() => {
               try {
                 await updateWinnerStats(addresses, amountPerWinnerWei);
                 showMessage(`Updated stats for ${addresses.length} winner(s) with ${amountPerWinnerETH.toFixed(6)} ETH each`);
+                
+                // Debug: Check if the first user's stats were actually updated
+                if (addresses.length > 0) {
+                  console.log("🔍 Verifying winner stats update...");
+                  const firstWinnerStats = await getUserStats(addresses[0]);
+                  console.log("📊 First winner stats after update:", firstWinnerStats);
+                }
               } catch (statsError) {
+                console.error("❌ updateWinnerStats error:", statsError);
                 showMessage("Pot distributed but failed to update winner statistics.", true);
               }
             }

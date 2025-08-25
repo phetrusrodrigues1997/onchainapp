@@ -609,25 +609,34 @@ export async function clearLiveEvidenceSubmissions() {
  */
 export async function updateWinnerStats(winnerAddresses: string[], potAmountPerWinner: bigint) {
   try {
-    console.log(`🔍 updateWinnerStats called with:`, { winnerAddresses, potAmountPerWinner });
+    console.log(`🔍 updateWinnerStats called with:`, { 
+      winnerAddresses, 
+      potAmountPerWinner: potAmountPerWinner.toString(),
+      potAmountPerWinnerNumber: Number(potAmountPerWinner)
+    });
     console.log(`Updating stats for ${winnerAddresses.length} winners, ${potAmountPerWinner} ETH wei each`);
     
     // Ensure we have an array of addresses
     const addresses = Array.isArray(winnerAddresses) ? winnerAddresses : [];
     
+    if (addresses.length === 0) {
+      console.warn(`⚠️ No addresses provided to updateWinnerStats`);
+      return false;
+    }
+    
     console.log(`📍 Processing addresses:`, addresses);
     
     for (let i = 0; i < addresses.length; i++) {
       const address = addresses[i];
-      if (!address) {
-        console.log(`⚠️ Skipping empty address at index ${i}`);
+      if (!address || typeof address !== 'string' || address.trim() === '') {
+        console.log(`⚠️ Skipping invalid address at index ${i}:`, address);
         continue;
       }
       
       console.log(`📝 Updating stats for address ${i + 1}/${addresses.length}: ${address}`);
       
       // Normalize wallet address to lowercase for consistency with profile image saving
-      const normalizedAddress = address.toLowerCase();
+      const normalizedAddress = address.toLowerCase().trim();
       
       // First check if user exists
       const existingUser = await db
@@ -636,18 +645,27 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
         .where(eq(UsersTable.walletAddress, normalizedAddress))
         .limit(1);
       
+      console.log(`🔍 User lookup for ${normalizedAddress}:`, existingUser);
+      
       let result;
       if (existingUser.length > 0) {
         // Update existing user
-        console.log(`📝 User ${normalizedAddress} exists, updating stats...`);
+        console.log(`📝 User ${normalizedAddress} exists, current pots won: ${existingUser[0].potsWon}, updating stats...`);
+        
+        // Get current values for logging
+        const currentPotsWon = existingUser[0].potsWon || 0;
+        const currentEarnings = existingUser[0].totalEarningsETH || BigInt(0);
+        
         result = await db
           .update(UsersTable)
           .set({
-            potsWon: sql`${UsersTable.potsWon} + 1`,
-            totalEarningsETH: sql`${UsersTable.totalEarningsETH} + ${potAmountPerWinner}`,
+            potsWon: currentPotsWon + 1, // Direct increment instead of SQL expression
+            totalEarningsETH: currentEarnings + potAmountPerWinner, // Direct addition instead of SQL expression
           })
           .where(eq(UsersTable.walletAddress, normalizedAddress))
           .returning();
+          
+        console.log(`📊 Updated from potsWon: ${currentPotsWon} → ${currentPotsWon + 1}`);
       } else {
         // Insert new user
         console.log(`📝 User ${normalizedAddress} doesn't exist, creating new entry...`);
@@ -659,16 +677,62 @@ export async function updateWinnerStats(winnerAddresses: string[], potAmountPerW
             totalEarningsETH: potAmountPerWinner,
           })
           .returning();
+          
+        console.log(`📊 Created new user with potsWon: 1`);
       }
       
-      console.log(`✅ Updated user ${address}:`, result);
+      console.log(`✅ Database result for user ${address}:`, result);
+      
+      // Verify the update worked by checking the database
+      const verifyUpdate = await db
+        .select()
+        .from(UsersTable)
+        .where(eq(UsersTable.walletAddress, normalizedAddress))
+        .limit(1);
+        
+      console.log(`🔍 Verification query after update:`, verifyUpdate);
     }
     
     console.log(`✅ Successfully updated winner stats for ${addresses.length} users`);
     return true;
   } catch (error) {
     console.error("❌ Error updating winner stats:", error);
-    throw new Error("Failed to update winner stats");
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+    throw new Error(`Failed to update winner stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Gets user stats for debugging purposes
+ * @param walletAddress - User's wallet address
+ */
+export async function getUserStats(walletAddress: string) {
+  try {
+    const normalizedAddress = walletAddress.toLowerCase().trim();
+    
+    const userStats = await db
+      .select()
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, normalizedAddress))
+      .limit(1);
+    
+    console.log(`📊 User stats for ${walletAddress}:`, userStats);
+    
+    if (userStats.length === 0) {
+      return { found: false, address: normalizedAddress };
+    }
+    
+    return { 
+      found: true, 
+      address: normalizedAddress,
+      potsWon: userStats[0].potsWon,
+      totalEarningsETH: userStats[0].totalEarningsETH.toString(),
+      imageUrl: userStats[0].imageUrl,
+      collectedAt: userStats[0].collectedAt
+    };
+  } catch (error) {
+    console.error("Error getting user stats:", error);
+    return { found: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
