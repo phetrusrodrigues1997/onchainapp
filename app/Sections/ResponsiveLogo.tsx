@@ -26,8 +26,8 @@ const ResponsiveLogo = () => {
       <span className="relative inline-block font-sans">
         {isMobile ? (
           // Mobile version - prevent text and image wrapping
-          <span className="flex items-center whitespace-nowrap text-xl font-bold tracking-tight text-[#000000]">
-            PrediWin.com
+          <span className="flex items-center whitespace-nowrap text-xl font-bold tracking-tight">
+            <span className="text-red-600">PrediWin</span><span className="text-[#000000]">.com</span>
             <Image
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
               alt="Icon"
@@ -38,8 +38,8 @@ const ResponsiveLogo = () => {
           </span>
           
         ) : (
-          <span className="flex items-center whitespace-nowrap text-3xl font-bold tracking-tight text-[#000000]">
-            PrediWin.com
+          <span className="flex items-center whitespace-nowrap text-3xl font-bold tracking-tight">
+            <span className="text-red-600">PrediWin</span><span className="text-[#000000]">.com</span>
             <Image
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
               alt="Icon"

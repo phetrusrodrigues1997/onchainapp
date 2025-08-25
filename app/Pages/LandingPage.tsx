@@ -298,7 +298,7 @@ const handleMarketClick = (marketId: string) => {
 >
   {/* Smaller red circle with question mark */}
   <span className=" flex items-center justify-center w-3 h-3 rounded-full bg-red-600 text-white text-[9px] font-bold">
-    ?
+    i
   </span>
   
   {/* Larger text */}
