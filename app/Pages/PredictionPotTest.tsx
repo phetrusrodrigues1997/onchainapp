@@ -574,7 +574,15 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
   const queryClient = useQueryClient();
 useEffect(() => {
+  console.log("🔄 Transaction confirmation useEffect triggered:", { 
+    isConfirmed, 
+    lastAction, 
+    winnerAddresses: winnerAddresses || 'empty',
+    potBalance: potBalance?.toString() || 'none' 
+  });
+  
   if (isConfirmed) {
+    console.log("✅ Transaction confirmed, lastAction:", lastAction);
     
     if (lastAction === 'enterPot') {
       // Keep loading state active while background processes complete
@@ -650,13 +658,22 @@ useEffect(() => {
       setLastAction('');
       return; // Don't execute common cleanup below
     } else if (lastAction === 'distributePot') {
+      console.log("🎯 lastAction === 'distributePot' - starting finishDistribution");
       // Handle pot distribution completion - update winner stats and clear wrong predictions
       const finishDistribution = async () => {
         try {
+          console.log("🔍 Distribution completion - checking conditions:");
+          console.log("- winnerAddresses:", winnerAddresses);
+          console.log("- winnerAddresses.trim():", winnerAddresses.trim());
+          console.log("- potBalance:", potBalance?.toString());
+          console.log("- potBalance > BigInt(0):", potBalance ? potBalance > BigInt(0) : false);
+          
           // Update winner statistics if we have winners and pot balance
           if (winnerAddresses.trim() && potBalance && potBalance > BigInt(0)) {
+            console.log("✅ All conditions met, updating winner statistics...");
             showMessage("Updating winner statistics...");
             const addresses = winnerAddresses.split(',').map(addr => addr.trim()).filter(addr => addr);
+            console.log("📍 Parsed addresses:", addresses);
             
             if (addresses.length > 0) {
               const amountPerWinnerWei = potBalance / BigInt(addresses.length);
@@ -677,6 +694,11 @@ useEffect(() => {
                 showMessage("Pot distributed but failed to update winner statistics.", true);
               }
             }
+          } else {
+            console.log("❌ One or more conditions failed for updating winner stats");
+            console.log("- winnerAddresses is empty:", !winnerAddresses.trim());
+            console.log("- potBalance is falsy:", !potBalance);
+            console.log("- potBalance <= 0:", potBalance ? potBalance <= BigInt(0) : 'potBalance is null');
           }
           
           // Clear wrong predictions for next round
@@ -688,6 +710,7 @@ useEffect(() => {
           showMessage("Pot distributed but cleanup tasks failed.", true);
         } finally {
           setIsLoading(false);
+          console.log("🔄 Clearing lastAction after distributePot completion");
           setLastAction('');
           // Refresh contract data
           setTimeout(() => {
