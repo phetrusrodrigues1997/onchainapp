@@ -259,55 +259,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
     );
   }
 
-  // Join Pot by Address view
-  if (showJoinPot) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full">
-            
-            {/* Back Button */}
-            <button
-              onClick={() => setShowJoinPot(false)}
-              className="flex items-center gap-2 text-gray-600 hover:text-black mb-8 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </button>
-            
-            {/* Header */}
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-black rounded-full mb-6">
-                <Search className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-4xl font-light text-black mb-4">Join Prediction Market</h1>
-              <p className="text-lg text-gray-600">Enter a contract address to join an existing market</p>
-            </div>
-
-            
-
-            {/* Join Button */}
-            <div className="mt-8">
-              <button
-                onClick={handleJoinByAddress}
-                disabled={!joinAddress || !navigateToPrivatePot}
-                className="w-full bg-black text-white py-4 px-8 text-lg font-light transition-all hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                <Search className="w-5 h-5" />
-                Join Market
-              </button>
-              
-              {!navigateToPrivatePot && (
-                <p className="text-center text-sm text-red-500 mt-3">
-                  Navigation function not available
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  
 
   // Create form state
   if (showCreateForm) {
@@ -429,7 +381,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
           <button
             onClick={handleMyMarketsClick}
             disabled={isLoadingMyPots}
-            className="w-full border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-lg text-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-[#aa0000] border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-lg text-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoadingMyPots ? (
               <>

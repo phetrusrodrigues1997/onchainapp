@@ -180,7 +180,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         const nextIndex = (currentIndex + 1) % currentMarketOptions.length;
         return currentMarketOptions[nextIndex].id;
       });
-    }, 20000);
+    }, 22000);
 
     return () => clearInterval(interval);
   }, [currentLanguage]);
@@ -316,7 +316,7 @@ const handleMarketClick = (marketId: string) => {
     <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
     
     <span className="relative">
-      Join live markets
+      Live markets
     </span>
     
     {/* Arrow with hover animation */}
