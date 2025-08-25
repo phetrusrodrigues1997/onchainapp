@@ -381,7 +381,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
           <button
             onClick={handleMyMarketsClick}
             disabled={isLoadingMyPots}
-            className="w-full bg-[#aa0000] border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-lg text-lg font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-red-600 border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-lg text-lg text-white font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoadingMyPots ? (
               <>
