@@ -16,6 +16,7 @@ import {
   processReEntry,
   debugWrongPredictions,
 } from '../Database/actions';
+import { ENFORCE_SATURDAY_RESTRICTIONS } from '../Database/config';
 import { updateWinnerStats } from '../Database/OwnerActions';
 import { clear } from 'console';
 
@@ -378,11 +379,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
 
 
-  const SATURDAY_TESTING_MODE = true;
-  
   // Utility functions for countdown
   const isPotEntryBlocked = (): boolean => {
-    if (SATURDAY_TESTING_MODE) return false;
+    if (!ENFORCE_SATURDAY_RESTRICTIONS) return false;
     return new Date().getDay() === 6; // Saturday blocked for winner determination
   };
 

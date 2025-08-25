@@ -983,17 +983,27 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Enter Market */}
           {!userParticipant && isAcceptingEntries && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Enter Market</h2>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6 lg:p-8">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Enter Market</h2>
               
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600">Entry Amount:</span>
-                  <span className="text-xl font-bold text-gray-900">${ethToUsd(potDetails?.entryAmount)}</span>
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                  <span className="text-sm sm:text-base text-gray-600 font-medium">Entry Amount:</span>
+                  <span className="text-lg sm:text-xl font-bold text-gray-900 break-all">
+                    ${Number(ethToUsd(potDetails?.entryAmount)).toFixed(2)}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Payment Method:</span>
-                  <span className="font-medium text-gray-900">ETH (wallet balance)</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
+                  <span className="text-sm sm:text-base text-gray-600 font-medium">Payment Method:</span>
+                  <span className="text-sm sm:text-base font-medium text-gray-900">ETH (wallet balance)</span>
+                </div>
+                
+                {/* ETH Amount Display */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 pt-2 border-t border-gray-200">
+                  <span className="text-xs sm:text-sm text-gray-500">ETH Amount:</span>
+                  <span className="text-xs sm:text-sm text-gray-700 font-mono break-all">
+                    {formatETH(potDetails?.entryAmount)} ETH
+                  </span>
                 </div>
               </div>
 
@@ -1001,14 +1011,14 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                   <button
                     onClick={handleEnterPot}
                     disabled={!potDetails?.entryAmount || isPending || isConfirming || userParticipant}
-                    className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 transition-colors font-medium"
+                    className="w-full bg-black text-white py-3 sm:py-4 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 transition-colors font-medium text-sm sm:text-base"
                   >
                     {userParticipant ? (
                       'Already Entered'
                     ) : isPending || isConfirming ? (
                       <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Entering Market...
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm sm:text-base">Entering Market...</span>
                       </div>
                     ) : (
                       'Enter Market'

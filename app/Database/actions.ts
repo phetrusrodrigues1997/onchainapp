@@ -1,13 +1,11 @@
 "use server";
 
-// TESTING TOGGLE - Set to false to allow betting on Saturdays for testing
-const ENFORCE_SATURDAY_RESTRICTIONS = false; // Toggle this on/off as needed
-
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import {  Messages, FeaturedBets, CryptoBets, LivePredictions } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
+import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes } from "./schema";
 import { desc } from "drizzle-orm";
