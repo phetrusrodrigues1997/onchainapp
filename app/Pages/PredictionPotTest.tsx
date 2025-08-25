@@ -103,6 +103,11 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [winnerAddresses, setWinnerAddresses] = useState<string>('');
+  
+  // Debug: Track winnerAddresses changes
+  useEffect(() => {
+    console.log("🔍 winnerAddresses changed:", winnerAddresses);
+  }, [winnerAddresses]);
   const [lastAction, setLastAction] = useState<string>('');
   const [selectedTableType, setSelectedTableType] = useState<TableType>('featured');
   const [ethPrice, setEthPrice] = useState<number | null>(null);
@@ -671,12 +676,15 @@ useEffect(() => {
           console.log("- potBalance:", potBalance?.toString());
           console.log("- potBalance > BigInt(0):", potBalance ? potBalance > BigInt(0) : false);
           
-          // Update winner statistics if we have winners and pot balance
-          if (winnerAddresses.trim() && potBalance && potBalance > BigInt(0)) {
-            console.log("✅ All conditions met, updating winner statistics...");
+          // Update winner statistics if we have pot balance - re-determine winners instead of relying on state
+          if (potBalance && potBalance > BigInt(0)) {
+            console.log("✅ Pot balance available, re-determining winners for stats update...");
             showMessage("Updating winner statistics...");
-            const addresses = winnerAddresses.split(',').map(addr => addr.trim()).filter(addr => addr);
-            console.log("📍 Parsed addresses:", addresses);
+            
+            // Re-determine winners to avoid state dependency issues
+            const winnersString = await determineWinners(selectedTableType, participants || []);
+            const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
+            console.log("📍 Re-determined addresses for stats:", addresses);
             
             if (addresses.length > 0) {
               const amountPerWinnerWei = potBalance / BigInt(addresses.length);
@@ -698,8 +706,7 @@ useEffect(() => {
               }
             }
           } else {
-            console.log("❌ One or more conditions failed for updating winner stats");
-            console.log("- winnerAddresses is empty:", !winnerAddresses.trim());
+            console.log("❌ Conditions failed for updating winner stats");
             console.log("- potBalance is falsy:", !potBalance);
             console.log("- potBalance <= 0:", potBalance ? potBalance <= BigInt(0) : 'potBalance is null');
           }
@@ -1293,6 +1300,7 @@ useEffect(() => {
             }
             
             // Set winner addresses for transaction confirmation handler
+            console.log("🎯 Setting winnerAddresses:", winnersString);
             setWinnerAddresses(winnersString);
             showMessage(`Found ${addresses.length} winner(s). Distributing pot...`);
             
