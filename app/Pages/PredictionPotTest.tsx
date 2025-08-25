@@ -259,15 +259,18 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
   
 
-  // Reset loading state if transaction fails
+  // Reset loading state if transaction fails (but don't clear lastAction if transaction might still confirm)
   useEffect(() => {
-    if (!isPending && !isConfirming && !isConfirmed && lastAction) {
+    if (!isPending && !isConfirming && !isConfirmed && lastAction && isLoading) {
+      console.log("⚠️ Transaction appears to have failed, scheduling reset in 5 seconds...");
       setTimeout(() => {
-        if (isLoading) {
+        // Only reset if we're still in the same state (transaction truly failed)
+        if (!isPending && !isConfirming && !isConfirmed && isLoading) {
+          console.log("🔄 Resetting failed transaction state");
           setIsLoading(false);
           setLastAction('');
         }
-      }, 3000);
+      }, 5000); // Increased to 5 seconds to give more time for confirmation
     }
   }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
 
