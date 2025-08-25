@@ -169,7 +169,7 @@ const WalletPage: React.FC<ReceivePageProps> = ({ activeSection, setActiveSectio
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={copyAddressToClipboard}
-              className="flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="flex items-center justify-center gap-2 bg-red-600 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               {copied ? (
                 <>

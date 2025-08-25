@@ -17,12 +17,12 @@ import BuySection from "./Pages/BuyPage";
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
 import ResponsiveLogo from './Sections/ResponsiveLogo';
-import HowItWorksSection from './Pages/Discord';
+import HowItWorksSection from './Pages/discord';
 import { ConnectWallet, Wallet, WalletDropdown, WalletDropdownLink, WalletDropdownDisconnect } from '@coinbase/onchainkit/wallet';
 import { Address, Avatar, Name, Identity, EthBalance } from '@coinbase/onchainkit/identity';
 import GamesHub from './Pages/AIPage';
 import WalletPage from './Pages/ReceivePage';
-import CreatePotPage from './Pages/CreatePotPage';
+import CreatePotPage from './Pages/createPotPage';
 import PrivatePotInterface from './Pages/PrivatePotInterface';
 import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
@@ -155,8 +155,8 @@ export default function App() {
                 {isConnected && (
                   <>
                     <Avatar className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
-                    <div className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 bg-gray-100 flex items-center justify-center transition-all duration-200">
-                      <User className="h-4 w-4 text-gray-600" />
+                    <div className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 bg-black flex items-center justify-center transition-all duration-200">
+                      <User className="h-4 w-4 text-[#fafafa]" />
                     </div>
                   </>
                 )}

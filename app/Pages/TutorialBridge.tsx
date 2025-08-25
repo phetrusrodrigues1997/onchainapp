@@ -232,7 +232,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           {/* Enter Market Button - Positioned absolutely in top right, responsive */}
           <button
   onClick={() => setActiveSection(marketInfo.section)}
-  className="absolute top-4 right-4 md:top-6 md:right-6 bg-[#aa0000] text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm md:text-base font-medium shadow-lg hover:shadow-xl"
+  className="absolute top-4 right-4 md:top-6 md:right-6 bg-red-600 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-sm md:text-base font-medium shadow-lg hover:shadow-xl"
   style={{
     animation: 'subtlePulse 2s infinite'
   }}
@@ -246,7 +246,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           <style>{`
             @keyframes subtlePulse {
               0%, 100% { transform: scale(1); opacity: 1; }
-              50% { transform: scale(1.04); opacity: 0.8; }
+              50% { transform: scale(1.04); opacity: 0.85; }
             }
           `}</style>
           
@@ -258,9 +258,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
               How it works
             </h2>
-            <h3 className="text-lg md:text-xl font-bold mb-4 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
-              {marketInfo.name}
-            </h3>
+            
           </div>
           
           <div className="text-center max-w-3xl mx-auto px-2">

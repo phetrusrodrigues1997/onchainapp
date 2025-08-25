@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Image from 'next/image';
 import { Buy } from '@coinbase/onchainkit/buy'; 
-import { ETHToken, USDCToken } from '../Constants/coins';
+import { ETHToken } from '../Constants/coins';
 import { ArrowDown, CreditCard, Wallet, Download } from 'lucide-react';
 
 interface BuySectionProps {
@@ -10,8 +10,7 @@ interface BuySectionProps {
 }
 
 const tokens = [
-  { name: "USDC", token: USDCToken, description: "For market entries", usage: "For your predictions" },
-  { name: "ETH", token: ETHToken, description: "For gas fees", usage: "(~$0.01-0.05)" },
+  { name: "ETH", token: ETHToken, description: "For everything", usage: "Pot entries & gas fees" },
 ];
 
 const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection }) => {
@@ -175,37 +174,12 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
           <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
             <CreditCard className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Buy Tokens</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Buy ETH</h1>
           <p className="text-gray-600 font-light text-lg">
-            Get the tokens you need to participate in prediction markets
+            Get ETH to participate in prediction markets and pay for gas fees
           </p>
         </div>
 
-        {/* Token Toggle */}
-        <div className="max-w-lg mx-auto px-4 mb-8">
-          <div className="flex bg-gray-50 rounded-lg p-1 shadow-sm">
-            {tokens.map((token, index) => (
-              <button
-                key={token.name}
-                onClick={() => setSelectedTokenIndex(index)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-md font-medium transition-all duration-200 ${
-                  selectedTokenIndex === index
-                    ? 'bg-white text-gray-900 shadow-md'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <Image 
-                  src={token.token.image ?? "/placeholder-token.png"} 
-                  alt={token.token.symbol}
-                  width={24}
-                  height={24}
-                  className="w-6 h-6"
-                />
-                {token.token.symbol}
-              </button>
-            ))}
-          </div>
-        </div>
 
         
 
@@ -214,9 +188,9 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
           <div className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-gray-300 transition-all duration-300 shadow-lg">
             <div className="flex items-center gap-2 mb-4">
               <Wallet className="w-5 h-5 text-gray-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Purchase {selectedToken.token.symbol}</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Purchase ETH</h2>
             </div>
-            <Buy toToken={selectedToken.token} />
+            <Buy toToken={ETHToken} />
           </div>
         </div>
 
@@ -236,23 +210,16 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
         <div className="max-w-lg mx-auto px-4">
           <button
             onClick={() => setActiveSection && setActiveSection('wallet')}
-            className="w-full bg-gray-900 text-white rounded-xl p-6 hover:bg-gray-800 transition-all duration-300 shadow-lg flex items-center justify-center gap-3"
+            className="w-full bg-red-600 text-white rounded-xl p-6 hover:bg-gray-800 transition-all duration-300 shadow-lg flex items-center justify-center gap-3"
           >
             <Download className="w-6 h-6" />
             <div className="text-left">
-              <div className="text-lg font-semibold">Receive Tokens</div>
+              <div className="text-lg font-bold">Receive Tokens</div>
               <div className="text-sm text-gray-300">Get tokens sent to your wallet</div>
             </div>
           </button>
         </div>
-        {/* Selected Token Info */}
-        <div className="max-w-lg mx-auto px-4 mb-6 text-center">
-          <div className="bg-transparent rounded-lg p-4 mb-6">
-            
-            <p className="text-gray-600 font-medium text-sm mb-1">{selectedToken.description}</p>
-            <p className="text-gray-500 font-light text-xs">{selectedToken.usage}</p>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

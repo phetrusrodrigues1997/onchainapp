@@ -681,7 +681,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
           <div className="bg-white border-2 border-gray-100 rounded-xl p-8 hover:border-black transition-all group cursor-pointer"
                onClick={() => setSelectedGame('wordle')}>
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
                 <Grid3X3 className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-light text-black mb-3">Wordle</h3>
@@ -699,7 +699,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
           <div className="bg-white border-2 border-gray-100 rounded-xl p-8 hover:border-black transition-all group cursor-pointer"
                onClick={() => setSelectedGame('trivia')}>
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
                 <Brain className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-light text-black mb-3">AI Trivia</h3>
@@ -715,33 +715,39 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
         </div>
 
         {/* Coming Soon Section */}
-        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl -translate-y-8 p-12 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-light text-black mb-6">More Games Coming Soon</h2>
-          <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            We're working on exciting new games to expand your gaming experience
-          </p>
+        <div className="bg-gradient-to-br from-black via-gray-950 to-black rounded-2xl -translate-y-8 p-16 max-w-4xl mx-auto shadow-2xl border border-gray-800">
+          <div className="text-center">
+            <h2 className="text-5xl font-bold text-white mb-4 tracking-tight bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent">
+              Coming Soon
+            </h2>
+            <p className="text-2xl text-white font-light leading-relaxed max-w-2xl mx-auto">
+              Epic new challenges are being crafted to revolutionize your gaming experience
+            </p>
+          </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {/* Coming Soon Game Cards */}
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            
             {[
               { name: 'Chess Puzzles', icon: '♟️' },
               { name: 'Math Challenge', icon: '🔢' },
               { name: 'Memory Game', icon: '🧠' },
               { name: 'Word Search', icon: '🔍' }
             ].map((game, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 border border-gray-200 relative">
-                <div className="absolute top-2 right-2">
-                  <Lock className="w-4 h-4 text-gray-400" />
+              <div key={index} className="group bg-gradient-to-br from-gray-900 to-black rounded-xl p-8 border border-gray-700 relative hover:border-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <div className="absolute top-3 right-3">
+                  <Lock className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
                 </div>
-                <div className="text-3xl mb-3">{game.icon}</div>
-                <h4 className="text-sm font-medium text-gray-600">{game.name}</h4>
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{game.icon}</div>
+                <h4 className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors">{game.name}</h4>
               </div>
             ))}
-          </div>
+          </div> */}
           
-          <div className="mt-8 text-sm text-gray-500">
-            Stay tuned for updates and new game releases!
-          </div>
+          {/* <div className="mt-12 text-center">
+            <div className="text-lg text-white/80 font-medium">
+              🚀 More gameplay experiences loading...
+            </div>
+          </div> */}
         </div>
       </div>
     </div>
