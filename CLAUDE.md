@@ -7,9 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **PrediWin.com - Predict, Win, Repeat** is a sophisticated Next.js prediction market platform that gamifies forecasting across multiple asset classes and events through blockchain-based prediction competitions. Built on Base network with OnchainKit integration, users compete in weekly prediction cycles covering cryptocurrency, stocks, sports, and other market movements with structured timing for pot entry, prediction periods, and results determination.
 
 ### Core Concept & Weekly Schedule
-- Users pay **dynamic entry fees** (0.01-0.06 USDC based on day) to enter prediction pots via smart contracts
+- Users pay **ETH entry fees** (converted from USD values ~$0.01-0.06 based on day) to enter prediction pots via smart contracts
 - **Structured weekly cycle** with specific timing for different activities:
-  - **Sunday-Friday**: Pot entry period (users can join with increasing daily fees: 0.01→0.06 USDC)
+  - **Sunday-Friday**: Pot entry period (users can join with increasing daily fees based on USD value)
   - **Sunday-Friday**: Prediction period (participants make forecasts on various assets)
   - **Saturday**: Results day (winners determined at midnight UTC, pot distributed) - pot entries CLOSED
 - **Prediction Logic**: Users predict next day's asset price movements (positive/negative) across multiple markets
@@ -33,12 +33,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Day | Pot Entry | Predictions | Status & Fees |
 |-----|-----------|-------------|---------------|
 | **Saturday** | ❌ Closed | ❌ Closed | Results day - pot distribution |
-| **Sunday** | ✅ Open | ✅ Open | Cheapest entry (0.01 USDC) |
-| **Monday** | ✅ Open | ✅ Open | Low entry fee (0.02 USDC) |
-| **Tuesday** | ✅ Open | ✅ Open | Medium entry fee (0.03 USDC) |
-| **Wednesday** | ✅ Open | ✅ Open | Higher entry fee (0.04 USDC) |
-| **Thursday** | ✅ Open | ✅ Open | High entry fee (0.05 USDC) |
-| **Friday** | ✅ Open | ✅ Open | Highest entry fee (0.06 USDC) |
+| **Sunday** | ✅ Open | ✅ Open | Cheapest entry (~$0.01 USD in ETH) |
+| **Monday** | ✅ Open | ✅ Open | Low entry fee (~$0.02 USD in ETH) |
+| **Tuesday** | ✅ Open | ✅ Open | Medium entry fee (~$0.03 USD in ETH) |
+| **Wednesday** | ✅ Open | ✅ Open | Higher entry fee (~$0.04 USD in ETH) |
+| **Thursday** | ✅ Open | ✅ Open | High entry fee (~$0.05 USD in ETH) |
+| **Friday** | ✅ Open | ✅ Open | Highest entry fee (~$0.06 USD in ETH) |
 
 ## Development Commands
 
@@ -103,11 +103,11 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - `ImageURLs`: User profile images
 
 ### Blockchain Integration
-- **Smart Contracts**: PredictionPot contracts handle USDC pot entry and winner distribution
+- **Smart Contracts**: PredictionPot contracts handle ETH pot entry and winner distribution
 - **Factory Contract**: `PredictionPotWithCloning` at `0xeE44be339B390726865aAC73435B96552C0697d3` enables users to create private pots
 - **EIP-1167 Cloning**: Gas-efficient deployment of new prediction pots using minimal proxy pattern
 - **OnchainKit & Wagmi**: Wallet connections, transaction handling, and Base network integration
-- **USDC Payments**: Users approve and spend USDC for pot entries (0.01-0.06 USDC based on day)
+- **ETH Payments**: Users send ETH directly for pot entries (amounts calculated from USD values)
 - **ConnectWallet**: Integrated in header for seamless wallet connectivity
 - **Contract Addresses**: Configurable via cookies, supports multiple prediction markets
 - **Environment variables needed**: `NEXT_PUBLIC_ONCHAINKIT_API_KEY`, `NEXT_PUBLIC_PROJECT_ID`
@@ -122,10 +122,10 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 ## Key Features
 
 ### Prediction Pot System (`PredictionPotTest.tsx`)
-- **Weekly Pot Entry**: Users pay dynamic fees (0.01-0.06 USDC) to enter prediction competitions (Sunday-Friday)
+- **Weekly Pot Entry**: Users pay dynamic ETH fees (converted from $0.01-0.06 USD) to enter prediction competitions (Sunday-Friday)
 - **Dynamic Pricing**: Entry fees increase daily to incentivize early participation
 - **Dynamic UI**: Shows countdown timers and status messages based on current day
-- **USDC Approval Flow**: Two-step process (approve → enter pot) for blockchain security
+- **Direct ETH Payment**: Single-step process - users send ETH directly to contract
 - **Smart Contract Integration**: Automated pot distribution to winners via blockchain
 - **Participant Tracking**: Real-time display of pot balance and participant count
 - **Re-entry System**: Users with wrong predictions can pay today's entry fee to re-enter
@@ -137,9 +137,9 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 ### Referral Program (New Implementation)
 - **Unique Codes**: Each user gets an 8-character alphanumeric referral code
 - **Friend Rewards**: When 3 friends enter pots with your code, you earn 1 free entry
-- **Fraud Protection**: Free entries only awarded after confirmed USDC pot payments
+- **Fraud Protection**: Free entries only awarded after confirmed ETH pot payments
 - **Referral Dashboard**: Collapsible UI showing stats, code sharing, and available free entries
-- **Smart UI Flow**: Prioritizes free entries over USDC payments when available
+- **Smart UI Flow**: Prioritizes free entries over ETH payments when available
 
 ### Owner/Admin Functions
 - **Daily Outcome Setting**: Admins set "positive" or "negative" asset movement results
@@ -166,16 +166,16 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Clean Terminology**: Updated to use prediction-focused language
 
 ### Buy Page System (`BuyPage.tsx`)
-- **Dual Token Support**: Users can purchase both USDC and ETH via Coinbase OnChainKit
-- **USDC for Pot Entries**: Stablecoin for prediction market participation
-- **ETH for Gas Fees**: Base network native token for transaction fees (~$0.01-0.05)
-- **Educational UI**: Clear explanations of what each token is needed for
+- **ETH Purchase Support**: Users can purchase ETH via Coinbase OnChainKit
+- **ETH for Everything**: Single token for both pot entries and gas fees
+- **Base Network**: Native ETH transactions with low fees (~$0.01-0.05)
+- **Educational UI**: Clear explanations of ETH usage for pot participation
 - **Integrated Purchase Flow**: Seamless buying experience within the app
 
 ### Re-entry System
 - **Wrong Prediction Recovery**: Users who made incorrect predictions can re-enter markets
 - **Current Day Pricing**: Re-entry fee matches today's pot entry fee (not tomorrow's)
-- **Two-Step Process**: USDC approval → re-entry payment (same as normal pot entry)
+- **Direct ETH Payment**: Single-step process - users send ETH directly to re-enter
 - **Database Cleanup**: Removes user from wrong predictions table upon successful payment
 - **UI Integration**: Minimalist design matching the "You're in the Pot" aesthetic
 - **Clear Messaging**: Uses "today's entry fee" instead of specific amounts for cleaner UX
@@ -196,7 +196,7 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **OpenAI Integration**: Uses GPT-3.5-turbo model for dynamic question generation across 25+ categories
 - **Minimalistic Design**: Black and white UI design with clean typography and responsive layout
 - **Statistics Tracking**: Comprehensive stats including correct answers, accuracy, current streak, and best streak
-- **100 Answer Milestone**: Users earn 0.01 USDC discount after answering 100 questions correctly
+- **100 Answer Milestone**: Users earn ~$0.01 USD ETH discount after answering 100 questions correctly
 - **Hybrid Storage System**: 
   - **Database Storage**: Connected wallet users get persistent stats in PostgreSQL via Drizzle ORM
   - **localStorage Fallback**: Non-connected users use browser storage with seamless migration on wallet connect
@@ -234,6 +234,6 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Countdown Systems**: Multiple real-time countdowns for pot entry deadlines and reopening schedules
 - **Responsive UI**: Different interfaces and messages shown based on weekly schedule phases
 - **Prediction-Focused Language**: Entire UI uses "predict/prediction" terminology instead of "bet/betting" to avoid gambling associations
-- **USDC Display Precision**: All USDC amounts properly calculated using 6-decimal precision (divide by 1,000,000)
-- **Dynamic Pricing System**: Daily entry fees increase from Sunday (0.01 USDC) to Friday (0.06 USDC)
+- **ETH Amount Calculation**: All ETH amounts calculated from USD values with proper wei precision handling
+- **Dynamic Pricing System**: Daily entry fees increase from Sunday (~$0.01 USD) to Friday (~$0.06 USD) in ETH
 - **Multi-Asset Support**: Platform designed for predictions beyond crypto (stocks, sports, etc.)
