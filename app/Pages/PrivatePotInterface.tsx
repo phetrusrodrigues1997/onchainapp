@@ -821,6 +821,75 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Creator Panel</h2>
             
+            {/* Market Details Section */}
+            <div className="mb-8 pb-6 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Market Details</h3>
+                {!isEditingDetails && (
+                  <button
+                    onClick={startEditingDetails}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Details
+                  </button>
+                )}
+              </div>
+
+              {isEditingDetails ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Market Name</label>
+                    <input
+                      type="text"
+                      value={editingPotName}
+                      onChange={(e) => setEditingPotName(e.target.value)}
+                      className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                      placeholder="Enter market name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea
+                      value={editingDescription}
+                      onChange={(e) => setEditingDescription(e.target.value)}
+                      className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent resize-none"
+                      rows={3}
+                      placeholder="Enter market description"
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleUpdatePotDetails}
+                      disabled={!editingPotName.trim() && !editingDescription.trim()}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-300 font-medium transition-colors"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={cancelEditingDetails}
+                      className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="mb-3">
+                    <div className="text-sm text-gray-600 mb-1">Market Name:</div>
+                    <div className="font-medium text-gray-900">{potDetails?.potName || 'Unnamed Market'}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 mb-1">Description:</div>
+                    <div className="text-gray-900">{potDetails?.description || 'No description provided'}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-6">
               {/* Entry Amount Update */}
               <div className="space-y-4">
