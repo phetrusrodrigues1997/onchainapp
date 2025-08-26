@@ -161,10 +161,10 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
     }
   };
 
-  // Helper to display entry fee
+  // Helper to display entry fee (~${formatEthBalance(entryFeeEth)} ETH)
   const getEntryFeeDisplay = (): string => {
     if (!ethPrice) return `~${formatEthBalance(entryFeeEth)} ETH`;
-    return `$${ENTRY_FEE_USD.toFixed(2)} (~${formatEthBalance(entryFeeEth)} ETH)`;
+    return `$${ENTRY_FEE_USD.toFixed(2)}`;
   };
 
   // If user is already in the pot, proceed to questions
@@ -177,54 +177,54 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
   if (!isConnected) {
     return (
       <div className="max-w-2xl mx-auto mt-20 p-8 text-center">
-        <div className="bg-white border-2 border-gray-900 rounded-xl p-8 shadow-lg">
-          <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="bg-white border-2 border-black rounded-xl p-8 shadow-lg">
+          <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
             <div className="w-8 h-8 border-2 border-white rounded-full"></div>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Wallet Connection Required</h2>
-          <p className="text-gray-600 mb-6">Connect your wallet to access live prediction markets and start earning rewards.</p>
+          <h2 className="text-2xl font-semibold text-black mb-4">Wallet Connection Required</h2>
+          <p className="text-black mb-6">Connect your wallet to access live prediction markets and start earning rewards.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-20 p-4">
-      <div className="bg-white border-2 border-gray-900 rounded-xl shadow-xl overflow-hidden">
+    <div className="max-w-2xl mx-auto mt-10 p-4">
+      <div className="bg-white border-2 border-black rounded-xl shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="bg-gray-900 text-white px-8 py-8">
+        <div className="bg-black text-white px-8 py-8">
           <div className="text-center">
             
-            <h1 className="text-3xl font-bold text-white mb-3">Live Market Entry</h1>
-            <div className="bg-white/10 rounded-lg px-4 py-2 inline-block">
-              <p className="text-gray-200 font-medium">Entry Fee: {getEntryFeeDisplay()}</p>
+            <h1 className="text-3xl font-bold text-white mb-4">Live Markets</h1>
+            <div className="bg-white rounded-lg px-6 py-3 inline-block shadow-lg border-2 border-white">
+              <p className="text-black font-bold text-lg tracking-wide">⏱️ New questions every 60 minutes</p>
             </div>
           </div>
         </div>
 
         <div className="p-8">
           {/* Pot Stats */}
-          <div className="grid grid-cols-2 gap-6 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <div className="text-sm text-gray-500 mb-1">Pot Balance</div>
-              <div className="text-xl font-bold text-green-600">
+          {/* <div className="grid grid-cols-2 gap-6 mb-8">
+            <div className="bg-white p-4 rounded-lg border-2 border-black">
+              <div className="text-sm text-black mb-1">Pot Balance</div>
+              <div className="text-xl font-bold text-red-600">
                 {formatEthBalance(potBalance)} ETH
               </div>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <div className="text-sm text-gray-500 mb-1">Participants</div>
-              <div className="text-xl font-bold text-blue-600">
+            <div className="bg-white p-4 rounded-lg border-2 border-black">
+              <div className="text-sm text-black mb-1">Participants</div>
+              <div className="text-xl font-bold text-red-600">
                 {participants?.length || 0}
               </div>
             </div>
-          </div>
+          </div> */}
 
 
           {/* Status Messages */}
           {message && (
-            <div className="bg-gray-50 border-l-4 border-gray-900 text-gray-800 px-6 py-4 rounded-r-lg mb-6 shadow-sm">
+            <div className="bg-white border-l-4 border-red-600 text-black px-6 py-4 rounded-r-lg mb-6 shadow-sm">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-gray-900 rounded-full mr-3"></div>
+                <div className="w-2 h-2 bg-red-600 rounded-full mr-3"></div>
                 <p className="font-medium">{message}</p>
               </div>
             </div>
@@ -233,17 +233,17 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
           {/* ETH balance validation handled by wallet */}
 
           {/* Action Buttons */}
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
+          <div className="bg-white border-2 border-black rounded-xl p-6 mb-6">
             <div className="space-y-4">
               <div>
                 <div className="flex items-center mb-3">
-                  <div className="w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
-                  <h3 className="text-lg font-semibold text-gray-900">Enter Market</h3>
+                  <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
+                  <h3 className="text-lg font-semibold text-black">Enter Market</h3>
                 </div>
                 <button
                   onClick={handleEnterPot}
                   disabled={isLoading || isPending}
-                  className="w-full bg-[#00aa00] hover:bg-black disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg"
+                  className="w-full bg-red-600 hover:bg-black disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg"
                 >
                   {isLoading && lastAction === 'enter' ? (
                     <>
@@ -259,25 +259,25 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
           </div>
 
           {/* Instructions */}
-          <div className="bg-gray-900 text-white rounded-xl p-6">
+          <div className="bg-black text-white rounded-xl p-6">
             <h3 className="text-xl font-bold mb-4 flex items-center">
               <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mr-3">
-                <div className="w-3 h-3 bg-gray-900 rounded-full"></div>
+                <div className="w-3 h-3 bg-black rounded-full"></div>
               </div>
               How it works
             </h3>
             <div className="space-y-3">
               <div className="flex items-start">
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
-                <p className="text-gray-200">Pay $0.01 (in ETH) to enter the live prediction market</p>
+                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
+                <p className="text-white">Pay $0.01 (in ETH) to enter the live prediction market</p>
               </div>
               <div className="flex items-start">
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>
-                <p className="text-gray-200">Make predictions on hourly questions</p>
+                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>
+                <p className="text-white">Make predictions on hourly questions</p>
               </div>
               <div className="flex items-start">
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</div>
-                <p className="text-gray-200">Winners share the pot equally at round end</p>
+                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</div>
+                <p className="text-white">Winners share the pot equally at round end</p>
               </div>
             </div>
           </div>

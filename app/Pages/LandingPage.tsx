@@ -180,7 +180,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
         const nextIndex = (currentIndex + 1) % currentMarketOptions.length;
         return currentMarketOptions[nextIndex].id;
       });
-    }, 22000);
+    }, 17000);
 
     return () => clearInterval(interval);
   }, [currentLanguage]);
@@ -605,7 +605,7 @@ const handleMarketClick = (marketId: string) => {
               {/* Minimalist Entry Button */}
               <button
                 onClick={() => handleMarketClick('Featured')}
-                className="group relative bg-white border-2 border-black text-black px-16 py-4 rounded-lg font-semibold text-lg tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden shadow-lg hover:shadow-red-200"
+                className="group relative bg-black border-2 border-black text-white px-16 py-4 rounded-lg font-semibold text-lg tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden shadow-lg hover:shadow-red-200"
               >
                 <span className="relative z-10">Enter</span>
                 
@@ -656,7 +656,7 @@ const handleMarketClick = (marketId: string) => {
         </div>
       </section>
 
-      <footer className="relative z-10 px-6 py-10 bg-gray-900 text-center text-gray-400 text-sm border-t border-gray-800">
+      <footer className="relative z-10 px-6 py-10 bg-white text-center text-red-600 text-sm border-t border-gray-200">
         &copy; {new Date().getFullYear()} {t.footerText}
       </footer>
       

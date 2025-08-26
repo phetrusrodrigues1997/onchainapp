@@ -31,7 +31,7 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
       styleTag.innerHTML = `
         [data-testid="ockBuyButton_Button"],
         [data-testid="ockSwapButton_Button"] {
-          background-color: #000000 !important;
+          background-color: #ee0000 !important;
           border: 2px solid #e5e7eb !important;
           border-radius: 12px !important;
           transition: all 0.2s ease !important;

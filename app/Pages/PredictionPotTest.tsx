@@ -316,11 +316,11 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     // USD pricing that we want to maintain
     const usdPrices = {
       0: 0.01, // Sunday: $0.01
-      1: 0.02, // Monday: $0.02  
-      2: 0.03, // Tuesday: $0.03
-      3: 0.04, // Wednesday: $0.04
-      4: 0.05, // Thursday: $0.05
-      5: 0.06, // Friday: $0.06
+      1: 0.01, // Monday: $0.02  
+      2: 0.01, // Tuesday: $0.03
+      3: 0.01, // Wednesday: $0.04
+      4: 0.01, // Thursday: $0.05
+      5: 0.01, // Friday: $0.06
       6: 0.01, // Saturday: Closed (fallback to Sunday price)
     };
     
@@ -787,7 +787,7 @@ useEffect(() => {
             <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">
               {t.bitcoinPotTitle || 'The ₿itcoin Pot'}
             </h1>
-             <div className="w-60 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>}
+             <div className="w-60 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div>
           </div> */}
 
           {!isConnected && (
@@ -927,7 +927,7 @@ useEffect(() => {
                 </div>
                 <button
                   onClick={() => setActiveSection('makePrediction')}
-                  className="px-8 py-3 bg-gray-900 text-white font-medium rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105"
+                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105"
                 >
                   {t.goToBetting || 'Start Betting'}
                 </button>
@@ -1064,81 +1064,72 @@ useEffect(() => {
 
                   {/* Enter Pot - Only show if no free entries available */}
                   {freeEntriesAvailable === 0 && (
-                    <div className="bg-gradient-to-br from-[#2C2C47] to-[#1a1a2e] p-6 rounded-xl border border-[#6A5ACD]/30 shadow-lg relative overflow-hidden">
-                      {/* Decorative background elements */}
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-[#6A5ACD]/10 rounded-full blur-xl"></div>
-                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-[#c4b517]/10 rounded-full blur-lg"></div>
-                      
-                      <div className="relative z-10">
-                        {/* Header with icon */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#6A5ACD] to-[#c4b517] rounded-xl flex items-center justify-center shadow-lg">
-                            <span className="text-white text-xl">🎯</span>
-                          </div>
-                          <div>
-                            <h3 className="text-[#F5F5F5] font-bold text-lg">Join the Prediction Game</h3>
-                            <p className="text-[#A0A0B0] text-sm">Start competing for the pot 🏆</p>
-                          </div>
+                    <div className="bg-white border-2 border-black rounded-xl p-6 shadow-lg">
+                      {/* Header with icon */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
+                          <span className="text-white text-lg">🎯</span>
                         </div>
-                        
-                        {/* Entry price highlight */}
-                        <div className="bg-black/30 backdrop-blur-sm p-4 rounded-lg mb-4 border border-[#6A5ACD]/20">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl">💰</span>
-                              <div>
-                                <div className="text-[#F5F5F5] font-bold text-lg">
-                                  ${ethToUsd(entryAmount ?? BigInt(0)).toFixed(2)} USD
-                                </div>
-                                <div className="text-[#A0A0B0] text-sm">
-                                  Today's {getCurrentDayName()} Entry
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-green-400 text-sm font-medium">
-                              ⚡ {getCurrentDayName()} Price
-                            </div>
-                          </div>
+                        <div>
+                          <h3 className="text-black font-bold text-lg">Join Predictions</h3>
+                          <p className="text-black text-sm">Compete for the pot</p>
                         </div>
-                        
-                        {/* Referral Code Input */}
-                        <div className="mb-4">
-                          <label className="text-[#F5F5F5] text-sm mb-2 block flex items-center gap-2">
-                            <span>🎁</span>
-                            Referral Code (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Enter code to earn free entries..."
-                            value={inputReferralCode}
-                            onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
-                            className="w-full px-4 py-3 bg-black/50 border border-[#6A5ACD]/50 rounded-lg text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6A5ACD] focus:border-[#6A5ACD] transition-all duration-200"
-                            maxLength={8}
-                          />
-                        </div>
-                        
-                        {/* Action button */}
-                        <button
-                          onClick={() => handleEnterPot(false)}
-                          disabled={isActuallyLoading}
-                          className="w-full bg-gradient-to-r from-[#6A5ACD] to-[#c4b517] text-white px-6 py-4 rounded-lg font-bold text-lg hover:from-[#7B68EE] hover:to-[#d4c517] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
-                        >
-                          {isActuallyLoading && lastAction === 'enterPot'
-                            ? (
-                              <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                Processing Entry...
-                              </div>
-                            )
-                            : (
-                              <>
-                                <span>🚀</span>
-                                Pay ${ethToUsd(entryAmount ?? BigInt(0)).toFixed(2)} USD to Enter
-                              </>
-                            )}
-                        </button>
-                        
                       </div>
+                      
+                      {/* Entry price highlight */}
+                      <div className="bg-black p-4 rounded-lg mb-4 border border-black">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white text-xl">💰</span>
+                            <div>
+                              <div className="text-white font-bold text-lg">
+                                ${ethToUsd(entryAmount ?? BigInt(0)).toFixed(2)}
+                              </div>
+                              <div className="text-green-400 text-sm">
+                                {getCurrentDayName()} Pricing ⚡
+                              </div>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      </div>
+                        
+                      {/* Referral Code Input */}
+                      <div className="mb-4">
+                        <label className="text-black text-sm mb-2 block flex items-center gap-2">
+                          <span>🎁</span>
+                          Referral Code (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Enter code..."
+                          value={inputReferralCode}
+                          onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
+                          className="w-full px-4 py-3 bg-white border-2 border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-200"
+                          maxLength={8}
+                        />
+                      </div>
+                        
+                      {/* Action button */}
+                      <button
+                        onClick={() => handleEnterPot(false)}
+                        disabled={isActuallyLoading}
+                        className="w-full bg-red-600 hover:bg-black text-white px-6 py-4 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                      >
+                        {isActuallyLoading && lastAction === 'enterPot'
+                          ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              Processing...
+                            </div>
+                          )
+                          : (
+                            <>
+                              <span>🚀</span>
+                              Enter (${ethToUsd(entryAmount ?? BigInt(0)).toFixed(2)})
+                            </>
+                          )}
+                      </button>
                     </div>
                   )}
                 </div>
