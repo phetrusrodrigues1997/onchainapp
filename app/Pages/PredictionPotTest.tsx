@@ -909,7 +909,7 @@ useEffect(() => {
             <div className="mb-6">
               <div className={`rounded-xl border p-8 text-center transition-all duration-500 ${
                 justEnteredPot 
-                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400 shadow-lg scale-105' 
+                  ? 'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-green-400 shadow-lg' 
                   : 'bg-white border border-gray-200 hover:border-gray-300'
               }`}>
                 <div className={`text-2xl font-light mb-3 transition-colors duration-500 ${

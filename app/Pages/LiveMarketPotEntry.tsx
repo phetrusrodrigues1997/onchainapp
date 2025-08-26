@@ -195,10 +195,10 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
         <div className="bg-black text-white px-8 py-8">
           <div className="text-center">
             
-            <h1 className="text-3xl font-bold text-white mb-4">Live Markets</h1>
-            <div className="bg-white rounded-lg px-6 py-3 inline-block shadow-lg border-2 border-white">
+            <h1 className="text-3xl font-bold text-white">Live Markets</h1>
+            {/* <div className="bg-white rounded-lg px-6 py-3 inline-block shadow-lg border-2 border-white">
               <p className="text-black font-bold text-lg tracking-wide">⏱️ New questions every 60 minutes</p>
-            </div>
+            </div> */}
           </div>
         </div>
 

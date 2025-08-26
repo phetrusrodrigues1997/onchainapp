@@ -7,7 +7,7 @@ interface FAQItem {
 }
 
 const HowItWorksSection: React.FC = () => {
-  const [openItems, setOpenItems] = useState<Set<number>>(new Set([0]));
+  const [openItems, setOpenItems] = useState<Set<number>>(new Set());
 
   const toggleItem = (index: number) => {
     const newOpenItems = new Set(openItems);
