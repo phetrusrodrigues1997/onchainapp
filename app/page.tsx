@@ -150,7 +150,7 @@ export default function App() {
               <Wallet>
 <ConnectWallet 
                   text={isMobile ? "Sign In" : "Connect Wallet"}
-                  className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-black !px-4 !py-2 !min-w-0' : 'bg-black'}`}
+                  className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-black hover:bg-red-600 !px-4 !py-2 !min-w-0' : 'bg-black hover:bg-red-600 !px-8 !py-3'}`}
                 >
                 {isConnected && (
                   <>

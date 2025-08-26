@@ -25,6 +25,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const { alertState, showAlert, closeAlert } = useCustomAlert();
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const carouselRef = useRef<HTMLDivElement>(null);
   const availableMarkets = ["random topics", "crypto"];
   
@@ -171,8 +172,10 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-rotate market every 7 seconds
+  // Auto-rotate market every 7 seconds (disabled when searching)
   useEffect(() => {
+    if (searchQuery) return; // Don't auto-rotate when user is searching
+    
     const interval = setInterval(() => {
       setSelectedMarket(prevMarket => {
         const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
@@ -183,7 +186,43 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     }, 17000);
 
     return () => clearInterval(interval);
-  }, [currentLanguage]);
+  }, [currentLanguage, searchQuery]);
+
+  // Search functionality
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      setSelectedMarket('Featured');
+      return;
+    }
+    
+    const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
+    const matchingMarket = currentMarketOptions.find(market => 
+      market.name.toLowerCase().includes(query.toLowerCase()) ||
+      market.id.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    if (matchingMarket) {
+      setSelectedMarket(matchingMarket.id);
+    }
+  };
+
+  // Keyboard shortcut for search (forward slash)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const searchInput = document.querySelector('input[placeholder="Search markets..."]') as HTMLInputElement;
+        if (searchInput && document.activeElement !== searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
 
   const t = getTranslation(currentLanguage);
@@ -289,39 +328,57 @@ const handleMarketClick = (marketId: string) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-right mb-12 relative">
             {/* Live Markets Link */}
-<div className="mb-6 -translate-y-1/4 flex justify-between">
-  {/* Left text button with question mark in circle */}
-
-<button 
-  onClick={() => setActiveSection('discord')}
-  className="group inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold transition-colors"
->
-  {/* Smaller red circle with question mark */}
-  <span className=" flex items-center justify-center w-3 h-3 rounded-full bg-red-600 text-white text-[9px] font-bold">
-    i
-  </span>
-  
-  {/* Larger text */}
-  <span className="text-red-600">How it works</span>
-</button>
-
-
-
-  {/* Right button (your current one) */}
+<div className="mb-6 -translate-y-1/4 flex justify-between items-center">
+  {/* Left button */}
   <button 
-    onClick={() => setActiveSection('liveMarkets')}
-    className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-900 transition-all duration-200 hover:scale-105 animate-pulse-glow shadow-lg shadow-gray-300"
+    onClick={() => setActiveSection('discord')}
+    className="group inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold transition-colors"
   >
-    {/* Live indicator dot */}
-    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-    
-    <span className="relative">
-      Live markets
+    {/* Smaller red circle with question mark */}
+    <span className="flex items-center justify-center w-3 h-3 rounded-full bg-red-600 text-white text-[9px] font-bold">
+      i
     </span>
     
-    {/* Arrow with hover animation */}
-    <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs animate-pulse-right">→</span>
+    {/* Larger text */}
+    <span className="text-red-600">How it works</span>
   </button>
+
+  {/* Right section with search bar and live markets button */}
+  <div className="flex items-center gap-3">
+    {/* Search Bar - Hidden on mobile */}
+    <div className="hidden md:flex relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input
+        type="text"
+        placeholder="Search markets..."
+        value={searchQuery}
+        onChange={(e) => handleSearch(e.target.value)}
+        className="w-[355px] pl-10 pr-10 py-2 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors duration-200"
+      />
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <span className="text-gray-400 text-sm font-mono">/</span>
+      </div>
+    </div>
+    
+    <button 
+      onClick={() => setActiveSection('liveMarkets')}
+      className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-900 transition-all duration-200 hover:scale-105 animate-pulse-glow shadow-lg shadow-gray-300"
+    >
+      {/* Live indicator dot */}
+      <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+      
+      <span className="relative">
+        Live markets
+      </span>
+      
+      {/* Arrow with hover animation */}
+      <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs animate-pulse-right">→</span>
+    </button>
+  </div>
 </div>
 
             
