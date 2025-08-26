@@ -177,7 +177,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
   if (!isConnected) {
     return (
       <div className="max-w-2xl mx-auto mt-20 p-8 text-center">
-        <div className="bg-white border-2 border-black rounded-xl p-8 shadow-lg">
+        <div className="bg-white border-2 border-black rounded-xl p-8">
           <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-6">
             <div className="w-8 h-8 border-2 border-white rounded-full"></div>
           </div>
@@ -190,18 +190,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-4">
-      <div className="bg-white border-2 border-black rounded-xl shadow-xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-black text-white px-8 py-8">
-          <div className="text-center">
-            
-            <h1 className="text-3xl font-bold text-white">Live Markets</h1>
-            {/* <div className="bg-white rounded-lg px-6 py-3 inline-block shadow-lg border-2 border-white">
-              <p className="text-black font-bold text-lg tracking-wide">⏱️ New questions every 60 minutes</p>
-            </div> */}
-          </div>
-        </div>
-
+      <div className="bg-white rounded-xl ">
         <div className="p-8">
           {/* Pot Stats */}
           {/* <div className="grid grid-cols-2 gap-6 mb-8">
