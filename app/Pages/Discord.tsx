@@ -22,7 +22,15 @@ const HowItWorksSection: React.FC = () => {
   const faqItems: FAQItem[] = [
     {
       question: "How does PrediWin work?",
-      answer: "PrediWin.com is a prediction market platform with two main types: Public Markets (weekly competitions on global events) and Private Markets (custom markets you create for friends). Public markets run Sunday-Friday with increasing entry fees, while Private Markets let you create custom topics and invite friends via shareable links."
+      answer: "PrediWin.com is a prediction market platform that offers two main experiences. The first are Public Markets, which are weekly competitions where users make predictions on global events. These competitions run from Sunday to Friday, and the entry fee starts low at the beginning of the week and gradually increases. The second are Private Markets, which allow you to create your own custom prediction topics. You can then invite friends to join by sharing a link."
+    },
+    {
+      question: "What is the weekly schedule for Public Markets?",
+      answer: "Sunday-Friday: Market entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - markets are closed and winners are determined at midnight UTC with market distribution. Private Markets have no schedule - you control when they open and close."
+    },
+    {
+      question: "What happens if I make a wrong prediction?",
+      answer: "In Public Markets: If you predict incorrectly, you'll be eliminated but can re-enter by paying the current day's entry fee, the goal is to stay in the tournament until friday when the last prediction is made and the winners are determined on Saturday. In Private Markets: The market creator decides the final date, outcome and winners- you cannot re-enter a private market after the winners have been determined."
     },
     {
       question: "What are Private Markets and how do they work?",
@@ -44,18 +52,12 @@ const HowItWorksSection: React.FC = () => {
       question: "Why do I need Ethereum to place predictions?",
       answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering markets, making predictions, and claiming winnings. You'll also need USDC to pay the actual market's entry fees."
     },
-    {
-      question: "What is the weekly schedule for Public Markets?",
-      answer: "Sunday-Friday: Market entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - markets are closed and winners are determined at midnight UTC with market distribution. Private Markets have no schedule - you control when they open and close."
-    },
+    
     {
       question: "How are entry fees calculated in Public Markets?",
       answer: "Public Markets follow a dynamic pricing model to encourage early participation: Sunday (0.01 USDC), Monday (0.02 USDC), Tuesday (0.03 USDC), Wednesday (0.04 USDC), Thursday (0.05 USDC), Friday (0.06 USDC). Saturday is closed for results. Private Markets let you set any entry fee you want."
     },
-    {
-      question: "What happens if I make a wrong prediction?",
-      answer: "In Public Markets: If you predict incorrectly, you'll be blocked from future rounds but can re-enter by paying the current day's entry fee. In Private Markets: The market creator decides the outcome and winners - there's no automatic blocking system."
-    },
+  
     {
       question: "How does the referral system work?",
       answer: "Each user gets a unique 8-character referral code. When 3 friends enter markets using your code and make confirmed USDC payments, you earn 1 free market entry. This system includes fraud protection to ensure legitimate referrals and works for both Public and Private Markets."
