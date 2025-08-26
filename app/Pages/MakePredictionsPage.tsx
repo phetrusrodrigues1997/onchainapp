@@ -145,26 +145,40 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Get tomorrow midnight (when outcome will be revealed)
-  const getTomorrowMidnight = (): Date => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow;
+  // Get tonight's midnight (when new question becomes available)
+  const getTonightMidnight = (): Date => {
+    const tonight = new Date();
+    tonight.setDate(tonight.getDate() + 1);
+    tonight.setHours(0, 0, 0, 0);
+    return tonight;
   };
 
-  // Get today midnight (when new question becomes available)
-  const getTodayMidnight = (): Date => {
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0); // This gives us tomorrow at 00:00 (same as next midnight)
-    return midnight;
+  // Get tomorrow's midnight (when previous prediction outcome will be revealed - 24 hours after next question)
+  const getTomorrowMidnight = (): Date => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 2);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
   };
 
   // Update countdown timers
   const updateCountdowns = () => {
     const now = new Date();
     
-    // Time until outcome is revealed (tomorrow midnight)
+    // Time until new question (tonight's midnight)
+    const tonightMidnight = getTonightMidnight();
+    const diffToNewQuestion = tonightMidnight.getTime() - now.getTime();
+    
+    if (diffToNewQuestion > 0) {
+      const hours = Math.floor(diffToNewQuestion / (1000 * 60 * 60));
+      const minutes = Math.floor((diffToNewQuestion % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffToNewQuestion % (1000 * 60)) / 1000);
+      setTimeUntilNewQuestion({ hours, minutes, seconds });
+    } else {
+      setTimeUntilNewQuestion({ hours: 0, minutes: 0, seconds: 0 });
+    }
+
+    // Time until outcome is revealed (tomorrow's midnight - 24 hours after next question)
     const tomorrowMidnight = getTomorrowMidnight();
     const diffToOutcome = tomorrowMidnight.getTime() - now.getTime();
     
@@ -176,24 +190,46 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     } else {
       setTimeUntilOutcome({ hours: 0, minutes: 0, seconds: 0 });
     }
-
-    // Time until new question (today midnight)
-    const todayMidnight = getTodayMidnight();
-    const diffToNewQuestion = todayMidnight.getTime() - now.getTime();
-    
-    if (diffToNewQuestion > 0) {
-      const hours = Math.floor(diffToNewQuestion / (1000 * 60 * 60));
-      const minutes = Math.floor((diffToNewQuestion % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diffToNewQuestion % (1000 * 60)) / 1000);
-      setTimeUntilNewQuestion({ hours, minutes, seconds });
-    } else {
-      setTimeUntilNewQuestion({ hours: 0, minutes: 0, seconds: 0 });
-    }
   };
 
   // Check if user has already submitted evidence
   const hasUserSubmittedEvidence = (): boolean => {
     return userEvidenceSubmission !== null;
+  };
+
+  // Helper function to get timer urgency level
+  const getTimerUrgency = (hours: number, minutes: number, seconds: number) => {
+    const totalMinutes = hours * 60 + minutes + seconds / 60;
+    if (totalMinutes <= 15) return 'critical'; // < 15 minutes
+    if (totalMinutes <= 60) return 'urgent';   // < 1 hour
+    return 'normal';
+  };
+
+  // Helper function to get timer styling based on urgency
+  const getTimerStyling = (urgency: string, baseColor: string) => {
+    switch (urgency) {
+      case 'critical':
+        return {
+          container: `bg-gradient-to-r from-red-100 to-red-200 border-2 border-red-400 ${baseColor === 'blue' ? 'animate-pulse' : 'animate-bounce'}`,
+          text: 'text-red-800',
+          icon: 'bg-red-600',
+          timer: 'text-red-900'
+        };
+      case 'urgent':
+        return {
+          container: `bg-gradient-to-r from-orange-50 to-orange-100 border-2 border-orange-300 animate-pulse`,
+          text: 'text-orange-700',
+          icon: 'bg-orange-600',
+          timer: 'text-orange-900'
+        };
+      default:
+        return {
+          container: `bg-gradient-to-r from-${baseColor}-50 to-${baseColor}-100 border border-${baseColor}-200`,
+          text: `text-${baseColor}-700`,
+          icon: `bg-${baseColor}-600`,
+          timer: `text-${baseColor}-900`
+        };
+    }
   };
 
   // Add useEffect to handle cookie retrieval
@@ -585,46 +621,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
           </div>
         ) : (
           <>
-            {/* Today's Bet Results (Previous Prediction Awaiting Outcome) */}
-            {todaysBet && (
-              <div className="bg-gradient-to-br from-blue-50/80 via-white/80 to-blue-50/80 backdrop-blur-xl border border-blue-200/50 rounded-3xl p-6 mb-8 shadow-2xl shadow-blue-900/10 text-center relative overflow-hidden">
-                <div className="relative z-10">
-                  <h3 className="text-lg font-bold text-gray-700 mb-4">Previous Prediction</h3>
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    <div className={`p-3 rounded-xl shadow-md ${
-                      todaysBet.prediction === 'positive' ? 'bg-[#00dd00]' : 'bg-[#dd0000]'
-                    }`}>
-                      {todaysBet.prediction === 'positive' ? (
-                        <TrendingUp className="w-6 h-6 text-white" />
-                      ) : (
-                        <TrendingDown className="w-6 h-6 text-white" />
-                      )}
-                    </div>
-                    <div className="text-left">
-                      <div className="text-xl font-black text-gray-900 tracking-tight">
-                        {todaysBet.prediction === 'positive' ? 'YES' : 'NO'}
-                      </div>
-                      <div className="text-gray-500 text-xs font-medium">
-                        {new Date(todaysBet.betDate).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Outcome Countdown */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <Clock className="w-4 h-4 text-blue-600" />
-                      <span className="text-blue-700 font-medium text-sm">Result in:</span>
-                    </div>
-                    <span className="font-bold text-blue-900 text-lg tracking-wider">
-                      {timeUntilOutcome.hours.toString().padStart(2, '0')}:
-                      {timeUntilOutcome.minutes.toString().padStart(2, '0')}:
-                      {timeUntilOutcome.seconds.toString().padStart(2, '0')}
-                    </span>
-                  </div>
-                </div> 
-              </div>
-            )}
 
             {/* Tomorrow's Bet Interface */}
             {(hasOutcomeBeenSet() && marketOutcome && isEvidenceWindowActive()) ? (
@@ -877,44 +873,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                   </div>
                 </div>
 
-                {/* Timer Bars - Bottom Section (Dual Timer System) */}
-                <div className="bg-black">
-                  {/* Outcome Timer - Show if there's a previous prediction awaiting results */}
-                  {todaysBet && (
-                    <div className="px-6 py-3 border-b border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <div className="text-white font-medium">Previous Result</div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                            <Clock className="w-3 h-3 text-white" />
-                          </div>
-                          <span className="font-bold text-white text-lg tracking-wider">
-                            {timeUntilOutcome.hours.toString().padStart(2, '0')}:
-                            {timeUntilOutcome.minutes.toString().padStart(2, '0')}:
-                            {timeUntilOutcome.seconds.toString().padStart(2, '0')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* New Question Timer */}
-                  <div className="px-6 py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-white font-medium">Next Question</div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
-                          <Clock className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="font-bold text-white text-lg tracking-wider">
-                          {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
-                          {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
-                          {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             ) : isResultsDay() ? (
               // Saturday - Results Day message (when no outcome set yet)
@@ -1003,44 +961,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                   Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
                 </p>
                 
-                {/* Dual Timer System */}
-                <div className="space-y-3 mb-6 max-w-xs mx-auto">
-                  {/* Previous Result Timer - Only show if there's a todaysBet */}
-                  {todaysBet && (
-                    <div className="bg-white border-2 border-blue-600 rounded-xl p-3">
-                      <div className="text-center mb-2">
-                        <span className="text-blue-700 font-medium text-sm">Previous Result</span>
-                      </div>
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                          <Clock className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="font-bold text-blue-900 text-lg tracking-wider">
-                          {timeUntilOutcome.hours.toString().padStart(2, '0')}:
-                          {timeUntilOutcome.minutes.toString().padStart(2, '0')}:
-                          {timeUntilOutcome.seconds.toString().padStart(2, '0')}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Next Question Timer */}
-                  <div className="bg-white border-2 border-black rounded-xl p-3">
-                    <div className="text-center mb-2">
-                      <span className="text-gray-700 font-medium text-sm">Next Question</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
-                        <Clock className="w-3 h-3 text-white" />
-                      </div>
-                      <span className="font-bold text-black text-lg tracking-wider">
-                        {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
-                        {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
-                        {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -1109,6 +1029,88 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               : 'bg-green-50/80 border-green-200/50 text-green-700 shadow-green-900/10'
           }`}>
             <p className="font-bold text-lg">{message}</p>
+          </div>
+        )}
+
+        {/* Universal Dual Timer System - Always Visible */}
+        <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-2xl shadow-gray-900/10">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-4 sm:mb-6">Game Timers</h3>
+            
+
+            {/* New Question Timer */}
+            {(() => {
+              const urgency = getTimerUrgency(timeUntilNewQuestion.hours, timeUntilNewQuestion.minutes, timeUntilNewQuestion.seconds);
+              const styling = getTimerStyling(urgency, 'red');
+              return (
+                <div className={`${styling.container} rounded-xl p-3 sm:p-4`}>
+                  <div className="flex items-center justify-between">
+                    <div className={`${styling.text} font-medium text-sm sm:text-base`}>New Question</div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 ${styling.icon} rounded-full flex items-center justify-center`}>
+                        <Clock className="w-3 h-3 text-white" />
+                      </div>
+                      <span className={`font-bold ${styling.timer} text-base sm:text-lg tracking-wider`}>
+                        {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
+                        {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
+                        {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Outcome Reveal Timer */}
+            {(() => {
+              const urgency = getTimerUrgency(timeUntilOutcome.hours, timeUntilOutcome.minutes, timeUntilOutcome.seconds);
+              const styling = getTimerStyling(urgency, 'blue');
+              return (
+                <div className={`${styling.container} rounded-xl p-3 sm:p-4`}>
+                  <div className="flex items-center justify-between">
+                    <div className={`${styling.text} font-medium text-sm sm:text-base`}>Next Elimination</div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 ${styling.icon} rounded-full flex items-center justify-center`}>
+                        <Clock className="w-3 h-3 text-white" />
+                      </div>
+                      <span className={`font-bold ${styling.timer} text-base sm:text-lg tracking-wider`}>
+                        {timeUntilOutcome.hours.toString().padStart(2, '0')}:
+                        {timeUntilOutcome.minutes.toString().padStart(2, '0')}:
+                        {timeUntilOutcome.seconds.toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* Previous Prediction Section - Below Main Interface */}
+        {todaysBet && (
+          <div className="bg-gradient-to-br from-blue-50/80 via-white/80 to-blue-50/80 backdrop-blur-xl border border-blue-200/50 rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-2xl shadow-blue-900/10 text-center relative overflow-hidden">
+            <div className="relative z-10">
+              <h3 className="text-base sm:text-lg font-bold text-gray-700 mb-3 sm:mb-4">Previous Prediction</h3>
+              <div className="flex items-center justify-center gap-3 sm:gap-4">
+                <div className={`p-2 sm:p-3 rounded-xl shadow-md ${
+                  todaysBet.prediction === 'positive' ? 'bg-[#00dd00]' : 'bg-[#dd0000]'
+                }`}>
+                  {todaysBet.prediction === 'positive' ? (
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  ) : (
+                    <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  )}
+                </div>
+                <div className="text-left">
+                  <div className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
+                    {todaysBet.prediction === 'positive' ? 'YES' : 'NO'}
+                  </div>
+                  <div className="text-gray-500 text-xs font-medium">
+                    {new Date(todaysBet.betDate).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            </div> 
           </div>
         )}
 
