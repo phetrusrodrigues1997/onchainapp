@@ -158,6 +158,22 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Multiple Markets**: Support for Featured (Bitcoin) and general Crypto prediction markets
 - **Clean Terminology**: Uses "predict/prediction" terminology instead of "bet/betting"
 
+#### Updated MakePredictionsPage Layout Structure:
+- **Priority Layout**: New prediction interface displays first, previous predictions and timers below
+- **Universal Dual Timer System**: Always shows exactly 2 timers regardless of state:
+  - **"New Question"**: Red timer counting to next midnight (next prediction opportunity)
+  - **"Next Elimination"**: Blue timer counting to outcome reveal (24 hours after new question)
+- **Visual Urgency Feedback**: Timers change color and animate when urgent (<1 hour orange, <15 min red)
+- **Mobile Optimized**: Responsive spacing, typography, and touch-friendly elements
+- **Interface Flow**:
+  1. **Main Prediction Interface** (top) - New question prominently displayed first
+  2. **Game Timers Section** (middle) - Consistent dual timer system after scroll
+  3. **Previous Prediction Section** (bottom) - Context for awaiting results
+- **Timer Logic**: 
+  - New Question: Counts to tonight's midnight
+  - Next Elimination: Counts to tomorrow's midnight (24 hours after new question)
+- **State Independence**: Timers maintain consistent countdown regardless of prediction actions
+
 ### Tutorial System (`TutorialBridge.tsx`)
 - **5-Step Tutorial**: Guides new users through the weekly game cycle
 - **Updated Content**: Reflects accurate timing and schedules for pot entry and predictions
