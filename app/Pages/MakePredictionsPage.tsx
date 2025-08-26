@@ -88,6 +88,19 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
   const [isLoadingEvidence, setIsLoadingEvidence] = useState<boolean>(false);
 
+  // Timer states for countdown displays
+  const [timeUntilOutcome, setTimeUntilOutcome] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ hours: 0, minutes: 0, seconds: 0 });
+  
+  const [timeUntilNewQuestion, setTimeUntilNewQuestion] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ hours: 0, minutes: 0, seconds: 0 });
+
   // Check if betting is allowed (Sunday through Friday, unless testing toggle is off)
   const isBettingAllowed = (): boolean => {
     if (!SHOW_RESULTS_DAY_INFO) {
@@ -132,6 +145,52 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Get tomorrow midnight (when outcome will be revealed)
+  const getTomorrowMidnight = (): Date => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  };
+
+  // Get today midnight (when new question becomes available)
+  const getTodayMidnight = (): Date => {
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0); // This gives us tomorrow at 00:00 (same as next midnight)
+    return midnight;
+  };
+
+  // Update countdown timers
+  const updateCountdowns = () => {
+    const now = new Date();
+    
+    // Time until outcome is revealed (tomorrow midnight)
+    const tomorrowMidnight = getTomorrowMidnight();
+    const diffToOutcome = tomorrowMidnight.getTime() - now.getTime();
+    
+    if (diffToOutcome > 0) {
+      const hours = Math.floor(diffToOutcome / (1000 * 60 * 60));
+      const minutes = Math.floor((diffToOutcome % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffToOutcome % (1000 * 60)) / 1000);
+      setTimeUntilOutcome({ hours, minutes, seconds });
+    } else {
+      setTimeUntilOutcome({ hours: 0, minutes: 0, seconds: 0 });
+    }
+
+    // Time until new question (today midnight)
+    const todayMidnight = getTodayMidnight();
+    const diffToNewQuestion = todayMidnight.getTime() - now.getTime();
+    
+    if (diffToNewQuestion > 0) {
+      const hours = Math.floor(diffToNewQuestion / (1000 * 60 * 60));
+      const minutes = Math.floor((diffToNewQuestion % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffToNewQuestion % (1000 * 60)) / 1000);
+      setTimeUntilNewQuestion({ hours, minutes, seconds });
+    } else {
+      setTimeUntilNewQuestion({ hours: 0, minutes: 0, seconds: 0 });
+    }
+  };
+
   // Check if user has already submitted evidence
   const hasUserSubmittedEvidence = (): boolean => {
     return userEvidenceSubmission !== null;
@@ -159,6 +218,13 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       setSelectedTableType('featured');
       console.log('No valid contract cookie found, using default');
     }
+  }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    updateCountdowns(); // Initial update
+    const interval = setInterval(updateCountdowns, 1000); // Update every second
+    return () => clearInterval(interval);
   }, []);
 
   // Read contract data to get participants
@@ -733,31 +799,106 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 )}
               </div>
             ) : tomorrowsBet ? (
-              <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center relative overflow-hidden">
-                <div className="relative z-10">
-                  <h3 className="text-xl font-bold text-gray-700 mb-6">Tomorrow's Prediction</h3>
-                  <div className="inline-flex items-center gap-6 px-10 py-8 rounded-3xl bg-gradient-to-br from-gray-50/80 to-white/80 backdrop-blur-sm border border-gray-200/30 shadow-xl">
-                    {tomorrowsBet.prediction === 'positive' ? (
-                      <div className="p-4 bg-[#00dd00] rounded-2xl shadow-lg">
-                        <TrendingUp className="w-12 h-12 text-white" />
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-[#dd0000] rounded-2xl shadow-lg">
-                        <TrendingDown className="w-12 h-12 text-white" />
-                      </div>
-                    )}
+              <div className="bg-white border-2 border-black rounded-3xl shadow-2xl overflow-hidden relative">
+                {/* Header Section */}
+                <div className="bg-black text-white px-8 py-6 text-center">
+                  <h2 className="text-2xl font-bold tracking-tight">Prediction Confirmed</h2>
+                  <p className="text-gray-300 text-sm mt-1">
+                    {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+
+                {/* Main Prediction Display */}
+                <div className="p-8 text-center">
+                  <div className="flex items-center justify-center gap-8 mb-8">
+                    <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg ${
+                      tomorrowsBet.prediction === 'positive' 
+                        ? 'bg-black' 
+                        : 'bg-red-600'
+                    }`}>
+                      {tomorrowsBet.prediction === 'positive' ? (
+                        <TrendingUp className="w-10 h-10 text-white" />
+                      ) : (
+                        <TrendingDown className="w-10 h-10 text-white" />
+                      )}
+                    </div>
+                    
                     <div className="text-left">
-                      <div className="text-4xl font-black text-gray-900 tracking-tight mb-1">
+                      <div className="text-5xl font-black text-black tracking-tight mb-2">
                         {tomorrowsBet.prediction === 'positive' ? 'YES' : 'NO'}
                       </div>
-                      <div className="text-gray-500 text-sm font-medium">
-                        {new Date(tomorrowsBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      <div className="text-gray-600 text-sm font-medium">
+                        Set at {new Date(tomorrowsBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-500 text-lg mt-6 font-medium">
-                    Prediction set for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
-                  </p>
+
+                  {/* Market Question */}
+                  {/* {marketQuestion && (
+                    <div className="bg-black rounded-2xl p-6 mb-8 text-center">
+                      <p className="text-white font-semibold text-lg leading-relaxed">
+                        {marketQuestion}
+                      </p>
+                    </div>
+                  )} */}
+
+                  {/* Status Indicators */}
+                  <div className="grid grid-cols-2 gap-4 mb-8">
+                    <div className="bg-white border-2 border-black rounded-xl p-4 text-center">
+                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      </div>
+                      <div className="text-black font-bold text-sm">Active</div>
+                    </div>
+                    
+                    <div className="bg-white border-2 border-black rounded-xl p-4 text-center">
+                      <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center mx-auto mb-2">
+                        <Shield className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="text-black font-bold text-sm">Locked</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timer Bars - Bottom Section */}
+                <div className="bg-black">
+                  {/* Outcome Timer */}
+                  {/* <div className="px-6 py-3 border-b border-gray-700"> */}
+                    {/* <div className="flex items-center justify-between">
+                      <div className="text-white font-medium">Result Available</div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                          <Clock className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="font-bold text-white text-lg tracking-wider">
+                          {timeUntilOutcome.hours.toString().padStart(2, '0')}:
+                          {timeUntilOutcome.minutes.toString().padStart(2, '0')}:
+                          {timeUntilOutcome.seconds.toString().padStart(2, '0')}
+                        </span>
+                      </div>
+                    </div> */}
+                  {/* </div> */}
+                  
+                  {/* New Question Timer */}
+                  <div className="px-6 py-3">
+                    <div className="flex items-center justify-between">
+                      <div className="text-white font-medium">Next Question</div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                          <Clock className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="font-bold text-white text-lg tracking-wider">
+                          {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
+                          {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
+                          {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : isResultsDay() ? (
@@ -846,7 +987,20 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 <p className="text-gray-600 text-lg mb-4">
                   Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
                 </p>
-                {/* <div className="w-20 h-1.5 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 mx-auto rounded-full shadow-sm"></div> */}
+                
+                {/* New Question Timer */}
+                <div className="bg-white border-2 border-black rounded-xl p-4 mb-6 max-w-xs mx-auto">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center">
+                      <Clock className="w-3 h-3 text-white" />
+                    </div>
+                    <span className="font-bold text-black text-lg tracking-wider">
+                      {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
+                      {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
+                      {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 sm:gap-6">

@@ -311,7 +311,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
             <button
               onClick={handleCreatePot}
               disabled={!address || isPending || isConfirming || !potName.trim() || !description.trim()}
-              className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-500 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2"
             >
               {isPending || isConfirming ? (
                 <>
@@ -342,7 +342,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
         {/* Simple Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Create Prediction Markets
+            Private Markets
           </h1>
         
           
@@ -352,7 +352,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                 <span className="text-blue-600 text-xl">💰</span>
               </div>
-              <p className="text-sm text-gray-600">Anyone can enter with ETH</p>
+              <p className="text-sm text-gray-600">Share link with friends</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
@@ -373,7 +373,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
         <div className="space-y-4">
           <button
             onClick={() => setShowCreateForm(true)}
-            className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-800 transition-colors"
+            className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-500 transition-colors"
           >
             Create New Market
           </button>
@@ -381,7 +381,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
           <button
             onClick={handleMyMarketsClick}
             disabled={isLoadingMyPots}
-            className="w-full bg-red-600 py-4 px-6 rounded-lg text-lg text-white font-medium hover:border-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-red-600 py-4 px-6 rounded-lg text-lg text-white font-medium hover:border-gray-400 hover:bg-gray-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoadingMyPots ? (
               <>

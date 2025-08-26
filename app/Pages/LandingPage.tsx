@@ -713,7 +713,7 @@ const handleMarketClick = (marketId: string) => {
         </div>
       </section>
 
-      <footer className="relative z-10 px-6 py-10 bg-white text-center text-red-600 text-sm border-t border-gray-200">
+      <footer className="relative z-10 px-6 py-10 bg-white text-center text-red-600 text-sm shadow-md">
         &copy; {new Date().getFullYear()} {t.footerText}
       </footer>
       

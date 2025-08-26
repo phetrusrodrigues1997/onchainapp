@@ -154,9 +154,9 @@ export default function App() {
                 >
                 {isConnected && (
                   <>
-                    <Avatar className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
+                    <Avatar className="h-10 w-10 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
                     <div className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 bg-black flex items-center justify-center transition-all duration-200">
-                      <User className="h-4 w-4 text-[#fafafa]" />
+                      <User className="h-5 w-5 text-[#fafafa]" />
                     </div>
                   </>
                 )}
