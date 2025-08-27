@@ -27,6 +27,7 @@ import PrivatePotInterface from './Pages/PrivatePotInterface';
 import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
 import MessagingPage from './Pages/MessagingPage';
+import IdeasPage from './Pages/IdeasPage';
 
 
 
@@ -146,6 +147,17 @@ export default function App() {
             <div className="flex items-center justify-end flex-1">
             {/* Balance display removed - ETH balance handled by wallet */}
             
+            {/* Spacer to push Ideas button to the right */}
+            <div className="hidden md:flex flex-1"></div>
+            
+            {/* Ideas link */}
+            <button
+              onClick={() => setActiveSection('ideas')}
+              className="hidden md:block text-red-600 hover:text-red-700 font-semibold text-sm md:text-base translate-x-12 transition-colors duration-200 z-10 relative"
+            >
+              Ideas
+            </button>
+            
             <div className={`wallet-container ${isMobile ? '-ml-2' : 'ml-4'}`}>
               <Wallet>
 <ConnectWallet 
@@ -205,6 +217,7 @@ export default function App() {
           {activeSection === "makePrediction" && <MakePredicitions activeSection={activeSection} setActiveSection={setActiveSection} /> }
           {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}
+          {activeSection === "ideas" && <IdeasPage activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "privatePot" && privatePotAddress && (
             <PrivatePotInterface 
               contractAddress={privatePotAddress} 

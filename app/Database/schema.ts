@@ -128,3 +128,19 @@ export const EvidenceSubmissions = pgTable("evidence_submissions", {
   refundTxHash: text("refund_tx_hash"), // If approved, transaction hash for refund (for future implementation)
 });
 
+// Prediction market ideas submitted by users
+export const PredictionIdeas = pgTable("prediction_ideas", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(), // Who submitted the idea
+  idea: text("idea").notNull(), // The prediction market idea text
+  category: text("category").notNull(), // Category: crypto, stocks, sports, politics, entertainment, weather, tech, other
+  submittedAt: timestamp("submitted_at").defaultNow().notNull(), // When idea was submitted
+  likes: integer("likes").default(0).notNull(), // Number of community likes
+  status: text("status").notNull().default('pending'), // "pending", "approved", "implemented", "rejected"
+  reviewedBy: text("reviewed_by"), // Admin who reviewed the idea
+  reviewedAt: timestamp("reviewed_at"), // When the idea was reviewed
+  reviewNotes: text("review_notes"), // Admin notes about the decision
+  implementedAt: timestamp("implemented_at"), // When the idea was turned into a live market
+  marketAddress: text("market_address"), // Contract address if implemented as a market
+});
+

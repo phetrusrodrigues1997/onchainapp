@@ -7,7 +7,7 @@ import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
-import { EvidenceSubmissions, MarketOutcomes } from "./schema";
+import { EvidenceSubmissions, MarketOutcomes, PredictionIdeas } from "./schema";
 import { desc } from "drizzle-orm";
 import { getPrice } from '../Constants/getPrice';
 
@@ -1626,6 +1626,202 @@ export async function getAllEvidenceSubmissions(
   } catch (error) {
     console.error("Error getting evidence submissions:", error);
     return [];
+  }
+}
+
+// ==================== PREDICTION IDEAS FUNCTIONS ====================
+
+/**
+ * Submit a new prediction market idea
+ */
+export async function submitPredictionIdea({
+  walletAddress,
+  idea,
+  category
+}: {
+  walletAddress: string;
+  idea: string;
+  category: string;
+}) {
+  try {
+    // Validate inputs
+    if (!walletAddress || typeof walletAddress !== 'string' || walletAddress.length < 10) {
+      throw new Error('Invalid wallet address');
+    }
+
+    if (!idea || typeof idea !== 'string' || idea.trim().length < 10) {
+      throw new Error('Idea must be at least 10 characters long');
+    }
+
+    if (!category || typeof category !== 'string') {
+      throw new Error('Category is required');
+    }
+
+    const validCategories = ['crypto', 'stocks', 'sports', 'politics', 'entertainment', 'weather', 'tech', 'other'];
+    if (!validCategories.includes(category)) {
+      throw new Error('Invalid category');
+    }
+
+    // Sanitize inputs
+    const sanitizedWalletAddress = walletAddress.trim().toLowerCase();
+    const sanitizedIdea = idea.trim().substring(0, 500); // Limit to 500 characters
+    const sanitizedCategory = category.toLowerCase();
+
+    // Insert the idea
+    const result = await db
+      .insert(PredictionIdeas)
+      .values({
+        walletAddress: sanitizedWalletAddress,
+        idea: sanitizedIdea,
+        category: sanitizedCategory,
+        submittedAt: new Date(),
+        likes: 0,
+        status: 'pending'
+      })
+      .returning();
+
+    console.log('✅ Prediction idea submitted successfully:', result[0]);
+    return { success: true, idea: result[0] };
+
+  } catch (error) {
+    console.error('❌ Error submitting prediction idea:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Get recent prediction ideas (for community display)
+ */
+export async function getRecentPredictionIdeas(limit: number = 20) {
+  try {
+    const ideas = await db
+      .select()
+      .from(PredictionIdeas)
+      .where(eq(PredictionIdeas.status, 'pending'))
+      .orderBy(desc(PredictionIdeas.submittedAt))
+      .limit(limit);
+
+    return ideas;
+
+  } catch (error) {
+    console.error("Error getting recent prediction ideas:", error);
+    return [];
+  }
+}
+
+/**
+ * Get prediction ideas by user wallet address
+ */
+export async function getUserPredictionIdeas(walletAddress: string) {
+  try {
+    if (!walletAddress || typeof walletAddress !== 'string') {
+      throw new Error('Invalid wallet address');
+    }
+
+    const sanitizedAddress = walletAddress.trim().toLowerCase();
+
+    const ideas = await db
+      .select()
+      .from(PredictionIdeas)
+      .where(eq(PredictionIdeas.walletAddress, sanitizedAddress))
+      .orderBy(desc(PredictionIdeas.submittedAt));
+
+    return ideas;
+
+  } catch (error) {
+    console.error("Error getting user prediction ideas:", error);
+    return [];
+  }
+}
+
+/**
+ * Like a prediction idea (increment likes counter)
+ */
+export async function likePredictionIdea(ideaId: number) {
+  try {
+    if (!ideaId || typeof ideaId !== 'number') {
+      throw new Error('Invalid idea ID');
+    }
+
+    const result = await db
+      .update(PredictionIdeas)
+      .set({
+        likes: sql`${PredictionIdeas.likes} + 1`
+      })
+      .where(eq(PredictionIdeas.id, ideaId))
+      .returning();
+
+    if (result.length === 0) {
+      throw new Error('Idea not found');
+    }
+
+    return { success: true, likes: result[0].likes };
+
+  } catch (error) {
+    console.error("Error liking prediction idea:", error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+/**
+ * Update prediction idea status (admin function)
+ */
+export async function updatePredictionIdeaStatus({
+  ideaId,
+  status,
+  reviewedBy,
+  reviewNotes,
+  marketAddress
+}: {
+  ideaId: number;
+  status: 'approved' | 'implemented' | 'rejected';
+  reviewedBy: string;
+  reviewNotes?: string;
+  marketAddress?: string;
+}) {
+  try {
+    if (!ideaId || typeof ideaId !== 'number') {
+      throw new Error('Invalid idea ID');
+    }
+
+    if (!status || !['approved', 'implemented', 'rejected'].includes(status)) {
+      throw new Error('Invalid status');
+    }
+
+    if (!reviewedBy || typeof reviewedBy !== 'string') {
+      throw new Error('Reviewer address is required');
+    }
+
+    const updateData: any = {
+      status,
+      reviewedBy: reviewedBy.trim().toLowerCase(),
+      reviewedAt: new Date()
+    };
+
+    if (reviewNotes) {
+      updateData.reviewNotes = reviewNotes.trim();
+    }
+
+    if (status === 'implemented' && marketAddress) {
+      updateData.implementedAt = new Date();
+      updateData.marketAddress = marketAddress.trim();
+    }
+
+    const result = await db
+      .update(PredictionIdeas)
+      .set(updateData)
+      .where(eq(PredictionIdeas.id, ideaId))
+      .returning();
+
+    if (result.length === 0) {
+      throw new Error('Idea not found');
+    }
+
+    return { success: true, idea: result[0] };
+
+  } catch (error) {
+    console.error("Error updating prediction idea status:", error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 

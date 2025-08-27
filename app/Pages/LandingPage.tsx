@@ -258,6 +258,27 @@ const handleMarketClick = (marketId: string) => {
           100% { transform: translateX(0); }
         }
         
+        @keyframes professional-glow {
+          0%, 100% {
+            box-shadow: 
+              0 0 0 1px rgba(220, 38, 38, 0.3),
+              0 0 8px rgba(220, 38, 38, 0.15),
+              0 0 16px rgba(220, 38, 38, 0.1);
+          }
+          50% {
+            box-shadow: 
+              0 0 0 1px rgba(220, 38, 38, 0.6),
+              0 0 12px rgba(220, 38, 38, 0.3),
+              0 0 24px rgba(220, 38, 38, 0.2),
+              0 0 32px rgba(220, 38, 38, 0.1);
+          }
+        }
+        
+        .pulsing-glow-selected {
+          background: linear-gradient(135deg, rgb(220, 38, 38), rgb(239, 68, 68), rgb(55, 65, 81));
+          animation: professional-glow 2.5s ease-in-out infinite;
+        }
+        
         @keyframes pulse-glow {
           0%, 100% { 
             transform: scale(1); 
@@ -332,7 +353,7 @@ const handleMarketClick = (marketId: string) => {
     
     <button 
       onClick={() => setActiveSection('liveMarkets')}
-      className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-900 transition-all duration-200 hover:scale-105 animate-pulse-glow shadow-lg shadow-gray-300"
+      className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-red-600 transition-all duration-200 hover:scale-105 animate-pulse-glow shadow-lg shadow-gray-300"
     >
       {/* Live indicator dot */}
       <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
@@ -562,8 +583,8 @@ const handleMarketClick = (marketId: string) => {
                     <div
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => handleMarketClick(market.id)}
-                      className={`group bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
-                        market.tabId === selectedMarket ? 'scale-105' : ''
+                      className={`group rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
+                        market.tabId === selectedMarket ? 'scale-105 pulsing-glow-selected' : 'bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black'
                       }`}
                     >
                       <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-xl p-3 h-full flex flex-col min-h-[240px]">
