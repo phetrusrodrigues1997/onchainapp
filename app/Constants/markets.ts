@@ -262,7 +262,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
   name: 'Random Topics',
   symbol: 'Featured',
   color: '#1DB954',
-  question: 'Will Elon tweet about Trump?',
+  question: 'Will Elon Musk tweet about Trump?',
   icon: 'https://www.ft.com/__origami/service/image/v2/images/raw/ftcms%3A6c174ac8-68c0-4328-84de-28007721469c?source=next-article&fit=scale-down&quality=highest&width=1440&dpr=1',
   currentPrice: '$150',
   participants: 42,
