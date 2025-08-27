@@ -167,9 +167,9 @@ export default function App() {
             {/* Ideas link */}
             <button
               onClick={() => setActiveSection('ideas')}
-              className="hidden md:block text-red-600 hover:text-red-700 font-semibold text-sm md:text-base translate-x-12 transition-colors duration-200 z-10 relative"
+              className="hidden bg-gray-100 md:block text-gray-700 hover:text-black font-medium text-sm md:text-base translate-x-12 transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-red-100"
             >
-              Ideas
+              Ideas 
             </button>
             
             <div className={`wallet-container ${isMobile ? '-ml-2' : 'ml-4'}`}>

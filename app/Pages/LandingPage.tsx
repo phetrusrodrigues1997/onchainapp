@@ -144,7 +144,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         const nextIndex = (currentIndex + 1) % currentMarketOptions.length;
         return currentMarketOptions[nextIndex].id;
       });
-    }, 17000);
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [currentLanguage, searchQuery]);
@@ -552,14 +552,8 @@ const handleMarketClick = (marketId: string) => {
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
               <div className="flex items-center space-x-2">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    availableMarkets.includes(market.name.toLowerCase())
-                      ? 'bg-red-500'
-                      : 'bg-gray-400'
-                  }`}
-                ></div>        
-                <span className={`text-sm font-semibold ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-red-600' : 'text-gray-600'}`}>
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-400"></div>        
+                <span className="text-sm font-semibold text-gray-600">
                   {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
                 </span>
               </div>
@@ -670,14 +664,8 @@ const handleMarketClick = (marketId: string) => {
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                           <div className="flex items-center space-x-1">
-                            <div
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                availableMarkets.includes(market.name.toLowerCase())
-                                  ? 'bg-red-500 animate-pulse'
-                                  : 'bg-gray-400'
-                              }`}
-                            ></div>
-                            <span className={`text-[10px] font-medium ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-red-600' : 'text-gray-600'}`}>
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                            <span className="text-[10px] font-medium text-gray-600">
                               {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
                             </span>
                           </div>
