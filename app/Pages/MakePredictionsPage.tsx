@@ -101,23 +101,25 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     seconds: number;
   }>({ hours: 0, minutes: 0, seconds: 0 });
 
-  // Check if betting is allowed (Sunday through Friday, unless testing toggle is off)
+  // Check if betting is allowed (Sunday through Friday, unless testing toggle is off) - UK timezone
   const isBettingAllowed = (): boolean => {
     if (!SHOW_RESULTS_DAY_INFO) {
       return true; // Always allow betting when testing toggle is off
     }
     const now = new Date();
-    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const day = ukNow.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
     return day !== 6; // All days except Saturday
   };
 
-  // Check if today is Saturday (results day) - only when toggle is enabled
+  // Check if today is Saturday (results day) - only when toggle is enabled - UK timezone
   const isResultsDay = (): boolean => {
     if (!SHOW_RESULTS_DAY_INFO) {
       return false; // Never show results day when testing toggle is off
     }
     const now = new Date();
-    const day = now.getDay();
+    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const day = ukNow.getDay();
     return day === 6; // Saturday
   };
 
@@ -145,17 +147,21 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Get tonight's midnight (when new question becomes available)
+  // Get tonight's midnight (when new question becomes available) - UK timezone
   const getTonightMidnight = (): Date => {
-    const tonight = new Date();
+    const now = new Date();
+    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const tonight = new Date(ukNow);
     tonight.setDate(tonight.getDate() + 1);
     tonight.setHours(0, 0, 0, 0);
     return tonight;
   };
 
-  // Get tomorrow's midnight (when previous prediction outcome will be revealed - 24 hours after next question)
+  // Get tomorrow's midnight (when previous prediction outcome will be revealed - 24 hours after next question) - UK timezone
   const getTomorrowMidnight = (): Date => {
-    const tomorrow = new Date();
+    const now = new Date();
+    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const tomorrow = new Date(ukNow);
     tomorrow.setDate(tomorrow.getDate() + 2);
     tomorrow.setHours(0, 0, 0, 0);
     return tomorrow;
@@ -164,10 +170,11 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   // Update countdown timers
   const updateCountdowns = () => {
     const now = new Date();
+    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
     
     // Time until new question (tonight's midnight)
     const tonightMidnight = getTonightMidnight();
-    const diffToNewQuestion = tonightMidnight.getTime() - now.getTime();
+    const diffToNewQuestion = tonightMidnight.getTime() - ukNow.getTime();
     
     if (diffToNewQuestion > 0) {
       const hours = Math.floor(diffToNewQuestion / (1000 * 60 * 60));
@@ -180,7 +187,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
     // Time until outcome is revealed (tomorrow's midnight - 24 hours after next question)
     const tomorrowMidnight = getTomorrowMidnight();
-    const diffToOutcome = tomorrowMidnight.getTime() - now.getTime();
+    const diffToOutcome = tomorrowMidnight.getTime() - ukNow.getTime();
     
     if (diffToOutcome > 0) {
       const hours = Math.floor(diffToOutcome / (1000 * 60 * 60));
