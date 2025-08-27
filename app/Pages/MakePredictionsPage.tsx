@@ -1247,4 +1247,4 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       </div>
     </div>
   );
-}}
+}
