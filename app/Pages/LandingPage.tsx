@@ -469,7 +469,7 @@ const handleMarketClick = (marketId: string) => {
             {/* Header with Icon and Price */}
             <div className="flex flex-col items-center mb-3">
               <div className="flex items-center justify-center mb-2">
-                <div className="rounded-xl flex items-center justify-center w-full h-40 bg-gray-50 overflow-hidden">
+                <div className="rounded-xl flex items-center justify-center w-full h-36 bg-gray-50 overflow-hidden">
                   {market.icon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={market.icon} 

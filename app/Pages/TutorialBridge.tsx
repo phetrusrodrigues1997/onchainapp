@@ -67,21 +67,18 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     }
   }, [address, isConnected]);
 
-  // Read participants from first contract
-  const { data: participants1 } = useReadContract({
-    address: '0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22' as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'getParticipants',
-    query: { enabled: isConnected && !!address }
-  });
+  // Get contract addresses array
+  const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
 
-  // Read participants from second contract  
-  const { data: participants2 } = useReadContract({
-    address: '0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198' as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'getParticipants',
-    query: { enabled: isConnected && !!address }
-  });
+  // Read participants from all contracts
+  const participantsQueries = contractAddresses.map(address => 
+    useReadContract({
+      address: address as `0x${string}`,
+      abi: PREDICTION_POT_ABI,
+      functionName: 'getParticipants',
+      query: { enabled: isConnected && !!address }
+    })
+  );
 
   // Set up the selected market address from cookie
   useEffect(() => {
@@ -101,25 +98,18 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
     const participatingPots: string[] = [];
 
-    // Check first contract
-    if (participants1 && Array.isArray(participants1)) {
-      const isParticipant1 = participants1.some(
-        (participant: string) => participant.toLowerCase() === address.toLowerCase()
-      );
-      if (isParticipant1) {
-        participatingPots.push('0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22');
+    // Check all contracts
+    participantsQueries.forEach((query, index) => {
+      const participants = query.data;
+      if (participants && Array.isArray(participants)) {
+        const isParticipant = participants.some(
+          (participant: string) => participant.toLowerCase() === address.toLowerCase()
+        );
+        if (isParticipant) {
+          participatingPots.push(contractAddresses[index]);
+        }
       }
-    }
-
-    // Check second contract
-    if (participants2 && Array.isArray(participants2)) {
-      const isParticipant2 = participants2.some(
-        (participant: string) => participant.toLowerCase() === address.toLowerCase()
-      );
-      if (isParticipant2) {
-        participatingPots.push('0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198');
-      }
-    }
+    });
 
     setUserPots(participatingPots);
 
@@ -133,7 +123,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         console.log('User is owner, keeping normal dashboard flow');
       }
     }
-  }, [participants1, participants2, address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
+  }, [participantsQueries.map(q => q.data), address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
 
 
   useEffect(() => {
@@ -168,25 +158,21 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       const selectedMarketAddress = Cookies.get('selectedMarket');
       console.log('Selected market address from cookie:', selectedMarketAddress);
       
-      // Map contract addresses to market info
-      if (selectedMarketAddress === '0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22') {
+      // Check if the selected market address exists in our CONTRACT_ADDRESSES
+      if (selectedMarketAddress && selectedMarketAddress in CONTRACT_ADDRESSES) {
+        const marketType = CONTRACT_ADDRESSES[selectedMarketAddress as keyof typeof CONTRACT_ADDRESSES];
         setMarketInfo({ 
-          name: '', 
-          section: 'bitcoinPot',
-          address: selectedMarketAddress 
-        });
-      } else if (selectedMarketAddress === '0x9FBD4dA12183a374a65A94Eb66F8165c9A7be198') {
-        setMarketInfo({ 
-          name: '', 
+          name: marketType === 'featured' ? 'Featured Market' : 'Crypto Market', 
           section: 'bitcoinPot',  // Both markets use the same section, PredictionPotTest handles the difference
           address: selectedMarketAddress 
         });
       } else {
-        // Default to Bitcoin market if no cookie or unknown address
+        // Default to first market if no cookie or unknown address
+        const defaultAddress = contractAddresses[0];
         setMarketInfo({ 
-          name: 'Bitcoin Market', 
+          name: 'Featured Market', 
           section: 'bitcoinPot',
-          address: '0x4Ff2bBB26CC30EaD90251dd224b641989Fa24e22' 
+          address: defaultAddress 
         });
       }
     };
