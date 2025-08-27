@@ -532,7 +532,7 @@ const handleMarketClick = (marketId: string) => {
       </section>
 
       {/* Desktop Markets Grid - Full Width */}
-      <section className="relative z-10 px-6 -mt-16 pb-16 hidden md:block">
+      <section className="relative z-10 px-6 -mt-20 pb-16 hidden md:block">
         <div className="max-w-7xl mx-auto">
           {/* All Markets Display - Full Width Grid */}
           <div className="grid grid-cols-4 gap-4">

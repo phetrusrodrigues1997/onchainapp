@@ -70,15 +70,22 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   // Get contract addresses array
   const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
 
-  // Read participants from all contracts
-  const participantsQueries = contractAddresses.map(address => 
-    useReadContract({
-      address: address as `0x${string}`,
-      abi: PREDICTION_POT_ABI,
-      functionName: 'getParticipants',
-      query: { enabled: isConnected && !!address }
-    })
-  );
+  // Read participants from all contracts - hooks must be called at top level
+  const { data: participants1 } = useReadContract({
+    address: contractAddresses[0] as `0x${string}`,
+    abi: PREDICTION_POT_ABI,
+    functionName: 'getParticipants',
+    query: { enabled: isConnected && !!address }
+  });
+
+  const { data: participants2 } = useReadContract({
+    address: contractAddresses[1] as `0x${string}`,
+    abi: PREDICTION_POT_ABI,
+    functionName: 'getParticipants',
+    query: { enabled: isConnected && !!address }
+  });
+
+  const participantsData = [participants1, participants2];
 
   // Set up the selected market address from cookie
   useEffect(() => {
@@ -99,8 +106,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     const participatingPots: string[] = [];
 
     // Check all contracts
-    participantsQueries.forEach((query, index) => {
-      const participants = query.data;
+    participantsData.forEach((participants, index) => {
       if (participants && Array.isArray(participants)) {
         const isParticipant = participants.some(
           (participant: string) => participant.toLowerCase() === address.toLowerCase()
@@ -123,7 +129,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         console.log('User is owner, keeping normal dashboard flow');
       }
     }
-  }, [participantsQueries.map(q => q.data), address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
+  }, [participantsData, address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
 
 
   useEffect(() => {
