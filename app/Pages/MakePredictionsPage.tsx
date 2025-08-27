@@ -211,10 +211,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     } else {
       setTimeUntilNewQuestion({ hours: 0, minutes: 0, seconds: 0 });
     }
-
-    // Time until outcome is revealed (tomorrow's midnight - 24 hours after next question)
-    
-    
+  };
 
   // Check if user has already submitted evidence
   const hasUserSubmittedEvidence = (): boolean => {
@@ -328,7 +325,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       console.error('Error loading evidence submission:', error);
       return null;
     }
-  }, [address, selectedTableType, contractAddress]);
+  }, [address, selectedTableType, contractAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load market outcome for current contract
   const loadMarketOutcome = useCallback(async () => {
@@ -371,7 +368,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     } catch (error) {
       console.error('Error loading market outcome:', error);
     }
-  }, [contractAddress, selectedTableType, address, loadUserEvidenceSubmission]);
+  }, [contractAddress, selectedTableType, address, loadUserEvidenceSubmission]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadBets = useCallback(async () => {
     if (!address || !selectedTableType) return;
@@ -397,7 +394,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     } finally {
       setIsBetLoading(false);
     }
-  }, [address, selectedTableType]);
+  }, [address, selectedTableType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load data on component mount and when key dependencies change
   useEffect(() => {
@@ -438,7 +435,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [marketOutcome, isEvidenceWindowActive]);
+  }, [marketOutcome, isEvidenceWindowActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showMessage = (msg: string) => {
     setMessage(msg);
@@ -632,7 +629,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Re-entry Required</h2>
               <p className="text-gray-600 text-sm mb-6">
-                Wrong prediction in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}. Pay today's entry fee to continue.
+                Wrong prediction in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}. Pay today&apos;s entry fee to continue.
               </p>
               
               <button
@@ -921,7 +918,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                       Outcome will be set soon!
                     </p>
                     <p className="text-blue-600 text-sm mt-2">
-                      You'll have 1 hour to submit evidence if you disagree
+                      You&apos;ll have 1 hour to submit evidence if you disagree
                     </p>
                   </div>
                   <div className="text-gray-600 text-sm">
@@ -1121,7 +1118,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             </div>
             
             <div className="relative z-10 text-gray-700 text-sm font-bold tracking-wide">
-              Predict tomorrow's outcome • Wrong predictions require re-entry fee
+              Predict tomorrow&apos;s outcome • Wrong predictions require re-entry fee
             </div>
           </div>
         )}
