@@ -295,6 +295,23 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     query: { enabled: !!contractAddress }
   }) as { data: bigint | undefined };
 
+  // Check if the user is a participant
+  const isParticipant = address && participants && Array.isArray(participants) 
+    ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
+    : false;
+
+  // Auto-redirect to MakePredictionsPage if user is already a participant
+  useEffect(() => {
+    if (isConnected && address && isParticipant && contractAddress) {
+      console.log('User is already a participant, redirecting to makePrediction in 1 second');
+      const timer = setTimeout(() => {
+        setActiveSection('makePrediction');
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, address, isParticipant, contractAddress, setActiveSection]);
+
   const { data: owner } = useReadContract({
     address: contractAddress as `0x${string}`,
     abi: PREDICTION_POT_ABI,
@@ -351,12 +368,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const entryAmount = freeEntriesAvailable > 0 ? usdToEth(0.02) : baseEntryAmount; // Fixed $0.02 if using free entry, otherwise daily price
 
   // ETH balance is handled by the wallet - no need for contract reads
-
-  // Check if the user is a participant
-  const isParticipant = address && participants && Array.isArray(participants) 
-    ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
-    : false;
-
 
 
   const formatETH = (value: bigint): string => {
@@ -904,36 +915,7 @@ useEffect(() => {
             </div>
           )}
 
-          {/* User Actions - Show different content if already a participant */}
-          {isConnected && contractAddress && isParticipant && !reEntryFee && !postEntryLoading && (
-            <div className="mb-6">
-              <div className={`rounded-xl border p-8 text-center transition-all duration-500 ${
-                justEnteredPot 
-                  ? 'bg-gradient-to-br from-red-50 to-rose-50 border-2 border-green-400 shadow-lg' 
-                  : 'bg-white border border-gray-200 hover:border-gray-300'
-              }`}>
-                <div className={`text-2xl font-light mb-3 transition-colors duration-500 ${
-                  justEnteredPot ? 'text-green-800' : 'text-gray-900'
-                }`}>
-                  {justEnteredPot ? "🎉 Welcome! You're in the Pot!" : (t.alreadyInPot || "✓ You're in the Pot")}
-                </div>
-                <div className={`font-light mb-6 leading-relaxed transition-colors duration-500 ${
-                  justEnteredPot ? 'text-green-700' : 'text-gray-600'
-                }`}>
-                  {justEnteredPot 
-                    ? "🎊 Congratulations! You're now part of this prediction market. Start making your daily predictions to compete for the pot!" 
-                    : (t.enteredPotMessage || "You've successfully entered this prediction market. You can now place your daily predictions!")
-                  }
-                </div>
-                <button
-                  onClick={() => setActiveSection('makePrediction')}
-                  className="px-8 py-3 bg-red-600 text-white font-medium rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-105"
-                >
-                  {t.goToBetting || 'Start Betting'}
-                </button>
-              </div>
-            </div>
-          )}
+          {/* User will be automatically redirected to MakePredictionsPage if already a participant */}
 
 
           {/* User Actions - Show countdown or pot entry based on day */}
