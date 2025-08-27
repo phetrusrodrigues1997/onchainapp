@@ -125,12 +125,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
   const [isLoadingEvidence, setIsLoadingEvidence] = useState<boolean>(false);
 
-  // Timer states for countdown displays
-  const [timeUntilOutcome, setTimeUntilOutcome] = useState<{
-    hours: number;
-    minutes: number;
-    seconds: number;
-  }>({ hours: 0, minutes: 0, seconds: 0 });
+
   
   const [timeUntilNewQuestion, setTimeUntilNewQuestion] = useState<{
     hours: number;
@@ -218,18 +213,8 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     }
 
     // Time until outcome is revealed (tomorrow's midnight - 24 hours after next question)
-    const tomorrowMidnight = getTomorrowMidnight();
-    const diffToOutcome = tomorrowMidnight.getTime() - ukNow.getTime();
     
-    if (diffToOutcome > 0) {
-      const hours = Math.floor(diffToOutcome / (1000 * 60 * 60));
-      const minutes = Math.floor((diffToOutcome % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diffToOutcome % (1000 * 60)) / 1000);
-      setTimeUntilOutcome({ hours, minutes, seconds });
-    } else {
-      setTimeUntilOutcome({ hours: 0, minutes: 0, seconds: 0 });
-    }
-  };
+    
 
   // Check if user has already submitted evidence
   const hasUserSubmittedEvidence = (): boolean => {
@@ -1095,28 +1080,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               );
             })()}
 
-            {/* Outcome Reveal Timer */}
-            {(() => {
-              const urgency = getTimerUrgency(timeUntilOutcome.hours, timeUntilOutcome.minutes, timeUntilOutcome.seconds);
-              const styling = getTimerStyling(urgency, 'blue');
-              return (
-                <div className={`${styling.container} rounded-xl p-3 sm:p-4`}>
-                  <div className="flex items-center justify-between">
-                    <div className={`${styling.text} font-medium text-sm sm:text-base`}>Next Elimination</div>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className={`w-5 h-5 sm:w-6 sm:h-6 ${styling.icon} rounded-full flex items-center justify-center`}>
-                        <Clock className="w-3 h-3 text-white" />
-                      </div>
-                      <span className={`font-bold ${styling.timer} text-base sm:text-lg tracking-wider`}>
-                        {timeUntilOutcome.hours.toString().padStart(2, '0')}:
-                        {timeUntilOutcome.minutes.toString().padStart(2, '0')}:
-                        {timeUntilOutcome.seconds.toString().padStart(2, '0')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
+            
           </div>
         </div>
 
@@ -1286,4 +1250,4 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       </div>
     </div>
   );
-}
+}}
