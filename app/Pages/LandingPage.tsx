@@ -351,7 +351,7 @@ const handleMarketClick = (marketId: string) => {
       className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-red-600 transition-all duration-200 hover:scale-105 animate-pulse-glow shadow-lg shadow-gray-300"
     >
       {/* Live indicator dot */}
-      <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
       
       <span className="relative">
         Live markets
@@ -422,9 +422,9 @@ const handleMarketClick = (marketId: string) => {
                   <button
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all duration-200  ${selectedMarket === market.id
-                        ? 'border-red-500 bg-red-50 text-red-700'
-                        : 'border-gray-300 hover:border-red-400 hover:bg-red-50 font-bold text-gray-700'
+                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200  ${selectedMarket === market.id
+                        ? 'bg-red-50 text-red-700'
+                        : 'hover:bg-red-50 font-bold text-gray-700'
                       }`}
                     style={{
                       minWidth: 'fit-content',

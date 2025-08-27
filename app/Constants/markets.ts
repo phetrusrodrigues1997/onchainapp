@@ -263,7 +263,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
   symbol: 'Featured',
   color: '#1DB954',
   question: 'Will Elon Musk tweet about Trump?',
-  icon: 'https://www.ft.com/__origami/service/image/v2/images/raw/ftcms%3A6c174ac8-68c0-4328-84de-28007721469c?source=next-article&fit=scale-down&quality=highest&width=1440&dpr=1',
+  icon: 'https://www.reuters.com/resizer/v2/X2P6AU3MARJKNEEGSGOX223QZU.jpg?auth=ec382dadf32e0b1c91a79c2e71a55c369312198ed92d304a8e8f789f93e58afb&width=1080&quality=80',
   currentPrice: '$150',
   participants: 42,
   potSize: '$420',
