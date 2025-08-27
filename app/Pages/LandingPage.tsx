@@ -423,8 +423,8 @@ const handleMarketClick = (marketId: string) => {
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
                     className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200  ${selectedMarket === market.id
-                        ? 'bg-red-50 text-red-700'
-                        : 'hover:bg-red-50 font-bold text-gray-700'
+                        ? 'text-black'
+                        : 'hover:text-red-600 font-bold text-gray-700'
                       }`}
                     style={{
                       minWidth: 'fit-content',
@@ -460,7 +460,7 @@ const handleMarketClick = (marketId: string) => {
           
           
 {/* Mobile Markets Display - All Markets */}
-<div className="max-w-md mx-auto md:hidden -translate-y-12 space-y-4">
+<div className="max-w-md mx-auto md:hidden -translate-y-14 space-y-4">
   {(() => {
     // Get all markets and deduplicate by ID
     const allMarkets = marketOptions.map(option => {
@@ -581,7 +581,7 @@ const handleMarketClick = (marketId: string) => {
       </section>
 
       {/* Desktop Markets Grid - Full Width */}
-      <section className="relative z-10 px-6 -mt-20 pb-16 hidden md:block">
+      <section className="relative z-10 px-6 -mt-24 pb-16 hidden md:block">
         <div className="max-w-7xl mx-auto">
           {/* All Markets Display - Full Width Grid */}
           <div className="grid grid-cols-4 gap-4">
