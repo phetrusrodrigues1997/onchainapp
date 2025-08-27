@@ -518,7 +518,7 @@ const handleMarketClick = (marketId: string) => {
             </div>
 
             {/* Trading Buttons */}
-            <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-2 gap-3 mb-2">
               <button className="bg-white hover:bg-gray-50 border-2 border-black hover:border-red-600 text-black hover:text-red-600 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
@@ -528,7 +528,7 @@ const handleMarketClick = (marketId: string) => {
             </div>
 
             {/* Stats Footer */}
-            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+            <div className="flex justify-between items-center pt-2">
               <div className="flex items-center space-x-2">
                 <div
                   className={`w-2.5 h-2.5 rounded-full ${
