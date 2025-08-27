@@ -411,7 +411,7 @@ const handleMarketClick = (marketId: string) => {
               {/* Scrollable Markets Container */}
               <div
                 ref={carouselRef}
-                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-0 md:px-12 transform: md:-translate-x-12"
+                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -ml-4"
                 onScroll={handleScroll}
                 style={{
                   scrollbarWidth: 'none',
