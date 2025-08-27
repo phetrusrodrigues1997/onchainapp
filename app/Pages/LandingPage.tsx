@@ -29,13 +29,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const availableMarkets = ["random topics", "crypto"];
   
-  // Countdown state for timer
-  const [timeUntilMidnight, setTimeUntilMidnight] = useState<{
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  }>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  
 
 
 
@@ -447,20 +441,30 @@ const handleMarketClick = (marketId: string) => {
 <div className="max-w-md mx-auto md:hidden -translate-y-12 space-y-4">
   {(() => {
     // Get all markets and deduplicate by ID
-    const allMarketsRaw = marketOptions.map(option => {
+    const allMarkets = marketOptions.map(option => {
       const marketData = getMarkets(t, option.id);
       const market = marketData[0]; // Get the first (main) market for each option
+      
       if (market) {
         // Store the tab option ID so we can match it later
         market.tabId = option.id;
+        return market;
+      } else {
+        // Create a fallback market for categories without data
+        return {
+          id: option.id,
+          name: option.name,
+          symbol: option.symbol,
+          color: option.color || '#666666',
+          question: `${option.name} predictions coming soon...`,
+          icon: option.icon || '🔮',
+          currentPrice: '-',
+          participants: 0,
+          potSize: '$0',
+          tabId: option.id
+        };
       }
-      return market;
-    }).filter(Boolean);
-    
-    // Remove duplicates based on market ID
-    const allMarkets = allMarketsRaw.filter((market, index, array) => 
-      array.findIndex(m => m.id === market.id) === index
-    );
+    });
     
     // Reorder: selected market first, then others (match by tabId)
     const selectedMarketData = allMarkets.find(market => market.tabId === selectedMarket);
@@ -561,20 +565,30 @@ const handleMarketClick = (marketId: string) => {
           <div className="grid grid-cols-4 gap-4">
                 {(() => {
                   // Get all markets and deduplicate by ID
-                  const allMarketsRaw = marketOptions.map(option => {
+                  const allMarkets = marketOptions.map(option => {
                     const marketData = getMarkets(t, option.id);
                     const market = marketData[0]; // Get the first (main) market for each option
+                    
                     if (market) {
                       // Store the tab option ID so we can match it later
                       market.tabId = option.id;
+                      return market;
+                    } else {
+                      // Create a fallback market for categories without data
+                      return {
+                        id: option.id,
+                        name: option.name,
+                        symbol: option.symbol,
+                        color: option.color || '#666666',
+                        question: `${option.name} predictions coming soon...`,
+                        icon: option.icon || '🔮',
+                        currentPrice: '-',
+                        participants: 0,
+                        potSize: '$0',
+                        tabId: option.id
+                      };
                     }
-                    return market;
-                  }).filter(Boolean);
-                  
-                  // Remove duplicates based on market ID
-                  const allMarkets = allMarketsRaw.filter((market, index, array) => 
-                    array.findIndex(m => m.id === market.id) === index
-                  );
+                  });
                   
                   // Reorder: selected market first, then others (match by tabId)
                   const selectedMarketData = allMarkets.find(market => market.tabId === selectedMarket);
