@@ -422,9 +422,9 @@ const handleMarketClick = (marketId: string) => {
                   <button
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200  ${selectedMarket === market.id
+                    className={`group flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 font-bold ${selectedMarket === market.id
                         ? 'text-black'
-                        : 'hover:text-red-600 font-bold text-gray-700'
+                        : 'text-[#6B7280] hover:text-black'
                       }`}
                     style={{
                       minWidth: 'fit-content',
@@ -432,20 +432,20 @@ const handleMarketClick = (marketId: string) => {
                       
                     }}
                   >
-                    {/* Icon */}
+                    {/* Icon
                     {selectedMarket === market.id && (
   <div
     className="w-6 h-6 rounded flex items-center justify-center text-sm font-bold flex-shrink-0 text-red-600"
   >
     {market.icon}
   </div>
-)}
+)} */}
 
 
                     {/* Name */}
                     <span
   className={`text-sm whitespace-nowrap ${
-    selectedMarket === market.id ? 'font-bold text-red-700' : 'font-medium text-gray-700'
+    selectedMarket === market.id ? 'font-bold text-black' : 'font-medium text-[#6B7280] group-hover:text-black group-hover:font-bold'
   }`}
 >
   {market.name}
