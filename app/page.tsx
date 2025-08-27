@@ -198,7 +198,7 @@ export default function App() {
 
       </header>
 
-      <main className="flex-grow bg-[#fefefe]">
+      <main className="flex-grow bg-[#fefefe] pb-16 md:pb-0">
         
           
           
@@ -241,10 +241,75 @@ export default function App() {
           {/* Add more sections as needed */}
         
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 z-40">
+        <div className="flex items-center justify-around py-2">
+          <button
+            onClick={() => setActiveSection('home')}
+            className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 ${
+              activeSection === 'home' ? 'text-red-600' : 'text-gray-500'
+            }`}
+          >
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-all duration-200 ${
+              activeSection === 'home' ? 'bg-red-100' : ''
+            }`}>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13z"/>
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Explore</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('profile')}
+            className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 ${
+              activeSection === 'profile' ? 'text-red-600' : 'text-gray-500'
+            }`}
+          >
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-all duration-200 ${
+              activeSection === 'profile' ? 'bg-red-100' : ''
+            }`}>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1V3H9V1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM17 20H7V9H17V20Z"/>
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Stats</span>
+          </button>
+
+          <button
+            onClick={() => {/* Search functionality to be implemented */}}
+            className="flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 text-gray-400 cursor-not-allowed"
+          >
+            <div className="w-6 h-6 rounded-full flex items-center justify-center mb-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Search</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('ideas')}
+            className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 ${
+              activeSection === 'ideas' ? 'text-red-600' : 'text-gray-500'
+            }`}
+          >
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-all duration-200 ${
+              activeSection === 'ideas' ? 'bg-red-100' : ''
+            }`}>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.3 3-3.4 3-5.7 0-3.9-3.1-7-7-7z"/>
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Ideas</span>
+          </button>
+        </div>
+      </div>
       
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-md shadow-lg border border-[#004400] transition-all duration-200 flex items-center z-50">
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 md:bottom-6 bg-black/80 text-white px-4 py-2 rounded-md shadow-lg border border-[#004400] transition-all duration-200 flex items-center z-50">
           <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
           </svg>

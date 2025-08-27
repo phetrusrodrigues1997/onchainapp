@@ -1825,4 +1825,36 @@ export async function updatePredictionIdeaStatus({
   }
 }
 
+/**
+ * Get user profiles for a list of wallet addresses
+ */
+export async function getUserProfiles(walletAddresses: string[]) {
+  try {
+    if (!walletAddresses || walletAddresses.length === 0) {
+      return [];
+    }
+
+    console.log('🔍 Looking for profiles for addresses:', walletAddresses);
+
+    // Sanitize wallet addresses
+    const sanitizedAddresses = walletAddresses.map(addr => addr.trim().toLowerCase());
+
+    // Use IN clause instead of ANY for better compatibility
+    const profiles = await db
+      .select({
+        walletAddress: UsersTable.walletAddress,
+        imageUrl: UsersTable.imageUrl
+      })
+      .from(UsersTable)
+      .where(sql`LOWER(${UsersTable.walletAddress}) IN (${sql.join(sanitizedAddresses.map(addr => sql`${addr}`), sql`, `)})`);
+
+    console.log('📸 Found profiles:', profiles);
+    return profiles;
+
+  } catch (error) {
+    console.error("Error getting user profiles:", error);
+    return [];
+  }
+}
+
 
