@@ -15,6 +15,62 @@ import { getPrice } from '../Constants/getPrice';
 const sqlConnection = neon(process.env.DATABASE_URL!);
 const db = drizzle(sqlConnection);
 
+// UK timezone helper functions
+const getUKOffset = (date: Date): number => {
+  // Create a date in UK timezone and compare to UTC
+  const ukDateString = date.toLocaleString('en-GB', { 
+    timeZone: 'Europe/London',
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  });
+  
+  const utcDateString = date.toLocaleString('en-GB', { 
+    timeZone: 'UTC',
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  });
+  
+  // Parse both dates and find the difference
+  const ukTime = new Date(ukDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
+  const utcTime = new Date(utcDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
+  
+  return ukTime.getTime() - utcTime.getTime(); // Difference in milliseconds
+};
+
+const getUKTime = (date: Date = new Date()): Date => {
+  const ukOffsetMs = getUKOffset(date);
+  return new Date(date.getTime() + ukOffsetMs);
+};
+
+const getUKDateString = (date: Date = new Date()): string => {
+  const ukTime = getUKTime(date);
+  return ukTime.toLocaleDateString('en-GB', {
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit' 
+  }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+};
+
+const getTomorrowUKDateString = (date: Date = new Date()): string => {
+  const ukTime = getUKTime(date);
+  ukTime.setDate(ukTime.getDate() + 1); // Add 1 day to UK time
+  return ukTime.toLocaleDateString('en-GB', {
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit' 
+  }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+};
+
 
 
 /**
@@ -220,7 +276,7 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
     // If user has wrong prediction, return today's dynamic entry fee
     if (result.length > 0) {
       const now = new Date();
-      const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+      const ukNow = getUKTime(now);
       const day = ukNow.getDay(); // 0 = Sunday, 1 = Monday, etc.
       
       const basePrices = {
@@ -318,7 +374,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     // Server-side schedule validation - betting only allowed Sunday-Friday (unless testing toggle is disabled)
     if (ENFORCE_SATURDAY_RESTRICTIONS) {
       const now = new Date();
-      const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+      const ukNow = getUKTime(now);
       const day = ukNow.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
       if (day === 6) {
         throw new Error('Betting is not allowed on Saturdays (Results Day).');
@@ -326,14 +382,8 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     }
     
     // Get tomorrow's date for the prediction (in UK timezone)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const predictionDate = tomorrow.toLocaleDateString('en-GB', { 
-      timeZone: 'Europe/London',
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+    const now = new Date();
+    const predictionDate = getTomorrowUKDateString(now);
     
     const betsTable = getTableFromType(typeTable);
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
@@ -361,9 +411,15 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
 
     if (existingBet.length > 0) {
       // 3. If a bet exists, update the prediction
+      // Create UK timezone timestamp for updated_at
+      const ukUpdatedAt = getUKTime(now);
+      
       await db
         .update(betsTable)
-        .set({ prediction })
+        .set({ 
+          prediction,
+          createdAt: ukUpdatedAt // Update timestamp to UK time when prediction changes
+        })
         .where(and(
           eq(betsTable.walletAddress, walletAddress),
           eq(betsTable.betDate, predictionDate)
@@ -372,12 +428,26 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     }
 
     // 4. Otherwise, insert new bet for tomorrow
+    // Create UK timezone timestamp for created_at
+    const ukCreatedAt = getUKTime(now);
+    
+    // DEBUG: Log timezone information
+    const ukOffsetMs = getUKOffset(now);
+    console.log('=== TIMEZONE DEBUG ===');
+    console.log('Server time (now):', now.toISOString());
+    console.log('UK time (calculated):', ukCreatedAt.toISOString());
+    console.log('UK offset detected:', ukOffsetMs / (60 * 60 * 1000), 'hours');
+    console.log('Current UK timezone:', ukOffsetMs === 0 ? 'GMT' : 'BST');
+    console.log('Prediction date:', predictionDate);
+    console.log('======================');
+    
     const result = await db
       .insert(betsTable)
       .values({
         walletAddress,
         prediction,
         betDate: predictionDate,
+        createdAt: ukCreatedAt, // Override default with UK timezone
       })
       .returning();
 
@@ -395,14 +465,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
  */
 export async function getTomorrowsBet(walletAddress: string, tableType: string) {
   try {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const predictionDate = tomorrow.toLocaleDateString('en-GB', { 
-      timeZone: 'Europe/London',
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+    const predictionDate = getTomorrowUKDateString();
     
     const betsTable = getTableFromType(tableType);
     const result = await db
@@ -426,12 +489,7 @@ export async function getTomorrowsBet(walletAddress: string, tableType: string) 
  */
 export async function getTodaysBet(walletAddress: string, tableType: string) {
   try {
-    const today = new Date().toLocaleDateString('en-GB', { 
-      timeZone: 'Europe/London',
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+    const today = getUKDateString();
     const betsTable = getTableFromType(tableType);
     const result = await db
       .select()
@@ -949,12 +1007,7 @@ export async function getReferralStats(walletAddress: string) {
  */
 export async function placeLivePrediction(walletAddress: string, prediction: 'positive' | 'negative') {
   try {
-    const today = new Date().toLocaleDateString('en-GB', { 
-      timeZone: 'Europe/London',
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+    const today = getUKDateString();
     
     // SECURITY: Server-side pot participation validation would require contract query here
     // Currently relying on client-side validation with triple-layer security:

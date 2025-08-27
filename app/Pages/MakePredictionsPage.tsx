@@ -5,6 +5,43 @@ import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
 
+// UK timezone helper functions (frontend version)
+const getUKOffset = (date: Date): number => {
+  // Create a date in UK timezone and compare to UTC
+  const ukDateString = date.toLocaleString('en-GB', { 
+    timeZone: 'Europe/London',
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  });
+  
+  const utcDateString = date.toLocaleString('en-GB', { 
+    timeZone: 'UTC',
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  });
+  
+  // Parse both dates and find the difference
+  const ukTime = new Date(ukDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
+  const utcTime = new Date(utcDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
+  
+  return ukTime.getTime() - utcTime.getTime(); // Difference in milliseconds
+};
+
+const getUKTime = (date: Date = new Date()): Date => {
+  const ukOffsetMs = getUKOffset(date);
+  return new Date(date.getTime() + ukOffsetMs);
+};
+
 // Define table identifiers instead of passing table objects
 const tableMapping = {
   "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
@@ -106,8 +143,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     if (!SHOW_RESULTS_DAY_INFO) {
       return true; // Always allow betting when testing toggle is off
     }
-    const now = new Date();
-    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const ukNow = getUKTime();
     const day = ukNow.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
     return day !== 6; // All days except Saturday
   };
@@ -117,8 +153,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     if (!SHOW_RESULTS_DAY_INFO) {
       return false; // Never show results day when testing toggle is off
     }
-    const now = new Date();
-    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const ukNow = getUKTime();
     const day = ukNow.getDay();
     return day === 6; // Saturday
   };
@@ -149,8 +184,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
   // Get tonight's midnight (when new question becomes available) - UK timezone
   const getTonightMidnight = (): Date => {
-    const now = new Date();
-    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const ukNow = getUKTime();
     const tonight = new Date(ukNow);
     tonight.setDate(tonight.getDate() + 1);
     tonight.setHours(0, 0, 0, 0);
@@ -159,8 +193,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
   // Get tomorrow's midnight (when previous prediction outcome will be revealed - 24 hours after next question) - UK timezone
   const getTomorrowMidnight = (): Date => {
-    const now = new Date();
-    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const ukNow = getUKTime();
     const tomorrow = new Date(ukNow);
     tomorrow.setDate(tomorrow.getDate() + 2);
     tomorrow.setHours(0, 0, 0, 0);
@@ -169,8 +202,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
   // Update countdown timers
   const updateCountdowns = () => {
-    const now = new Date();
-    const ukNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+    const ukNow = getUKTime();
     
     // Time until new question (tonight's midnight)
     const tonightMidnight = getTonightMidnight();
@@ -818,9 +850,9 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               <div className="bg-white border-2 border-black rounded-3xl shadow-2xl overflow-hidden relative">
                 {/* Header Section */}
                 <div className="bg-black text-white px-8 py-6 text-center">
-                  <h2 className="text-2xl font-bold tracking-tight">Prediction Confirmed</h2>
+                  <h2 className="text-2xl font-bold tracking-tight">Current Prediction</h2>
                   <p className="text-gray-300 text-sm mt-1">
-                    {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString('en-US', { 
+                    For: {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString('en-US', { 
                       weekday: 'long', 
                       month: 'short', 
                       day: 'numeric' 
@@ -847,9 +879,13 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                       <div className="text-5xl font-black text-black tracking-tight mb-2">
                         {tomorrowsBet.prediction === 'positive' ? 'YES' : 'NO'}
                       </div>
-                      <div className="text-gray-600 text-sm font-medium">
-                        Set at {new Date(tomorrowsBet.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                      </div>
+                      {/* <div className="text-gray-600 text-sm font-medium">
+                        Set at {new Date(tomorrowsBet.createdAt).toLocaleTimeString('en-GB', {
+                          timeZone: 'Europe/London',
+                          hour: '2-digit', 
+                          minute: '2-digit'
+                        })}
+                      </div> */}
                     </div>
                   </div>
 
@@ -1042,7 +1078,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         {/* Universal Dual Timer System - Always Visible */}
         <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-2xl shadow-gray-900/10">
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-4 sm:mb-6">Game Timers</h3>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-4 sm:mb-6">Important Information</h3>
             
 
             {/* New Question Timer */}
@@ -1113,7 +1149,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                     {todaysBet.prediction === 'positive' ? 'YES' : 'NO'}
                   </div>
                   <div className="text-gray-500 text-xs font-medium">
-                    {new Date(todaysBet.betDate).toLocaleDateString()}
+                    For: {new Date(todaysBet.betDate).toLocaleDateString()}
                   </div>
                 </div>
               </div>
