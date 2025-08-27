@@ -134,7 +134,7 @@ export default function App() {
 // }
 
   return (
-    <div className="min-h-screen bg-[#fefefe] text-white overflow-hidden">
+    <div className="min-h-screen bg-white text-white overflow-hidden">
       
       
       <header className="z-50 bg-[#fdfdfd] px-4 py-3 md:py-4 shadow-md sticky top-0">
@@ -212,7 +212,7 @@ export default function App() {
 
       </header>
 
-      <main className="flex-grow bg-[#fefefe] pb-16 md:pb-0">
+      <main className="flex-grow bg-white pb-16 md:pb-0">
         
           
           

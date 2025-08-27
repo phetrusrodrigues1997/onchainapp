@@ -294,7 +294,7 @@ const handleMarketClick = (marketId: string) => {
         }
       `}</style>
       
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 overflow-hidden -mt-[10.5rem]">
+    <div className="min-h-screen bg-white text-gray-900 overflow-hidden -mt-[10.5rem]">
       {/* Hero Section */}
       <section className="relative z-10 px-6 pt-20 pb-16">
         <div className="max-w-7xl mx-auto">
