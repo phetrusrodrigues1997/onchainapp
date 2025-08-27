@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 interface NavigationMenuProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
+  
 }
 
 const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps) => {

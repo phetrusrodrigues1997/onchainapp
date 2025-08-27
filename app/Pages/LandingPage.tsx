@@ -10,6 +10,7 @@ import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 interface LandingPageProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
+  isMobileSearchActive?: boolean;
 }
 
 const contractAddresses = {
@@ -18,7 +19,7 @@ const contractAddresses = {
   solana: '0xSolanaAddress...'
 } as const;
 
-const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
+const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [selectedMarket, setSelectedMarket] = useState('Featured');
@@ -309,7 +310,7 @@ const handleMarketClick = (marketId: string) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-right mb-12 relative">
             {/* Live Markets Link */}
-<div className="mb-6 -translate-y-1/4 flex justify-between items-center">
+<div className={`mb-6 -translate-y-1/4 flex justify-between items-center ${isMobileSearchActive ? 'md:flex hidden' : ''}`}>
   {/* Left button */}
   <button 
     onClick={() => setActiveSection('discord')}
@@ -362,9 +363,30 @@ const handleMarketClick = (marketId: string) => {
   </div>
 </div>
 
+{/* Mobile Search Bar - Only shown when search is active */}
+{isMobileSearchActive && (
+  <div className="md:hidden mb-6 -translate-y-1/4">
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input
+        type="text"
+        placeholder="Search markets..."
+        value={searchQuery}
+        onChange={(e) => handleSearch(e.target.value)}
+        className="w-full pl-10 pr-4 py-3 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors duration-200"
+        autoFocus
+      />
+    </div>
+  </div>
+)}
+
             
             {/* Market Carousel */}
-            <div className="relative -translate-y-1/3">
+            <div className={`relative -translate-y-1/3 ${isMobileSearchActive ? 'md:block hidden' : ''}`}>
 
               {/* Left Arrow - Only shown when there's content to scroll left */}
               {showLeftArrow && (

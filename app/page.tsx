@@ -42,6 +42,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home'); // Default section
   const [privatePotAddress, setPrivatePotAddress] = useState<string>(''); // For routing to private pots
   const [hasEnteredLivePot, setHasEnteredLivePot] = useState(false); // Track live pot entry
+  const [isMobileSearchActive, setIsMobileSearchActive] = useState(false); // Track mobile search state
 
   // Function to navigate to a private pot
   const navigateToPrivatePot = (contractAddress: string) => {
@@ -54,10 +55,23 @@ export default function App() {
     setHasEnteredLivePot(true);
   };
 
+  // Function to handle mobile search toggle
+  const handleMobileSearchToggle = () => {
+    setActiveSection('home');
+    setIsMobileSearchActive(!isMobileSearchActive);
+  };
+
   // Reset live pot entry state when switching sections
   useEffect(() => {
     if (activeSection !== 'liveMarkets') {
       setHasEnteredLivePot(false);
+    }
+  }, [activeSection]);
+
+  // Reset mobile search state when switching away from home
+  useEffect(() => {
+    if (activeSection !== 'home') {
+      setIsMobileSearchActive(false);
     }
   }, [activeSection]);
 
@@ -213,7 +227,7 @@ export default function App() {
           {activeSection === "dashboard" && <TutorialBridge activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} isMobileSearchActive={isMobileSearchActive} />}
           {activeSection === "makePrediction" && <MakePredicitions activeSection={activeSection} setActiveSection={setActiveSection} /> }
           {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}
@@ -246,7 +260,10 @@ export default function App() {
       <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 z-40">
         <div className="flex items-center justify-around py-0.5">
           <button
-            onClick={() => setActiveSection('home')}
+            onClick={() => {
+              setActiveSection('home');
+              setIsMobileSearchActive(false);
+            }}
             className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 ${
               activeSection === 'home' ? 'text-red-600' : 'text-gray-500'
             }`}
@@ -258,7 +275,23 @@ export default function App() {
                 <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13z"/>
               </svg>
             </div>
-            <span className="text-xs font-medium">Explore</span>
+            <span className="text-xs font-medium">Home</span>
+          </button>
+
+            <button
+            onClick={handleMobileSearchToggle}
+            className={`flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 ${
+              isMobileSearchActive ? 'text-red-600' : 'text-gray-500'
+            }`}
+          >
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 transition-all duration-200 ${
+              isMobileSearchActive ? 'bg-red-100' : ''
+            }`}>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Search</span>
           </button>
 
           <button
@@ -277,17 +310,7 @@ export default function App() {
             <span className="text-xs font-medium">Stats</span>
           </button>
 
-          <button
-            onClick={() => {/* Search functionality to be implemented */}}
-            className="flex flex-col items-center justify-center py-2 px-4 rounded-lg transition-all duration-200 text-gray-400 cursor-not-allowed"
-          >
-            <div className="w-6 h-6 rounded-full flex items-center justify-center mb-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-              </svg>
-            </div>
-            <span className="text-xs font-medium">Search</span>
-          </button>
+          
 
           <button
             onClick={() => setActiveSection('ideas')}
