@@ -984,61 +984,52 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               </div>
             ) : (
               // Premium betting interface
-          <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
-            {/* Subtle animated background */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 animate-pulse"></div>
-            </div>
+          <div className="bg-white border-2 border-black rounded-3xl p-8 mb-8 shadow-2xl relative overflow-hidden">
+            {/* Red accent line */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
             
             <div className="relative z-10">
-              <div className="text-center mb-10">
-                <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Your Call?</h2>
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-black text-black mb-4 tracking-tight">Your Call?</h2>
                 {marketQuestion && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 mx-auto max-w-md">
-                    <p className="text-gray-800 font-semibold text-base leading-relaxed">
+                  <div className="bg-black text-white rounded-2xl p-4 mb-6 mx-auto max-w-md">
+                    <p className="text-white font-semibold text-base leading-relaxed">
                       {marketQuestion}
                     </p>
                   </div>
                 )}
-                <p className="text-gray-600 text-lg mb-4">
+                <p className="text-black text-lg font-semibold">
                   Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
                 </p>
-                
               </div>
 
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {/* Premium Bullish Button */}
+              <div className="grid grid-cols-2 gap-6">
+                {/* YES Button - Black */}
                 <button
                   onClick={() => handlePlaceBet('positive')}
                   disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-gradient-to-br from-gray-900 via-gray-800 to-black hover:from-gray-800 hover:via-gray-700 hover:to-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-white p-6 sm:p-10 rounded-3xl font-black text-xl sm:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/25 overflow-hidden"
+                  className="group relative bg-black hover:bg-[#009900] disabled:opacity-50 disabled:cursor-not-allowed text-white p-8 rounded-2xl font-black text-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border-2 border-black overflow-hidden"
                 >
-                  {/* Subtle shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
                   <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-2 sm:p-3 bg-white/10 rounded-2xl mb-4 sm:mb-6 backdrop-blur-sm flex items-center justify-center">
-                      <TrendingUp className="w-10 h-10 sm:w-14 sm:h-14 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="p-3 bg-white/10 rounded-xl mb-4 backdrop-blur-sm flex items-center justify-center">
+                      <TrendingUp className="w-12 h-12 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="tracking-wide">YES</div>
                   </div>
                   
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-gray-900 to-black opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-xl"></div>
+                  {/* Hover glow effect */}
+                  <div className="absolute inset-0 rounded-2xl bg-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 </button>
 
-                {/* Premium Bearish Button */}
+                {/* NO Button - White with red accent */}
                 <button
                   onClick={() => handlePlaceBet('negative')}
                   disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-gradient-to-br from-white via-gray-50 to-gray-100 hover:from-gray-50 hover:via-gray-100 hover:to-gray-200 border-2 border-gray-200 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 p-6 sm:p-10 rounded-3xl font-black text-xl sm:text-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 shadow-2xl hover:shadow-3xl shadow-gray-900/10 overflow-hidden"
+                  className="group relative bg-white hover:bg-red-50 border-2 border-black hover:border-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-black hover:text-red-600 p-8 rounded-2xl font-black text-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl overflow-hidden"
                 >
-                  {/* Subtle pattern overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
                   <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-2 sm:p-3 bg-gray-900/10 rounded-2xl mb-4 sm:mb-6 backdrop-blur-sm flex items-center justify-center">
-                      <TrendingDown className="w-10 h-10 sm:w-14 sm:h-14 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="p-3 bg-black/10 group-hover:bg-red-100 rounded-xl mb-4 backdrop-blur-sm flex items-center justify-center transition-colors duration-300">
+                      <TrendingDown className="w-12 h-12 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="tracking-wide">NO</div>
                   </div>
@@ -1047,11 +1038,11 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
               {isLoading && (
                 <div className="text-center mt-8">
-                  <div className="inline-flex items-center gap-3 text-gray-900 bg-white/50 backdrop-blur-sm px-6 py-3 rounded-2xl border border-gray-200/50 shadow-lg">
+                  <div className="inline-flex items-center gap-3 text-black bg-white border-2 border-black px-6 py-3 rounded-xl shadow-lg">
                     <div className="relative">
-                      <Zap className="w-6 h-6" />
+                      <Zap className="w-6 h-6 text-red-600" />
                       <div className="absolute inset-0 animate-ping">
-                        <Zap className="w-6 h-6 opacity-30" />
+                        <Zap className="w-6 h-6 text-red-600 opacity-30" />
                       </div>
                     </div>
                     <span className="font-bold">Placing bet...</span>
