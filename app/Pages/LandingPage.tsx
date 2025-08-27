@@ -495,7 +495,7 @@ const handleMarketClick = (marketId: string) => {
                     <img 
                       src={market.icon} 
                       alt={`${market.name} Icon`} 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover min-w-full min-h-full" 
                     />
                   ) : (
                     <span className="text-lg text-gray-600">{market.icon}</span>
