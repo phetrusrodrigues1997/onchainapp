@@ -49,22 +49,9 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     }
   };
 
-  // Get countdown label based on current day
-  const getCountdownLabel = (): string => {
-    const now = new Date();
-    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
-    
-    if (day === 6) return 'Results day! New pot starts in:'; // Saturday
-    if (day >= 0 && day <= 5) return 'Refreshes in:'; // Sunday-Friday
-    return 'Pot opens in:'; // Fallback
-  };
+  
 
-  // Check if should use 24h countdown (Sunday-Friday) or long countdown (Saturday only)
-  const isShortCountdown = (): boolean => {
-    const now = new Date();
-    const day = now.getDay();
-    return day >= 0 && day <= 5; // Sunday-Friday use 24h countdown to next midnight
-  };
+  
 
   // Function to get next Saturday midnight (pot closes)
   const getNextSaturdayMidnight = (): Date => {
@@ -94,23 +81,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     return midnight;
   };
 
-  // Function to update countdown
-  const updateCountdown = () => {
-    const now = new Date();
-    const target = isShortCountdown() ? getNextMidnight() : getNextMidnight(); // Always use next midnight for consistency
-    const difference = target.getTime() - now.getTime();
 
-    if (difference > 0) {
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      
-      setTimeUntilMidnight({ days, hours, minutes, seconds });
-    } else {
-      setTimeUntilMidnight({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-    }
-  };
 
   useEffect(() => {
     const savedLang = Cookies.get('language') as Language | undefined;
@@ -120,12 +91,7 @@ const LandingPage = ({ activeSection, setActiveSection }: LandingPageProps) => {
     setIsVisible(true);
   }, []);
 
-  // Countdown timer effect
-  useEffect(() => {
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, []);
+ 
 
   useEffect(() => {
   const detectLanguage = async () => {
@@ -456,229 +422,252 @@ const handleMarketClick = (marketId: string) => {
 
           
           
-<div className={'max-w-md mx-auto md:hidden -translate-y-12'} >
-
-  <div 
-    onClick={() => handleMarketClick(markets[0].id)}
-    className="group bg-white rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black"
-  >
-    <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-xl p-4 h-full"
-  >
+{/* Mobile Markets Display - All Markets */}
+<div className="max-w-md mx-auto md:hidden -translate-y-12 space-y-4">
+  {(() => {
+    // Get all markets and deduplicate by ID
+    const allMarketsRaw = marketOptions.map(option => {
+      const marketData = getMarkets(t, option.id);
+      const market = marketData[0]; // Get the first (main) market for each option
+      if (market) {
+        // Store the tab option ID so we can match it later
+        market.tabId = option.id;
+      }
+      return market;
+    }).filter(Boolean);
     
-    {/* Background Gradient Accent */}
-    <div className="absolute top-0 left-0 right-0 h-1 "></div>
+    // Remove duplicates based on market ID
+    const allMarkets = allMarketsRaw.filter((market, index, array) => 
+      array.findIndex(m => m.id === market.id) === index
+    );
     
-    {/* Countdown Timer - Above image */}
-    <div className="flex justify-end mb-2">
-      <div className="text-xs text-gray-600 font-medium whitespace-nowrap">
-        <span className="text-[10px] text-gray-500 mr-1">{getCountdownLabel()}</span>
-        <span className="text-[11px] font-bold text-red-600">
-          {isShortCountdown() ? (
-            `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
-          ) : (
-            timeUntilMidnight.days === 0 ? 
-              `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S` :
-              `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
-          )}
-        </span>
-      </div>
-    </div>
+    // Reorder: selected market first, then others (match by tabId)
+    const selectedMarketData = allMarkets.find(market => market.tabId === selectedMarket);
+    const otherMarkets = allMarkets.filter(market => market.tabId !== selectedMarket);
+    const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : allMarkets;
     
-    {/* Header with Icon and Price */}
-    <div className="flex flex-col items-center mb-3">
-      <div className="flex items-center justify-center mb-2">
-        <div className="rounded-xl flex items-center justify-center w-full h-48 bg-gray-50 overflow-hidden">
-  {markets[0].icon?.slice(0, 4) === 'http' ? (
-    <img 
-      src={markets[0].icon} 
-      alt={`${markets[0].name} Icon`} 
-      className="w-full h-full object-cover" 
-    />
-  ) : (
-    <span className="text-lg text-gray-600">{markets[0].icon}</span>
-  )}
-</div>
+    return orderedMarkets.map((market, index) => (
+      <div key={`mobile-${market.id}-${index}`} className="max-w-md mx-auto">
+        <div 
+          onClick={() => handleMarketClick(market.id)}
+          className={`group bg-white rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black 
+          }`}
+        >
+          <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-xl p-4 h-full">
+            {/* Background Gradient Accent */}
+            <div className="absolute top-0 left-0 right-0 h-1"></div>
+            
+            {/* Countdown Timer - Above image (only for selected market) */}
+            {market.tabId === selectedMarket && (
+              <div className="flex justify-end mb-2">
+                <div className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                 
+                </div>
+              </div>
+            )}
+            
+            {/* Header with Icon and Price */}
+            <div className="flex flex-col items-center mb-3">
+              <div className="flex items-center justify-center mb-2">
+                <div className="rounded-xl flex items-center justify-center w-full h-48 bg-gray-50 overflow-hidden">
+                  {market.icon?.slice(0, 4) === 'http' ? (
+                    <img 
+                      src={market.icon} 
+                      alt={`${market.name} Icon`} 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-lg text-gray-600">{market.icon}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Question */}
+            <div className="mb-3">
+              <p className="text-base font-semibold text-gray-900 leading-snug text-center">
+                {market.question}
+              </p>
+            </div>
+
+            {/* Trading Buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <button className="bg-white hover:bg-gray-50 border-2 border-black hover:border-red-600 text-black hover:text-red-600 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+                YES
+              </button>
+              <button className="bg-red-600 hover:bg-red-700 border-2 border-red-600 hover:border-red-700 text-white py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+                NO
+              </button>
+            </div>
+
+            {/* Stats Footer */}
+            <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    availableMarkets.includes(market.name.toLowerCase())
+                      ? 'bg-red-500'
+                      : 'bg-gray-400'
+                  }`}
+                ></div>        
+                <span className={`text-sm font-semibold ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-red-600' : 'text-gray-600'}`}>
+                  {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
+                </span>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-sm font-bold text-gray-900">{market.potSize}</div>
+                <div className="text-xs text-gray-600">Volume</div>
+              </div>
+              
+              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* <div className="text-center">
-        <h2 className="text-lg font-bold text-gray-900">{markets[0].name}</h2>
-        <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
-      </div> */}
-    </div>
-
-    {/* Question */}
-    <div className="mb-3">
-      <p className="text-base font-semibold text-gray-900 leading-snug text-center">
-        {markets[0].question}
-      </p>
-    </div>
-
-    {/* Trading Buttons */}
-    <div className="grid grid-cols-2 gap-3 mb-3">
-      <button className="bg-white hover:bg-gray-50 border-2 border-black hover:border-red-600 text-black hover:text-red-600 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-        YES
-      </button>
-      <button className="bg-red-600 hover:bg-red-700 border-2 border-red-600 hover:border-red-700 text-white py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-        NO
-      </button>
-    </div>
-
-    {/* Stats Footer */}
-    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-      <div className="flex items-center space-x-2">
-<div
-  className={`w-2.5 h-2.5 rounded-full ${
-    availableMarkets.includes(markets[0].name.toLowerCase())
-      ? 'bg-red-500'
-      : 'bg-gray-400'
-  }`}
-></div>        <span className={`text-sm font-semibold ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-red-600' : 'text-gray-600'}`}>
-          {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Available' : 'Soon'}
-        </span>
-      </div>
-      
-      <div className="text-center">
-        <div className="text-sm font-bold text-gray-900">{markets[0].potSize}</div>
-        <div className="text-xs text-gray-600">Volume</div>
-      </div>
-      
-      <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
-    </div>
-    </div>
-  </div>
+    ));
+  })()}
 </div>
         </div>
       </section>
 
-      {/* Desktop Two-Column Layout */}
-      <section className="relative z-10 px-6 -mt-8 pb-16 hidden md:block">
+      {/* Desktop Markets Grid - Full Width */}
+      <section className="relative z-10 px-6 -mt-16 pb-16 hidden md:block">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-start">
-            {/* Left Column - Market Card */}
-            <div className="flex justify-center">
-              <div className={`${selectedMarket === 'Crypto' || selectedMarket.toLowerCase() === 'crypto' || markets[0].name?.toLowerCase().includes('crypto') ? '-translate-y-12' : '-translate-y-12'}`}>
-                <div 
-                  onClick={() => handleMarketClick(markets[0].id)}
-                  className="group bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black rounded-3xl p-[2px] cursor-pointer relative overflow-hidden w-[28rem] h-[480px] transition-all duration-700 hover:scale-105 hover:-rotate-2 hover:shadow-[0_35px_60px_rgba(220,38,38,0.2)]"
-                >
-                  <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl p-6 h-full flex flex-col"
-                >
-                  {/* Background Gradient Accent */}
-                  <div className="absolute top-0 left-0 right-0 h-1 "></div>
+          {/* All Markets Display - Full Width Grid */}
+          <div className="grid grid-cols-4 gap-4">
+                {(() => {
+                  // Get all markets and deduplicate by ID
+                  const allMarketsRaw = marketOptions.map(option => {
+                    const marketData = getMarkets(t, option.id);
+                    const market = marketData[0]; // Get the first (main) market for each option
+                    if (market) {
+                      // Store the tab option ID so we can match it later
+                      market.tabId = option.id;
+                    }
+                    return market;
+                  }).filter(Boolean);
                   
-                  {/* Countdown Timer - Above image */}
-                  <div className="flex justify-end mb-2">
-                    <div className="text-sm text-gray-600 font-medium whitespace-nowrap">
-                      <span className="text-xs text-gray-500 mr-2">{getCountdownLabel()}</span>
-                      <span className="text-sm font-bold text-red-600">
-                        {isShortCountdown() ? (
-                          `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S`
-                        ) : (
-                          timeUntilMidnight.days === 0 ? 
-                            `${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M ${timeUntilMidnight.seconds.toString().padStart(2, '0')}S` :
-                            `${timeUntilMidnight.days}D ${timeUntilMidnight.hours.toString().padStart(2, '0')}H ${timeUntilMidnight.minutes.toString().padStart(2, '0')}M`
-                        )}
-                      </span>
-                    </div>
-                  </div>
+                  // Remove duplicates based on market ID
+                  const allMarkets = allMarketsRaw.filter((market, index, array) => 
+                    array.findIndex(m => m.id === market.id) === index
+                  );
                   
-                  {/* Header with Icon and Price */}
-                  <div className="flex flex-col items-center mb-3">
-                    <div className="flex items-center justify-center mb-2">
-                      <div className="rounded-xl flex items-center justify-center w-96 h-40 bg-gray-50 overflow-hidden">
-                        {markets[0].icon?.slice(0, 4) === 'http' ? (
-                          <img 
-                            src={markets[0].icon} 
-                            alt={`${markets[0].name} Icon`} 
-                            className="w-full h-full object-cover" 
-                          />
-                        ) : (
-                          <span className="text-lg text-gray-600">{markets[0].icon}</span>
+                  // Reorder: selected market first, then others (match by tabId)
+                  const selectedMarketData = allMarkets.find(market => market.tabId === selectedMarket);
+                  const otherMarkets = allMarkets.filter(market => market.tabId !== selectedMarket);
+                  const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : allMarkets;
+                  
+                  return orderedMarkets.map((market, index) => (
+                    <div
+                      key={`desktop-${market.id}-${index}`}
+                      onClick={() => handleMarketClick(market.id)}
+                      className={`group bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
+                        market.tabId === selectedMarket ? 'scale-105' : ''
+                      }`}
+                    >
+                      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-xl p-3 h-full flex flex-col min-h-[240px]">
+                        {/* Countdown Timer - Above image */}
+                        {market.tabId === selectedMarket && (
+                          <div className="flex justify-end mb-2">
+                            <div className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                              
+                            </div>
+                          </div>
                         )}
+                        
+                        {/* Header with Icon */}
+                        <div className="flex flex-col items-center mb-2">
+                          <div className="rounded-lg flex items-center justify-center w-full h-32 bg-gray-50 overflow-hidden mb-1">
+                            {market.icon?.slice(0, 4) === 'http' ? (
+                              <img 
+                                src={market.icon} 
+                                alt={`${market.name} Icon`} 
+                                className="w-full h-full object-cover" 
+                              />
+                            ) : (
+                              <span className="text-2xl text-gray-600">{market.icon}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Question */}
+                        <div className="mb-2 flex-1 flex items-center justify-center">
+                          <p className="text-sm font-semibold text-gray-900 leading-tight text-center line-clamp-3">
+                            {market.question}
+                          </p>
+                        </div>
+
+                        {/* Trading Buttons */}
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          <button className="bg-white hover:bg-gray-50 border border-black hover:border-red-600 text-black hover:text-red-600 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                            YES
+                          </button>
+                          <button className="bg-red-600 hover:bg-red-700 border border-red-600 hover:border-red-700 text-white py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                            NO
+                          </button>
+                        </div>
+
+                        {/* Stats Footer - Compact */}
+                        <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                          <div className="flex items-center space-x-1">
+                            <div
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                availableMarkets.includes(market.name.toLowerCase())
+                                  ? 'bg-red-500 animate-pulse'
+                                  : 'bg-gray-400'
+                              }`}
+                            ></div>
+                            <span className={`text-[10px] font-medium ${availableMarkets.includes(market.name.toLowerCase()) ? 'text-red-600' : 'text-gray-600'}`}>
+                              {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
+                            </span>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-[10px] font-bold text-gray-900 leading-none">{market.potSize}</div>
+                            <div className="text-[9px] text-gray-500 leading-none">Volume</div>
+                          </div>
+                          
+                          <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
+                        </div>
                       </div>
                     </div>
-
-                    {/* <div className="text-center">
-                      <h2 className="text-lg font-bold text-black">{markets[0].name}</h2>
-                      <p className="text-sm text-gray-500 font-medium">{markets[0].symbol}</p>
-                    </div> */}
-                  </div>
-
-                  {/* Question */}
-                  <div className="mb-3 flex-1 flex items-center justify-center">
-                    <p className="text-base font-semibold text-black leading-snug text-center">
-                      {markets[0].question}
-                    </p>
-                  </div>
-
-                  {/* Trading Buttons */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <button className="bg-white hover:bg-gray-50 border-2 border-black hover:border-red-600 text-black hover:text-red-600 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                      YES
-                    </button>
-                    <button className="bg-red-600 hover:bg-red-700 border-2 border-red-600 hover:border-red-700 text-white py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                      NO
-                    </button>
-                  </div>
-
-                  {/* Stats Footer */}
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className={`w-2.5 h-2.5 rounded-full ${
-                          availableMarkets.includes(markets[0].name.toLowerCase())
-                            ? 'bg-red-500 animate-pulse'
-                            : 'bg-gray-400'
-                        }`}
-                      ></div>
-                      <span className={`text-sm font-semibold ${availableMarkets.includes(markets[0].name.toLowerCase()) ? 'text-red-600' : 'text-gray-600'}`}>
-                        {availableMarkets.includes(markets[0].name.toLowerCase()) ? 'Available' : 'Soon'}
-                      </span>
-                    </div>
-                    
-                    <div className="text-center">
-                      <div className="text-sm font-bold text-gray-900">{markets[0].potSize}</div>
-                      <div className="text-xs text-gray-600">Volume</div>
-                    </div>
-                    
-                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
-                  </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Sleek Call to Action */}
-            <div className="flex flex-col justify-center items-center text-center h-full">
-              <div className="space-y-3 mb-16">
-                <h2 className="text-3xl font-light text-gray-900 tracking-tight">
-                  <span className="text-red-600 font-medium">Thousands</span> of winners,
-                </h2>
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
-                  will you be next?
-                </h3>
-              </div>
-              
-              {/* Minimalist Entry Button */}
-              <button
-                onClick={() => handleMarketClick('Featured')}
-                className="group relative bg-black border-2 border-black text-white px-16 py-4 rounded-lg font-semibold text-lg tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden shadow-lg hover:shadow-red-200"
-              >
-                <span className="relative z-10">Enter</span>
-                
-                {/* Sliding fill effect */}
-                <div className="absolute inset-0 bg-red-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
-                
-                {/* Subtle arrows that appear on hover */}
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">
-                  <span className="text-white text-sm">→</span>
-                </div>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                  <span className="text-white text-sm">←</span>
-                </div>
-              </button>
-            </div>
+                  ));
+                })()}
           </div>
+        </div>
+      </section>
+
+      {/* Thousands of Winners Section - Desktop */}
+      <section className="relative z-10 px-6 py-16 hidden md:block">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="space-y-4 mb-12">
+            <h2 className="text-4xl font-light text-gray-900 tracking-tight">
+              <span className="text-red-600 font-medium">Thousands</span> of winners,
+            </h2>
+            <h3 className="text-3xl font-black text-gray-900 tracking-tight">
+              will you be next?
+            </h3>
+          </div>
+          
+          {/* Minimalist Entry Button */}
+          <button
+            onClick={() => handleMarketClick('Featured')}
+            className="group relative bg-black border-2 border-black text-white px-20 py-5 rounded-lg font-semibold text-xl tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden shadow-xl hover:shadow-red-200"
+          >
+            <span className="relative z-10">Enter</span>
+            
+            {/* Sliding fill effect */}
+            <div className="absolute inset-0 bg-red-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+            
+            {/* Subtle arrows that appear on hover */}
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">
+              <span className="text-white text-lg">→</span>
+            </div>
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+              <span className="text-white text-lg">←</span>
+            </div>
+          </button>
         </div>
       </section>
 

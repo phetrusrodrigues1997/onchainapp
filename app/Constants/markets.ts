@@ -14,6 +14,7 @@ export interface Market {
   currentPrice: string
   participants: number
   potSize: string
+  tabId?: string
 }
 
 export const getMarkets = (t: Translation, category: string): Market[] => {
@@ -340,7 +341,7 @@ else if (category === 'xtrends') {
   return [
   {
     id: 'Crypto',
-    name: 'Crypto',
+    name: 'Crypt',
     symbol: 'BTC',
     color: '#F7931A',
     question: t.bitcoinQuestion ?? '',
