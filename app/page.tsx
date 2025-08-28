@@ -203,7 +203,7 @@ export default function App() {
     <div className="min-h-screen bg-white text-white overflow-hidden">
       
       
-      <header className="z-50 bg-[#fdfdfd] px-4 py-1 md:py-2 sticky top-0 border-b border-gray-200">
+      <header className="z-50 bg-[#fdfdfd] px-4 py-3 md:py-2 sticky top-0 border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex flex-col">
           {/* Top row with main header elements */}
           <div className="flex justify-between items-center">
@@ -231,7 +231,7 @@ export default function App() {
                   placeholder="Search markets..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="w-[400px] pl-10 pr-10 py-2 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors duration-200"
+                  className="w-[500px] pl-10 pr-10 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                   <span className="text-gray-400 text-sm font-mono">/</span>
@@ -306,7 +306,7 @@ export default function App() {
           
           {/* Market Carousel - only show on home section, on its own line */}
           {activeSection === 'home' && (
-            <div className="relative mt-1">
+            <div className="relative mt-2">
               {/* Left Arrow - Hidden on mobile */}
               {showLeftArrow && (
                 <button
