@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
@@ -541,10 +541,10 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Trading Buttons */}
             <div className="grid grid-cols-2 gap-3 mb-2">
-              <button className="bg-green-100 hover:bg-green-200 border-2 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-green-100 hover:bg-green-200 border-2 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
-              <button className="bg-red-100 hover:bg-red-200 border-2 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-red-100 hover:bg-red-200 border-2 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 NO
               </button>
             </div>
@@ -562,7 +562,7 @@ const handleMarketClick = (marketId: string) => {
                 <div className="text-sm font-bold text-gray-900">{market.potSize}</div>
               </div>
               
-              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
+              <Bookmark className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
             </div>
           </div>
         </div>
@@ -673,7 +673,7 @@ const handleMarketClick = (marketId: string) => {
                             <div className="text-[10px] font-bold text-gray-900 leading-none">{market.potSize}</div>
                           </div>
                           
-                          <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
+                          <Bookmark className="w-3 h-3 text-gray-400 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
                         </div>
                       </div>
                     </div>
