@@ -541,10 +541,10 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Trading Buttons */}
             <div className="grid grid-cols-2 gap-3 mb-2">
-              <button className="bg-white hover:bg-gray-50 border-2 border-black hover:border-red-600 text-black hover:text-red-600 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-green-100 hover:bg-green-200 border-2 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
-              <button className="bg-red-600 hover:bg-red-700 border-2 border-red-600 hover:border-red-700 text-white py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-red-100 hover:bg-red-200 border-2 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-3 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 NO
               </button>
             </div>
@@ -560,7 +560,6 @@ const handleMarketClick = (marketId: string) => {
               
               <div className="text-center">
                 <div className="text-sm font-bold text-gray-900">{market.potSize}</div>
-                <div className="text-xs text-gray-600">Volume</div>
               </div>
               
               <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
@@ -653,10 +652,10 @@ const handleMarketClick = (marketId: string) => {
 
                         {/* Trading Buttons */}
                         <div className="grid grid-cols-2 gap-2 mb-2">
-                          <button className="bg-white hover:bg-gray-50 border border-black hover:border-red-600 text-black hover:text-red-600 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                          <button className="bg-green-100 hover:bg-green-200 border border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                             YES
                           </button>
-                          <button className="bg-red-600 hover:bg-red-700 border border-red-600 hover:border-red-700 text-white py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                          <button className="bg-red-100 hover:bg-red-200 border border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                             NO
                           </button>
                         </div>
@@ -672,7 +671,6 @@ const handleMarketClick = (marketId: string) => {
                           
                           <div className="text-center">
                             <div className="text-[10px] font-bold text-gray-900 leading-none">{market.potSize}</div>
-                            <div className="text-[9px] text-gray-500 leading-none">Volume</div>
                           </div>
                           
                           <ArrowRight className="w-3 h-3 text-gray-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
