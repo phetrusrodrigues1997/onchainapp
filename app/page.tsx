@@ -203,7 +203,7 @@ export default function App() {
     <div className="min-h-screen bg-white text-white overflow-hidden">
       
       
-      <header className="z-50 bg-[#fdfdfd] px-4 py-3 md:py-2 sticky top-0 border-b border-gray-200">
+      <header className="z-50 bg-[#fdfdfd] px-4 pt-3 pb-1 md:py-2 sticky top-0 border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex flex-col">
           {/* Top row with main header elements */}
           <div className="flex justify-between items-center">
@@ -306,7 +306,7 @@ export default function App() {
           
           {/* Market Carousel - only show on home section, on its own line */}
           {activeSection === 'home' && (
-            <div className="relative mt-1">
+            <div className="relative mt-3 md:mt-1">
               {/* Left Arrow - Hidden on mobile */}
               {showLeftArrow && (
                 <button
@@ -476,24 +476,6 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setActiveSection('profile')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
-              activeSection === 'profile' ? 'text-red-600' : 'text-gray-500'
-            }`}
-          >
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${
-              activeSection === 'profile' ? 'bg-red-100' : ''
-            }`}>
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1V3H9V1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM17 20H7V9H17V20Z"/>
-              </svg>
-            </div>
-            <span className="text-[10px] font-medium">Stats</span>
-          </button>
-
-          
-
-          <button
             onClick={() => setActiveSection('discord')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
               activeSection === 'discord' ? 'text-red-600' : 'text-gray-500'
@@ -506,7 +488,7 @@ export default function App() {
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1V3H9V1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM17 20H7V9H17V20Z"/>
               </svg>
             </div>
-            <span className="text-[10px] font-medium">Help</span>
+            <span className="text-[10px] font-medium">How it works</span>
           </button>
 
           <button
