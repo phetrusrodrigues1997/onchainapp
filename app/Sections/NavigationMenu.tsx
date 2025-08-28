@@ -29,6 +29,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   // Menu items for reusability
   const menuItems = [
     { id: 'home', label: 'Home' },
+    { id: 'liveMarkets', label: 'Live Markets' },
     { id: 'createPot', label: 'Private Markets' },
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
@@ -40,37 +41,18 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
   return (
     <nav className="relative">
-      {/* Mobile hamburger menu button*/}
+      {/* Hamburger menu button - now shown on both desktop and mobile */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="p-2 rounded-lg md:hidden"
+        className="p-2 rounded-lg"
         aria-label="Toggle menu"
       >
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Desktop menu */}
-      <div className="hidden md:flex ">
-        <div className="flex space-x-6">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`font-medium whitespace-nowrap ${
-                activeSection === item.id
-                  ? 'text-black text-base font-semibold'
-                  : 'text-[#6B7280] hover:text-black hover:font-semibold'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Mobile menu dropdown */}
-      {isMobile && isMenuOpen && (
-        <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg">
+      {/* Menu dropdown - shown for both desktop and mobile when hamburger is clicked */}
+      {isMenuOpen && (
+        <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg right-0">
         <div className="py-2">
           {menuItems.map((item) => (
             <button

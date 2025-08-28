@@ -1,10 +1,10 @@
 // App.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { formatUnits } from 'viem';
-import { User } from 'lucide-react';
+import { User, ChevronLeft, ChevronRight } from 'lucide-react';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
 import MakePredicitions from './Pages/MakePredictionsPage';
@@ -28,6 +28,8 @@ import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
 import MessagingPage from './Pages/MessagingPage';
 import IdeasPage from './Pages/IdeasPage';
+import { getMarkets } from './Constants/markets';
+import { Language, getTranslation, supportedLanguages } from './Languages/languages';
 
 
 
@@ -43,6 +45,14 @@ export default function App() {
   const [privatePotAddress, setPrivatePotAddress] = useState<string>(''); // For routing to private pots
   const [hasEnteredLivePot, setHasEnteredLivePot] = useState(false); // Track live pot entry
   const [isMobileSearchActive, setIsMobileSearchActive] = useState(false); // Track mobile search state
+  const [searchQuery, setSearchQuery] = useState(''); // Search functionality
+  
+  // Carousel state
+  const [selectedMarket, setSelectedMarket] = useState('Featured');
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Function to navigate to a private pot
   const navigateToPrivatePot = (contractAddress: string) => {
@@ -59,6 +69,43 @@ export default function App() {
   const handleMobileSearchToggle = () => {
     setActiveSection('home');
     setIsMobileSearchActive(!isMobileSearchActive);
+  };
+
+  // Search functionality
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setActiveSection('home'); // Navigate to home when searching
+  };
+
+  // Carousel functions
+  const updateArrowVisibility = () => {
+    const container = carouselRef.current;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  const scrollLeft = () => {
+    const container = carouselRef.current;
+    if (container) {
+      container.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    const container = carouselRef.current;
+    if (container) {
+      container.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setShowLeftArrow(scrollLeft > 0);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
   };
 
   // Reset live pot entry state when switching sections
@@ -103,6 +150,25 @@ export default function App() {
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
+  // Carousel effects
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateArrowVisibility();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateArrowVisibility();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [selectedMarket]);
+
+  // Get markets data
+  const t = getTranslation(currentLanguage);
+  const marketOptions = getMarkets(t, 'options');
+
   // Removed USDC balance reading - now using ETH directly
 
   // Removed USDC balance formatting - now using ETH directly
@@ -137,12 +203,13 @@ export default function App() {
     <div className="min-h-screen bg-white text-white overflow-hidden">
       
       
-      <header className="z-50 bg-[#fdfdfd] px-4 py-3 md:py-4 shadow-md sticky top-0">
-        <div className="max-w-7xl mx-auto">
+      <header className="z-50 bg-[#fdfdfd] px-4 py-1 md:py-2 sticky top-0 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto flex flex-col">
+          {/* Top row with main header elements */}
           <div className="flex justify-between items-center">
             <div className="flex items-center flex-1">
-              {/* Mobile hamburger only - shows to left of logo on mobile */}
-              <div className="md:hidden">
+              {/* Hamburger menu - shows on both desktop and mobile at left edge */}
+              <div>
                 <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
               </div>
               
@@ -151,65 +218,147 @@ export default function App() {
                 <div className="absolute -inset-1 rounded-full blur-md"></div>
                 <ResponsiveLogo />
               </div>
-            </div>
-            
-            {/* Desktop menu - slightly left of center */}
-            <div className="hidden md:flex flex-1 justify-center ml-12">
-              <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+              
+              {/* Search Bar - Desktop only, right of logo */}
+              <div className="hidden md:flex relative ml-6">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                  <svg className="w-8 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search markets..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="w-[400px] pl-10 pr-10 py-2 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors duration-200"
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <span className="text-gray-400 text-sm font-mono">/</span>
+                </div>
+              </div>
             </div>
             
             <div className="flex items-center justify-end flex-1">
-            {/* Balance display removed - ETH balance handled by wallet */}
-            
-            {/* Spacer to push Ideas button to the right */}
-            <div className="hidden md:flex flex-1"></div>
-            
-            {/* Ideas link */}
-            <button
-              onClick={() => setActiveSection('ideas')}
-              className="hidden bg-gray-100 md:block text-gray-700 hover:text-black font-medium text-sm md:text-base translate-x-12 transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-red-100"
-            >
-              Ideas 
-            </button>
-            
-            <div className={`wallet-container ${isMobile ? '-ml-2' : 'ml-4'}`}>
-              <Wallet>
-<ConnectWallet 
-                  text={isMobile ? "Sign In" : "Connect Wallet"}
-                  className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-black hover:bg-red-600 !px-4 !py-2 !min-w-0' : 'bg-black hover:bg-red-600 !px-8 !py-3'}`}
-                >
-                {isConnected && (
-                  <>
-                    <Avatar className="h-10 w-10 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
-                    <div className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 bg-black flex items-center justify-center transition-all duration-200">
-                      <User className="h-5 w-5 text-[#fafafa]" />
-                    </div>
-                  </>
-                )}
-              </ConnectWallet>
-              <WalletDropdown>
-                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar />
-                  <Name />
-                  <Address />
-                  <EthBalance />
-                </Identity>
-                <WalletDropdownLink
-                  icon="wallet"
-                  href="https://keys.coinbase.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wallet
-                </WalletDropdownLink>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </Wallet>
+              {/* Balance display removed - ETH balance handled by wallet */}
+              
+              {/* Spacer to push buttons to the right */}
+              <div className="hidden md:flex flex-1"></div>
+              
+              {/* How it works button - Desktop */}
+              <button 
+                onClick={() => setActiveSection('discord')}
+                className="hidden md:inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold transition-colors translate-x-8"
+              >
+                {/* Smaller red circle with i */}
+                <span className="flex items-center justify-center w-3 h-3 rounded-full bg-red-600 text-white text-[9px] font-bold">
+                  i
+                </span>
+                
+                {/* Text */}
+                <span className="text-red-600">How it works</span>
+              </button>
+              
+              {/* Ideas link */}
+              <button
+                onClick={() => setActiveSection('ideas')}
+                className="hidden bg-gray-100 md:block text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-red-100 translate-x-12"
+              >
+                Ideas 
+              </button>
+              
+              <div className={`wallet-container ${isMobile ? '-ml-2' : 'ml-4'}`}>
+                <Wallet>
+                  <ConnectWallet 
+                    text={isMobile ? "Sign In" : "Connect Wallet"}
+                    className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-black hover:bg-red-600 !px-4 !py-2 !min-w-0' : 'bg-black hover:bg-red-600 !px-8 !py-3'}`}
+                  >
+                    {isConnected && (
+                      <>
+                        <Avatar className="h-10 w-10 rounded-full border-2 border-gray-200 hover:border-gray-300 transition-all duration-200" />
+                        <div className="h-8 w-8 rounded-full border-2 border-gray-200 hover:border-gray-300 bg-black flex items-center justify-center transition-all duration-200">
+                          <User className="h-5 w-5 text-[#fafafa]" />
+                        </div>
+                      </>
+                    )}
+                  </ConnectWallet>
+                  <WalletDropdown>
+                    <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                      <Avatar />
+                      <Name />
+                      <Address />
+                      <EthBalance />
+                    </Identity>
+                    <WalletDropdownLink
+                      icon="wallet"
+                      href="https://keys.coinbase.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Wallet
+                    </WalletDropdownLink>
+                    <WalletDropdownDisconnect />
+                  </WalletDropdown>
+                </Wallet>
+              </div>
             </div>
           </div>
-        </div>
-        </div>
+          
+          {/* Market Carousel - only show on home section, on its own line */}
+          {activeSection === 'home' && (
+            <div className="relative mt-1">
+              {/* Left Arrow - Hidden on mobile */}
+              {showLeftArrow && (
+                <button
+                  onClick={scrollLeft}
+                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
+                >
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
 
+              {/* Right Arrow - Hidden on mobile */}
+              {showRightArrow && (
+                <button
+                  onClick={scrollRight}
+                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
+                >
+                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
+              )}
+
+              {/* Scrollable Markets Container */}
+              <div
+                ref={carouselRef}
+                className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
+                onScroll={handleScroll}
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
+                }}
+              >
+                {marketOptions.map((market) => (
+                  <button
+                    key={market.id}
+                    onClick={() => setSelectedMarket(market.id)}
+                    className={`group flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 font-medium ${selectedMarket === market.id
+                        ? 'text-black font-bold'
+                        : 'text-[#6B7280] hover:text-black hover:font-bold'
+                      }`}
+                    style={{
+                      minWidth: 'fit-content',
+                      height: '32px',
+                    }}
+                  >
+                    <span className="text-sm whitespace-nowrap">
+                      {market.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </header>
 
       <main className="flex-grow bg-white pb-16 md:pb-0">
@@ -227,7 +376,7 @@ export default function App() {
           {activeSection === "dashboard" && <TutorialBridge activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} isMobileSearchActive={isMobileSearchActive} />}
+          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} isMobileSearchActive={isMobileSearchActive} searchQuery={searchQuery} selectedMarket={selectedMarket} />}
           {activeSection === "makePrediction" && <MakePredicitions activeSection={activeSection} setActiveSection={setActiveSection} /> }
           {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}
@@ -311,6 +460,22 @@ export default function App() {
           </button>
 
           
+
+          <button
+            onClick={() => setActiveSection('discord')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
+              activeSection === 'discord' ? 'text-red-600' : 'text-gray-500'
+            }`}
+          >
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${
+              activeSection === 'discord' ? 'bg-red-100' : ''
+            }`}>
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1V3H9V1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM17 20H7V9H17V20Z"/>
+              </svg>
+            </div>
+            <span className="text-[10px] font-medium">Help</span>
+          </button>
 
           <button
             onClick={() => setActiveSection('ideas')}

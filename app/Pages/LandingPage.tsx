@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { ArrowRight, ChevronLeft, ChevronRight, Bookmark } from 'lucide-react';
+import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
@@ -11,6 +11,8 @@ interface LandingPageProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   isMobileSearchActive?: boolean;
+  searchQuery?: string;
+  selectedMarket?: string;
 }
 
 const contractAddresses = {
@@ -19,34 +21,15 @@ const contractAddresses = {
   solana: '0xSolanaAddress...'
 } as const;
 
-const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false }: LandingPageProps) => {
+const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured' }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
-  const [selectedMarket, setSelectedMarket] = useState('Featured');
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const selectedMarket = propSelectedMarket;
   const { alertState, showAlert, closeAlert } = useCustomAlert();
-  const [showRightArrow, setShowRightArrow] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const carouselRef = useRef<HTMLDivElement>(null);
   const availableMarkets = ["random topics", "crypto"];
   
   
 
-
-
-  // Function to update arrow visibility
-  const updateArrowVisibility = () => {
-    const container = carouselRef.current;
-    if (container) {
-      const { scrollLeft, scrollWidth, clientWidth } = container;
-      setShowLeftArrow(scrollLeft > 0);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
-    }
-  };
-
-  
-
-  
 
   // Function to get next Saturday midnight (pot closes)
   const getNextSaturdayMidnight = (): Date => {
@@ -104,86 +87,9 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 }, []);
 
 
-  // Update arrow visibility when selectedMarket changes
-  useEffect(() => {
-    // Use setTimeout to ensure DOM is updated after selectedMarket change
-    const timer = setTimeout(() => {
-      updateArrowVisibility();
-    }, 100);
 
-    return () => clearTimeout(timer);
-  }, [selectedMarket]);
 
-  // Update arrow visibility on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      updateArrowVisibility();
-    };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Initial arrow state check after component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updateArrowVisibility();
-    }, 200);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Auto-rotate market every 7 seconds (disabled when searching)
-  useEffect(() => {
-    if (searchQuery) return; // Don't auto-rotate when user is searching
-    
-    const interval = setInterval(() => {
-      setSelectedMarket(prevMarket => {
-        const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
-        const currentIndex = currentMarketOptions.findIndex(market => market.id === prevMarket);
-        const nextIndex = (currentIndex + 1) % currentMarketOptions.length;
-        return currentMarketOptions[nextIndex].id;
-      });
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [currentLanguage, searchQuery]);
-
-  // Search functionality
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    
-    if (!query.trim()) {
-      setSelectedMarket('Featured');
-      return;
-    }
-    
-    const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
-    const matchingMarket = currentMarketOptions.find(market => 
-      market.name.toLowerCase().includes(query.toLowerCase()) ||
-      market.id.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    if (matchingMarket) {
-      setSelectedMarket(matchingMarket.id);
-    }
-  };
-
-  // Keyboard shortcut for search (forward slash)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && !e.ctrlKey && !e.altKey && !e.metaKey) {
-        const searchInput = document.querySelector('input[placeholder="Search markets..."]') as HTMLInputElement;
-        if (searchInput && document.activeElement !== searchInput) {
-          e.preventDefault();
-          searchInput.focus();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
 
   const t = getTranslation(currentLanguage);
@@ -222,30 +128,9 @@ const handleMarketClick = (marketId: string) => {
   }
 };
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const container = e.currentTarget;
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-
-    setShowLeftArrow(scrollLeft > 0);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
-  };
-
-  const scrollLeft = () => {
-    const container = carouselRef.current;
-    if (container) {
-      container.scrollBy({ left: -200, behavior: 'smooth' });
-    }
-  };
-
-  const scrollRight = () => {
-    const container = carouselRef.current;
-    if (container) {
-      container.scrollBy({ left: 200, behavior: 'smooth' });
-    }
-  };
 
   return (
-    <>
+    <div>
       <style>{`
         @keyframes pulse-right {
           0% { transform: translateX(0); }
@@ -294,173 +179,13 @@ const handleMarketClick = (marketId: string) => {
         }
       `}</style>
       
-    <div className="min-h-screen bg-white text-gray-900 overflow-hidden -mt-[10.5rem]">
-      {/* Hero Section */}
-      <section className="relative z-10 px-6 pt-20 pb-16">
-        <div className="max-w-7xl mx-auto">
-          <div
-            className={`text-center transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-              }`}
-          ></div>
-        </div>
-      </section>
-
+    <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
       {/* Markets Grid */}
-      <section className="relative z-10 px-6 py-12">
+      <section className="relative z-10 px-6 pt-8 md:pt-32">
         <div className="max-w-7xl mx-auto">
-          <div className="text-right mb-12 relative">
-            {/* Live Markets Link */}
-<div className={`mb-6 -translate-y-1/4 flex justify-between items-center ${isMobileSearchActive ? 'md:flex hidden' : ''}`}>
-  {/* Left button */}
-  <button 
-    onClick={() => setActiveSection('discord')}
-    className="group inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold transition-colors"
-  >
-    {/* Smaller red circle with question mark */}
-    <span className="flex items-center justify-center w-3 h-3 rounded-full bg-red-600 text-white text-[9px] font-bold">
-      i
-    </span>
-    
-    {/* Larger text */}
-    <span className="text-red-600">How it works</span>
-  </button>
-
-  {/* Right section with search bar and live markets button */}
-  <div className="flex items-center gap-3">
-    {/* Search Bar - Hidden on mobile */}
-    <div className="hidden md:flex relative">
-      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-      <input
-        type="text"
-        placeholder="Search markets..."
-        value={searchQuery}
-        onChange={(e) => handleSearch(e.target.value)}
-        className="w-[355px] pl-10 pr-10 py-2 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors duration-200"
-      />
-      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-        <span className="text-gray-400 text-sm font-mono">/</span>
-      </div>
-    </div>
-    
-    <button 
-      onClick={() => setActiveSection('liveMarkets')}
-      className="group relative inline-flex items-center gap-1.5 bg-black text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-red-600 transition-all duration-200 hover:scale-105 animate-pulse-glow shadow-lg shadow-gray-300"
-    >
-      {/* Live indicator dot */}
-      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-      
-      <span className="relative">
-        Live markets
-      </span>
-      
-      {/* Arrow with hover animation */}
-      <span className="transform group-hover:translate-x-0.5 transition-transform duration-200 text-xs animate-pulse-right">→</span>
-    </button>
-  </div>
-</div>
-
-{/* Mobile Search Bar - Only shown when search is active */}
-{isMobileSearchActive && (
-  <div className="md:hidden mb-6 -translate-y-1/4">
-    <div className="relative">
-      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-      <input
-        type="text"
-        placeholder="Search markets..."
-        value={searchQuery}
-        onChange={(e) => handleSearch(e.target.value)}
-        className="w-full pl-10 pr-4 py-3 bg-white border-2 border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-red-600 transition-colors duration-200"
-        autoFocus
-      />
-    </div>
-  </div>
-)}
-
-            
-            {/* Market Carousel */}
-            <div className={`relative -translate-y-1/3 ${isMobileSearchActive ? 'md:block hidden' : ''}`}>
-
-              {/* Left Arrow - Only shown when there's content to scroll left */}
-              {showLeftArrow && (
-                <button
-                  onClick={scrollLeft}
-                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-
-              {/* Right Arrow - Only shown when there's content to scroll right */}
-              {showRightArrow && (
-                <button
-                  onClick={scrollRight}
-                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-
-              {/* Scrollable Markets Container */}
-              <div
-                ref={carouselRef}
-                 className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 -ml-4"
-                onScroll={handleScroll}
-                style={{
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none'
-                }}
-              >
-                {marketOptions.map((market) => (
-                  <button
-                    key={market.id}
-                    onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 font-bold ${selectedMarket === market.id
-                        ? 'text-black'
-                        : 'text-[#6B7280] hover:text-black'
-                      }`}
-                    style={{
-                      minWidth: 'fit-content',
-                      height: '40px',
-                      
-                    }}
-                  >
-                    {/* Icon
-                    {selectedMarket === market.id && (
-  <div
-    className="w-6 h-6 rounded flex items-center justify-center text-sm font-bold flex-shrink-0 text-red-600"
-  >
-    {market.icon}
-  </div>
-)} */}
-
-
-                    {/* Name */}
-                    <span
-  className={`text-sm whitespace-nowrap ${
-    selectedMarket === market.id ? 'font-bold text-black' : 'font-medium text-[#6B7280] group-hover:text-black group-hover:font-bold'
-  }`}
->
-  {market.name}
-</span>
-
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          
           
 {/* Mobile Markets Display - All Markets */}
-<div className="max-w-md mx-auto md:hidden -translate-y-14 space-y-4">
+<div className="max-w-md mx-auto md:hidden space-y-4">
   {(() => {
     // Get all markets and deduplicate by ID
     const allMarkets = marketOptions.map(option => {
@@ -497,10 +222,10 @@ const handleMarketClick = (marketId: string) => {
       <div key={`mobile-${market.id}-${index}`} className="max-w-md mx-auto">
         <div 
           onClick={() => handleMarketClick(market.id)}
-          className={`group bg-white rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black 
+          className={`group bg-white rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] border border-gray-200
           }`}
         >
-          <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-xl p-4 h-full">
+          <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-2xl p-4 h-full">
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
@@ -614,11 +339,11 @@ const handleMarketClick = (marketId: string) => {
                     <div
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => handleMarketClick(market.id)}
-                      className={`group rounded-2xl p-[2px] cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
-                        market.tabId === selectedMarket ? 'scale-105 pulsing-glow-selected' : 'bg-gradient-to-r from-red-600 via-red-500 to-gray-800 hover:from-red-700 hover:via-red-600 hover:to-black'
+                      className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
+                        market.tabId === selectedMarket ? 'scale-105 bg-white border border-gray-400' : 'bg-white border border-gray-200'
                       }`}
                     >
-                      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-xl p-3 h-full flex flex-col min-h-[240px]">
+                      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-3 h-full flex flex-col min-h-[240px]">
                         {/* Countdown Timer - Above image */}
                         {market.tabId === selectedMarket && (
                           <div className="flex justify-end mb-2">
@@ -761,7 +486,7 @@ const handleMarketClick = (marketId: string) => {
         autoClose={alertState.autoClose}
       />
     </div>
-    </>
+    </div>
   );
 };
 
