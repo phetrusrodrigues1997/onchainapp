@@ -7,41 +7,22 @@ import Cookies from 'js-cookie';
 import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
 
-// UK timezone helper functions (frontend version)
-const getUKOffset = (date: Date): number => {
-  // Create a date in UK timezone and compare to UTC
-  const ukDateString = date.toLocaleString('en-GB', { 
-    timeZone: 'Europe/London',
-    year: 'numeric', 
-    month: '2-digit', 
-    day: '2-digit', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit',
-    hour12: false
-  });
-  
-  const utcDateString = date.toLocaleString('en-GB', { 
-    timeZone: 'UTC',
-    year: 'numeric', 
-    month: '2-digit', 
-    day: '2-digit', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit',
-    hour12: false
-  });
-  
-  // Parse both dates and find the difference
-  const ukTime = new Date(ukDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
-  const utcTime = new Date(utcDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
-  
-  return ukTime.getTime() - utcTime.getTime(); // Difference in milliseconds
-};
-
+// UK timezone helper function (simplified and more reliable)
 const getUKTime = (date: Date = new Date()): Date => {
-  const ukOffsetMs = getUKOffset(date);
-  return new Date(date.getTime() + ukOffsetMs);
+  // Use Intl.DateTimeFormat to get UK time directly
+  const ukTimeString = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).format(date);
+  
+  // Parse the UK time string (format: YYYY-MM-DD, HH:MM:SS)
+  return new Date(ukTimeString.replace(', ', 'T'));
 };
 
 // Helper function to get table type from contract address using markets.ts
@@ -194,19 +175,17 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   // Get tonight's midnight (when new question becomes available) - UK timezone
   const getTonightMidnight = (): Date => {
     const ukNow = getUKTime();
-    const tonight = new Date(ukNow);
-    tonight.setDate(tonight.getDate() + 1);
-    tonight.setHours(0, 0, 0, 0);
-    return tonight;
+    // Create tomorrow's midnight in UK timezone
+    const tomorrow = new Date(ukNow.getFullYear(), ukNow.getMonth(), ukNow.getDate() + 1, 0, 0, 0, 0);
+    return tomorrow;
   };
 
   // Get tomorrow's midnight (when previous prediction outcome will be revealed - 24 hours after next question) - UK timezone
   const getTomorrowMidnight = (): Date => {
     const ukNow = getUKTime();
-    const tomorrow = new Date(ukNow);
-    tomorrow.setDate(tomorrow.getDate() + 2);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow;
+    // Create day after tomorrow's midnight in UK timezone
+    const dayAfterTomorrow = new Date(ukNow.getFullYear(), ukNow.getMonth(), ukNow.getDate() + 2, 0, 0, 0, 0);
+    return dayAfterTomorrow;
   };
 
   // Update countdown timers
@@ -845,7 +824,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             ) : tomorrowsBet ? (
               <div className="bg-white border-2 border-black rounded-3xl shadow-2xl overflow-hidden relative">
                 {/* Header Section */}
-                <div className="bg-black text-white px-8 py-6 text-center">
+                <div className="bg-black text-white px-6 py-4 text-center">
                   <h2 className="text-2xl font-bold tracking-tight">Current Prediction</h2>
                   <p className="text-gray-300 text-sm mt-1">
                     For: {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString('en-US', { 
@@ -857,8 +836,8 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 </div>
 
                 {/* Main Prediction Display */}
-                <div className="p-8 text-center">
-                  <div className="flex items-center justify-center gap-8 mb-8">
+                <div className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-6 mb-6">
                     <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg ${
                       tomorrowsBet.prediction === 'positive' 
                         ? 'bg-black' 
@@ -895,19 +874,19 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                   )} */}
 
                   {/* Status Indicators */}
-                  <div className="grid grid-cols-2 gap-4 mb-8">
-                    <div className="bg-white border-2 border-black rounded-xl p-4 text-center">
-                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="bg-white border-2 border-black rounded-lg p-2 text-center">
+                      <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                       </div>
-                      <div className="text-black font-bold text-sm">Active</div>
+                      <div className="text-black font-bold text-xs">Ongoing</div>
                     </div>
                     
-                    <div className="bg-white border-2 border-black rounded-xl p-4 text-center">
-                      <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center mx-auto mb-2">
-                        <Shield className="w-4 h-4 text-white" />
+                    <div className="bg-white border-2 border-black rounded-lg p-2 text-center">
+                      <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center mx-auto mb-1">
+                        <Shield className="w-2.5 h-2.5 text-white" />
                       </div>
-                      <div className="text-black font-bold text-sm">Locked</div>
+                      <div className="text-black font-bold text-xs">Locked</div>
                     </div>
                   </div>
                 </div>
@@ -1132,7 +1111,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             </div>
             
             <div className="relative z-10 text-gray-700 text-sm font-bold tracking-wide">
-              Predict tomorrow&apos;s outcome • Wrong predictions require re-entry fee
+             Wrong predictions will require a re-entry fee to continue.
             </div>
           </div>
         )}

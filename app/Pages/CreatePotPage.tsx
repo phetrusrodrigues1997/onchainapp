@@ -342,24 +342,24 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
         {/* Simple Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Private Markets
+            Private Markets <span className="text-4xl">👻</span>
           </h1>
         
           
           {/* Visual benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-8 md:mt-24 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-8 md:mt-24 text-center">
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                 <span className="text-blue-600 text-xl">💰</span>
               </div>
               <p className="text-sm text-gray-600">Share link with friends</p>
             </div>
-            <div className="flex flex-col items-center">
+            {/* <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
                 <span className="text-green-600 text-xl">👑</span>
               </div>
               <p className="text-sm text-gray-600">You decide the winners</p>
-            </div>
+            </div> */}
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
                 <span className="text-purple-600 text-xl">🏆</span>

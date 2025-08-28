@@ -19,6 +19,7 @@ import {
 import { ENFORCE_SATURDAY_RESTRICTIONS } from '../Database/config';
 import { updateWinnerStats } from '../Database/OwnerActions';
 import { clear } from 'console';
+import LoadingScreen from '../Components/LoadingScreen';
 
 
 // Define table identifiers instead of passing table objects
@@ -753,45 +754,7 @@ useEffect(() => {
 
   // Show loading screen for first 2 seconds or during post-entry processing
   if (isInitialLoading || postEntryLoading) {
-    return (
-      <div className="min-h-screen bg-invisible p-4 flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center">
-          <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10 relative overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gray-900 rounded-full blur-3xl animate-pulse"></div>
-              <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-gray-700 rounded-full blur-2xl animate-pulse delay-500"></div>
-            </div>
-            
-            <div className="relative z-10">
-              {/* Bitcoin icon with rotation animation */}
-              <div className="w-20 h-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-gray-900/25 animate-spin">
-                <span className="text-3xl font-black text-white drop-shadow-lg">₿</span>
-              </div>
-              
-              <h1 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">
-                Loading Prediction Pot
-              </h1>
-              
-              {/* Loading dots animation */}
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce delay-100"></div>
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce delay-200"></div>
-              </div>
-              
-              <p className="text-gray-600 text-sm">
-                Preparing your markets...
-              </p>
-            </div>
-            
-            {/* Subtle pulse indicator */}
-            <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full animate-ping"></div>
-            <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-600 rounded-full"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Prediwin" subtitle="Preparing your markets..." />;
   }
 
   return (

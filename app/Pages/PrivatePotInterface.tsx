@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getPrice } from '../Constants/getPrice';
 import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Settings, Share2, ArrowLeft, CheckCircle2, Clock, Vote, Target, Info } from 'lucide-react';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
+import LoadingScreen from '../Components/LoadingScreen';
 
 // Import new private pot database functions
 import { 
@@ -674,34 +675,12 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
   // Show loading screen for first 2 seconds
   if (isInitialLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-6 mx-auto animate-pulse">
-            <Target className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-4">Loading Market</h1>
-          <div className="flex justify-center space-x-1 mb-4">
-            <div className="w-2 h-2 bg-black rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-black rounded-full animate-bounce delay-100"></div>
-            <div className="w-2 h-2 bg-black rounded-full animate-bounce delay-200"></div>
-          </div>
-          <p className="text-gray-600">Preparing your prediction market...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Prediwin" subtitle="Preparing your prediction market..." />;
   }
 
   // Show loading while pot details are being fetched
   if (isPotLoading && !isInitialLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading market details...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Prediwin" subtitle="Loading market details..." />;
   }
 
   // Show error if pot doesn't exist after loading attempt

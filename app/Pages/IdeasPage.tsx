@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { MessageSquare, Plus, Clock, ThumbsUp, TrendingUp, Users, Hash } from 'lucide-react';
 import { submitPredictionIdea, getRecentPredictionIdeas, likePredictionIdea, getUserProfiles } from '../Database/actions';
+import LoadingScreen from '../Components/LoadingScreen';
 
 interface IdeasPageProps {
   activeSection: string;

@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import Cookies from 'js-cookie';
 import { Bookmark, Clock, X } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
+import LoadingScreen from '../Components/LoadingScreen';
 
 interface BookmarksPageProps {
   activeSection: string;
@@ -128,14 +129,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your bookmarks...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Prediwin" subtitle="Loading your bookmarks..." />;
   }
 
   return (

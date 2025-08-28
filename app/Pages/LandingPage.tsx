@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { useAccount } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
@@ -26,6 +26,24 @@ const getContractAddress = (marketId: string): string | null => {
   return market?.contractAddress || null;
 };
 
+// Contract addresses mapping for participant checking
+const CONTRACT_ADDRESSES = {
+  "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
+  "0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8": "crypto",
+} as const;
+
+// Prediction Pot ABI for participant checking
+const PREDICTION_POT_ABI = [
+  {
+    "inputs": [],
+    "name": "getParticipants",
+    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const;
+
+
 const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured', setSelectedMarket, onLoadingChange }: LandingPageProps) => {
   const { address, isConnected } = useAccount();
   const [isVisible, setIsVisible] = useState(false);
@@ -46,6 +64,27 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const [displayedMarketsCount, setDisplayedMarketsCount] = useState(12);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const MARKETS_PER_PAGE = 12;
+
+  // Get contract addresses array for participant checking
+  const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
+
+  // Read participants from all contracts
+  const { data: participants1 } = useReadContract({
+    address: contractAddresses[0] as `0x${string}`,
+    abi: PREDICTION_POT_ABI,
+    functionName: 'getParticipants',
+    query: { enabled: isConnected && !!address }
+  });
+
+  const { data: participants2 } = useReadContract({
+    address: contractAddresses[1] as `0x${string}`,
+    abi: PREDICTION_POT_ABI,
+    functionName: 'getParticipants',
+    query: { enabled: isConnected && !!address }
+  });
+
+  const participantsData = [participants1, participants2];
+
 
   // Load more markets function
   const loadMoreMarkets = () => {
@@ -74,7 +113,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       const windowHeight = window.innerHeight;
       const docHeight = document.documentElement.scrollHeight;
       
-      if (scrollTop + windowHeight >= docHeight - 200) { // 200px before bottom
+      if (scrollTop + windowHeight >= docHeight - 800) { // 800px before bottom
         loadMoreMarkets();
       }
     };
@@ -191,8 +230,6 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     
     detectLanguage();
   }, []);
-
-
 
 
 
@@ -332,6 +369,20 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     }
   };
 
+  // Helper function to check if user is a participant in the selected market
+  const isUserParticipant = (contractAddress: string): boolean => {
+    if (!isConnected || !address) return false;
+
+    const contractIndex = contractAddresses.findIndex(addr => addr === contractAddress);
+    if (contractIndex === -1) return false;
+
+    const participants = participantsData[contractIndex];
+    if (!participants || !Array.isArray(participants)) return false;
+
+    return participants.some(
+      (participant: string) => participant.toLowerCase() === address.toLowerCase()
+    );
+  };
 
   
 const handleMarketClick = (marketId: string) => {
@@ -370,9 +421,23 @@ const handleMarketClick = (marketId: string) => {
       expires: 7 // Cookie expires in 7 days
     });
     
-    // Optional: Add a small delay to ensure cookie is set before navigation
+    // Check if user is the special owner address
+    const SPECIAL_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
+    const isOwner = address && address.toLowerCase() === SPECIAL_ADDRESS.toLowerCase();
+    const isParticipant = isUserParticipant(contractAddress);
+    
+    // Route based on user type and participation status
     setTimeout(() => {
-      setActiveSection('dashboard');
+      if (isOwner) {
+        console.log('Owner detected, routing to PredictionPotTest');
+        setActiveSection('bitcoinPot');
+      } else if (isParticipant) {
+        console.log('Participant detected, routing to MakePredictions');
+        setActiveSection('makePrediction');
+      } else {
+        console.log('Non-participant, routing to TutorialBridge');
+        setActiveSection('dashboard');
+      }
     }, 200);
     
   } else {
@@ -393,14 +458,14 @@ const handleMarketClick = (marketId: string) => {
         
         <div className="max-w-md mx-auto text-center relative z-10 px-6">
           <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10">
-            {/* Logo/Icon */}
-            <div className="w-24 h-24 bg-gradient-to-br from-red-600 via-red-500 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-900/25 relative overflow-hidden">
+            Logo/Text
+            {/* <div className="bg-gradient-to-br from-red-600 via-red-500 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-900/25 relative overflow-hidden px-6 py-4">
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-              <span className="text-4xl font-black text-white drop-shadow-lg relative z-10">₿</span>
-            </div>
+              <span className="text-xl font-black text-white drop-shadow-lg relative z-10 tracking-tight">prediwin.com</span>
+            </div> */}
             
             {/* Title */}
-            <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">PrediWin</h1>
+            <h1 className="text-3xl font-black text-red-600 mb-4 tracking-tight">Prediwin</h1>
             <p className="text-gray-600 text-base mb-8">Loading prediction markets...</p>
             
             {/* Progress Bar */}

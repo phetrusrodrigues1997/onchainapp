@@ -161,12 +161,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
     }
   };
 
-  // Helper to display entry fee (~${formatEthBalance(entryFeeEth)} ETH)
-  const getEntryFeeDisplay = (): string => {
-    if (!ethPrice) return `~${formatEthBalance(entryFeeEth)} ETH`;
-    return `$${ENTRY_FEE_USD.toFixed(2)}`;
-  };
-
+  
   // If user is already in the pot, proceed to questions
   useEffect(() => {
     if (isUserInPot && !isLoading) {
@@ -240,7 +235,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
                       Entering Market...
                     </>
                   ) : (
-                    `Enter (${getEntryFeeDisplay()})`
+                    `Enter ($${ENTRY_FEE_USD.toFixed(2)})`
                   )}
                 </button>
               </div>
