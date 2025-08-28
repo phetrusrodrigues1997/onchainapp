@@ -54,6 +54,27 @@ export default function App() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  // Get market options for carousels
+  const t = getTranslation(currentLanguage);
+  const marketOptions = getMarkets(t, 'options');
+
+  // Personalized labels for the second carousel
+  const personalizedLabels = {
+    '★ Featured': 'For you',
+    'Crypto': 'Bitcoin',
+    'Stocks': 'Tesla',
+    'Music Charts': 'Sabrina Carpenter',
+    'X Trending Topics': 'Popular Hashtags',
+    'Weather': 'Climate',
+    'Sports': 'Football',
+    'Politics': 'Trump',
+    'Elections': 'US 2024',
+    'TV Shows': 'Netflix',
+    'Pop Culture': 'Celebrities', 
+    'Tech News': 'OpenAI',
+    'Boxing': 'UFC'
+  } as const;
+
   // Function to navigate to a private pot
   const navigateToPrivatePot = (contractAddress: string) => {
     setPrivatePotAddress(contractAddress);
@@ -165,9 +186,6 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [selectedMarket]);
 
-  // Get markets data
-  const t = getTranslation(currentLanguage);
-  const marketOptions = getMarkets(t, 'options');
 
   // Removed USDC balance reading - now using ETH directly
 
@@ -393,6 +411,40 @@ export default function App() {
         </div>
       </div>
 
+      {/* Second Carousel - Personalized Labels (Below mobile search bar) */}
+      {activeSection === 'home' && (
+        <section className="relative z-10 px-4 py-3 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              {marketOptions.map((market) => (
+                <button
+                  key={`personalized-${market.id}`}
+                  onClick={() => setSelectedMarket(market.id)}
+                  className={`group flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 font-medium ${
+                    selectedMarket === market.id
+                      ? 'text-red-600 font-bold bg-red-100'
+                      : 'text-[#6B7280] hover:text-black hover:font-bold hover:bg-gray-50'
+                    }`}
+                  style={{
+                    minWidth: 'fit-content',
+                    height: '32px',
+                  }}
+                >
+                  <span className="text-sm whitespace-nowrap">
+                    {personalizedLabels[market.name as keyof typeof personalizedLabels] || market.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <main className="flex-grow bg-white pb-16 md:pb-0">
         
           
@@ -408,7 +460,7 @@ export default function App() {
           {activeSection === "dashboard" && <TutorialBridge activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "bitcoinPot" && <PredictionPotTest activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "referralProgram" && <ReferralProgram activeSection={activeSection} setActiveSection={setActiveSection} />}
-          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} isMobileSearchActive={isMobileSearchActive} searchQuery={searchQuery} selectedMarket={selectedMarket} />}
+          {activeSection === "home" && <LandingPage activeSection={activeSection} setActiveSection={setActiveSection} isMobileSearchActive={isMobileSearchActive} searchQuery={searchQuery} selectedMarket={selectedMarket} setSelectedMarket={setSelectedMarket} />}
           {activeSection === "makePrediction" && <MakePredicitions activeSection={activeSection} setActiveSection={setActiveSection} /> }
           {activeSection === "AI" && <GamesHub activeSection={activeSection} setActiveSection={setActiveSection} />}
           {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}

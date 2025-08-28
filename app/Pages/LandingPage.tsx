@@ -13,6 +13,7 @@ interface LandingPageProps {
   isMobileSearchActive?: boolean;
   searchQuery?: string;
   selectedMarket?: string;
+  setSelectedMarket?: (market: string) => void;
 }
 
 const contractAddresses = {
@@ -21,7 +22,7 @@ const contractAddresses = {
   solana: '0xSolanaAddress...'
 } as const;
 
-const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured' }: LandingPageProps) => {
+const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured', setSelectedMarket }: LandingPageProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const selectedMarket = propSelectedMarket;
@@ -96,6 +97,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 
   const markets = getMarkets(t, selectedMarket);
   const marketOptions = getMarkets(t, 'options');
+
 
   
 const handleMarketClick = (marketId: string) => {
@@ -180,12 +182,13 @@ const handleMarketClick = (marketId: string) => {
       `}</style>
       
     <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
+
       {/* Markets Grid */}
-      <section className="relative z-10 px-6 pt-8 md:pt-32">
+      <section className="relative z-10 px-6 pt-2 md:mt-[5.5rem]">
         <div className="max-w-7xl mx-auto">
           
 {/* Mobile Markets Display - All Markets */}
-<div className="max-w-md mx-auto md:hidden space-y-4">
+<div className="max-w-md mx-auto md:hidden space-y-4 -translate-y-2">
   {(() => {
     // Get all markets and deduplicate by ID
     const allMarkets = marketOptions.map(option => {
@@ -341,7 +344,7 @@ const handleMarketClick = (marketId: string) => {
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => handleMarketClick(market.id)}
                       className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
-                        market.tabId === selectedMarket ? 'scale-105 bg-white border border-gray-400' : 'bg-white border border-gray-200'
+                        market.tabId === selectedMarket ? ' bg-white border border-gray-400' : 'bg-white border border-gray-200'
                       }`}
                     >
                       <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-3 h-full flex flex-col min-h-[240px]">
