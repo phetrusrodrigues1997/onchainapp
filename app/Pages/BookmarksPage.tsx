@@ -39,10 +39,22 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
 
       try {
         setLoading(true);
-        const userBookmarks = await getUserBookmarks(address);
-        setBookmarks(userBookmarks);
+        console.log('📑 Loading bookmarks for:', address);
+        
+        // Add timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout: Database query took too long')), 10000) // 10 second timeout
+        );
+        
+        const bookmarksPromise = getUserBookmarks(address);
+        
+        const userBookmarks = await Promise.race([bookmarksPromise, timeoutPromise]);
+        setBookmarks(userBookmarks as any);
+        console.log('📑 Bookmarks loaded successfully, count:', (userBookmarks as any).length);
       } catch (error) {
         console.error('Error loading bookmarks:', error);
+        // Set empty bookmarks on error so page still loads
+        setBookmarks([]);
       } finally {
         setLoading(false);
       }

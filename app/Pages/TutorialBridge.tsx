@@ -57,6 +57,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [userPots, setUserPots] = useState<string[]>([]);
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [hasCheckedRedirect, setHasCheckedRedirect] = useState(false);
   
   const { address, isConnected } = useAccount();
 
@@ -95,9 +97,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     }
   }, []);
 
-  // Simple owner check - hardcoded owner address
-  const OWNER_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
-  const isOwner = address && address.toLowerCase() === OWNER_ADDRESS.toLowerCase();
+  // Check if user has the specific wallet address
+  const SPECIAL_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
+  const isSpecialUser = address && address.toLowerCase() === SPECIAL_ADDRESS.toLowerCase();
 
   // Update userPots when participant data changes
   useEffect(() => {
@@ -119,17 +121,43 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
     setUserPots(participatingPots);
 
-    // Check if user is already a participant in the selected market and redirect to predictions
-    // BUT only if they are NOT the owner
-    if (selectedMarketAddress && participatingPots.includes(selectedMarketAddress)) {
-      if (!isOwner) {
-        console.log('User is participant but not owner, redirecting to predictions');
-        setActiveSection('makePrediction');
+    // Only check redirect once to prevent infinite loops
+    if (!hasCheckedRedirect && selectedMarketAddress && participatingPots.length > 0) {
+      console.log('TutorialBridge redirect check:', {
+        selectedMarketAddress,
+        participatingPots,
+        includes: participatingPots.includes(selectedMarketAddress),
+        isSpecialUser,
+        address
+      });
+
+      // Check if user is already a participant in the selected market
+      if (participatingPots.includes(selectedMarketAddress)) {
+        console.log('User IS in the selected market pot');
+        // All participants skip tutorial - redirect based on user type
+        if (isSpecialUser) {
+          console.log('Special user (owner) already in pot, redirecting to PredictionPotTest');
+          setIsRedirecting(true);
+          setHasCheckedRedirect(true); // Prevent further checks
+          // Add a small delay to show the loading screen
+          setTimeout(() => {
+            setActiveSection('bitcoinPot');
+          }, 1000);
+        } else {
+          console.log('Regular participant already in pot, redirecting to MakePredictions');
+          setIsRedirecting(true);
+          setHasCheckedRedirect(true); // Prevent further checks
+          // Add a small delay to show the loading screen
+          setTimeout(() => {
+            setActiveSection('makePrediction');
+          }, 1000);
+        }
       } else {
-        console.log('User is owner, keeping normal dashboard flow');
+        console.log('User is NOT in the selected market pot');
+        setHasCheckedRedirect(true); // Mark as checked
       }
     }
-  }, [participantsData, address, isConnected, setActiveSection, selectedMarketAddress, isOwner]);
+  }, [participantsData, address, isConnected, setActiveSection, selectedMarketAddress, isSpecialUser]);
 
 
   useEffect(() => {
@@ -189,6 +217,30 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
     return () => clearInterval(interval);
   }, []);
+
+  // Show loading screen when redirecting
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-white text-black flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-white border-2 border-black rounded-3xl p-12 shadow-2xl">
+            <div className="w-20 h-20 bg-black rounded-2xl flex items-center justify-center mx-auto mb-8">
+              <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <h2 className="text-2xl font-black text-black mb-4 tracking-tight">Loading Predictions</h2>
+            <p className="text-gray-600 text-base">Taking you to make predictions...</p>
+            
+            {/* Progress dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              <div className="w-2 h-2 bg-black rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-black rounded-full animate-bounce delay-100"></div>
+              <div className="w-2 h-2 bg-black rounded-full animate-bounce delay-200"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-black p-6">

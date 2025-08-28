@@ -238,6 +238,45 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **State Synchronization**: Hook state takes precedence over database checks to prevent modal re-appearance after submission
 - **Source Tracking**: Tracks which page collected each email (PredictionPot, AI, PrivatePot, CreatePot)
 
+### Performance Optimizations & Database Considerations
+
+#### LandingPage.tsx Bookmark System (CRITICAL)
+⚠️ **Potential Database Overload Issue**: The bookmark functionality in `LandingPage.tsx` can generate excessive database queries that may overwhelm the Neon PostgreSQL instance.
+
+**The Problem:**
+- **Original Implementation**: Made 50+ simultaneous database calls via `isMarketBookmarked()` for every market on each render
+- **Trigger Points**: Executed whenever `address`, `isConnected`, `marketOptions`, or language (`t`) changed
+- **Database Impact**: Could cause connection limits to be exceeded and slow response times
+- **User Impact**: Slow page loads, potential timeouts, poor user experience
+
+**Optimization Implemented:**
+- **Batched Processing**: Process markets in groups of 10 with 100ms delays between batches
+- **Dependency Reduction**: Removed `marketOptions` and `t` from useEffect dependencies to prevent excessive re-runs
+- **Request Debouncing**: Added 200ms debounce to prevent rapid successive calls during wallet connection changes
+- **Cancellation Logic**: Proper cleanup prevents memory leaks and stale requests
+- **Caching Strategy**: Geo IP language detection cached for 1 hour in localStorage
+- **Detailed Logging**: Console tracking for bookmark loading performance monitoring
+
+**Current Behavior:**
+```javascript
+// Before: 50+ simultaneous queries on every render change
+// After: 10 queries per batch with delays, only on wallet/connection changes
+console.log('📑 Loading bookmark status for user:', address);
+console.log('📑 Checking bookmarks for 45 markets');
+console.log('📑 Loaded 12 bookmarks');
+```
+
+**Database Function Optimization:**
+- **BookmarksPage**: Added 10-second timeout and 100-market limit in `getUserBookmarks()`
+- **Query Performance**: Added timing logs and error handling for slow database responses
+- **Memory Management**: Proper async cleanup prevents memory leaks
+
+**Monitoring Guidelines:**
+- Watch console logs for bookmark loading times exceeding 2-3 seconds
+- Monitor Neon database connection count and query performance
+- Alert if `getUserBookmarks()` consistently times out (indicates database issues)
+- Consider implementing Redis caching layer if bookmark queries become frequent
+
 ## Development Notes
 
 - **SPA Architecture**: Single-page application with conditional rendering based on `activeSection`

@@ -300,17 +300,21 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
 
-  // Auto-redirect to MakePredictionsPage if user is already a participant
+  // Check if user has the special wallet address
+  const SPECIAL_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
+  const isSpecialUser = address && address.toLowerCase() === SPECIAL_ADDRESS.toLowerCase();
+
+  // Auto-redirect to MakePredictionsPage if user is already a participant (except special user)
   useEffect(() => {
-    if (isConnected && address && isParticipant && contractAddress) {
-      console.log('User is already a participant, redirecting to makePrediction in 1 second');
+    if (isConnected && address && isParticipant && contractAddress && !isSpecialUser) {
+      console.log('User is already a participant (not special user), redirecting to makePrediction in 1 second');
       const timer = setTimeout(() => {
         setActiveSection('makePrediction');
       }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [isConnected, address, isParticipant, contractAddress, setActiveSection]);
+  }, [isConnected, address, isParticipant, contractAddress, setActiveSection, isSpecialUser]);
 
   const { data: owner } = useReadContract({
     address: contractAddress as `0x${string}`,
@@ -1300,7 +1304,19 @@ useEffect(() => {
       </button>
     </div>
 
-    
+    {/* Navigate to Make Predictions */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-purple-500">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">🎯 Make Predictions</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Go to the predictions page to make your own predictions.
+      </p>
+      <button
+        onClick={() => setActiveSection('makePrediction')}
+        className="bg-purple-600 text-[#F5F5F5] px-6 py-3 rounded-md font-medium hover:bg-purple-700 w-full"
+      >
+        📊 Go to Predictions Page
+      </button>
+    </div>
     
   </div>
 )}

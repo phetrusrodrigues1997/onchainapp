@@ -985,30 +985,30 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             <div className="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
             
             <div className="relative z-10">
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-black text-black mb-4 tracking-tight">Your Call?</h2>
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-black text-black mb-3 tracking-tight">Your Call?</h2>
                 {marketQuestion && (
-                  <div className="bg-black text-white rounded-2xl p-4 mb-6 mx-auto max-w-md">
-                    <p className="text-white font-semibold text-base leading-relaxed">
+                  <div className="bg-black text-white rounded-2xl p-3 mb-4 mx-auto max-w-md">
+                    <p className="text-white font-semibold text-sm leading-relaxed">
                       {marketQuestion}
                     </p>
                   </div>
                 )}
-                <p className="text-black text-lg font-semibold">
+                <p className="text-black text-base font-semibold">
                   Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-4">
                 {/* YES Button - Black */}
                 <button
                   onClick={() => handlePlaceBet('positive')}
                   disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-black hover:bg-[#009900] disabled:opacity-50 disabled:cursor-not-allowed text-white p-8 rounded-2xl font-black text-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border-2 border-black overflow-hidden"
+                  className="group relative bg-black hover:bg-[#009900] disabled:opacity-50 disabled:cursor-not-allowed text-white p-6 rounded-2xl font-black text-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border-2 border-black overflow-hidden"
                 >
                   <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-3 bg-white/10 rounded-xl mb-4 backdrop-blur-sm flex items-center justify-center">
-                      <TrendingUp className="w-12 h-12 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="p-2 bg-white/10 rounded-lg mb-3 backdrop-blur-sm flex items-center justify-center">
+                      <TrendingUp className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="tracking-wide">YES</div>
                   </div>
@@ -1021,11 +1021,11 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 <button
                   onClick={() => handlePlaceBet('negative')}
                   disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-white hover:bg-red-50 border-2 border-black hover:border-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-black hover:text-red-600 p-8 rounded-2xl font-black text-2xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl overflow-hidden"
+                  className="group relative bg-white hover:bg-red-50 border-2 border-black hover:border-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-black hover:text-red-600 p-6 rounded-2xl font-black text-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl overflow-hidden"
                 >
                   <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-3 bg-black/10 group-hover:bg-red-100 rounded-xl mb-4 backdrop-blur-sm flex items-center justify-center transition-colors duration-300">
-                      <TrendingDown className="w-12 h-12 group-hover:scale-110 transition-transform duration-300" />
+                    <div className="p-2 bg-black/10 group-hover:bg-red-100 rounded-lg mb-3 backdrop-blur-sm flex items-center justify-center transition-colors duration-300">
+                      <TrendingDown className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="tracking-wide">NO</div>
                   </div>

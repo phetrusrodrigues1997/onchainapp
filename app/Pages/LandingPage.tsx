@@ -16,6 +16,7 @@ interface LandingPageProps {
   searchQuery?: string;
   selectedMarket?: string;
   setSelectedMarket?: (market: string) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 // Helper function to get contract address from markets data
@@ -25,7 +26,7 @@ const getContractAddress = (marketId: string): string | null => {
   return market?.contractAddress || null;
 };
 
-const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured', setSelectedMarket }: LandingPageProps) => {
+const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured', setSelectedMarket, onLoadingChange }: LandingPageProps) => {
   const { address, isConnected } = useAccount();
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
@@ -33,9 +34,54 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const { alertState, showAlert, closeAlert } = useCustomAlert();
   const availableMarkets = ["random topics", "crypto"];
   
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
   // Bookmark state
   const [bookmarkedMarkets, setBookmarkedMarkets] = useState<Set<string>>(new Set());
   const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
+  
+  // Pagination state
+  const [displayedMarketsCount, setDisplayedMarketsCount] = useState(12);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const MARKETS_PER_PAGE = 12;
+
+  // Load more markets function
+  const loadMoreMarkets = () => {
+    if (isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    // Simulate loading delay for better UX
+    setTimeout(() => {
+      setDisplayedMarketsCount(prev => prev + MARKETS_PER_PAGE);
+      setIsLoadingMore(false);
+    }, 500);
+  };
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setDisplayedMarketsCount(12);
+  }, [searchQuery]);
+
+  // Infinite scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isLoadingMore) return;
+      
+      // Check if user scrolled near bottom of page
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      
+      if (scrollTop + windowHeight >= docHeight - 200) { // 200px before bottom
+        loadMoreMarkets();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoadingMore]);
   
   
 
@@ -70,30 +116,81 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 
 
 
+  // Loading effect with progress simulation
   useEffect(() => {
+    const initializeApp = async () => {
+      // Simulate progressive loading - 4 second total duration
+      const loadingSteps = [
+        { progress: 15, delay: 400, label: 'Loading markets...' },
+        { progress: 30, delay: 600, label: 'Fetching data...' },
+        { progress: 50, delay: 700, label: 'Setting up interface...' },
+        { progress: 75, delay: 800, label: 'Finalizing...' },
+        { progress: 100, delay: 600, label: 'Ready!' }
+      ];
+      
+      for (const step of loadingSteps) {
+        await new Promise(resolve => setTimeout(resolve, step.delay));
+        setLoadingProgress(step.progress);
+      }
+      
+      // Complete loading
+      setTimeout(() => {
+        setIsLoading(false);
+        setIsVisible(true);
+        // Notify parent that loading is complete
+        onLoadingChange?.(false);
+      }, 400);
+    };
+    
+    // Notify parent that loading started
+    onLoadingChange?.(true);
+    
+    initializeApp();
+    
+    // Initialize language
     const savedLang = Cookies.get('language') as Language | undefined;
     if (savedLang && supportedLanguages.some(lang => lang.code === savedLang)) {
       setCurrentLanguage(savedLang);
     }
-    setIsVisible(true);
   }, []);
 
  
 
   useEffect(() => {
-  const detectLanguage = async () => {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      const isBrazil = data.country === 'BR';
-      setCurrentLanguage(isBrazil ? 'pt-BR' : 'en');
-    } catch (err) {
-      console.error('Geo IP detection failed:', err);
-      setCurrentLanguage('en'); // fallback
-    }
-  };
-  detectLanguage();
-}, []);
+    const detectLanguage = async () => {
+      // Check if language is already cached
+      const cachedLanguage = localStorage.getItem('detectedLanguage');
+      const cacheTimestamp = localStorage.getItem('languageDetectionTime');
+      const ONE_HOUR = 60 * 60 * 1000;
+      
+      // Use cached result if less than 1 hour old
+      if (cachedLanguage && cacheTimestamp && 
+          (Date.now() - parseInt(cacheTimestamp)) < ONE_HOUR) {
+        console.log('Using cached language detection:', cachedLanguage);
+        setCurrentLanguage(cachedLanguage as Language);
+        return;
+      }
+
+      try {
+        console.log('Detecting language via geo IP...');
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        const isBrazil = data.country === 'BR';
+        const detectedLang = isBrazil ? 'pt-BR' : 'en';
+        
+        // Cache the result
+        localStorage.setItem('detectedLanguage', detectedLang);
+        localStorage.setItem('languageDetectionTime', Date.now().toString());
+        
+        setCurrentLanguage(detectedLang);
+      } catch (err) {
+        console.error('Geo IP detection failed:', err);
+        setCurrentLanguage('en'); // fallback
+      }
+    };
+    
+    detectLanguage();
+  }, []);
 
 
 
@@ -106,8 +203,10 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const markets = getMarkets(t, selectedMarket);
   const marketOptions = getMarkets(t, 'options');
 
-  // Load bookmark status for all possible markets
+  // Load bookmark status for all possible markets (optimized)
   useEffect(() => {
+    let isCancelled = false;
+    
     const loadBookmarkStatus = async () => {
       if (!isConnected || !address) {
         setBookmarkedMarkets(new Set());
@@ -115,6 +214,8 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       }
 
       try {
+        console.log('📑 Loading bookmark status for user:', address);
+        
         // Get all possible market IDs from all categories
         const allPossibleMarkets = [
           ...marketOptions, // From options category
@@ -136,27 +237,50 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
           new Map(allPossibleMarkets.map(market => [market.id, market])).values()
         );
 
-        const bookmarkChecks = await Promise.all(
-          uniqueMarkets.map(async (market) => {
-            const isBookmarked = await isMarketBookmarked(address, market.id);
-            return { marketId: market.id, isBookmarked };
-          })
-        );
+        console.log('📑 Checking bookmarks for', uniqueMarkets.length, 'markets');
 
-        const bookmarkedSet = new Set(
-          bookmarkChecks
-            .filter(check => check.isBookmarked)
-            .map(check => check.marketId)
-        );
+        // Batch the bookmark checks to prevent overwhelming the database
+        const BATCH_SIZE = 10;
+        const bookmarkedSet = new Set<string>();
         
-        setBookmarkedMarkets(bookmarkedSet);
+        for (let i = 0; i < uniqueMarkets.length; i += BATCH_SIZE) {
+          if (isCancelled) return;
+          
+          const batch = uniqueMarkets.slice(i, i + BATCH_SIZE);
+          const batchChecks = await Promise.all(
+            batch.map(async (market) => {
+              const isBookmarked = await isMarketBookmarked(address, market.id);
+              return { marketId: market.id, isBookmarked };
+            })
+          );
+          
+          batchChecks
+            .filter(check => check.isBookmarked)
+            .forEach(check => bookmarkedSet.add(check.marketId));
+          
+          // Small delay between batches to prevent overwhelming the database
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        if (!isCancelled) {
+          setBookmarkedMarkets(bookmarkedSet);
+          console.log('📑 Loaded', bookmarkedSet.size, 'bookmarks');
+        }
       } catch (error) {
         console.error('Error loading bookmark status:', error);
       }
     };
 
-    loadBookmarkStatus();
-  }, [marketOptions, address, isConnected, t]);
+    // Add debouncing to prevent rapid successive calls
+    const timeoutId = setTimeout(() => {
+      loadBookmarkStatus();
+    }, 200);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [address, isConnected]); // Removed marketOptions and t to prevent excessive re-runs
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
@@ -257,6 +381,55 @@ const handleMarketClick = (marketId: string) => {
 };
 
 
+  // Show loading screen
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gray-900 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="max-w-md mx-auto text-center relative z-10 px-6">
+          <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10">
+            {/* Logo/Icon */}
+            <div className="w-24 h-24 bg-gradient-to-br from-red-600 via-red-500 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-900/25 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+              <span className="text-4xl font-black text-white drop-shadow-lg relative z-10">₿</span>
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">PrediWin</h1>
+            <p className="text-gray-600 text-base mb-8">Loading prediction markets...</p>
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-300 ease-out relative"
+                style={{ width: `${loadingProgress}%` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+              </div>
+            </div>
+            
+            {/* Progress Text */}
+            <div className="text-gray-500 text-sm font-medium">
+              {loadingProgress}%
+            </div>
+            
+            {/* Animated dots */}
+            <div className="flex justify-center gap-1 mt-6">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce delay-100"></div>
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce delay-200"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <style>{`
@@ -355,7 +528,10 @@ const handleMarketClick = (marketId: string) => {
     const otherMarkets = filteredMarkets.filter(market => market.tabId !== selectedMarket);
     const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : filteredMarkets;
     
-    return orderedMarkets.map((market, index) => (
+    // Apply pagination
+    const displayedMarkets = orderedMarkets.slice(0, displayedMarketsCount);
+    
+    return displayedMarkets.map((market, index) => (
       <div key={`mobile-${market.id}-${index}`} className="max-w-md mx-auto">
         <div 
           onClick={() => handleMarketClick(market.id)}
@@ -448,6 +624,34 @@ const handleMarketClick = (marketId: string) => {
       </div>
     ));
   })()}
+
+{/* Mobile Loading More Indicator */}
+{(() => {
+  const allMarkets = marketOptions.length;
+  const hasMoreMarkets = displayedMarketsCount < allMarkets && !searchQuery;
+  
+  return (
+    <div className="md:hidden">
+      {isLoadingMore && (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+          <span className="ml-3 text-gray-600">Loading more markets...</span>
+        </div>
+      )}
+      
+      {hasMoreMarkets && !isLoadingMore && (
+        <div className="text-center py-6">
+          <button
+            onClick={loadMoreMarkets}
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+          >
+            Load More Markets ({allMarkets - displayedMarketsCount} remaining)
+          </button>
+        </div>
+      )}
+    </div>
+  );
+})()}
 </div>
         </div>
       </section>
@@ -497,7 +701,10 @@ const handleMarketClick = (marketId: string) => {
                   const otherMarkets = filteredMarkets.filter(market => market.tabId !== selectedMarket);
                   const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : filteredMarkets;
                   
-                  return orderedMarkets.map((market, index) => (
+                  // Apply pagination for desktop
+                  const displayedMarkets = orderedMarkets.slice(0, displayedMarketsCount);
+                  
+                  return displayedMarkets.map((market, index) => (
                     <div
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => handleMarketClick(market.id)}
@@ -583,6 +790,34 @@ const handleMarketClick = (marketId: string) => {
                   ));
                 })()}
           </div>
+
+          {/* Desktop Loading More Indicator */}
+          {(() => {
+            const allMarkets = marketOptions.length;
+            const hasMoreMarkets = displayedMarketsCount < allMarkets && !searchQuery;
+            
+            return (
+              <>
+                {isLoadingMore && (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600"></div>
+                    <span className="ml-4 text-gray-600 text-lg">Loading more markets...</span>
+                  </div>
+                )}
+                
+                {hasMoreMarkets && !isLoadingMore && (
+                  <div className="text-center py-8">
+                    <button
+                      onClick={loadMoreMarkets}
+                      className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Load More Markets ({allMarkets - displayedMarketsCount} remaining)
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 

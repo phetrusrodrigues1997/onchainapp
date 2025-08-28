@@ -1914,13 +1914,18 @@ export async function removeBookmark(walletAddress: string, marketId: string) {
 
 export async function getUserBookmarks(walletAddress: string) {
   try {
+    console.log('📑 Starting database query for bookmarks:', walletAddress);
+    const startTime = Date.now();
+    
     const bookmarks = await db
       .select()
       .from(Bookmarks)
       .where(eq(Bookmarks.walletAddress, walletAddress))
-      .orderBy(desc(Bookmarks.bookmarkedAt));
+      .orderBy(desc(Bookmarks.bookmarkedAt))
+      .limit(100); // Reasonable limit to prevent huge queries
 
-    console.log('📑 Retrieved bookmarks for user:', walletAddress, 'Count:', bookmarks.length);
+    const queryTime = Date.now() - startTime;
+    console.log('📑 Retrieved bookmarks for user:', walletAddress, 'Count:', bookmarks.length, 'Query time:', queryTime + 'ms');
     return bookmarks;
 
   } catch (error) {
