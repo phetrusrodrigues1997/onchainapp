@@ -18,7 +18,7 @@ interface BookmarkItem {
   marketName: string;
   marketQuestion: string;
   marketCategory: string;
-  contractAddress?: string;
+  contractAddress?: string | null;
   bookmarkedAt: Date;
 }
 
