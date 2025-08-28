@@ -200,7 +200,7 @@ export default function App() {
 // }
 
   return (
-    <div className="min-h-screen bg-white text-white overflow-hidden">
+    <div className="min-h-screen bg-white text-white">
       
       
       <header className="z-50 bg-[#fdfdfd] px-4 pt-3 pb-1 md:py-2 sticky top-0 border-b border-gray-200">

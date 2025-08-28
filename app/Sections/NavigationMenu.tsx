@@ -52,7 +52,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
 
       {/* Menu dropdown - shown for both desktop and mobile when hamburger is clicked */}
       {isMenuOpen && (
-        <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg right-0">
+        <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg left-0">
         <div className="py-2">
           {menuItems.map((item) => (
             <button
