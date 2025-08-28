@@ -225,7 +225,7 @@ const handleMarketClick = (marketId: string) => {
           className={`group bg-white rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] border border-gray-200
           }`}
         >
-          <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-2xl p-4 h-full">
+          <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-2xl p-3 h-full">
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
@@ -238,10 +238,11 @@ const handleMarketClick = (marketId: string) => {
               </div>
             )}
             
-            {/* Header with Icon and Price */}
-            <div className="flex flex-col items-center mb-3">
-              <div className="w-full mb-2">
-                <div className="rounded-xl w-full h-32 bg-gray-50 overflow-hidden relative">
+            {/* Header with Icon and Question - Horizontal Layout */}
+            <div className="flex items-start gap-3 mb-3">
+              {/* Small Square Image */}
+              <div className="flex-shrink-0">
+                <div className="rounded-lg w-12 h-12 bg-gray-50 overflow-hidden relative">
                   {market.icon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={market.icon} 
@@ -250,26 +251,26 @@ const handleMarketClick = (marketId: string) => {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg text-gray-600">{market.icon}</span>
+                      <span className="text-sm text-gray-600">{market.icon}</span>
                     </div>
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Question */}
-            <div className="mb-3">
-              <p className="text-base font-semibold text-gray-900 leading-snug text-center">
-                {market.question}
-              </p>
+              
+              {/* Question */}
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900 leading-tight">
+                  {market.question}
+                </p>
+              </div>
             </div>
 
             {/* Trading Buttons */}
-            <div className="grid grid-cols-2 gap-3 mb-2">
-              <button className="bg-green-100 hover:bg-green-200 border-2 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <button className="bg-green-100 hover:bg-green-200 border-2 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
-              <button className="bg-red-100 hover:bg-red-200 border-2 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-2.5 px-4 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-red-100 hover:bg-red-200 border-2 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 NO
               </button>
             </div>
