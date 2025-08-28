@@ -4,6 +4,8 @@ import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEv
 import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
+import { getMarkets } from '../Constants/markets';
+import { getTranslation } from '../Languages/languages';
 
 // UK timezone helper functions (frontend version)
 const getUKOffset = (date: Date): number => {
@@ -42,7 +44,19 @@ const getUKTime = (date: Date = new Date()): Date => {
   return new Date(date.getTime() + ukOffsetMs);
 };
 
-// Define table identifiers instead of passing table objects
+// Helper function to get table type from contract address using markets.ts
+const getTableTypeFromContract = (contractAddress: string): string => {
+  const marketOptions = getMarkets(getTranslation('en'), 'options');
+  const market = marketOptions.find(m => m.contractAddress === contractAddress);
+  
+  if (market?.id === 'Featured') return 'featured';
+  if (market?.id === 'crypto') return 'crypto';
+  
+  // Fallback for unknown contracts
+  return 'featured';
+};
+
+// Keep the type for existing code compatibility
 const tableMapping = {
   "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
   "0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8": "crypto",

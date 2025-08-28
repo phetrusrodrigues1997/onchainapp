@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
+import { useAccount } from 'wagmi';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
+import { addBookmark, removeBookmark, isMarketBookmarked } from '../Database/actions';
 
 interface LandingPageProps {
   activeSection: string;
@@ -16,18 +18,24 @@ interface LandingPageProps {
   setSelectedMarket?: (market: string) => void;
 }
 
-const contractAddresses = {
-  Featured: '0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD',
-  Crypto: '0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8',
-  solana: '0xSolanaAddress...'
-} as const;
+// Helper function to get contract address from markets data
+const getContractAddress = (marketId: string): string | null => {
+  const marketOptions = getMarkets(getTranslation('en'), 'options');
+  const market = marketOptions.find(m => m.id === marketId || m.name === marketId);
+  return market?.contractAddress || null;
+};
 
 const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured', setSelectedMarket }: LandingPageProps) => {
+  const { address, isConnected } = useAccount();
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const selectedMarket = propSelectedMarket;
   const { alertState, showAlert, closeAlert } = useCustomAlert();
   const availableMarkets = ["random topics", "crypto"];
+  
+  // Bookmark state
+  const [bookmarkedMarkets, setBookmarkedMarkets] = useState<Set<string>>(new Set());
+  const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
   
   
 
@@ -98,15 +106,133 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const markets = getMarkets(t, selectedMarket);
   const marketOptions = getMarkets(t, 'options');
 
+  // Load bookmark status for all possible markets
+  useEffect(() => {
+    const loadBookmarkStatus = async () => {
+      if (!isConnected || !address) {
+        setBookmarkedMarkets(new Set());
+        return;
+      }
+
+      try {
+        // Get all possible market IDs from all categories
+        const allPossibleMarkets = [
+          ...marketOptions, // From options category
+        ];
+
+        // Loop through all market options and get markets from each category
+        marketOptions.forEach(option => {
+          try {
+            const categoryMarkets = getMarkets(t, option.id);
+            allPossibleMarkets.push(...categoryMarkets);
+          } catch (error) {
+            // Ignore categories that don't exist or have errors
+            console.log(`Category ${option.id} not found or has no markets`);
+          }
+        });
+
+        // Remove duplicates by creating a Map with market.id as key
+        const uniqueMarkets = Array.from(
+          new Map(allPossibleMarkets.map(market => [market.id, market])).values()
+        );
+
+        const bookmarkChecks = await Promise.all(
+          uniqueMarkets.map(async (market) => {
+            const isBookmarked = await isMarketBookmarked(address, market.id);
+            return { marketId: market.id, isBookmarked };
+          })
+        );
+
+        const bookmarkedSet = new Set(
+          bookmarkChecks
+            .filter(check => check.isBookmarked)
+            .map(check => check.marketId)
+        );
+        
+        setBookmarkedMarkets(bookmarkedSet);
+      } catch (error) {
+        console.error('Error loading bookmark status:', error);
+      }
+    };
+
+    loadBookmarkStatus();
+  }, [marketOptions, address, isConnected, t]);
+
+  // Handle bookmark toggle
+  const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent triggering market click
+    
+    if (!isConnected || !address) {
+      showAlert('Please connect your wallet to bookmark markets', 'info', 'Connect Wallet');
+      return;
+    }
+
+    const isCurrentlyBookmarked = bookmarkedMarkets.has(market.id);
+    setBookmarkLoading(market.id);
+
+    try {
+      if (isCurrentlyBookmarked) {
+        const result = await removeBookmark(address, market.id);
+        if (result.success) {
+          setBookmarkedMarkets(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(market.id);
+            return newSet;
+          });
+          showAlert('Bookmark removed', 'success', 'Success');
+        } else {
+          showAlert(result.message, 'error', 'Error');
+        }
+      } else {
+        const contractAddress = getContractAddress(market.id);
+        const result = await addBookmark(
+          address,
+          market.id,
+          market.name,
+          market.question,
+          selectedMarket, // market category
+          contractAddress || undefined
+        );
+        if (result.success) {
+          setBookmarkedMarkets(prev => new Set(prev).add(market.id));
+          showAlert('Market bookmarked!', 'success', 'Success');
+        } else {
+          showAlert(result.message, 'error', 'Error');
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      showAlert('Failed to update bookmark', 'error', 'Error');
+    } finally {
+      setBookmarkLoading(null);
+    }
+  };
+
 
   
 const handleMarketClick = (marketId: string) => {
-  if (contractAddresses[marketId as keyof typeof contractAddresses]) {
-    const contractAddress = contractAddresses[marketId as keyof typeof contractAddresses];
+  const contractAddress = getContractAddress(marketId);
+  
+  if (contractAddress) {
     console.log('Selected market:', marketId, 'Contract address:', contractAddress);
     
-    // Find the market question
-    const market = markets.find(m => m.id === marketId);
+    // Find the market question from the correct category
+    let market = null;
+    
+    // Try to find the market in the specific category first
+    if (marketId === 'Featured') {
+      const featuredMarkets = getMarkets(t, 'Featured');
+      market = featuredMarkets.find(m => m.id === marketId);
+    } else if (marketId === 'Crypto') {
+      const cryptoMarkets = getMarkets(t, 'Crypto');
+      market = cryptoMarkets.find(m => m.id === marketId);
+    }
+    
+    // Fallback: try to find in current markets or options
+    if (!market) {
+      market = markets.find(m => m.id === marketId);
+    }
+    
     const marketQuestion = market?.question || '';
     
     // Set the cookies with proper options
@@ -216,10 +342,18 @@ const handleMarketClick = (marketId: string) => {
       }
     });
     
+    // Filter markets based on search query
+    const filteredMarkets = searchQuery 
+      ? allMarkets.filter(market => 
+          market.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          market.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : allMarkets;
+
     // Reorder: selected market first, then others (match by tabId)
-    const selectedMarketData = allMarkets.find(market => market.tabId === selectedMarket);
-    const otherMarkets = allMarkets.filter(market => market.tabId !== selectedMarket);
-    const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : allMarkets;
+    const selectedMarketData = filteredMarkets.find(market => market.tabId === selectedMarket);
+    const otherMarkets = filteredMarkets.filter(market => market.tabId !== selectedMarket);
+    const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : filteredMarkets;
     
     return orderedMarkets.map((market, index) => (
       <div key={`mobile-${market.id}-${index}`} className="max-w-md mx-auto">
@@ -291,7 +425,23 @@ const handleMarketClick = (marketId: string) => {
                 <div className="text-sm font-bold text-gray-500">{market.potSize}</div>
               </div>
               
-              <Bookmark className="w-4 h-4 text-gray-500 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
+              <button
+                onClick={(e) => handleBookmarkToggle(market, e)}
+                disabled={bookmarkLoading === market.id}
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                {bookmarkLoading === market.id ? (
+                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+                ) : (
+                  <Bookmark 
+                    className={`w-4 h-4 transition-all duration-200 ${
+                      bookmarkedMarkets.has(market.id) 
+                        ? 'text-red-600 fill-red-600' 
+                        : 'text-gray-500 group-hover:text-red-600 group-hover:fill-red-600'
+                    }`} 
+                  />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -334,10 +484,18 @@ const handleMarketClick = (marketId: string) => {
                     }
                   });
                   
+                  // Filter markets based on search query
+                  const filteredMarkets = searchQuery 
+                    ? allMarkets.filter(market => 
+                        market.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        market.name.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                    : allMarkets;
+
                   // Reorder: selected market first, then others (match by tabId)
-                  const selectedMarketData = allMarkets.find(market => market.tabId === selectedMarket);
-                  const otherMarkets = allMarkets.filter(market => market.tabId !== selectedMarket);
-                  const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : allMarkets;
+                  const selectedMarketData = filteredMarkets.find(market => market.tabId === selectedMarket);
+                  const otherMarkets = filteredMarkets.filter(market => market.tabId !== selectedMarket);
+                  const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : filteredMarkets;
                   
                   return orderedMarkets.map((market, index) => (
                     <div
@@ -402,7 +560,23 @@ const handleMarketClick = (marketId: string) => {
                             <div className="text-[10px] font-bold text-gray-500 leading-none">{market.potSize}</div>
                           </div>
                           
-                          <Bookmark className="w-3 h-3 text-gray-500 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
+                          <button
+                            onClick={(e) => handleBookmarkToggle(market, e)}
+                            disabled={bookmarkLoading === market.id}
+                            className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            {bookmarkLoading === market.id ? (
+                              <div className="w-3 h-3 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+                            ) : (
+                              <Bookmark 
+                                className={`w-3 h-3 transition-all duration-200 ${
+                                  bookmarkedMarkets.has(market.id) 
+                                    ? 'text-red-600 fill-red-600' 
+                                    : 'text-gray-500 group-hover:text-red-600 group-hover:fill-red-600'
+                                }`} 
+                              />
+                            )}
+                          </button>
                         </div>
                       </div>
                     </div>

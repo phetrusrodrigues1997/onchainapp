@@ -144,3 +144,15 @@ export const PredictionIdeas = pgTable("prediction_ideas", {
   marketAddress: text("market_address"), // Contract address if implemented as a market
 });
 
+// Bookmarks table - stores user's bookmarked markets
+export const Bookmarks = pgTable("bookmarks", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(), // User who bookmarked
+  marketId: text("market_id").notNull(), // Market ID being bookmarked
+  marketName: text("market_name").notNull(), // Market name for display
+  marketQuestion: text("market_question").notNull(), // Market question for display
+  marketCategory: text("market_category").notNull(), // Category (Featured, Crypto, etc.)
+  contractAddress: text("contract_address"), // Contract address if available
+  bookmarkedAt: timestamp("bookmarked_at").defaultNow().notNull(), // When bookmarked
+});
+

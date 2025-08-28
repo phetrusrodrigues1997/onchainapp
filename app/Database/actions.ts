@@ -2,7 +2,7 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import {  Messages, FeaturedBets, CryptoBets, LivePredictions } from "./schema"; // Import the schema
+import {  Messages, FeaturedBets, CryptoBets, LivePredictions, Bookmarks } from "./schema"; // Import the schema
 import { eq, sql, and } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
@@ -1854,6 +1854,102 @@ export async function getUserProfiles(walletAddresses: string[]) {
   } catch (error) {
     console.error("Error getting user profiles:", error);
     return [];
+  }
+}
+
+// Bookmark functions
+export async function addBookmark(walletAddress: string, marketId: string, marketName: string, marketQuestion: string, marketCategory: string, contractAddress?: string) {
+  try {
+    // Check if bookmark already exists
+    const existingBookmark = await db
+      .select()
+      .from(Bookmarks)
+      .where(and(
+        eq(Bookmarks.walletAddress, walletAddress),
+        eq(Bookmarks.marketId, marketId)
+      ))
+      .limit(1);
+
+    if (existingBookmark.length > 0) {
+      console.log('📑 Bookmark already exists for market:', marketId);
+      return { success: false, message: 'Market already bookmarked' };
+    }
+
+    // Add new bookmark
+    await db.insert(Bookmarks).values({
+      walletAddress,
+      marketId,
+      marketName,
+      marketQuestion,
+      marketCategory,
+      contractAddress,
+    });
+
+    console.log('📑 Bookmark added successfully for market:', marketId);
+    return { success: true, message: 'Market bookmarked successfully' };
+
+  } catch (error) {
+    console.error("Error adding bookmark:", error);
+    return { success: false, message: 'Failed to add bookmark' };
+  }
+}
+
+export async function removeBookmark(walletAddress: string, marketId: string) {
+  try {
+    await db
+      .delete(Bookmarks)
+      .where(and(
+        eq(Bookmarks.walletAddress, walletAddress),
+        eq(Bookmarks.marketId, marketId)
+      ));
+
+    console.log('📑 Bookmark removed successfully for market:', marketId);
+    return { success: true, message: 'Bookmark removed successfully' };
+
+  } catch (error) {
+    console.error("Error removing bookmark:", error);
+    return { success: false, message: 'Failed to remove bookmark' };
+  }
+}
+
+export async function getUserBookmarks(walletAddress: string) {
+  try {
+    const bookmarks = await db
+      .select()
+      .from(Bookmarks)
+      .where(eq(Bookmarks.walletAddress, walletAddress))
+      .orderBy(desc(Bookmarks.bookmarkedAt));
+
+    console.log('📑 Retrieved bookmarks for user:', walletAddress, 'Count:', bookmarks.length);
+    return bookmarks;
+
+  } catch (error) {
+    console.error("Error getting user bookmarks:", error);
+    return [];
+  }
+}
+
+export async function isMarketBookmarked(walletAddress: string, marketId: string) {
+  try {
+    // Select only essential columns to avoid issues with missing contract_address column
+    const bookmark = await db
+      .select({
+        id: Bookmarks.id,
+        marketId: Bookmarks.marketId,
+        walletAddress: Bookmarks.walletAddress
+      })
+      .from(Bookmarks)
+      .where(and(
+        eq(Bookmarks.walletAddress, walletAddress),
+        eq(Bookmarks.marketId, marketId)
+      ))
+      .limit(1);
+
+    return bookmark.length > 0;
+
+  } catch (error) {
+    console.error("Error checking bookmark status:", error);
+    return false;
   }
 }
 

@@ -8,6 +8,7 @@ export interface Market {
   id: string
   name: string
   symbol: string
+  contractAddress?: string
   color: string
   question: string
   icon: string
@@ -43,6 +44,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
     id: 'Featured',
     name: 'Featured',
     symbol: '',
+    contractAddress: '0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD',
     color: '#FF5733',
     question: '',
     icon: '',
@@ -51,12 +53,13 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
     potSize: '$500',
   },
   {
-    id: 'crypto',
+    id: 'Crypto',
     name: 'Crypto',
     symbol: '',
+    contractAddress: '0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8',
     color: '#FF5733',
-    question: '',
-    icon: '',
+    question: 'Will Bitcoin close higher than it opened today?',
+    icon: 'https://imagenes.elpais.com/resizer/v2/RHT44JJG7YLJUGQUHJZYYMVIDM.jpg?auth=660c11fcb0487f91edb65bc9c3ee0feaf3e584d22c991318625202b52722555a&width=1200',
     currentPrice: '$100',
     participants: 50,
     potSize: '$500',
@@ -261,6 +264,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
   id: 'Featured',
   name: 'Random Topics',
   symbol: 'Featured',
+  contractAddress: '0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD',
   color: '#1DB954',
   question: 'Will Elon Musk tweet about Trump?',
   icon: 'https://www.reuters.com/resizer/v2/X2P6AU3MARJKNEEGSGOX223QZU.jpg?auth=ec382dadf32e0b1c91a79c2e71a55c369312198ed92d304a8e8f789f93e58afb&width=1080&quality=80',
@@ -504,6 +508,22 @@ else if (category === 'gaming') {
   ]
 }
 
+else if (category === 'Crypto'){
+  return [
+    {
+    id: 'Crypto',
+    name: 'crypto',
+    symbol: '',
+    contractAddress: '0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8',
+    color: '#FF5733',
+    question: 'Will Bitcoin close higher than it opened today?',
+    icon: 'https://imagenes.elpais.com/resizer/v2/RHT44JJG7YLJUGQUHJZYYMVIDM.jpg?auth=660c11fcb0487f91edb65bc9c3ee0feaf3e584d22c991318625202b52722555a&width=1200',
+    currentPrice: '$100',
+    participants: 50,
+    potSize: '$500',
+  }]
+}
+
 else if (category === 'xtrends') {
   return [
     {
@@ -521,107 +541,7 @@ else if (category === 'xtrends') {
 
   // Default category (financial/crypto/etc)
   return [
-  {
-    id: 'Crypto',
-    name: 'Crypt',
-    symbol: 'BTC',
-    color: '#F7931A',
-    question: t.bitcoinQuestion ?? '',
-    icon: 'https://imagenes.elpais.com/resizer/v2/RHT44JJG7YLJUGQUHJZYYMVIDM.jpg?auth=660c11fcb0487f91edb65bc9c3ee0feaf3e584d22c991318625202b52722555a&width=1200',
-    currentPrice: '$99,000.00', // Static price - use dynamic pricing component separately
-    participants: 127,
-    potSize: '$1,270',
-  },
-  {
-    id: 'ethereum',
-    name: 'Ethereum',
-    symbol: 'ETH',
-    color: '#627EEA',
-    question: t.ethereumQuestion ?? '',
-    icon:"https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
-    currentPrice: '$3,456',
-    participants: 89,
-    potSize: '$890',
-  },
-  {
-    id: 'solana',
-    name: 'Solana',
-    symbol: 'SOL',
-    color: '#9945FF',
-    question: t.solanaQuestion ?? '',
-    icon: 'https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png',
-    currentPrice: '$198',
-    participants: 64,
-    potSize: '$640',
-  },
   
-  {
-    id: 'dogecoin',
-    name: 'Dogecoin',
-    symbol: 'DOGE',
-    color: '#C2A633',
-    question: t.dogecoinQuestion ?? '',
-    icon: 'https://upload.wikimedia.org/wikipedia/en/d/d0/Dogecoin_Logo.png',
-    currentPrice: '$0.075',
-    participants: 72,
-    potSize: '$720',
-  },
-  {
-    id: 'cardano',
-    name: 'Cardano',
-    symbol: 'ADA',
-    color: '#0033AD',
-    question: t.cardanoQuestion ?? '',
-    icon: 'https://static1.tokenterminal.com//cardano/logo.png',
-    currentPrice: '$0.42',
-    participants: 54,
-    potSize: '$540',
-  },
-  {
-    id: 'xrp',
-    name: 'XRP',
-    symbol: 'XRP',
-    color: '#346AA9',
-    question: t.xrpQuestion ?? '',
-    icon: 'https://zengo.com/wp-content/uploads/xrp-1.png',
-    currentPrice: '$0.62',
-    participants: 60,
-    potSize: '$600',
-  },
- 
-  {
-    id: 'litecoin',
-    name: 'Litecoin',
-    symbol: 'LTC',
-    color: '#BEBEBE',
-    question: t.litecoinQuestion ?? '',
-    icon: 'https://s3.coinmarketcap.com/static/img/portraits/630c5fcaf8184351dc5c6ee5.png',
-    currentPrice: '$150.25',
-    participants: 45,
-    potSize: '$450',
-  },
-  {
-    id: 'polkadot',
-    name: 'Polkadot',
-    symbol: 'DOT',
-    color: '#E6007A',
-    question: t.polkadotQuestion ?? '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/200x200/6636.png',
-    currentPrice: '$6.50',
-    participants: 38,
-    potSize: '$380',
-  },
-  {
-    id: 'chainlink',
-    name: 'Chainlink',
-    symbol: 'LINK',
-    color: '#375BD2',
-    question: t.chainlinkQuestion ?? '',
-    icon: 'https://s2.coinmarketcap.com/static/img/coins/200x200/1975.png',
-    currentPrice: '$8.75',
-    participants: 50,
-    potSize: '$500',
-  }
 ]
 }
 
