@@ -270,10 +270,10 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Trading Buttons */}
             <div className="grid grid-cols-2 gap-2 mb-2">
-              <button className="bg-green-100 hover:bg-green-200 border-2 border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-blue-50 hover:bg-blue-200 border-2 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
-              <button className="bg-red-100 hover:bg-red-200 border-2 border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-purple-50 hover:bg-purple-200 border-2 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 NO
               </button>
             </div>
@@ -281,14 +281,14 @@ const handleMarketClick = (marketId: string) => {
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
               <div className="flex items-center space-x-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-gray-400"></div>        
-                <span className="text-sm font-semibold text-gray-600">
+                <div className="w-2.5 h-2.5 rounded-full bg-gray-300"></div>        
+                <span className="text-sm font-semibold text-gray-400">
                   {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
                 </span>
               </div>
               
               <div className="text-center">
-                <div className="text-sm font-bold text-gray-900">{market.potSize}</div>
+                <div className="text-sm font-bold text-gray-400">{market.potSize}</div>
               </div>
               
               <Bookmark className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
@@ -381,10 +381,10 @@ const handleMarketClick = (marketId: string) => {
 
                         {/* Trading Buttons */}
                         <div className="grid grid-cols-2 gap-2 mb-2">
-                          <button className="bg-green-100 hover:bg-green-200 border border-green-200 hover:border-green-300 text-green-700 hover:text-green-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                          <button className="bg-blue-50 hover:bg-blue-200 border border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                             YES
                           </button>
-                          <button className="bg-red-100 hover:bg-red-200 border border-red-200 hover:border-red-300 text-red-700 hover:text-red-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                          <button className="bg-purple-50 hover:bg-purple-200 border border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                             NO
                           </button>
                         </div>
@@ -392,14 +392,14 @@ const handleMarketClick = (marketId: string) => {
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                           <div className="flex items-center space-x-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                            <span className="text-[10px] font-medium text-gray-600">
+                            <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                            <span className="text-[10px] font-medium text-gray-400">
                               {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
                             </span>
                           </div>
                           
                           <div className="text-center">
-                            <div className="text-[10px] font-bold text-gray-900 leading-none">{market.potSize}</div>
+                            <div className="text-[10px] font-bold text-gray-400 leading-none">{market.potSize}</div>
                           </div>
                           
                           <Bookmark className="w-3 h-3 text-gray-400 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />

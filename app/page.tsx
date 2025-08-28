@@ -57,6 +57,32 @@ export default function App() {
   // Get market options for carousels
   const t = getTranslation(currentLanguage);
   const marketOptions = getMarkets(t, 'options');
+  
+  // State for shuffled markets to avoid hydration mismatch
+  const [shuffledMarkets, setShuffledMarkets] = useState(marketOptions);
+  
+  // Shuffle function
+  const shuffleArray = (array: any[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+  
+  // Shuffle markets on client side only, keeping Featured first
+  useEffect(() => {
+    const featuredMarket = marketOptions.find(market => market.name === '★ Featured');
+    const otherMarkets = marketOptions.filter(market => market.name !== '★ Featured');
+    const shuffledOthers = shuffleArray(otherMarkets);
+    
+    if (featuredMarket) {
+      setShuffledMarkets([featuredMarket, ...shuffledOthers]);
+    } else {
+      setShuffledMarkets(shuffleArray(marketOptions));
+    }
+  }, []);
 
   // Personalized labels for the second carousel
   const personalizedLabels = {
@@ -421,7 +447,7 @@ export default function App() {
                 msOverflowStyle: 'none'
               }}
             >
-              {marketOptions.map((market) => (
+              {shuffledMarkets.map((market) => (
                 <button
                   key={`personalized-${market.id}`}
                   onClick={() => setSelectedMarket(market.id)}
