@@ -282,16 +282,16 @@ const handleMarketClick = (marketId: string) => {
             <div className="flex justify-between items-center pt-2">
               <div className="flex items-center space-x-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-gray-300"></div>        
-                <span className="text-sm font-semibold text-gray-400">
+                <span className="text-sm font-semibold text-gray-500">
                   {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
                 </span>
               </div>
               
               <div className="text-center">
-                <div className="text-sm font-bold text-gray-400">{market.potSize}</div>
+                <div className="text-sm font-bold text-gray-500">{market.potSize}</div>
               </div>
               
-              <Bookmark className="w-4 h-4 text-gray-400 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
+              <Bookmark className="w-4 h-4 text-gray-500 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
             </div>
           </div>
         </div>
@@ -393,16 +393,16 @@ const handleMarketClick = (marketId: string) => {
                         <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                           <div className="flex items-center space-x-1">
                             <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                            <span className="text-[10px] font-medium text-gray-400">
+                            <span className="text-[10px] font-medium text-gray-500">
                               {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
                             </span>
                           </div>
                           
                           <div className="text-center">
-                            <div className="text-[10px] font-bold text-gray-400 leading-none">{market.potSize}</div>
+                            <div className="text-[10px] font-bold text-gray-500 leading-none">{market.potSize}</div>
                           </div>
                           
-                          <Bookmark className="w-3 h-3 text-gray-400 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
+                          <Bookmark className="w-3 h-3 text-gray-500 group-hover:text-red-600 group-hover:fill-red-600 transition-all duration-200" />
                         </div>
                       </div>
                     </div>

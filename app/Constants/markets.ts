@@ -41,7 +41,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
     return [
       {
     id: 'Featured',
-    name: '★ Featured',
+    name: 'Featured',
     symbol: '',
     color: '#FF5733',
     question: '',

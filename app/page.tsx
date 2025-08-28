@@ -73,8 +73,8 @@ export default function App() {
   
   // Shuffle markets on client side only, keeping Featured first
   useEffect(() => {
-    const featuredMarket = marketOptions.find(market => market.name === '★ Featured');
-    const otherMarkets = marketOptions.filter(market => market.name !== '★ Featured');
+    const featuredMarket = marketOptions.find(market => market.name === 'Featured');
+    const otherMarkets = marketOptions.filter(market => market.name !== 'Featured');
     const shuffledOthers = shuffleArray(otherMarkets);
     
     if (featuredMarket) {
@@ -86,7 +86,7 @@ export default function App() {
 
   // Personalized labels for the second carousel
   const personalizedLabels = {
-    '★ Featured': 'For you',
+    'Featured': 'For you',
     'Crypto': 'Bitcoin',
     'Stocks': 'Tesla',
     'Music Charts': 'Sabrina Carpenter',
@@ -350,7 +350,7 @@ export default function App() {
           
           {/* Market Carousel - only show on home section, on its own line */}
           {activeSection === 'home' && (
-            <div className="relative mt-3 md:mt-1">
+            <div className="relative mt-3 md:translate-y-2">
               {/* Left Arrow - Hidden on mobile */}
               {showLeftArrow && (
                 <button
@@ -385,16 +385,16 @@ export default function App() {
                   <button
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 font-medium ${selectedMarket === market.id
+                    className={`group flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${selectedMarket === market.id
                         ? 'text-black font-bold'
-                        : 'text-[#6B7280] hover:text-black hover:font-bold'
+                        : 'text-gray-500 hover:text-gray-600 font-semibold'
                       }`}
                     style={{
                       minWidth: 'fit-content',
                       height: '32px',
                     }}
                   >
-                    <span className="text-sm whitespace-nowrap">
+                    <span className="text-[15px] whitespace-nowrap">
                       {market.name}
                     </span>
                   </button>
@@ -451,17 +451,17 @@ export default function App() {
                 <button
                   key={`personalized-${market.id}`}
                   onClick={() => setSelectedMarket(market.id)}
-                  className={`group flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 font-medium ${
+                  className={`group flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
                     selectedMarket === market.id
                       ? 'text-red-600 font-bold bg-red-100'
-                      : 'text-[#6B7280] hover:text-black hover:font-bold hover:bg-gray-50'
+                      : 'text-gray-400 hover:text-gray-600 font-semibold hover:bg-gray-50'
                     }`}
                   style={{
                     minWidth: 'fit-content',
                     height: '32px',
                   }}
                 >
-                  <span className="text-sm whitespace-nowrap">
+                  <span className="text-[15px] whitespace-nowrap">
                     {personalizedLabels[market.name as keyof typeof personalizedLabels] || market.name}
                   </span>
                 </button>
@@ -524,65 +524,65 @@ export default function App() {
               setIsMobileSearchActive(false);
             }}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
-              activeSection === 'home' ? 'text-red-600' : 'text-gray-500'
+              activeSection === 'home' ? 'text-black' : 'text-gray-500'
             }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${
-              activeSection === 'home' ? 'bg-red-100' : ''
+              activeSection === 'home' ? 'bg-transparent' : ''
             }`}>
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13z"/>
               </svg>
             </div>
-            <span className="text-[10px] font-medium">Home</span>
+            <span className="text-[11px] font-medium">Home</span>
           </button>
 
             <button
             onClick={handleMobileSearchToggle}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
-              isMobileSearchActive ? 'text-red-600' : 'text-gray-500'
+              isMobileSearchActive ? 'text-black' : 'text-gray-500'
             }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${
-              isMobileSearchActive ? 'bg-red-100' : ''
+              isMobileSearchActive ? 'bg-transparent' : ''
             }`}>
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
               </svg>
             </div>
-            <span className="text-[10px] font-medium">Search</span>
+            <span className="text-[11px] font-medium">Search</span>
           </button>
 
           <button
             onClick={() => setActiveSection('discord')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
-              activeSection === 'discord' ? 'text-red-600' : 'text-gray-500'
+              activeSection === 'discord' ? 'text-black' : 'text-gray-500'
             }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${
-              activeSection === 'discord' ? 'bg-red-100' : ''
+              activeSection === 'discord' ? 'bg-transparent' : ''
             }`}>
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1V3H9V1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM17 20H7V9H17V20Z"/>
               </svg>
             </div>
-            <span className="text-[10px] font-medium">How it works</span>
+            <span className="text-[11px] font-medium">How it works</span>
           </button>
 
           <button
             onClick={() => setActiveSection('ideas')}
             className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${
-              activeSection === 'ideas' ? 'text-red-600' : 'text-gray-500'
+              activeSection === 'ideas' ? 'text-black' : 'text-gray-500'
             }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${
-              activeSection === 'ideas' ? 'bg-red-100' : ''
+              activeSection === 'ideas' ? 'bg-transparent' : ''
             }`}>
-              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.3 3-3.4 3-5.7 0-3.9-3.1-7-7-7z"/>
               </svg>
             </div>
-            <span className="text-[10px] font-medium">Ideas</span>
+            <span className="text-[11px] font-medium">Ideas</span>
           </button>
         </div>
       </div>
