@@ -413,7 +413,7 @@ export default function App() {
 
       {/* Second Carousel - Personalized Labels (Below mobile search bar) */}
       {activeSection === 'home' && (
-        <section className="relative z-10 px-4 py-3 bg-white">
+        <section className="relative z-10 px-4 py-1 md:py-3 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
               style={{
