@@ -259,7 +259,7 @@ const handleMarketClick = (marketId: string) => {
               
               {/* Question */}
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900 leading-tight">
+                <p className="text-base font-semibold text-gray-900 leading-tight">
                   {market.question}
                 </p>
               </div>
