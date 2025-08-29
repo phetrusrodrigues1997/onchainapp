@@ -148,6 +148,20 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     hash: txHash,
   });
 
+  // Debug transaction receipt states
+  useEffect(() => {
+    if (txHash) {
+      console.log("🧾 Transaction receipt state changed:", {
+        txHash,
+        isPending,
+        isConfirming,
+        isConfirmed,
+        lastAction,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [txHash, isPending, isConfirming, isConfirmed, lastAction]);
+
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
     const savedLang = Cookies.get('language');
     if (savedLang && supportedLanguages.some(lang => lang.code === savedLang)) {
@@ -268,17 +282,40 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   // Reset loading state if transaction fails (but don't clear lastAction if transaction might still confirm)
   useEffect(() => {
     if (!isPending && !isConfirming && !isConfirmed && lastAction && isLoading) {
-      console.log("⚠️ Transaction appears to have failed, scheduling reset in 5 seconds...");
+      console.log("⚠️ Transaction appears to have failed - state analysis:");
+      console.log({
+        isPending,
+        isConfirming, 
+        isConfirmed,
+        lastAction,
+        isLoading,
+        txHash: txHash || 'no hash',
+        contractAddress,
+        timestamp: new Date().toISOString()
+      });
+      console.log("⏰ Scheduling state reset in 30 seconds...");
+      
       setTimeout(() => {
         // Only reset if we're still in the same state (transaction truly failed)
         if (!isPending && !isConfirming && !isConfirmed && isLoading) {
-          console.log("🔄 Resetting failed transaction state");
+          console.log("🔄 Resetting failed transaction state after timeout");
+          console.log("📊 Final state before reset:", {
+            isPending,
+            isConfirming,
+            isConfirmed,
+            lastAction,
+            isLoading,
+            txHash: txHash || 'no hash'
+          });
           setIsLoading(false);
           setLastAction('');
+          showMessage("Transaction may have failed. Please try again if needed.", true);
+        } else {
+          console.log("✅ Transaction state changed during timeout - not resetting");
         }
       }, 30000); // 30 seconds to give plenty of time for wallet confirmation
     }
-  }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
+  }, [isPending, isConfirming, isConfirmed, lastAction, isLoading, txHash, contractAddress]);
 
 
   // Read contract data
@@ -600,13 +637,22 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 useEffect(() => {
   console.log("🔄 Transaction confirmation useEffect triggered:", { 
     isConfirmed, 
+    isConfirming, 
+    isPending,
     lastAction, 
     winnerAddresses: winnerAddresses || 'empty',
-    potBalance: potBalance?.toString() || 'none' 
+    potBalance: potBalance?.toString() || 'none',
+    txHash: txHash || 'no hash'
   });
   
   if (isConfirmed) {
-    console.log("✅ Transaction confirmed, lastAction:", lastAction);
+    console.log("✅ Transaction confirmed successfully! Details:", {
+      lastAction,
+      txHash,
+      timestamp: new Date().toISOString(),
+      contractAddress,
+      selectedTableType
+    });
     
     if (lastAction === 'enterPot') {
       // Keep loading state active while background processes complete
@@ -682,20 +728,29 @@ useEffect(() => {
       setLastAction('');
       return; // Don't execute common cleanup below
     } else if (lastAction === 'distributePot') {
-      console.log("🎯 lastAction === 'distributePot' - starting finishDistribution");
+      console.log("🎯 Pot distribution confirmed! Starting post-distribution cleanup...");
+      console.log("📊 Distribution confirmation state:", {
+        winnerAddresses,
+        potBalance: potBalance?.toString(),
+        contractAddress,
+        selectedTableType,
+        participantCount: participants?.length || 0
+      });
+      
       // Handle pot distribution completion - update winner stats and clear wrong predictions
       const finishDistribution = async () => {
         try {
-          console.log("🔍 Distribution completion - checking conditions:");
+          console.log("🔍 Starting finishDistribution process");
+          console.log("🧮 Distribution completion - checking conditions:");
           console.log("- winnerAddresses:", winnerAddresses);
-          console.log("- winnerAddresses.trim():", winnerAddresses.trim());
+          console.log("- winnerAddresses.trim():", winnerAddresses?.trim());
           console.log("- potBalance:", potBalance?.toString());
           console.log("- potBalance > BigInt(0):", potBalance ? potBalance > BigInt(0) : false);
           
           // Update winner statistics if we have pot balance - re-determine winners instead of relying on state
           if (potBalance && potBalance > BigInt(0)) {
             console.log("✅ Pot balance available, re-determining winners for stats update...");
-            showMessage("Updating winner statistics...");
+            showMessage("Pot distributed successfully! Updating winner statistics...");
             
             // Re-determine winners to avoid state dependency issues
             const winnersString = await determineWinners(selectedTableType, participants || []);
@@ -1213,16 +1268,30 @@ useEffect(() => {
       </p>
       <button
         onClick={async () => {
+          console.log("🚀 Starting pot distribution process...");
+          console.log("📊 Initial state:", {
+            contractAddress,
+            selectedTableType,
+            participantCount: participants?.length || 0,
+            potBalance: potBalance?.toString(),
+            isOwner,
+            address
+          });
+
           setIsLoading(true);
           setLastAction("distributePot");
           
           try {
             // Determine winners
             const participantCount = participants?.length || 0;
+            console.log("🔍 Determining winners for", participantCount, "participants");
             showMessage(`Determining winners among ${participantCount} pot participants...`);
+            
             const winnersString = await determineWinners(selectedTableType, participants || []);
+            console.log("🏆 determineWinners returned:", winnersString);
             
             if (!winnersString || winnersString.trim() === "") {
+              console.log("❌ No winners found - winnersString empty or null");
               showMessage(`No winners found for this round (${participantCount} participants checked)`, true);
               setIsLoading(false);
               setLastAction("");
@@ -1231,8 +1300,15 @@ useEffect(() => {
             
             // Parse winner addresses
             const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
+            console.log("📝 Parsed winner addresses:", addresses);
+            console.log("✅ Address validation:", {
+              addressCount: addresses.length,
+              validFormat: addresses.every(addr => addr.startsWith('0x') && addr.length === 42),
+              addresses: addresses
+            });
             
             if (addresses.length === 0) {
+              console.log("❌ No valid addresses after parsing");
               showMessage("No valid winner addresses found", true);
               setIsLoading(false);
               setLastAction("");
@@ -1240,21 +1316,40 @@ useEffect(() => {
             }
             
             // Set winner addresses for transaction confirmation handler
-            console.log("🎯 Setting winnerAddresses:", winnersString);
+            console.log("🎯 Setting winnerAddresses for confirmation handler:", winnersString);
             setWinnerAddresses(winnersString);
             showMessage(`Found ${addresses.length} winner(s). Distributing pot...`);
             
+            // Log contract interaction details
+            console.log("📄 Contract interaction details:", {
+              contractAddress,
+              functionName: 'distributePot',
+              args: [addresses],
+              abiLength: PREDICTION_POT_ABI.length
+            });
+            
             // Distribute pot using the blockchain contract
-            await writeContract({
+            console.log("🔗 Calling writeContract with distributePot...");
+            const txResult = await writeContract({
               address: contractAddress as `0x${string}`,
               abi: PREDICTION_POT_ABI,
               functionName: 'distributePot',
               args: [addresses],
             });
             
+            console.log("📝 Transaction submitted successfully:", txResult);
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
-            // Here maybe?
+            
           } catch (error) {
+            console.error("❌ Pot distribution failed:", error);
+            console.log("🔍 Error details:", {
+              errorType: typeof error,
+              errorMessage: error instanceof Error ? error.message : String(error),
+              errorStack: error instanceof Error ? error.stack : undefined,
+              contractAddress,
+              selectedTableType
+            });
+            
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
             setLastAction("");
