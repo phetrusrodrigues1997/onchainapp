@@ -262,11 +262,11 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     // USD pricing that we want to maintain (simplified - all days $0.01 for now)
     const usdPrices = {
       0: 0.01, // Sunday: $0.01
-      1: 0.02, // Monday: $0.02  
-      2: 0.03, // Tuesday: $0.03
-      3: 0.04, // Wednesday: $0.04
-      4: 0.05, // Thursday: $0.05
-      5: 0.06, // Friday: $0.06
+      1: 0.01, // Monday: $0.02  
+      2: 0.01, // Tuesday: $0.03
+      3: 0.01, // Wednesday: $0.04
+      4: 0.01, // Thursday: $0.05
+      5: 0.01, // Friday: $0.06
       6: 0.01, // Saturday: Closed (fallback to Sunday price)
     };
     
