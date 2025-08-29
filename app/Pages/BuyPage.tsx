@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import Image from 'next/image';
 import { Buy } from '@coinbase/onchainkit/buy'; 
 import { ETHToken } from '../Constants/coins';
-import { ArrowDown, CreditCard, Wallet, Download } from 'lucide-react';
+import { useAccount, useBalance } from 'wagmi';
+import { formatUnits } from 'viem';
+import { ArrowDown, CreditCard, Wallet, Download, Copy, Check, QrCode } from 'lucide-react';
+import { getPrice } from '../Constants/getPrice';
 
 interface BuySectionProps {
   activeSection?: string;
@@ -16,6 +19,64 @@ const tokens = [
 const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection }) => {
   const [selectedTokenIndex, setSelectedTokenIndex] = useState<number>(0);
   const selectedToken = tokens[selectedTokenIndex];
+  const [activeTab, setActiveTab] = useState<'buy' | 'receive'>('buy');
+  const { address, isConnected } = useAccount();
+  const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
+
+  // Get ETH balance
+  const ethBalance = useBalance({
+    address,
+    chainId: 8453
+  });
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+        setIsLoadingPrice(false);
+      } catch (error) {
+        console.error('Failed to fetch ETH price:', error);
+        setEthPrice(4700); // Fallback price
+        setIsLoadingPrice(false);
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Helper function to convert ETH to USD
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
+
+  const copyAddressToClipboard = async () => {
+    if (address) {
+      try {
+        await navigator.clipboard.writeText(address);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy address:', err);
+      }
+    }
+  };
+
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   useEffect(() => {
     const styleId = 'custom-button-style';
@@ -168,57 +229,198 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
   return (
     <div className="min-h-screen bg-white" style={{ minHeight: 'calc(100vh + 400px)' }}>
       <div className="pt-12 pb-24">
+      
+
+        {/* Tab Navigation */}
+        <div className="max-w-lg mx-auto px-4 mb-8">
+          <div className="flex bg-gray-100 rounded-2xl p-2">
+            <button
+              onClick={() => setActiveTab('buy')}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                activeTab === 'buy'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                Buy ETH
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('receive')}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                activeTab === 'receive'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Download className="w-4 h-4" />
+                Receive ETH
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'buy' ? (
+          // Buy Tab Content
+          <div className="max-w-lg mx-auto px-4">
+            {/* Balance Display */}
+            {isConnected && address && (
+              <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <img 
+                      src={ETHToken.image || ''} 
+                      alt="ETH"
+                      className="w-6 h-6 object-cover"
+                    />
+                    <h2 className="text-lg font-bold text-gray-900">
+                      {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+                    </h2>
+                  </div>
+                  <p className="text-gray-600 font-medium">ETH Balance</p>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-gray-300 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Wallet className="w-5 h-5 text-gray-600" />
+                <h2 className="text-lg font-semibold text-gray-900">Purchase ETH</h2>
+              </div>
+              <Buy toToken={ETHToken} />
+            </div>
+          </div>
+        ) : (
+          // Receive Tab Content
+          <div className="max-w-lg mx-auto px-4">
+            {!isConnected || !address ? (
+              <div className="bg-white rounded-xl border-2 border-gray-200 p-8 text-center shadow-lg">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Wallet className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Connect Wallet</h3>
+                <p className="text-gray-600">Connect your wallet to view your receive address</p>
+              </div>
+            ) : (
+              <>
+                {/* Balance Display */}
+                <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <img 
+                        src={ETHToken.image || ''} 
+                        alt="ETH"
+                        className="w-6 h-6 object-cover"
+                      />
+                      <h2 className="text-lg font-bold text-gray-900">
+                        {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+                      </h2>
+                    </div>
+                    <p className="text-gray-600 font-medium">ETH Balance</p>
+                  </div>
+                </div>
+
+                {/* Address Card */}
+                <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Your Wallet Address</h3>
+                    <p className="text-gray-600 text-sm">Share this address to receive ETH on Base network</p>
+                  </div>
+
+                  {/* Address Display */}
+                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                    <div className="font-mono text-sm text-gray-900 break-all text-center leading-relaxed">
+                      {address}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={copyAddressToClipboard}
+                      className="flex items-center justify-center gap-2 bg-red-600 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => setShowQR(!showQR)}
+                      className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
+                    >
+                      <QrCode className="w-4 h-4" />
+                      <span>QR Code</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* QR Code Section */}
+                {showQR && (
+                  <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-lg mb-6">
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold text-gray-900 mb-6">QR Code</h3>
+                      
+                      {/* QR Code Display */}
+                      <div className="bg-white rounded-2xl p-6 mb-6 inline-block shadow-inner">
+                        <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center mx-auto">
+                          {/* Placeholder QR pattern */}
+                          <div className="grid grid-cols-8 gap-1">
+                            {Array.from({ length: 64 }, (_, i) => (
+                              <div
+                                key={i}
+                                className={`w-2 h-2 ${
+                                  Math.random() > 0.5 ? 'bg-black' : 'bg-white'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-gray-600 text-sm mb-4">
+                        Scan this QR code to get the wallet address
+                      </p>
+
+                      <button
+                        onClick={() => setShowQR(false)}
+                        className="text-gray-500 hover:text-gray-700 font-medium"
+                      >
+                        Hide QR Code
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Network Info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 text-blue-700 text-sm font-semibold mb-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span>Base Network</span>
+                  </div>
+                  <p className="text-blue-600 text-xs">
+                    Only send ETH on Base network to this address
+                  </p>
+                </div>
+                
+          
         
-        {/* Header Section */}
-        <div className="max-w-2xl mx-auto px-4 mb-12 text-center">
-          <div className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <CreditCard className="w-10 h-10 text-white" />
+              </>
+            )}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Buy ETH</h1>
-          <p className="text-gray-600 font-light text-lg">
-            Get ETH to participate in prediction markets and pay for gas fees
-          </p>
-        </div>
-
-
-        
-
-        {/* Buy Component */}
-        <div className="max-w-lg mx-auto px-4">
-          <div className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-gray-300 transition-all duration-300 shadow-lg">
-            <div className="flex items-center gap-2 mb-4">
-              <Wallet className="w-5 h-5 text-gray-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Purchase ETH</h2>
-            </div>
-            <Buy toToken={ETHToken} />
-          </div>
-        </div>
-
-        {/* Or Divider */}
-        <div className="max-w-lg mx-auto px-4 my-8">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Receive Tokens Button */}
-        <div className="max-w-lg mx-auto px-4">
-          <button
-            onClick={() => setActiveSection && setActiveSection('wallet')}
-            className="w-full bg-red-600 text-white rounded-xl p-6 hover:bg-gray-800 transition-all duration-300 shadow-lg flex items-center justify-center gap-3"
-          >
-            <Download className="w-6 h-6" />
-            <div className="text-left">
-              <div className="text-lg font-bold">Receive Tokens</div>
-              <div className="text-sm text-gray-300">Get tokens sent to your wallet</div>
-            </div>
-          </button>
-        </div>
+        )}
         
       </div>
     </div>

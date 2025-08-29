@@ -31,10 +31,9 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     { id: 'home', label: 'Home' },
     { id: 'liveMarkets', label: 'Live Markets' },
     { id: 'createPot', label: 'Private Markets' },
+    { id: 'buy', label: 'Fund Account' },
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
-    { id: 'wallet', label: 'Receive' },
-    { id: 'buy', label: 'Purchase' },
     { id: 'discord', label: 'Help' },
     
   ];

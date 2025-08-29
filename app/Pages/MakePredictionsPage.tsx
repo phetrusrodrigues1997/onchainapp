@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAccount, useReadContract } from 'wagmi';
-import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions } from '../Database/actions';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { formatUnits, parseEther } from 'viem';
+import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions, processReEntry } from '../Database/actions';
 import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
+import { getPrice } from '../Constants/getPrice';
+import { useQueryClient } from '@tanstack/react-query';
 
 // UK timezone helper function (simplified and more reliable)
 const getUKTime = (date: Date = new Date()): Date => {
@@ -45,12 +48,26 @@ const tableMapping = {
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];
 
-// Contract ABI for PredictionPot (minimal version to check participants)
+// Contract ABI for PredictionPot (includes both read and write functions)
 const PREDICTION_POT_ABI = [
   {
     "inputs": [],
     "name": "getParticipants",
     "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "enterPot",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBalance",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
   }
@@ -91,6 +108,8 @@ interface MakePredictionsProps {
 
 export default function MakePredicitions({ activeSection, setActiveSection }: MakePredictionsProps) {
   const { address, isConnected } = useAccount();
+  const { writeContract, data: txHash, isPending } = useWriteContract();
+  const queryClient = useQueryClient();
   
   // TESTING TOGGLE - Set to false to test prediction logic on Saturdays
   const SHOW_RESULTS_DAY_INFO = false; // Toggle this on/off as needed
@@ -119,6 +138,15 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const [allEvidenceSubmissions, setAllEvidenceSubmissions] = useState<any[]>([]);
   const [showAdminPanel, setShowAdminPanel] = useState<boolean>(false);
   const [isLoadingEvidence, setIsLoadingEvidence] = useState<boolean>(false);
+  
+  // Re-entry transaction state
+  const [isReEntryLoading, setIsReEntryLoading] = useState<boolean>(false);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  
+  // Wait for transaction receipt
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
 
 
   
@@ -211,6 +239,41 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     return userEvidenceSubmission !== null;
   };
 
+  // Helper functions for ETH price and entry amount calculations
+  const usdToEth = (usdAmount: number): bigint => {
+    const fallbackEthPrice = 4700; // Fallback ETH price
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethAmount = usdAmount / currentEthPrice;
+    return parseEther(ethAmount.toString());
+  };
+
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
+
+  // Get dynamic entry amount based on day of week (USD equivalent in ETH)
+  const getDynamicEntryAmount = (): bigint => {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday
+    
+    // USD pricing that we want to maintain (simplified - all days $0.01 for now)
+    const usdPrices = {
+      0: 0.01, // Sunday: $0.01
+      1: 0.02, // Monday: $0.02  
+      2: 0.03, // Tuesday: $0.03
+      3: 0.04, // Wednesday: $0.04
+      4: 0.05, // Thursday: $0.05
+      5: 0.06, // Friday: $0.06
+      6: 0.01, // Saturday: Closed (fallback to Sunday price)
+    };
+    
+    const usdPrice = usdPrices[day as keyof typeof usdPrices];
+    return usdToEth(usdPrice);
+  };
+
   // Helper function to get timer urgency level
   const getTimerUrgency = (hours: number, minutes: number, seconds: number) => {
     const totalMinutes = hours * 60 + minutes + seconds / 60;
@@ -245,6 +308,26 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         };
     }
   };
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+      } catch (error) {
+        console.error('Failed to fetch ETH price:', error);
+        setEthPrice(4700); // Fallback price
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Add useEffect to handle cookie retrieval
   useEffect(() => {
@@ -410,6 +493,35 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     loadAllData();
   }, [address, isParticipant, selectedTableType, loadBets, loadMarketOutcome]);
 
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && isReEntryLoading) {
+      const completeReEntry = async () => {
+        try {
+          // Remove user from wrong predictions table
+          const success = await processReEntry(address!, selectedTableType);
+          if (success) {
+            setIsReEntryLoading(false);
+            showMessage('Re-entry successful! You can now predict again.');
+            setReEntryFee(null); // Clear re-entry fee
+            // Refresh contract data
+            queryClient.invalidateQueries({ queryKey: ['readContract'] });
+            // Reload bets to refresh UI
+            await loadBets();
+          } else {
+            setIsReEntryLoading(false);
+            showMessage('Re-entry payment processed but database update failed. Please contact support.');
+          }
+        } catch (error) {
+          setIsReEntryLoading(false);
+          showMessage('Re-entry payment processed but database update failed. Please contact support.');
+        }
+      };
+      
+      completeReEntry();
+    }
+  }, [isConfirmed, isReEntryLoading, address, selectedTableType, queryClient, loadBets]);
+
   // Timer effect for evidence window countdown
   useEffect(() => {
     if (!marketOutcome || !isEvidenceWindowActive()) return;
@@ -454,6 +566,32 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       showMessage(error instanceof Error ? error.message : 'Failed to place bet. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handle re-entry pot payment
+  const handleReEntry = async () => {
+    if (!contractAddress || !reEntryFee) return;
+    
+    setIsReEntryLoading(true);
+    
+    try {
+      const entryAmount = getDynamicEntryAmount();
+      
+      // Use writeContract to enter the pot with ETH payment
+      await writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: PREDICTION_POT_ABI,
+        functionName: 'enterPot',
+        args: [],
+        value: entryAmount, // Send ETH as value
+      });
+      
+      showMessage('Re-entry payment submitted! Waiting for confirmation...');
+    } catch (error) {
+      console.error('Re-entry payment failed:', error);
+      showMessage('Re-entry payment failed. Please try again.');
+      setIsReEntryLoading(false);
     }
   };
 
@@ -626,10 +764,18 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               </p>
               
               <button
-                onClick={() => setActiveSection('bitcoinPot')}
-                className="w-full bg-black text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center gap-2"
+                onClick={handleReEntry}
+                disabled={isReEntryLoading || isPending || isConfirming}
+                className="w-full bg-black text-white font-medium py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Pay Entry Fee
+                {isReEntryLoading || isPending || isConfirming ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Processing...
+                  </>
+                ) : (
+                  `Enter Pot (${ethToUsd(getDynamicEntryAmount()).toFixed(2)} USD)`
+                )}
               </button>
             </div>
           </div>

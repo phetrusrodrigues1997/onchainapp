@@ -292,3 +292,4 @@ console.log('📑 Loaded 12 bookmarks');
 - **ETH Amount Calculation**: All ETH amounts calculated from USD values with proper wei precision handling
 - **Dynamic Pricing System**: Daily entry fees increase from Sunday (~$0.01 USD) to Friday (~$0.06 USD) in ETH
 - **Multi-Asset Support**: Platform designed for predictions beyond crypto (stocks, sports, etc.)
+- in the page, let's also display the eth balance for the buy tab, whereas right now we only display it for the receive tab

@@ -603,7 +603,7 @@ const handleMarketClick = (marketId: string) => {
           className={`group bg-white rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] border border-gray-200
           }`}
         >
-          <div className="bg-gradient-to-br from-white via-white to-gray-50 rounded-2xl p-3 h-full">
+          <div className="bg-white rounded-2xl p-3 h-full">
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
@@ -620,7 +620,7 @@ const handleMarketClick = (marketId: string) => {
             <div className="flex items-start gap-3 mb-3">
               {/* Small Square Image */}
               <div className="flex-shrink-0">
-                <div className="rounded-lg w-12 h-12 bg-gray-50 overflow-hidden relative">
+                <div className="rounded-lg w-12 h-12 bg-white overflow-hidden relative">
                   {market.icon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={market.icon} 
@@ -773,11 +773,11 @@ const handleMarketClick = (marketId: string) => {
                     <div
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => handleMarketClick(market.id)}
-                      className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
+                      className={`group rounded-2xl bg-white cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
                         market.tabId === selectedMarket ? ' bg-white border border-gray-400' : 'bg-white border border-gray-200'
                       }`}
                     >
-                      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-3 h-full flex flex-col min-h-[240px]">
+                      <div className="bg-white rounded-2xl p-3 h-full flex flex-col min-h-[240px]">
                         {/* Countdown Timer - Above image */}
                         {market.tabId === selectedMarket && (
                           <div className="flex justify-end mb-2">
@@ -789,7 +789,7 @@ const handleMarketClick = (marketId: string) => {
                         
                         {/* Header with Icon */}
                         <div className="flex flex-col items-center mb-2">
-                          <div className="rounded-lg flex items-center justify-center w-full h-32 bg-gray-50 overflow-hidden mb-1">
+                          <div className="rounded-lg flex items-center justify-center w-full h-32 bg-white overflow-hidden mb-1">
                             {market.icon?.slice(0, 4) === 'http' ? (
                               <img 
                                 src={market.icon} 
