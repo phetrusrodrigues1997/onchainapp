@@ -6,13 +6,25 @@ import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
 
-// Table mapping for market types
-const tableMapping = {
-  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-} as const;
+// Dynamic market discovery
+const getMarketsWithContracts = () => {
+  const t = getTranslation('en'); // Default to English for admin
+  const allMarkets = getMarkets(t, 'options');
+  return allMarkets.filter(market => market.contractAddress);
+};
 
-type TableType = typeof tableMapping[keyof typeof tableMapping];
+// Map contract address to table type for database queries
+const getTableTypeFromContract = (contractAddress: string): string => {
+  // Legacy mapping for existing contracts
+  const legacyMapping: Record<string, string> = {
+    "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
+    "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
+  };
+  
+  return legacyMapping[contractAddress] || contractAddress.slice(2, 8).toLowerCase();
+};
+
+type TableType = "featured" | "crypto" | string;
 
 interface EvidenceSubmission {
   id: number;
@@ -48,8 +60,13 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
 }) => {
   const { address, isConnected } = useAccount();
   
+  // Get markets with contracts
+  const marketsWithContracts = getMarketsWithContracts();
+  
   // State management
-  const [selectedMarket, setSelectedMarket] = useState<TableType>('featured');
+  const [selectedMarket, setSelectedMarket] = useState<string>(
+    marketsWithContracts.length > 0 ? marketsWithContracts[0].contractAddress! : ''
+  );
   const [evidenceSubmissions, setEvidenceSubmissions] = useState<EvidenceSubmission[]>([]);
   const [marketOutcome, setMarketOutcome] = useState<MarketOutcome | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -58,9 +75,10 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
   
 
   // Load market outcome for selected market
-  const loadMarketOutcome = async (marketType: TableType) => {
+  const loadMarketOutcome = async (contractAddress: string) => {
     try {
-      const provisionalOutcomeData = await getProvisionalOutcome(marketType);
+      const tableType = getTableTypeFromContract(contractAddress);
+      const provisionalOutcomeData = await getProvisionalOutcome(tableType);
       
       if (provisionalOutcomeData) {
         setMarketOutcome({
@@ -80,13 +98,14 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
   };
 
   // Load evidence submissions for selected market
-  const loadEvidenceSubmissions = async (marketType: TableType) => {
+  const loadEvidenceSubmissions = async (contractAddress: string) => {
     if (!marketOutcome) return;
     
     setIsLoading(true);
     try {
+      const tableType = getTableTypeFromContract(contractAddress);
       const outcomeDate = new Date(marketOutcome.setAt).toISOString().split('T')[0];
-      const submissions = await getAllEvidenceSubmissions(marketType, outcomeDate);
+      const submissions = await getAllEvidenceSubmissions(tableType, outcomeDate);
       setEvidenceSubmissions(submissions);
     } catch (error) {
       console.error('Error loading evidence submissions:', error);
@@ -98,14 +117,16 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
 
   // Load data when market changes or component mounts
   useEffect(() => {
-    const loadData = async () => {
-      await loadMarketOutcome(selectedMarket);
-    };
-    loadData();
+    if (selectedMarket) {
+      const loadData = async () => {
+        await loadMarketOutcome(selectedMarket);
+      };
+      loadData();
+    }
   }, [selectedMarket]);
 
   useEffect(() => {
-    if (marketOutcome) {
+    if (marketOutcome && selectedMarket) {
       loadEvidenceSubmissions(selectedMarket);
     }
   }, [marketOutcome, selectedMarket]);
@@ -188,36 +209,58 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
           </p>
         </div>
 
-        {/* Market Selector */}
+        {/* Dynamic Market Selector */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-lg">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Eye className="w-5 h-5" />
-            Select Market
+            Select Market ({marketsWithContracts.length} available)
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={() => setSelectedMarket('featured')}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 ${
-                selectedMarket === 'featured'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-              }`}
-            >
-              <div className="font-semibold">Featured Market</div>
-              <div className="text-sm opacity-75">Main prediction market</div>
-            </button>
-            <button
-              onClick={() => setSelectedMarket('crypto')}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 ${
-                selectedMarket === 'crypto'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
-              }`}
-            >
-              <div className="font-semibold">Crypto Market</div>
-              <div className="text-sm opacity-75">Cryptocurrency predictions</div>
-            </button>
-          </div>
+          
+          {marketsWithContracts.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-gray-500 mb-2">No markets with contract addresses found</div>
+              <div className="text-sm text-gray-400">Markets must have contractAddress property to appear here</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {marketsWithContracts.map((market) => (
+                <button
+                  key={market.contractAddress}
+                  onClick={() => setSelectedMarket(market.contractAddress!)}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                    selectedMarket === market.contractAddress
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 hover:border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3 mb-2">
+                    {market.icon && (
+                      <div className="w-8 h-8 rounded-md overflow-hidden flex-shrink-0">
+                        {market.icon.startsWith('http') ? (
+                          <img 
+                            src={market.icon} 
+                            alt={market.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs">
+                            {market.icon}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <div className="font-semibold text-sm">{market.name}</div>
+                      <div className="text-xs opacity-75 line-clamp-2">{market.question}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                    {market.contractAddress?.slice(0, 8)}...{market.contractAddress?.slice(-6)}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Market Outcome Status */}

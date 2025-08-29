@@ -773,19 +773,12 @@ const handleMarketClick = (marketId: string) => {
                     <div
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => handleMarketClick(market.id)}
-                      className={`group rounded-2xl bg-white cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
-                        market.tabId === selectedMarket ? ' bg-white border border-gray-400' : 'bg-white border border-gray-200'
-                      }`}
+                      className="group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)]"
                     >
-                      <div className="bg-white rounded-2xl p-3 h-full flex flex-col min-h-[140px]">
-                        {/* Countdown Timer - Above image */}
-                        {market.tabId === selectedMarket && (
-                          <div className="flex justify-end mb-2">
-                            <div className="text-xs text-gray-600 font-medium whitespace-nowrap">
-                              
-                            </div>
-                          </div>
-                        )}
+                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[140px] ${
+                        market.tabId === selectedMarket ? ' bg-red-100 border border-gray-200' : 'bg-white border border-gray-200' 
+                      }`}>
+                        
                         
                         {/* Header with Icon and Question - Mobile Style Layout */}
                         <div className="flex items-start gap-3 mb-3">
