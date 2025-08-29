@@ -43,7 +43,7 @@ const getTableTypeFromContract = (contractAddress: string): string => {
 // Keep the type for existing code compatibility
 const tableMapping = {
   "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8": "crypto",
+  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
 } as const;
 
 type TableType = typeof tableMapping[keyof typeof tableMapping];

@@ -38,7 +38,7 @@ import { Language, getTranslation, supportedLanguages } from './Languages/langua
 
 
 // Contract now uses ETH directly - no USDC needed
-const LIVE_POT_ADDRESS = '0x3dfdEdC82B14B1dd5f45Ae0F2A5F3738A487096e';
+const LIVE_POT_ADDRESS = '0xC495Ca91D255dfCd62e97B57660658D48B464b6D';
 
 export default function App() {
   const { address, isConnected } = useAccount();
