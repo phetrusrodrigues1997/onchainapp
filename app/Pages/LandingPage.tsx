@@ -791,7 +791,7 @@ const handleMarketClick = (marketId: string) => {
                         <div className="flex items-start gap-3 mb-3">
                           {/* Small Square Image */}
                           <div className="flex-shrink-0">
-                            <div className="rounded-lg w-16 h-16 bg-white overflow-hidden relative">
+                            <div className="rounded-lg w-20 h-20 bg-white overflow-hidden relative">
                               {market.icon?.slice(0, 4) === 'http' ? (
                                 <img 
                                   src={market.icon} 
