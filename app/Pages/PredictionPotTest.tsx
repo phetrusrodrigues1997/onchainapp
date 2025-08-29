@@ -1270,7 +1270,7 @@ useEffect(() => {
           });
 
           setIsLoading(true);
-          setLastAction("distributePot");
+          // DON'T set lastAction yet - wait until we have winners!
           
           try {
             // Determine winners
@@ -1285,7 +1285,6 @@ useEffect(() => {
               console.log("❌ No winners found - winnersString empty or null");
               showMessage(`No winners found for this round (${participantCount} participants checked)`, true);
               setIsLoading(false);
-              setLastAction("");
               return;
             }
             
@@ -1302,7 +1301,6 @@ useEffect(() => {
               console.log("❌ No valid addresses after parsing");
               showMessage("No valid winner addresses found", true);
               setIsLoading(false);
-              setLastAction("");
               return;
             }
             
@@ -1314,6 +1312,10 @@ useEffect(() => {
             // CRITICAL: Wait for winnerAddresses state to actually update before proceeding
             console.log("⏳ Waiting for winnerAddresses state to update...");
             await new Promise(resolve => setTimeout(resolve, 500)); // Give React time to update state
+            
+            // NOW set lastAction after we have confirmed winners
+            console.log("🎯 NOW setting lastAction after winners are confirmed");
+            setLastAction("distributePot");
             
             // Double-check that winnerAddresses state is properly set
             console.log("🔍 Verifying winnerAddresses state is ready...");
@@ -1368,6 +1370,7 @@ useEffect(() => {
             
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
+            // Only reset lastAction if it was set (after winners were determined)
             setLastAction("");
           }
         }}
