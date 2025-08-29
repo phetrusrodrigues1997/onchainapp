@@ -56,6 +56,7 @@ const LIVE_POT_ADDRESS = '0xC495Ca91D255dfCd62e97B57660658D48B464b6D';
 
 interface FifteenMinuteQuestionsProps {
   className?: string;
+  setActiveSection?: (section: string) => void;
 }
 
 interface QuestionData {
@@ -64,7 +65,7 @@ interface QuestionData {
   questionId: string | null;
 }
 
-export default function FifteenMinuteQuestions({ className = '' }: FifteenMinuteQuestionsProps) {
+export default function FifteenMinuteQuestions({ className = '', setActiveSection }: FifteenMinuteQuestionsProps) {
   const { address } = useAccount();
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const queryClient = useQueryClient();
@@ -1239,22 +1240,35 @@ export default function FifteenMinuteQuestions({ className = '' }: FifteenMinute
                             <p className="text-blue-700 font-medium">Review Evidence Submissions</p>
                           </div>
                         </div>
-                        <button
-                          onClick={toggleAdminPanel}
-                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                        >
-                          {showAdminPanel ? (
-                            <>
-                              <ChevronUp className="w-4 h-4" />
-                              Hide
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="w-4 h-4" />
-                              Show Evidence ({allEvidenceSubmissions.length})
-                            </>
-                          )}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (setActiveSection) {
+                                setActiveSection('adminEvidenceReview');
+                              }
+                            }}
+                            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Evidence Review Page
+                          </button>
+                          <button
+                            onClick={toggleAdminPanel}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                          >
+                            {showAdminPanel ? (
+                              <>
+                                <ChevronUp className="w-4 h-4" />
+                                Hide
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-4 h-4" />
+                                Show Evidence ({allEvidenceSubmissions.length})
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Evidence List */}

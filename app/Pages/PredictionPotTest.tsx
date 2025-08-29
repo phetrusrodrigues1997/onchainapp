@@ -1332,6 +1332,20 @@ useEffect(() => {
         📊 Go to Predictions Page
       </button>
     </div>
+
+    {/* Navigate to Admin Evidence Review */}
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-indigo-500">
+      <h3 className="text-[#F5F5F5] font-medium mb-2">📋 Evidence Review</h3>
+      <p className="text-[#A0A0B0] text-sm mb-3">
+        Review evidence submissions and manage dispute resolution.
+      </p>
+      <button
+        onClick={() => setActiveSection('adminEvidenceReview')}
+        className="bg-indigo-600 text-[#F5F5F5] px-6 py-3 rounded-md font-medium hover:bg-indigo-700 w-full"
+      >
+        🔍 Admin Evidence Review Page
+      </button>
+    </div>
     
   </div>
 )}

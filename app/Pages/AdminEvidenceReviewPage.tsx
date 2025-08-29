@@ -56,19 +56,6 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
   const [expandedEvidence, setExpandedEvidence] = useState<Set<number>>(new Set());
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   
-  // Check if user is admin/owner
-  const isAdmin = (): boolean => {
-    if (!address || !isConnected) return false;
-    
-    // Add specific admin wallet addresses here
-    const adminAddresses: string[] = [
-      // Add your admin wallet addresses here (lowercase)
-      // Example: '0x1234567890123456789012345678901234567890'
-    ];
-    
-    const normalizedAddress = address.toLowerCase();
-    return adminAddresses.includes(normalizedAddress);
-  };
 
   // Load market outcome for selected market
   const loadMarketOutcome = async (marketType: TableType) => {
@@ -185,27 +172,6 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
     );
   }
 
-  if (!isAdmin()) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
-        <div className="max-w-md mx-auto text-center">
-          <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 shadow-2xl shadow-gray-900/10">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Shield className="w-10 h-10 text-red-500" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600 mb-8">You don't have permission to access this admin panel</p>
-            <button
-              onClick={() => setActiveSection('home')}
-              className="bg-gray-900 text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-800 transition-colors"
-            >
-              Return to Home
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
@@ -440,30 +406,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
           </div>
         </div>
 
-        {/* Summary Stats */}
-        {evidenceSubmissions.length > 0 && (
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-6 mt-8">
-            <h3 className="text-lg font-bold text-blue-900 mb-4">Evidence Summary</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-blue-800">{evidenceSubmissions.length}</div>
-                <div className="text-blue-600 text-sm font-medium">Total Submissions</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-orange-700">{evidenceSubmissions.filter(e => e.status === 'pending').length}</div>
-                <div className="text-orange-600 text-sm font-medium">Pending Review</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-green-700">{evidenceSubmissions.filter(e => e.status === 'approved').length}</div>
-                <div className="text-green-600 text-sm font-medium">Approved</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-red-700">{evidenceSubmissions.filter(e => e.status === 'rejected').length}</div>
-                <div className="text-red-600 text-sm font-medium">Rejected</div>
-              </div>
-            </div>
-          </div>
-        )}
+        
 
       </div>
     </div>

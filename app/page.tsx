@@ -553,7 +553,7 @@ export default function App() {
         {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}
         {activeSection === "ideas" && <IdeasPage activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "bookmarks" && <BookmarksPage activeSection={activeSection} setActiveSection={setActiveSection} />}
-        {activeSection === "adminEvidence" && <AdminEvidenceReviewPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+        {activeSection === "adminEvidenceReview" && <AdminEvidenceReviewPage activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "privatePot" && privatePotAddress && (
           <PrivatePotInterface
             contractAddress={privatePotAddress}
@@ -566,7 +566,7 @@ export default function App() {
         )}
         {activeSection === "liveMarkets" && (
           hasEnteredLivePot ? (
-            <FifteenMinuteQuestions className="mt-20" />
+            <FifteenMinuteQuestions className="mt-20" setActiveSection={setActiveSection} />
           ) : (
             <LiveMarketPotEntry
               contractAddress={LIVE_POT_ADDRESS}

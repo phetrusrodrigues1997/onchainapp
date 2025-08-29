@@ -282,8 +282,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               onClick={() => setShowActiveMarkets(!showActiveMarkets)}
               className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
-              <h4 className="font-semibold mb-1">Make Predictions</h4>
-              <p className="text-sm text-gray-600">Predict on markets you've already entered</p>
+              <h4 className="font-semibold mb-1">My Markets</h4>
+              <p className="text-sm text-gray-600">View markets you've already entered</p>
             </button>
             
             {/* User's Active Markets - Mobile: Show right after Make Predictions button */}

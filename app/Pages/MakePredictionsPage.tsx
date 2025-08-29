@@ -1262,26 +1262,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
           </div>
         )}
 
-        {/* Admin Notice - Link to Evidence Review Page */}
-        {isAdmin() && hasOutcomeBeenSet() && marketOutcome && (
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-4 mt-8 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Shield className="w-6 h-6 text-blue-600" />
-                <div>
-                  <h3 className="font-bold text-blue-900">Admin Panel Available</h3>
-                  <p className="text-blue-700 text-sm">View and manage evidence submissions</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveSection('adminEvidence')}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                Review Evidence
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Admin Evidence Review Panel - Removed - Now available on dedicated admin page */}
         {false && isAdmin() && hasOutcomeBeenSet() && marketOutcome && (

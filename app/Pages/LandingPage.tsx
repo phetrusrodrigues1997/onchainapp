@@ -777,7 +777,7 @@ const handleMarketClick = (marketId: string) => {
                         market.tabId === selectedMarket ? ' bg-white border border-gray-400' : 'bg-white border border-gray-200'
                       }`}
                     >
-                      <div className="bg-white rounded-2xl p-3 h-full flex flex-col min-h-[240px]">
+                      <div className="bg-white rounded-2xl p-3 h-full flex flex-col min-h-[140px]">
                         {/* Countdown Timer - Above image */}
                         {market.tabId === selectedMarket && (
                           <div className="flex justify-end mb-2">
@@ -787,26 +787,31 @@ const handleMarketClick = (marketId: string) => {
                           </div>
                         )}
                         
-                        {/* Header with Icon */}
-                        <div className="flex flex-col items-center mb-2">
-                          <div className="rounded-lg flex items-center justify-center w-full h-32 bg-white overflow-hidden mb-1">
-                            {market.icon?.slice(0, 4) === 'http' ? (
-                              <img 
-                                src={market.icon} 
-                                alt={`${market.name} Icon`} 
-                                className="w-full h-full object-cover" 
-                              />
-                            ) : (
-                              <span className="text-2xl text-gray-600">{market.icon}</span>
-                            )}
+                        {/* Header with Icon and Question - Mobile Style Layout */}
+                        <div className="flex items-start gap-3 mb-3">
+                          {/* Small Square Image */}
+                          <div className="flex-shrink-0">
+                            <div className="rounded-lg w-16 h-16 bg-white overflow-hidden relative">
+                              {market.icon?.slice(0, 4) === 'http' ? (
+                                <img 
+                                  src={market.icon} 
+                                  alt={`${market.name} Icon`} 
+                                  className="absolute inset-0 w-full h-full object-cover" 
+                                />
+                              ) : (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-lg text-gray-600">{market.icon}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-
-                        {/* Question */}
-                        <div className="mb-2 flex-1 flex items-center justify-center">
-                          <p className="text-sm font-semibold text-gray-900 leading-tight text-center line-clamp-3">
-                            {market.question}
-                          </p>
+                          
+                          {/* Question */}
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900 leading-tight line-clamp-3">
+                              {market.question}
+                            </p>
+                          </div>
                         </div>
 
                         {/* Trading Buttons */}
