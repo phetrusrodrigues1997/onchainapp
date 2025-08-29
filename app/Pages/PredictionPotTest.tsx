@@ -143,8 +143,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [postEntryLoading, setPostEntryLoading] = useState(false);
   const [usedDiscountedEntry, setUsedDiscountedEntry] = useState(false);
   
-  // Flag to control when failure detection should be active
-  const [enableFailureDetection, setEnableFailureDetection] = useState(false);
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -282,51 +280,22 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
   
 
-  // Reset loading state if transaction fails - BUT only after enough time for writeContract to update isPending
+  // Simple transaction reset - only if truly stuck
   useEffect(() => {
-    if (enableFailureDetection && !isPending && !isConfirming && !isConfirmed && lastAction && isLoading && !txHash) {
-      console.log("⚠️ Transaction may have failed - no txHash after submission:");
-      console.log({
-        isPending,
-        isConfirming, 
-        isConfirmed,
-        lastAction,
-        isLoading,
-        txHash: txHash || 'no hash',
-        contractAddress,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Wait longer before declaring failure - give writeContract time to update state
-      console.log("⏰ Scheduling state reset in 60 seconds (extended for writeContract delay)...");
-      
-      setTimeout(() => {
-        // Only reset if we STILL have no txHash and no pending state (transaction truly failed)
-        if (!isPending && !isConfirming && !isConfirmed && isLoading && !txHash) {
-          console.log("🔄 Resetting failed transaction state after extended timeout");
-          console.log("📊 Final state before reset:", {
-            isPending,
-            isConfirming,
-            isConfirmed,
-            lastAction,
-            isLoading,
-            txHash: txHash || 'no hash'
-          });
+    if (!isPending && !isConfirming && !isConfirmed && lastAction && isLoading) {
+      console.log("⏰ Setting up simple transaction timeout...");
+      const timeout = setTimeout(() => {
+        if (!isPending && !isConfirming && !isConfirmed && isLoading) {
+          console.log("🔄 Simple timeout reset");
           setIsLoading(false);
           setLastAction('');
-          showMessage("Transaction failed to submit. Please try again.", true);
-        } else {
-          console.log("✅ Transaction state changed during timeout - not resetting");
-          console.log("📊 Updated state:", {
-            isPending,
-            isConfirming,
-            isConfirmed,
-            txHash: txHash || 'no hash'
-          });
+          showMessage("Transaction timeout. Please try again.", true);
         }
-      }, 60000); // 60 seconds to give plenty of time for writeContract + wallet confirmation
+      }, 120000); // 2 minutes - much longer timeout
+      
+      return () => clearTimeout(timeout);
     }
-  }, [enableFailureDetection, isPending, isConfirming, isConfirmed, lastAction, isLoading, txHash, contractAddress]);
+  }, [isPending, isConfirming, isConfirmed, lastAction, isLoading]);
 
 
   // Read contract data
@@ -739,6 +708,17 @@ useEffect(() => {
       setLastAction('');
       return; // Don't execute common cleanup below
     } else if (lastAction === 'distributePot') {
+      // SAFETY CHECK: Don't proceed if winnerAddresses is empty 
+      if (!winnerAddresses || winnerAddresses.trim() === '' || winnerAddresses === 'empty') {
+        console.log("⚠️ Distribution confirmed but winnerAddresses is empty - skipping cleanup");
+        console.log("📊 Problematic state:", {
+          winnerAddresses: winnerAddresses || 'undefined',
+          lastAction,
+          isConfirmed
+        });
+        return; // Don't proceed with cleanup
+      }
+      
       console.log("🎯 Pot distribution confirmed! Starting post-distribution cleanup...");
       console.log("📊 Distribution confirmation state:", {
         winnerAddresses,
@@ -815,7 +795,6 @@ useEffect(() => {
       return;
     }
     setLastAction('');
-    setEnableFailureDetection(false); // Reset failure detection after any transaction completion
   }
 }, [isConfirmed, lastAction]);
 
@@ -1292,9 +1271,6 @@ useEffect(() => {
 
           setIsLoading(true);
           setLastAction("distributePot");
-          setEnableFailureDetection(false); // Disable failure detection during async operations
-          
-          console.log("🛡️ Failure detection disabled during async operations");
           
           try {
             // Determine winners
@@ -1335,16 +1311,29 @@ useEffect(() => {
             setWinnerAddresses(winnersString);
             showMessage(`Found ${addresses.length} winner(s). Distributing pot...`);
             
+            // CRITICAL: Wait for winnerAddresses state to actually update before proceeding
+            console.log("⏳ Waiting for winnerAddresses state to update...");
+            await new Promise(resolve => setTimeout(resolve, 500)); // Give React time to update state
+            
+            // Double-check that winnerAddresses state is properly set
+            console.log("🔍 Verifying winnerAddresses state is ready...");
+            if (!winnersString || winnersString.trim() === "") {
+              throw new Error("Winner addresses not properly set - aborting transaction");
+            }
+            
             // Log contract interaction details
             console.log("📄 Contract interaction details:", {
               contractAddress,
               functionName: 'distributePot',
               args: [addresses],
-              abiLength: PREDICTION_POT_ABI.length
+              abiLength: PREDICTION_POT_ABI.length,
+              winnersString: winnersString // Confirm we have winners
             });
             
             // Distribute pot using the blockchain contract
             console.log("🔗 Calling writeContract with distributePot...");
+            console.log("🎯 Confirmed winnerAddresses before transaction:", winnersString);
+            
             const txResult = await writeContract({
               address: contractAddress as `0x${string}`,
               abi: PREDICTION_POT_ABI,
@@ -1365,10 +1354,6 @@ useEffect(() => {
               timestamp: new Date().toISOString()
             });
             
-            // Now enable failure detection after writeContract has had time to complete
-            setEnableFailureDetection(true);
-            console.log("🛡️ Failure detection re-enabled after writeContract completion");
-            
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
             
           } catch (error) {
@@ -1384,7 +1369,6 @@ useEffect(() => {
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
             setLastAction("");
-            setEnableFailureDetection(false); // Reset failure detection on error
           }
         }}
         disabled={isActuallyLoading}
