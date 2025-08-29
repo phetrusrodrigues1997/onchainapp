@@ -279,10 +279,10 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
   
 
-  // Reset loading state if transaction fails (but don't clear lastAction if transaction might still confirm)
+  // Reset loading state if transaction fails - BUT only after enough time for writeContract to update isPending
   useEffect(() => {
-    if (!isPending && !isConfirming && !isConfirmed && lastAction && isLoading) {
-      console.log("⚠️ Transaction appears to have failed - state analysis:");
+    if (!isPending && !isConfirming && !isConfirmed && lastAction && isLoading && !txHash) {
+      console.log("⚠️ Transaction may have failed - no txHash after submission:");
       console.log({
         isPending,
         isConfirming, 
@@ -293,12 +293,14 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
         contractAddress,
         timestamp: new Date().toISOString()
       });
-      console.log("⏰ Scheduling state reset in 30 seconds...");
+      
+      // Wait longer before declaring failure - give writeContract time to update state
+      console.log("⏰ Scheduling state reset in 60 seconds (extended for writeContract delay)...");
       
       setTimeout(() => {
-        // Only reset if we're still in the same state (transaction truly failed)
-        if (!isPending && !isConfirming && !isConfirmed && isLoading) {
-          console.log("🔄 Resetting failed transaction state after timeout");
+        // Only reset if we STILL have no txHash and no pending state (transaction truly failed)
+        if (!isPending && !isConfirming && !isConfirmed && isLoading && !txHash) {
+          console.log("🔄 Resetting failed transaction state after extended timeout");
           console.log("📊 Final state before reset:", {
             isPending,
             isConfirming,
@@ -309,11 +311,17 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
           });
           setIsLoading(false);
           setLastAction('');
-          showMessage("Transaction may have failed. Please try again if needed.", true);
+          showMessage("Transaction failed to submit. Please try again.", true);
         } else {
           console.log("✅ Transaction state changed during timeout - not resetting");
+          console.log("📊 Updated state:", {
+            isPending,
+            isConfirming,
+            isConfirmed,
+            txHash: txHash || 'no hash'
+          });
         }
-      }, 30000); // 30 seconds to give plenty of time for wallet confirmation
+      }, 60000); // 60 seconds to give plenty of time for writeContract + wallet confirmation
     }
   }, [isPending, isConfirming, isConfirmed, lastAction, isLoading, txHash, contractAddress]);
 
@@ -1338,6 +1346,18 @@ useEffect(() => {
             });
             
             console.log("📝 Transaction submitted successfully:", txResult);
+            console.log("⏳ Waiting for transaction state to update...");
+            
+            // Give a small delay for the transaction state to update
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            console.log("📊 Transaction state after submission:", {
+              txHash: txHash || 'no hash yet',
+              isPending,
+              isConfirming,
+              timestamp: new Date().toISOString()
+            });
+            
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
             
           } catch (error) {
