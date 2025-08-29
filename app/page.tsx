@@ -440,11 +440,20 @@ export default function App() {
         </div>
 
         {/* Bookmark/Save Symbol */}
-        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button 
+          className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Mobile search bar bookmark button clicked');
+            setActiveSection('bookmarks');
+          }}
+          type="button"
+        >
+          <svg className="w-5 h-5 text-gray-600 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
           </svg>
-        </div>
+        </button>
       </div>
       )}
 
@@ -478,15 +487,18 @@ export default function App() {
                 </div>
 
                 {/* Bookmark/Save Symbol */}
-                <div
-                  className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200"
-                  onClick={() => {
+                <button
+                  className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors z-20 relative"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Bookmark button clicked - should navigate to bookmarks');
                     setActiveSection('bookmarks');
-                    // put your save/bookmark logic here
                   }}
+                  type="button"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-600"
+                    className="w-5 h-5 text-gray-600 pointer-events-none"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -498,7 +510,7 @@ export default function App() {
                       d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
                     />
                   </svg>
-                </div>
+                </button>
 
               </div>
 
@@ -583,7 +595,8 @@ export default function App() {
         <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 z-40">
         <div className="flex items-center justify-around py-2">
           <button
-            onClick={() => {
+            onClick={(e) => {
+              console.log('Mobile HOME button clicked');
               setActiveSection('home');
               setIsMobileSearchActive(false);
             }}
@@ -601,17 +614,20 @@ export default function App() {
           </button>
 
           <button
-            onClick={() => setActiveSection('bookmarks')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'bookmarks' ? 'text-black' : 'text-gray-500'
+            onClick={(e) => {
+              console.log('Mobile CREATE button clicked');
+              setActiveSection('createPot');
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'createPot' ? 'text-black' : 'text-gray-500'
               }`}
           >
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'bookmarks' ? 'bg-transparent' : ''
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'createPot' ? 'bg-transparent' : ''
               }`}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M12 5v14m-7-7h14"></path>
               </svg>
             </div>
-            <span className="text-[11px] font-medium">Bookmarks</span>
+            <span className="text-[11px] font-medium">Create</span>
           </button>
 
           <button
@@ -628,18 +644,25 @@ export default function App() {
             <span className="text-[11px] font-medium">How it works</span>
           </button>
 
+          
           <button
-            onClick={() => setActiveSection('createPot')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'createPot' ? 'text-black' : 'text-gray-500'
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Mobile my markets button clicked - should navigate to bookmarks');
+              setActiveSection('bookmarks');
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'bookmarks' ? 'text-black' : 'text-gray-500'
               }`}
           >
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'createPot' ? 'bg-transparent' : ''
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'bookmarks' ? 'bg-transparent' : ''
               }`}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M12 5v14m-7-7h14"></path>
+              <svg className="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <span className="text-[11px] font-medium">Create</span>
+            <span className="text-[11px] font-medium">My Markets</span>
           </button>
         </div>
         </div>

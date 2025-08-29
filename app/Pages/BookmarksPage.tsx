@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import Cookies from 'js-cookie';
 import { Bookmark, Clock, X, Trophy, Users, TrendingUp } from 'lucide-react';
@@ -50,8 +50,11 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   const [userPots, setUserPots] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'bookmarks' | 'entered'>('bookmarks');
 
-  // Get contract addresses array
-  const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
+  // Get contract addresses array - memoized to prevent re-creation
+  const contractAddresses = useMemo(() => 
+    Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>,
+    []
+  );
 
   // Read participants from all contracts
   const { data: participants1 } = useReadContract({
@@ -68,9 +71,6 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     query: { enabled: isConnected && !!address }
   });
 
-  // Combine all participants data
-  const participantsData = [participants1, participants2];
-
   // Update userPots when participant data changes
   useEffect(() => {
     if (!isConnected || !address) {
@@ -79,6 +79,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     }
 
     const participatingPots: string[] = [];
+    const participantsData = [participants1, participants2];
     
     participantsData.forEach((participants, index) => {
       if (participants && Array.isArray(participants)) {
@@ -92,7 +93,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     });
 
     setUserPots(participatingPots);
-  }, [participantsData, address, isConnected]);
+  }, [participants1, participants2, address, isConnected, contractAddresses]);
 
   // Load bookmarks when component mounts or address changes
   useEffect(() => {
