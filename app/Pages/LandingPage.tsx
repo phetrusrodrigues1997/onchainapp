@@ -645,10 +645,10 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Trading Buttons */}
             <div className="grid grid-cols-2 gap-2 mb-2">
-              <button className="bg-blue-50 hover:bg-blue-200 border-2 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-blue-50 hover:bg-blue-200 border border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
-              <button className="bg-purple-50 hover:bg-purple-200 border-2 border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-purple-50 hover:bg-purple-200 border border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 NO
               </button>
             </div>
