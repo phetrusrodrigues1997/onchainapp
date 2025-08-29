@@ -235,25 +235,25 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
           </div>
 
           {/* Instructions */}
-          <div className="bg-black text-white rounded-xl p-6">
+          <div className="bg-white text-black rounded-xl p-6 border border-gray-400">
             <h3 className="text-xl font-bold mb-4 flex items-center">
-              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center mr-3">
-                <div className="w-3 h-3 bg-black rounded-full"></div>
+              <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center mr-3">
+                <div className="w-2 h-2 bg-white rounded-full "></div>
               </div>
               How it works
             </h3>
             <div className="space-y-3">
               <div className="flex items-start">
                 <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
-                <p className="text-white">Pay $0.01 (in ETH) to enter the live prediction market</p>
+                <p className="text-black">Pay $0.01 (in ETH) to enter the live prediction market</p>
               </div>
               <div className="flex items-start">
                 <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>
-                <p className="text-white">Make predictions on hourly questions</p>
+                <p className="text-black">Make predictions on hourly questions</p>
               </div>
               <div className="flex items-start">
                 <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</div>
-                <p className="text-white">Winners share the pot equally at round end</p>
+                <p className="text-black">Winners share the pot equally at round end</p>
               </div>
             </div>
           </div>
