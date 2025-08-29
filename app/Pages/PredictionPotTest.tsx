@@ -142,6 +142,9 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   const [justEnteredPot, setJustEnteredPot] = useState(false);
   const [postEntryLoading, setPostEntryLoading] = useState(false);
   const [usedDiscountedEntry, setUsedDiscountedEntry] = useState(false);
+  
+  // Flag to control when failure detection should be active
+  const [enableFailureDetection, setEnableFailureDetection] = useState(false);
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -281,7 +284,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
 
   // Reset loading state if transaction fails - BUT only after enough time for writeContract to update isPending
   useEffect(() => {
-    if (!isPending && !isConfirming && !isConfirmed && lastAction && isLoading && !txHash) {
+    if (enableFailureDetection && !isPending && !isConfirming && !isConfirmed && lastAction && isLoading && !txHash) {
       console.log("⚠️ Transaction may have failed - no txHash after submission:");
       console.log({
         isPending,
@@ -323,7 +326,7 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
         }
       }, 60000); // 60 seconds to give plenty of time for writeContract + wallet confirmation
     }
-  }, [isPending, isConfirming, isConfirmed, lastAction, isLoading, txHash, contractAddress]);
+  }, [enableFailureDetection, isPending, isConfirming, isConfirmed, lastAction, isLoading, txHash, contractAddress]);
 
 
   // Read contract data
@@ -812,6 +815,7 @@ useEffect(() => {
       return;
     }
     setLastAction('');
+    setEnableFailureDetection(false); // Reset failure detection after any transaction completion
   }
 }, [isConfirmed, lastAction]);
 
@@ -1288,6 +1292,9 @@ useEffect(() => {
 
           setIsLoading(true);
           setLastAction("distributePot");
+          setEnableFailureDetection(false); // Disable failure detection during async operations
+          
+          console.log("🛡️ Failure detection disabled during async operations");
           
           try {
             // Determine winners
@@ -1358,6 +1365,10 @@ useEffect(() => {
               timestamp: new Date().toISOString()
             });
             
+            // Now enable failure detection after writeContract has had time to complete
+            setEnableFailureDetection(true);
+            console.log("🛡️ Failure detection re-enabled after writeContract completion");
+            
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
             
           } catch (error) {
@@ -1373,6 +1384,7 @@ useEffect(() => {
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
             setLastAction("");
+            setEnableFailureDetection(false); // Reset failure detection on error
           }
         }}
         disabled={isActuallyLoading}
