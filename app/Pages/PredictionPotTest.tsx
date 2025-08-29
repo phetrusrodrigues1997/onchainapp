@@ -1260,118 +1260,56 @@ useEffect(() => {
       <button
         onClick={async () => {
           console.log("🚀 Starting pot distribution process...");
-          console.log("📊 Initial state:", {
-            contractAddress,
-            selectedTableType,
-            participantCount: participants?.length || 0,
-            potBalance: potBalance?.toString(),
-            isOwner,
-            address
-          });
-
+          
           setIsLoading(true);
-          // DON'T set lastAction yet - wait until we have winners!
+          setLastAction('distributePot'); // Set this FIRST like FifteenMinuteQuestions
           
           try {
-            // Determine winners
-            const participantCount = participants?.length || 0;
-            console.log("🔍 Determining winners for", participantCount, "participants");
-            showMessage(`Determining winners among ${participantCount} pot participants...`);
-            
+            // Step 1: Determine winners
+            console.log("🔍 Determining winners...");
             const winnersString = await determineWinners(selectedTableType, participants || []);
-            console.log("🏆 determineWinners returned:", winnersString);
             
             if (!winnersString || winnersString.trim() === "") {
-              console.log("❌ No winners found - winnersString empty or null");
-              showMessage(`No winners found for this round (${participantCount} participants checked)`, true);
+              console.log("❌ No winners found");
+              showMessage("No winners found for this round", true);
               setIsLoading(false);
+              setLastAction('');
               return;
             }
             
-            // Parse winner addresses
+            // Step 2: Parse winner addresses
             const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
-            console.log("📝 Parsed winner addresses:", addresses);
-            console.log("✅ Address validation:", {
-              addressCount: addresses.length,
-              validFormat: addresses.every(addr => addr.startsWith('0x') && addr.length === 42),
-              addresses: addresses
-            });
             
             if (addresses.length === 0) {
-              console.log("❌ No valid addresses after parsing");
+              console.log("❌ No valid addresses");
               showMessage("No valid winner addresses found", true);
               setIsLoading(false);
+              setLastAction('');
               return;
             }
             
-            // Set winner addresses for transaction confirmation handler
-            console.log("🎯 Setting winnerAddresses for confirmation handler:", winnersString);
-            setWinnerAddresses(winnersString);
+            console.log(`✅ Found ${addresses.length} winner(s):`, addresses);
             showMessage(`Found ${addresses.length} winner(s). Distributing pot...`);
             
-            // CRITICAL: Wait for winnerAddresses state to actually update before proceeding
-            console.log("⏳ Waiting for winnerAddresses state to update...");
-            await new Promise(resolve => setTimeout(resolve, 500)); // Give React time to update state
+            // Step 3: Store winners for confirmation handler (keep this simple)
+            setWinnerAddresses(winnersString);
             
-            // NOW set lastAction after we have confirmed winners
-            console.log("🎯 NOW setting lastAction after winners are confirmed");
-            setLastAction("distributePot");
-            
-            // Double-check that winnerAddresses state is properly set
-            console.log("🔍 Verifying winnerAddresses state is ready...");
-            if (!winnersString || winnersString.trim() === "") {
-              throw new Error("Winner addresses not properly set - aborting transaction");
-            }
-            
-            // Log contract interaction details
-            console.log("📄 Contract interaction details:", {
-              contractAddress,
-              functionName: 'distributePot',
-              args: [addresses],
-              abiLength: PREDICTION_POT_ABI.length,
-              winnersString: winnersString // Confirm we have winners
-            });
-            
-            // Distribute pot using the blockchain contract
-            console.log("🔗 Calling writeContract with distributePot...");
-            console.log("🎯 Confirmed winnerAddresses before transaction:", winnersString);
-            
-            const txResult = await writeContract({
+            // Step 4: Distribute pot - SIMPLE like FifteenMinuteQuestions
+            await writeContract({
               address: contractAddress as `0x${string}`,
               abi: PREDICTION_POT_ABI,
               functionName: 'distributePot',
               args: [addresses],
             });
             
-            console.log("📝 Transaction submitted successfully:", txResult);
-            console.log("⏳ Waiting for transaction state to update...");
-            
-            // Give a small delay for the transaction state to update
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            console.log("📊 Transaction state after submission:", {
-              txHash: txHash || 'no hash yet',
-              isPending,
-              isConfirming,
-              timestamp: new Date().toISOString()
-            });
-            
+            console.log("✅ Distribution transaction submitted");
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
             
           } catch (error) {
             console.error("❌ Pot distribution failed:", error);
-            console.log("🔍 Error details:", {
-              errorType: typeof error,
-              errorMessage: error instanceof Error ? error.message : String(error),
-              errorStack: error instanceof Error ? error.stack : undefined,
-              contractAddress,
-              selectedTableType
-            });
-            
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
-            // Only reset lastAction if it was set (after winners were determined)
-            setLastAction("");
+            setLastAction('');
           }
         }}
         disabled={isActuallyLoading}
