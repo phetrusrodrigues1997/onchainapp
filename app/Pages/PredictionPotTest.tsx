@@ -24,7 +24,7 @@ import LoadingScreen from '../Components/LoadingScreen';
 
 // Define table identifiers instead of passing table objects
 const tableMapping = {
-  "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
+  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
   "0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8": "crypto",
 } as const;
 

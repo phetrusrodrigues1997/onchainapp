@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import { useAccount, useReadContract } from 'wagmi';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
-import { getMarkets } from '../Constants/markets';
+import { getMarkets, Market } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { addBookmark, removeBookmark, isMarketBookmarked } from '../Database/actions';
 
@@ -28,7 +28,7 @@ const getContractAddress = (marketId: string): string | null => {
 
 // Contract addresses mapping for participant checking
 const CONTRACT_ADDRESSES = {
-  "0x5AA958a4008b71d484B6b0B044e5387Db16b5CfD": "featured",
+  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
   "0x53B8Cbc599142b29D92eA4eC74fCC4f59454AcD8": "crypto",
 } as const;
 
@@ -392,7 +392,7 @@ const handleMarketClick = (marketId: string) => {
     console.log('Selected market:', marketId, 'Contract address:', contractAddress);
     
     // Find the market question from the correct category
-    let market = null;
+    let market: Market | undefined = undefined;
     
     // Try to find the market in the specific category first
     if (marketId === 'Featured') {
