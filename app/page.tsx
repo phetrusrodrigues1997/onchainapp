@@ -254,6 +254,7 @@ export default function App() {
     }
   }, [activeSection]);
 
+
   return (
     <div className="min-h-screen bg-white text-white">
 

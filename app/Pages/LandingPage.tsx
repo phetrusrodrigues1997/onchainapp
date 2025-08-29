@@ -64,6 +64,13 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const [displayedMarketsCount, setDisplayedMarketsCount] = useState(12);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const MARKETS_PER_PAGE = 12;
+  
+  // Animation state for position swapping
+  const [swapAnimation, setSwapAnimation] = useState<{
+    fromIndex: number;
+    toIndex: number;
+    isAnimating: boolean;
+  } | null>(null);
 
   // Get contract addresses array for participant checking
   const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
@@ -384,6 +391,37 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     );
   };
 
+  // Function to handle market selection with position swap animation
+  const handleMarketSelection = (newMarketId: string, currentMarketsList: any[]) => {
+    // If it's the same market, don't do anything
+    if (newMarketId === selectedMarket) return;
+    
+    // Find indices of current selected and new selected markets
+    const currentSelectedIndex = currentMarketsList.findIndex(market => market.tabId === selectedMarket);
+    const newSelectedIndex = currentMarketsList.findIndex(market => market.tabId === newMarketId);
+    
+    if (currentSelectedIndex === -1 || newSelectedIndex === -1) return;
+    
+    // If new selected is already first, no need to animate
+    if (newSelectedIndex === 0) {
+      setSelectedMarket?.(newMarketId);
+      return;
+    }
+    
+    // Start swap animation
+    setSwapAnimation({
+      fromIndex: currentSelectedIndex,
+      toIndex: newSelectedIndex,
+      isAnimating: true
+    });
+    
+    // After animation completes, update the selected market
+    setTimeout(() => {
+      setSelectedMarket?.(newMarketId);
+      setSwapAnimation(null);
+    }, 600); // Match CSS animation duration
+  };
+
   
 const handleMarketClick = (marketId: string) => {
   const contractAddress = getContractAddress(marketId);
@@ -520,6 +558,46 @@ const handleMarketClick = (marketId: string) => {
           }
         }
         
+        @keyframes swapToFirst {
+          0% { 
+            transform: translateY(0) translateX(0) scale(1);
+            z-index: 1;
+          }
+          50% { 
+            transform: translateY(-20px) translateX(-10px) scale(1.05);
+            z-index: 10;
+          }
+          100% { 
+            transform: translateY(var(--swap-distance)) translateX(0) scale(1);
+            z-index: 1;
+          }
+        }
+        
+        @keyframes swapFromFirst {
+          0% { 
+            transform: translateY(0) translateX(0) scale(1);
+            z-index: 1;
+          }
+          50% { 
+            transform: translateY(20px) translateX(10px) scale(0.95);
+            z-index: 10;
+          }
+          100% { 
+            transform: translateY(var(--swap-distance)) translateX(0) scale(1);
+            z-index: 1;
+          }
+        }
+        
+        .swap-to-first {
+          animation: swapToFirst 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          position: relative;
+        }
+        
+        .swap-from-first {
+          animation: swapFromFirst 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          position: relative;
+        }
+        
         .pulsing-glow-selected {
           background: linear-gradient(135deg, rgb(220, 38, 38), rgb(239, 68, 68), rgb(55, 65, 81));
           animation: professional-glow 2.5s ease-in-out infinite;
@@ -596,14 +674,42 @@ const handleMarketClick = (marketId: string) => {
     // Apply pagination
     const displayedMarkets = orderedMarkets.slice(0, displayedMarketsCount);
     
-    return displayedMarkets.map((market, index) => (
+    return displayedMarkets.map((market, index) => {
+      // Calculate animation classes
+      const isSwapping = swapAnimation && swapAnimation.isAnimating;
+      const isSwappingToFirst = isSwapping && swapAnimation.toIndex === index;
+      const isSwappingFromFirst = isSwapping && swapAnimation.fromIndex === index;
+      
+      // Calculate swap distance for CSS variable
+      const swapDistance = isSwapping 
+        ? `${(Math.abs(swapAnimation.toIndex - swapAnimation.fromIndex) * 100)}px`
+        : '0px';
+      
+      return (
       <div key={`mobile-${market.id}-${index}`} className="max-w-md mx-auto">
         <div 
-          onClick={() => handleMarketClick(market.id)}
-          className={`group bg-white rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] border border-gray-200
+          onClick={() => {
+            if (!isSwapping && market.tabId) {
+              handleMarketSelection(market.tabId, displayedMarkets);
+              // Add delay before navigation to allow animation
+              setTimeout(() => handleMarketClick(market.id), 300);
+            } else if (!isSwapping) {
+              // Fallback for markets without tabId
+              handleMarketClick(market.id);
+            }
+          }}
+          className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] ${
+            isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
           }`}
+          style={{
+            '--swap-distance': swapDistance
+          } as React.CSSProperties}
         >
-          <div className="bg-white rounded-2xl p-3 h-full">
+          <div className={`rounded-2xl p-3 h-full transition-all duration-300 ${
+            market.tabId === selectedMarket 
+              ? 'bg-white border border-gray-200 shadow-lg shadow-red-100/50 ring-1 ring-red-100' 
+              : 'bg-white border border-gray-200 hover:border-gray-300'
+          }`}>
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
@@ -687,7 +793,8 @@ const handleMarketClick = (marketId: string) => {
           </div>
         </div>
       </div>
-    ));
+      );
+    });
   })()}
 
 {/* Mobile Loading More Indicator */}
@@ -769,14 +876,41 @@ const handleMarketClick = (marketId: string) => {
                   // Apply pagination for desktop
                   const displayedMarkets = orderedMarkets.slice(0, displayedMarketsCount);
                   
-                  return displayedMarkets.map((market, index) => (
+                  return displayedMarkets.map((market, index) => {
+                    // Calculate animation classes
+                    const isSwapping = swapAnimation && swapAnimation.isAnimating;
+                    const isSwappingToFirst = isSwapping && swapAnimation.toIndex === index;
+                    const isSwappingFromFirst = isSwapping && swapAnimation.fromIndex === index;
+                    
+                    // Calculate swap distance for CSS variable (desktop uses grid so different calculation)
+                    const swapDistance = isSwapping 
+                      ? `${(Math.abs(swapAnimation.toIndex - swapAnimation.fromIndex) * 180)}px`
+                      : '0px';
+                    
+                    return (
                     <div
                       key={`desktop-${market.id}-${index}`}
-                      onClick={() => handleMarketClick(market.id)}
-                      className="group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:scale-105 hover:-rotate-1 hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)]"
+                      onClick={() => {
+                        if (!isSwapping && market.tabId) {
+                          handleMarketSelection(market.tabId, displayedMarkets);
+                          // Add delay before navigation to allow animation
+                          setTimeout(() => handleMarketClick(market.id), 300);
+                        } else if (!isSwapping) {
+                          // Fallback for markets without tabId
+                          handleMarketClick(market.id);
+                        }
+                      }}
+                      className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
+                        isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
+                      }`}
+                      style={{
+                        '--swap-distance': swapDistance
+                      } as React.CSSProperties}
                     >
-                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[140px] ${
-                        market.tabId === selectedMarket ? ' bg-red-100 border border-gray-200' : 'bg-white border border-gray-200' 
+                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 ${
+                        market.tabId === selectedMarket 
+                          ? 'bg-gradient-to-br from-red-50 to-white border-2 border-red-200 shadow-lg shadow-red-100/50 ring-1 ring-red-100' 
+                          : 'bg-white border border-gray-200 hover:border-gray-300' 
                       }`}>
                         
                         
@@ -850,7 +984,8 @@ const handleMarketClick = (marketId: string) => {
                         </div>
                       </div>
                     </div>
-                  ));
+                    );
+                  });
                 })()}
           </div>
 
