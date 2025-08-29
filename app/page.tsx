@@ -28,6 +28,7 @@ import FifteenMinuteQuestions from './Sections/FifteenMinuteQuestions';
 import LiveMarketPotEntry from './Pages/LiveMarketPotEntry';
 import MessagingPage from './Pages/MessagingPage';
 import IdeasPage from './Pages/IdeasPage';
+import AdminEvidenceReviewPage from './Pages/AdminEvidenceReviewPage';
 import { getMarkets } from './Constants/markets';
 import { Language, getTranslation, supportedLanguages } from './Languages/languages';
 
@@ -552,6 +553,7 @@ export default function App() {
         {activeSection === "createPot" && <CreatePotPage navigateToPrivatePot={navigateToPrivatePot} />}
         {activeSection === "ideas" && <IdeasPage activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "bookmarks" && <BookmarksPage activeSection={activeSection} setActiveSection={setActiveSection} />}
+        {activeSection === "adminEvidence" && <AdminEvidenceReviewPage activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "privatePot" && privatePotAddress && (
           <PrivatePotInterface
             contractAddress={privatePotAddress}

@@ -151,15 +151,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
     });
   };
 
-  const formatEthBalance = (balance: bigint | undefined): string => {
-    if (!balance) return '0.0000';
-    try {
-      const formatted = formatUnits(balance, 18);
-      return parseFloat(formatted).toFixed(4);
-    } catch {
-      return '0.0000';
-    }
-  };
+  
 
   
   // If user is already in the pot, proceed to questions

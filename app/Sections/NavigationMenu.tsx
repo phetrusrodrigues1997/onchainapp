@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useAccount } from 'wagmi';
 
 interface NavigationMenuProps {
   activeSection: string;
@@ -10,6 +11,7 @@ interface NavigationMenuProps {
 const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { address, isConnected } = useAccount();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -26,8 +28,22 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
+  // Check if user is admin
+  const isAdmin = (): boolean => {
+    if (!address || !isConnected) return false;
+    
+    // Add specific admin wallet addresses here
+    const adminAddresses: string[] = [
+      // Add your admin wallet addresses here (lowercase)
+      // Example: '0x1234567890123456789012345678901234567890'
+    ];
+    
+    const normalizedAddress = address.toLowerCase();
+    return adminAddresses.includes(normalizedAddress);
+  };
+
   // Menu items for reusability
-  const menuItems = [
+  const baseMenuItems = [
     { id: 'home', label: 'Home' },
     { id: 'liveMarkets', label: 'Live Markets' },
     { id: 'createPot', label: 'Private Markets' },
@@ -35,8 +51,17 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
     { id: 'discord', label: 'Help' },
-    
   ];
+
+  // Admin-only menu items
+  const adminMenuItems = [
+    { id: 'adminEvidence', label: '🔒 Evidence Review' },
+  ];
+
+  // Combine menu items based on user permissions
+  const menuItems = isAdmin() 
+    ? [...baseMenuItems, ...adminMenuItems]
+    : baseMenuItems;
 
   return (
     <nav className="relative">
