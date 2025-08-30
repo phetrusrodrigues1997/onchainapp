@@ -361,7 +361,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userPots.map((contractAddress) => {
                   const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                  const marketName = marketType === 'featured' ? 'Featured Market' : 'Crypto Market';
+                  const marketName = marketType === 'featured' ? 'Trending Market' : 'Crypto Market';
                   
                   return (
                     <button 

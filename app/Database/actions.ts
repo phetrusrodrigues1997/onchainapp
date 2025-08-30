@@ -3,7 +3,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import {  Messages, FeaturedBets, CryptoBets, LivePredictions, Bookmarks } from "./schema"; // Import the schema
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql, and, inArray } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
 import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
@@ -1896,11 +1896,17 @@ export async function addBookmark(walletAddress: string, marketId: string, marke
 
 export async function removeBookmark(walletAddress: string, marketId: string) {
   try {
+    // Handle legacy 'Featured' -> 'Trending' transition for removal
+    const searchIds = [marketId];
+    if (marketId === 'Trending') {
+      searchIds.push('Featured'); // Also remove legacy 'Featured' bookmarks
+    }
+
     await db
       .delete(Bookmarks)
       .where(and(
         eq(Bookmarks.walletAddress, walletAddress),
-        eq(Bookmarks.marketId, marketId)
+        inArray(Bookmarks.marketId, searchIds)
       ));
 
     console.log('📑 Bookmark removed successfully for market:', marketId);
@@ -1936,6 +1942,14 @@ export async function getUserBookmarks(walletAddress: string) {
 
 export async function isMarketBookmarked(walletAddress: string, marketId: string) {
   try {
+    // Handle legacy 'Featured' -> 'Trending' transition
+    const searchIds = [marketId];
+    if (marketId === 'Trending') {
+      searchIds.push('Featured'); // Also check for legacy 'Featured' bookmarks
+    }
+
+    console.log(`📑 Checking bookmark for wallet: ${walletAddress}, marketIds: ${searchIds.join(', ')}`);
+
     // Select only essential columns to avoid issues with missing contract_address column
     const bookmark = await db
       .select({
@@ -1946,11 +1960,13 @@ export async function isMarketBookmarked(walletAddress: string, marketId: string
       .from(Bookmarks)
       .where(and(
         eq(Bookmarks.walletAddress, walletAddress),
-        eq(Bookmarks.marketId, marketId)
+        inArray(Bookmarks.marketId, searchIds)
       ))
       .limit(1);
 
-    return bookmark.length > 0;
+    const isBookmarked = bookmark.length > 0;
+    console.log(`📑 Result: ${isBookmarked} for ${marketId}`);
+    return isBookmarked;
 
   } catch (error) {
     console.error("Error checking bookmark status:", error);

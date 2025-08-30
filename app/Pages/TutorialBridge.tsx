@@ -157,7 +157,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       if (selectedMarketAddress && selectedMarketAddress in CONTRACT_ADDRESSES) {
         const marketType = CONTRACT_ADDRESSES[selectedMarketAddress as keyof typeof CONTRACT_ADDRESSES];
         setMarketInfo({ 
-          name: marketType === 'featured' ? 'Featured Market' : 'Crypto Market', 
+          name: marketType === 'featured' ? 'Trending Market' : 'Crypto Market', 
           section: 'bitcoinPot',  // Both markets use the same section, PredictionPotTest handles the difference
           address: selectedMarketAddress 
         });
@@ -165,7 +165,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         // Default to first market if no cookie or unknown address
         const defaultAddress = contractAddresses[0];
         setMarketInfo({ 
-          name: 'Featured Market', 
+          name: 'Trending Market', 
           section: 'bitcoinPot',
           address: defaultAddress 
         });
@@ -297,7 +297,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 <div className="grid grid-cols-1 gap-3">
                   {userPots.map((contractAddress) => {
                     const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                    const marketName = marketType === 'featured' ? 'Featured Market' : 'Crypto Market';
+                    const marketName = marketType === 'featured' ? 'Trending Market' : 'Crypto Market';
                     
                     const handleMarketClick = () => {
                       Cookies.set('selectedMarket', contractAddress);
@@ -403,7 +403,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {userPots.map((contractAddress) => {
                     const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                    const marketName = marketType === 'featured' ? 'Featured Market' : 'Crypto Market';
+                    const marketName = marketType === 'featured' ? 'Trending Market' : 'Crypto Market';
                     
                     const handleMarketClick = () => {
                       Cookies.set('selectedMarket', contractAddress);

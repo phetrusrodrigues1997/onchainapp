@@ -271,7 +271,7 @@ body::before {
 
 
 button[aria-label="Toggle menu"] {
-  background-color: white !important;
+  background-color: black !important;
   transform: translateX(-14px) !important;
   transition: all 0.2s ease-in-out !important;
 }
@@ -279,7 +279,7 @@ button[aria-label="Toggle menu"] {
 
 
 button[aria-label="Toggle menu"] svg {
-  stroke: black !important;
+  stroke: white !important;
   stroke-width: 2 !important;
   transition: all 0.2s ease-in-out !important;
 }

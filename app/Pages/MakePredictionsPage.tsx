@@ -33,7 +33,7 @@ const getTableTypeFromContract = (contractAddress: string): string => {
   const marketOptions = getMarkets(getTranslation('en'), 'options');
   const market = marketOptions.find(m => m.contractAddress === contractAddress);
   
-  if (market?.id === 'Featured') return 'featured';
+  if (market?.id === 'Trending') return 'featured';
   if (market?.id === 'crypto') return 'crypto';
   
   // Fallback for unknown contracts
@@ -760,7 +760,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Re-entry Required</h2>
               <p className="text-gray-600 text-sm mb-6">
-                Wrong prediction in {selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}. Pay today&apos;s entry fee to continue.
+                Wrong prediction in {selectedTableType === 'featured' ? 'Trending Market' : 'Crypto Market'}. Pay today&apos;s entry fee to continue.
               </p>
               
               <button

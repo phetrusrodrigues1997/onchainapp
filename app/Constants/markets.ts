@@ -41,8 +41,8 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
   else if (category === 'options') {
     return [
       {
-    id: 'Featured',
-    name: 'Featured',
+    id: 'Trending',
+    name: 'Trending',
     symbol: '',
     contractAddress: '0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F',
     color: '#FF5733',
@@ -259,11 +259,11 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
 
  }
 
- else if (category === 'Featured') {
+ else if (category === 'Trending') {
   return [{
-  id: 'Featured',
+  id: 'Trending',
   name: 'Random Topics',
-  symbol: 'Featured',
+  symbol: 'Trending',
   contractAddress: '0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F',
   color: '#1DB954',
   question: 'Will Elon Musk tweet about Trump?',

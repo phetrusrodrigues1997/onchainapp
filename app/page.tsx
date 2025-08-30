@@ -50,7 +50,7 @@ export default function App() {
   const [isLandingPageLoading, setIsLandingPageLoading] = useState(activeSection === 'home'); // Track LandingPage loading state
 
   // Carousel state
-  const [selectedMarket, setSelectedMarket] = useState('Featured');
+  const [selectedMarket, setSelectedMarket] = useState('Trending');
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [showLeftArrow2, setShowLeftArrow2] = useState(false);
@@ -76,14 +76,14 @@ export default function App() {
     return shuffled;
   };
 
-  // Shuffle markets on client side only, keeping Featured first
+  // Shuffle markets on client side only, keeping Trending first
   useEffect(() => {
-    const featuredMarket = marketOptions.find(market => market.name === 'Featured');
-    const otherMarkets = marketOptions.filter(market => market.name !== 'Featured');
+    const trendingMarket = marketOptions.find(market => market.name === 'Trending');
+    const otherMarkets = marketOptions.filter(market => market.name !== 'Trending');
     const shuffledOthers = shuffleArray(otherMarkets);
 
-    if (featuredMarket) {
-      setShuffledMarkets([featuredMarket, ...shuffledOthers]);
+    if (trendingMarket) {
+      setShuffledMarkets([trendingMarket, ...shuffledOthers]);
     } else {
       setShuffledMarkets(shuffleArray(marketOptions));
     }
@@ -91,7 +91,7 @@ export default function App() {
 
   // Personalized labels for the second carousel
   const personalizedLabels = {
-    'Featured': 'For you',
+    'Trending': 'For you',
     'Crypto': 'Bitcoin',
     'Stocks': 'Tesla',
     'Music Charts': 'Sabrina Carpenter',
@@ -320,7 +320,7 @@ export default function App() {
 
       {/* Hide header and all content when LandingPage is loading */}
       {!isLandingPageLoading && (
-        <header className="z-50 bg-[#fdfdfd] px-4 pt-3 pb-1 md:py-2 sticky top-0 border-b border-gray-200">
+        <header className="z-50 bg-[#fdfdfd] px-4 pt-0 pb-0 md:py-2 sticky top-0 md:border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex flex-col">
           {/* Top row with main header elements */}
           <div className="flex justify-between items-center">
@@ -418,7 +418,7 @@ export default function App() {
 
           {/* Market Carousel - only show on home section, on its own line */}
           {activeSection === 'home' && (
-            <div className="mt-3 md:translate-y-2">
+            <div className="mt-3 md:translate-y-2 pt-2 md:pt-0 border-b md:border-b-0 border-gray-200">
               {/* Markets Container - Show first 13 on desktop, all on mobile */}
               <div className="flex gap-2 overflow-x-auto md:overflow-visible scrollbar-hide pb-1"
                 style={{
@@ -468,12 +468,12 @@ export default function App() {
             placeholder="Search markets..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
+            className="w-full pl-10 pr-4 py-2.5 bg-transparent border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors duration-200"
           />
         </div>
 
         {/* Filter Symbol */}
-        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
+        <div className="flex items-center justify-center w-10 h-10 bg-transparent border border-gray-300 rounded-lg">
           <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
@@ -481,7 +481,7 @@ export default function App() {
 
         {/* Bookmark/Save Symbol */}
         <button 
-          className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+          className="flex items-center justify-center w-10 h-10 bg-transparent border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

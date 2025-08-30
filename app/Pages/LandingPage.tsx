@@ -44,7 +44,7 @@ const PREDICTION_POT_ABI = [
 ] as const;
 
 
-const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Featured', setSelectedMarket, onLoadingChange }: LandingPageProps) => {
+const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Trending', setSelectedMarket, onLoadingChange }: LandingPageProps) => {
   const { address, isConnected } = useAccount();
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
@@ -447,9 +447,9 @@ const handleMarketClick = (marketId: string) => {
     let market: Market | undefined = undefined;
     
     // Try to find the market in the specific category first
-    if (marketId === 'Featured') {
-      const featuredMarkets = getMarkets(t, 'Featured');
-      market = featuredMarkets.find(m => m.id === marketId);
+    if (marketId === 'Trending') {
+      const trendingMarkets = getMarkets(t, 'Trending');
+      market = trendingMarkets.find(m => m.id === marketId);
     } else if (marketId === 'Crypto') {
       const cryptoMarkets = getMarkets(t, 'Crypto');
       market = cryptoMarkets.find(m => m.id === marketId);
@@ -693,16 +693,16 @@ const handleMarketClick = (marketId: string) => {
       
       orderedMarkets = [selectedMarketData];
       
-      // We want to move "Featured" market to position 16+, so filter it out from early positions
-      const featuredMarket = otherMarkets.find(market => market.tabId === 'Featured');
-      const otherMarketsFiltered = otherMarkets.filter(market => market.tabId !== 'Featured');
+      // We want to move "Trending" market to position 16+, so filter it out from early positions
+      const trendingMarket = otherMarkets.find(market => market.tabId === 'Trending');
+      const otherMarketsFiltered = otherMarkets.filter(market => market.tabId !== 'Trending');
       
-      // Add first 15 other markets (excluding Featured)
+      // Add first 15 other markets (excluding Trending)
       orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(0, 15)];
       
-      // Add the Featured market at position 16+ (only if it's not the currently selected market)
-      if (featuredMarket && selectedMarket !== 'Featured') {
-        orderedMarkets = [...orderedMarkets, featuredMarket];
+      // Add the Trending market at position 16+ (only if it's not the currently selected market)
+      if (trendingMarket && selectedMarket !== 'Trending') {
+        orderedMarkets = [...orderedMarkets, trendingMarket];
       }
       
       // Add any remaining markets
@@ -916,16 +916,16 @@ const handleMarketClick = (marketId: string) => {
                   if (selectedMarketData) {
                     orderedMarkets = [selectedMarketData];
                     
-                    // We want to move "Featured" market to position 16+, so filter it out from early positions
-                    const featuredMarket = otherMarkets.find(market => market.tabId === 'Featured');
-                    const otherMarketsFiltered = otherMarkets.filter(market => market.tabId !== 'Featured');
+                    // We want to move "Trending" market to position 16+, so filter it out from early positions
+                    const trendingMarket = otherMarkets.find(market => market.tabId === 'Trending');
+                    const otherMarketsFiltered = otherMarkets.filter(market => market.tabId !== 'Trending');
                     
-                    // Add first 15 other markets (excluding Featured)
+                    // Add first 15 other markets (excluding Trending)
                     orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(0, 15)];
                     
-                    // Add the Featured market at position 16+ (only if it's not the currently selected market)
-                    if (featuredMarket && selectedMarket !== 'Featured') {
-                      orderedMarkets = [...orderedMarkets, featuredMarket];
+                    // Add the Trending market at position 16+ (only if it's not the currently selected market)
+                    if (trendingMarket && selectedMarket !== 'Trending') {
+                      orderedMarkets = [...orderedMarkets, trendingMarket];
                     }
                     
                     // Add any remaining markets
@@ -1081,7 +1081,7 @@ const handleMarketClick = (marketId: string) => {
           
           {/* Minimalist Entry Button */}
           <button
-            onClick={() => handleMarketClick('Featured')}
+            onClick={() => handleMarketClick('Trending')}
             className="group relative bg-black border-2 border-black text-white px-20 py-5 rounded-lg font-semibold text-xl tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden shadow-xl hover:shadow-red-200"
           >
             <span className="relative z-10">Enter</span>
@@ -1112,7 +1112,7 @@ const handleMarketClick = (marketId: string) => {
           
           {/* Minimalist Entry Button - Mobile */}
           <button
-            onClick={() => handleMarketClick('Featured')}
+            onClick={() => handleMarketClick('Trending')}
             className="group relative bg-white border-2 border-black text-black px-12 py-4 rounded-lg font-semibold text-base tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden mx-auto shadow-lg hover:shadow-red-200"
           >
             <span className="relative z-10">Enter</span>

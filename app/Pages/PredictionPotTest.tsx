@@ -904,7 +904,7 @@ useEffect(() => {
                   ⚠️ Re-entry Required
                 </div>
                 <div className="text-gray-600 font-light mb-4 leading-relaxed">
-                  You made a wrong prediction in <span className="font-medium">{selectedTableType === 'featured' ? 'Featured Market' : 'Crypto Market'}</span> and need to pay <span className="font-medium">today's entry fee</span> to re-enter this specific market.
+                  You made a wrong prediction in <span className="font-medium">{selectedTableType === 'featured' ? 'Trending Market' : 'Crypto Market'}</span> and need to pay <span className="font-medium">today's entry fee</span> to re-enter this specific market.
                 </div>
                 
                 
