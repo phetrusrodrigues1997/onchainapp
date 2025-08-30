@@ -80,7 +80,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
     console.log(`🎨 Using fallback avatar for ${walletAddress}`);
     // Fallback: gradient background with initials
     return (
-      <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-gray-700 rounded-full flex items-center justify-center border-2 border-gray-200">
+      <div className="w-10 h-10 bg-gradient-to-br from-purple-1000 to-gray-700 rounded-full flex items-center justify-center border-2 border-gray-200">
         <span className="text-white font-bold text-sm">
           {walletAddress.slice(2, 4).toUpperCase()}
         </span>
@@ -211,12 +211,12 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <MessageSquare className="w-6 h-6 text-red-600 mr-3" />
+              <MessageSquare className="w-6 h-6 text-purple-700 mr-3" />
               <h1 className="text-xl font-bold">Community Ideas</h1>
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700 transition-all duration-200 hover:scale-105 flex items-center gap-2 shadow-lg"
+              className="bg-purple-700 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700 transition-all duration-200 hover:scale-105 flex items-center gap-2 shadow-lg"
             >
               <Plus className="w-4 h-4" />
               Share Idea
@@ -229,7 +229,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {loadingIdeas ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-red-600 border-t-transparent mx-auto mb-3"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-700 border-t-transparent mx-auto mb-3"></div>
             <p className="text-gray-600">Loading community ideas...</p>
           </div>
         ) : recentIdeas.length === 0 ? (
@@ -239,7 +239,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
             <p className="mb-6">Be the first to share a prediction market insight!</p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-red-600 text-white px-6 py-2 rounded-full font-medium hover:bg-red-700 transition-colors"
+              className="bg-purple-700 text-white px-6 py-2 rounded-full font-medium hover:bg-red-700 transition-colors"
             >
               Share the first idea
             </button>
@@ -275,7 +275,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
                 <div className="flex items-center gap-6 pt-2 border-t border-gray-100">
                   <button
                     onClick={() => handleLikeIdea(ideaItem.id)}
-                    className="flex items-center gap-2 text-gray-500 hover:text-red-600 transition-colors py-2"
+                    className="flex items-center gap-2 text-gray-500 hover:text-purple-700 transition-colors py-2"
                   >
                     <ThumbsUp className="w-4 h-4" />
                     <span className="text-sm">{ideaItem.likes}</span>
@@ -319,7 +319,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
                       setShowCreateModal(false);
                       setActiveSection('home');
                     }}
-                    className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                    className="bg-purple-700 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
                   >
                     Connect Wallet
                   </button>
@@ -347,7 +347,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
                           onClick={() => setCategory(cat.value)}
                           className={`p-2 rounded-lg border text-sm font-medium transition-all ${
                             category === cat.value
-                              ? 'bg-red-50 border-red-200 text-red-800'
+                              ? 'bg-purple-100 border-purple-200 text-red-800'
                               : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
                           }`}
                         >
@@ -364,7 +364,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
                       onChange={(e) => setIdea(e.target.value)}
                       placeholder="Share your prediction market insight, strategy, or question..."
                       rows={4}
-                      className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none"
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-1000 focus:border-purple-1000 resize-none"
                       maxLength={500}
                     />
                     <div className="text-right text-sm text-gray-500 mt-1">
@@ -376,7 +376,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
                   <button
                     type="submit"
                     disabled={isSubmitting || idea.trim().length < 10}
-                    className="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                    className="w-full bg-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                   >
                     {isSubmitting ? (
                       <>

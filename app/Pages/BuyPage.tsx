@@ -342,7 +342,7 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={copyAddressToClipboard}
-                      className="flex items-center justify-center gap-2 bg-red-600 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
+                      className="flex items-center justify-center gap-2 bg-purple-700 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
                     >
                       {copied ? (
                         <>

@@ -840,7 +840,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
     return (
       <div className={`relative max-w-4xl mx-auto -translate-y-8 ${className}`}>
         <div className="relative bg-white border-2 border-black rounded-xl shadow-2xl overflow-hidden">
-          <div className="bg-red-600 text-white px-6 py-4 text-center">
+          <div className="bg-purple-700 text-white px-6 py-4 text-center">
             <span className="text-lg font-mono tracking-wider">POT ENTRY REQUIRED</span>
           </div>
           <div className="p-12 text-center">
@@ -903,7 +903,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
             <div className="flex items-center space-x-2">
               <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${
                 currentQuestion.timeRemaining > 60 ? 'bg-green-500' : 
-                currentQuestion.timeRemaining > 30 ? 'bg-yellow-500' : 'bg-red-500'
+                currentQuestion.timeRemaining > 30 ? 'bg-yellow-500' : 'bg-purple-1000'
               }`}></div>
               <span className="text-sm font-mono tracking-wider">LIVE PREDICTION</span>
               {isTransitioning && (
@@ -956,7 +956,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                   className={`h-full time-bar-transition ${
                     currentQuestion.timeRemaining > 300 ? 'bg-gradient-to-r from-green-600 via-green-500 to-green-600' :
                     currentQuestion.timeRemaining > 60 ? 'bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600' :
-                    'bg-gradient-to-r from-red-600 via-red-500 to-red-600'
+                    'bg-gradient-to-r from-purple-700 via-purple-1000 to-purple-700'
                   }`}
                   style={{ 
                     width: `${Math.max(2, (currentQuestion.timeRemaining / (QUESTION_INTERVAL_MINUTES * 60)) * 100)}%`
@@ -966,7 +966,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
               <div className="flex justify-between mt-1 text-xs font-mono text-gray-500">
                 <span>STARTED</span>
                 <span className={`transition-colors duration-300 ${
-                  currentQuestion.timeRemaining < 60 ? 'text-red-500 font-bold animate-pulse' : 
+                  currentQuestion.timeRemaining < 60 ? 'text-purple-1000 font-bold animate-pulse' : 
                   currentQuestion.timeRemaining < 120 ? 'text-yellow-600 font-semibold' : ''
                 }`}>
                   {currentQuestion.timeRemaining < 60 ? 'URGENT' : 
@@ -1004,14 +1004,14 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                   }`} 
                   disabled={isTransitioning || isSubmitting || !address || !hasEnteredPot}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-1000 to-purple-700 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
                   <div className="relative flex items-center justify-center space-x-2">
                     <span className="text-3xl">{isSubmitting ? '⏳' : '✗'}</span>
                     <span className="tracking-widest">NO</span>
                   </div>
                   {/* Button Corner Effects */}
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-purple-1000 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-purple-1000 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                 </button>
               </div>
             ) : (
@@ -1020,7 +1020,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                 <div className={`relative px-8 py-6 rounded-lg border-4 ${
                   userPrediction === 'positive' 
                     ? 'bg-green-100 border-green-600 text-green-800' 
-                    : 'bg-red-100 border-red-600 text-red-800'
+                    : 'bg-purple-100 border-purple-700 text-red-800'
                 }`}>
                   <div className="flex items-center justify-center space-x-3">
                     <span className="text-3xl">
@@ -1181,7 +1181,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                     <select
                       value={outcomeInput}
                       onChange={(e) => setOutcomeInput(e.target.value as 'positive' | 'negative' | '')}
-                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-1000 focus:border-transparent mb-4"
                     >
                       <option value="">Select outcome...</option>
                       <option value="positive">Positive</option>
@@ -1344,7 +1344,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                   <select
                     value={finalOutcomeInput}
                     onChange={(e) => setFinalOutcomeInput(e.target.value as 'positive' | 'negative' | '')}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-1000 focus:border-transparent mb-4"
                   >
                     <option value="">Select final outcome...</option>
                     <option value="positive">Positive</option>
@@ -1384,7 +1384,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                 {processMessage && (
                   <div className={`mt-4 p-3 rounded-lg ${
                     processMessage.includes('Failed') || processMessage.includes('Please enter') 
-                      ? 'bg-red-900/50 border border-red-500 text-red-200' 
+                      ? 'bg-red-900/50 border border-purple-1000 text-purple-200' 
                       : 'bg-green-900/50 border border-green-500 text-green-200'
                   }`}>
                     {processMessage}

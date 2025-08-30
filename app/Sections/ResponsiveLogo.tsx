@@ -27,7 +27,7 @@ const ResponsiveLogo = () => {
         {isMobile ? (
           // Mobile version - prevent text and image wrapping
           <span className="flex items-center whitespace-nowrap text-2xl font-extrabold tracking-wide">
-            <span className="text-red-600">PrediWin</span>
+            <span className="text-purple-700">PrediWin</span>
             <span className="text-black">.com</span>
            <Image
   src="/ghostie.png"
@@ -41,7 +41,7 @@ const ResponsiveLogo = () => {
           
         ) : (
           <span className="flex items-center whitespace-nowrap text-3xl font-extrabold tracking-wide">
-            <span className="text-red-600">PrediWin</span>
+            <span className="text-purple-700">PrediWin</span>
             <span className="text-black">.com</span>
             <Image
   src="/ghostie.png"

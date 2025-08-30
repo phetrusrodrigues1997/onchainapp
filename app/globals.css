@@ -131,8 +131,8 @@ body::before {
 
 
 
-.mt-2.text-red-500.text-center {
-  display: none !important; /* Override Tailwind's text-red-500 */
+.mt-2.text-purple-1000.text-center {
+  display: none !important; /* Override Tailwind's text-purple-1000 */
 }
 
 @keyframes marquee {

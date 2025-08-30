@@ -207,7 +207,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <Bookmark className="w-8 h-8 text-red-600" />
+            <Bookmark className="w-8 h-8 text-purple-700" />
             <h1 className="text-3xl font-bold text-gray-900">Your Markets</h1>
           </div>
           <p className="text-gray-600">Markets you've bookmarked and entered</p>
@@ -219,7 +219,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
             onClick={() => setActiveTab('bookmarks')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md font-medium transition-colors ${
               activeTab === 'bookmarks'
-                ? 'bg-white text-red-600 shadow-sm'
+                ? 'bg-white text-purple-700 shadow-sm'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -227,7 +227,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
             Bookmarked
             {bookmarks.length > 0 && (
               <span className={`text-xs px-2 py-1 rounded-full ${
-                activeTab === 'bookmarks' ? 'bg-red-100' : 'bg-gray-200'
+                activeTab === 'bookmarks' ? 'bg-purple-100' : 'bg-gray-200'
               }`}>
                 {bookmarks.length}
               </span>
@@ -263,7 +263,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
               <p className="text-gray-600 mb-6">Start bookmarking markets to see them here.</p>
               <button
                 onClick={() => setActiveSection('home')}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="bg-purple-700 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 Explore Markets
               </button>
@@ -303,11 +303,11 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                     <button
                       onClick={() => handleRemoveBookmark(bookmark.marketId)}
                       disabled={removing === bookmark.marketId}
-                      className="ml-4 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                      className="ml-4 p-2 text-gray-400 hover:text-purple-700 hover:bg-purple-100 rounded-lg transition-colors disabled:opacity-50"
                       title="Remove bookmark"
                     >
                       {removing === bookmark.marketId ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-700"></div>
                       ) : (
                         <X className="w-4 h-4" />
                       )}

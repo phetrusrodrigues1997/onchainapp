@@ -223,7 +223,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
                     setShowMyPots(false);
                     setShowCreateForm(true);
                   }}
-                  className="bg-red-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                  className="bg-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors"
                 >
                   Create Your First Market
                 </button>
@@ -324,7 +324,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
             </button>
             
             {!address && (
-              <p className="text-center text-sm text-red-500">
+              <p className="text-center text-sm text-purple-1000">
                 Connect your wallet to create a market
               </p>
             )}
@@ -381,7 +381,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
           <button
             onClick={handleMyMarketsClick}
             disabled={isLoadingMyPots}
-            className="w-full bg-red-600 py-4 px-6 rounded-lg text-lg text-white font-medium hover:border-gray-400 hover:bg-gray-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-purple-700 py-4 px-6 rounded-lg text-lg text-white font-medium hover:border-gray-400 hover:bg-gray-500 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isLoadingMyPots ? (
               <>

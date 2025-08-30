@@ -45,9 +45,9 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
         };
       case 'error':
         return {
-          bg: 'bg-red-50',
-          border: 'border-red-200',
-          icon: <AlertCircle className="w-6 h-6 text-red-600" />,
+          bg: 'bg-purple-100',
+          border: 'border-purple-200',
+          icon: <AlertCircle className="w-6 h-6 text-purple-700" />,
           titleColor: 'text-red-800',
           messageColor: 'text-red-700'
         };

@@ -285,9 +285,9 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     switch (urgency) {
       case 'critical':
         return {
-          container: `bg-gradient-to-r from-red-100 to-red-200 border-2 border-red-400 ${baseColor === 'blue' ? 'animate-pulse' : 'animate-bounce'}`,
+          container: `bg-gradient-to-r from-purple-100 to-purple-200 border-2 border-red-400 ${baseColor === 'blue' ? 'animate-pulse' : 'animate-bounce'}`,
           text: 'text-red-800',
-          icon: 'bg-red-600',
+          icon: 'bg-purple-700',
           timer: 'text-red-900'
         };
       case 'urgent':
@@ -788,13 +788,13 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 <div className={`bg-gradient-to-br backdrop-blur-xl border-2 rounded-2xl p-6 mb-6 mt-16 shadow-xl relative overflow-hidden ${
                   marketOutcome?.outcome === 'positive' 
                     ? 'from-green-50 via-white to-green-50 border-green-200 shadow-green-900/10' 
-                    : 'from-red-50 via-white to-red-50 border-red-200 shadow-red-900/10'
+                    : 'from-purple-100 via-white to-purple-100 border-purple-200 shadow-red-900/10'
                 }`}>
                   <div className="flex items-center justify-center gap-6">
                     <div className={`w-16 h-16 bg-gradient-to-br rounded-xl flex items-center justify-center shadow-lg ${
                       marketOutcome?.outcome === 'positive' 
                         ? 'from-green-500 to-green-600' 
-                        : 'from-red-500 to-red-600'
+                        : 'from-purple-1000 to-purple-700'
                     }`}>
                       {marketOutcome?.outcome === 'positive' ? (
                         <TrendingUp className="w-8 h-8 text-white" />
@@ -807,7 +807,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                       <div className={`inline-flex items-center px-6 py-2 rounded-xl bg-gradient-to-br backdrop-blur-sm border shadow-md ${
                         marketOutcome?.outcome === 'positive' 
                           ? 'from-green-50/80 to-white/80 border-green-200/30' 
-                          : 'from-red-50/80 to-white/80 border-red-200/30'
+                          : 'from-purple-100/80 to-white/80 border-purple-200/30'
                       }`}>
                         <div className={`text-2xl font-black tracking-tight ${
                           marketOutcome?.outcome === 'positive' ? 'text-green-700' : 'text-red-700'
@@ -985,7 +985,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                     <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg ${
                       tomorrowsBet.prediction === 'positive' 
                         ? 'bg-black' 
-                        : 'bg-red-600'
+                        : 'bg-purple-700'
                     }`}>
                       {tomorrowsBet.prediction === 'positive' ? (
                         <TrendingUp className="w-10 h-10 text-white" />
@@ -1020,7 +1020,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                   {/* Status Indicators */}
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-white border-2 border-black rounded-lg p-2 text-center">
-                      <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-1">
+                      <div className="w-5 h-5 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-1">
                         <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                       </div>
                       <div className="text-black font-bold text-xs">Ongoing</div>
@@ -1095,7 +1095,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600">Saturday:</span>
-                        <span className="text-red-600 font-bold">✗ Results Day</span>
+                        <span className="text-purple-700 font-bold">✗ Results Day</span>
                       </div>
                     </div>
                   </div>
@@ -1105,7 +1105,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               // Premium betting interface
           <div className="bg-white border-2 border-black rounded-3xl p-8 mb-8 shadow-2xl relative overflow-hidden">
             {/* Red accent line */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-purple-700"></div>
             
             <div className="relative z-10">
               <div className="text-center mb-6">
@@ -1137,17 +1137,17 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                   </div>
                   
                   {/* Hover glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-red-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 rounded-2xl bg-purple-700 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 </button>
 
                 {/* NO Button - White with red accent */}
                 <button
                   onClick={() => handlePlaceBet('negative')}
                   disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-white hover:bg-red-50 border-2 border-black hover:border-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-black hover:text-red-600 p-6 rounded-2xl font-black text-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl overflow-hidden"
+                  className="group relative bg-white hover:bg-purple-100 border-2 border-black hover:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-black hover:text-purple-700 p-6 rounded-2xl font-black text-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl overflow-hidden"
                 >
                   <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-2 bg-black/10 group-hover:bg-red-100 rounded-lg mb-3 backdrop-blur-sm flex items-center justify-center transition-colors duration-300">
+                    <div className="p-2 bg-black/10 group-hover:bg-purple-100 rounded-lg mb-3 backdrop-blur-sm flex items-center justify-center transition-colors duration-300">
                       <TrendingDown className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="tracking-wide">NO</div>
@@ -1159,9 +1159,9 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 <div className="text-center mt-8">
                   <div className="inline-flex items-center gap-3 text-black bg-white border-2 border-black px-6 py-3 rounded-xl shadow-lg">
                     <div className="relative">
-                      <Zap className="w-6 h-6 text-red-600" />
+                      <Zap className="w-6 h-6 text-purple-700" />
                       <div className="absolute inset-0 animate-ping">
-                        <Zap className="w-6 h-6 text-red-600 opacity-30" />
+                        <Zap className="w-6 h-6 text-purple-700 opacity-30" />
                       </div>
                     </div>
                     <span className="font-bold">Placing bet...</span>
@@ -1178,7 +1178,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         {message && (
           <div className={`p-6 rounded-2xl mb-8 text-center backdrop-blur-xl border shadow-xl transform animate-in fade-in duration-500 ${
             message.includes('Failed') || message.includes('Error') 
-              ? 'bg-red-50/80 border-red-200/50 text-red-700 shadow-red-900/10' 
+              ? 'bg-purple-100/80 border-purple-200/50 text-red-700 shadow-red-900/10' 
               : 'bg-green-50/80 border-green-200/50 text-green-700 shadow-green-900/10'
           }`}>
             <p className="font-bold text-lg">{message}</p>
@@ -1349,7 +1349,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                                 ? 'bg-orange-100 text-orange-800'
                                 : submission.status === 'approved'
                                 ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                                : 'bg-purple-100 text-red-800'
                             }`}>
                               {submission.status.toUpperCase()}
                             </span>

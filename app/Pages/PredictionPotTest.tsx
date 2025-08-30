@@ -1058,7 +1058,7 @@ useEffect(() => {
                     <div className="bg-white border-2 border-black rounded-xl p-6 shadow-lg">
                       {/* Header with icon */}
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-purple-700 rounded-xl flex items-center justify-center">
                           <span className="text-white text-lg">🎯</span>
                         </div>
                         <div>
@@ -1096,7 +1096,7 @@ useEffect(() => {
                           placeholder="Enter code..."
                           value={inputReferralCode}
                           onChange={(e) => setInputReferralCode(e.target.value.toUpperCase())}
-                          className="w-full px-4 py-3 bg-white border-2 border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-200"
+                          className="w-full px-4 py-3 bg-white border-2 border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-700 focus:border-purple-700 transition-all duration-200"
                           maxLength={8}
                         />
                       </div>
@@ -1105,7 +1105,7 @@ useEffect(() => {
                       <button
                         onClick={() => handleEnterPot(false)}
                         disabled={isActuallyLoading}
-                        className="w-full bg-red-600 hover:bg-black text-white px-6 py-4 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                        className="w-full bg-purple-700 hover:bg-black text-white px-6 py-4 rounded-lg font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       >
                         {isActuallyLoading && lastAction === 'enterPot'
                           ? (
@@ -1241,7 +1241,7 @@ useEffect(() => {
           }
         }}
         disabled={isActuallyLoading}
-        className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-purple-700 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isActuallyLoading ? "Processing..." : "Set Final Outcome & Distribute Pot"}
       </button>
@@ -1316,7 +1316,7 @@ useEffect(() => {
     </div>
 
     {/* Navigate to Make Predictions */}
-    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-purple-500">
+    <div className="bg-[#2C2C47] p-4 rounded-lg mb-4 border-2 border-purple-1000">
       <h3 className="text-[#F5F5F5] font-medium mb-2">🎯 Make Predictions</h3>
       <p className="text-[#A0A0B0] text-sm mb-3">
         Go to the predictions page to make your own predictions.
@@ -1348,7 +1348,7 @@ useEffect(() => {
 
           {/* Status Message */}
           {message && (
-            <div className={`p-4 rounded-lg ${message.includes('failed') ? 'bg-red-900/50 border border-red-500' : 'bg-green-900/50 border border-green-500'}`}>
+            <div className={`p-4 rounded-lg ${message.includes('failed') ? 'bg-red-900/50 border border-purple-1000' : 'bg-green-900/50 border border-green-500'}`}>
               <p className="text-[#F5F5F5]">{message}</p>
             </div>
           )}

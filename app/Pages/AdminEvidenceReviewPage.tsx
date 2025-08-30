@@ -151,7 +151,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
       case 'approved':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-purple-100 text-red-800 border-purple-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -263,7 +263,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
           <div className={`bg-gradient-to-r backdrop-blur-xl border-2 rounded-2xl p-6 mb-8 shadow-xl ${
             marketOutcome.outcome === 'positive' 
               ? 'from-green-50 to-green-100 border-green-200' 
-              : 'from-red-50 to-red-100 border-red-200'
+              : 'from-purple-100 to-purple-100 border-purple-200'
           }`}>
             <div className="flex items-center justify-between">
               <div>
@@ -271,7 +271,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
                 <div className={`inline-flex items-center px-4 py-2 rounded-xl font-bold text-lg ${
                   marketOutcome.outcome === 'positive' 
                     ? 'bg-green-200 text-green-800' 
-                    : 'bg-red-200 text-red-800'
+                    : 'bg-purple-200 text-red-800'
                 }`}>
                   {marketOutcome.outcome === 'positive' ? 'POSITIVE' : 'NEGATIVE'}
                 </div>

@@ -378,14 +378,14 @@ export default function App() {
                 {/* How it works button - Next to search bar */}
                 <button
                   onClick={() => setActiveSection('discord')}
-                  className="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold transition-colors px-4 py-2 whitespace-nowrap min-w-fit"
+                  className="inline-flex items-center gap-2 text-purple-700 hover:text-red-700 font-semibold transition-colors px-4 py-2 whitespace-nowrap min-w-fit"
                 >
                   {/* Smaller red circle with i */}
-                  <span className="flex items-center justify-center w-3 h-3 rounded-full bg-red-600 text-white text-[9px] font-bold">
+                  <span className="flex items-center justify-center w-3 h-3 rounded-full bg-purple-700 text-white text-[9px] font-bold">
                     i
                   </span>
                   {/* Text */}
-                  <span className="text-red-600">How it works</span>
+                  <span className="text-purple-700">How it works</span>
                 </button>
               </div>
             </div>
@@ -399,7 +399,7 @@ export default function App() {
               {/* Ideas link */}
               <button
                 onClick={() => setActiveSection('ideas')}
-                className={`hidden md:inline-flex bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-red-100 ${isConnected ? '' : 'md:mr-4'}`}
+                className={`hidden md:inline-flex bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-purple-100 ${isConnected ? '' : 'md:mr-4'}`}
               >
                 Ideas
               </button>
@@ -408,12 +408,12 @@ export default function App() {
                 <Wallet>
                   <ConnectWallet
                     text={isMobile ? "Sign In" : "Sign In"}
-                    className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-red-600 hover:bg-black !px-4 !py-2 !min-w-0' : 'bg-red-600 hover:bg-black !px-4 !py-2 !min-w-0 !w-24 !whitespace-nowrap ml-8'}`}
+                    className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-purple-700 hover:bg-black !px-4 !py-2 !min-w-0' : 'bg-purple-700 hover:bg-black !px-4 !py-2 !min-w-0 !w-24 !whitespace-nowrap ml-8'}`}
                   >
                     {isConnected && (
                       <div className="flex items-center gap-2">
                         <Bell className="w-5 h-5 text-gray-600 hover:text-gray-800 cursor-pointer transition-colors" />
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-red-600 via-red-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-700 via-red-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
                       </div>
                     )}
                   </ConnectWallet>
@@ -680,7 +680,7 @@ export default function App() {
                     key={`personalized-${market.id}`}
                     onClick={() => setSelectedMarket(market.id)}
                     className={`group flex-shrink-0 flex items-center gap-1 px-4 py-2 transition-all duration-300 ${selectedMarket === market.id
-                        ? 'text-red-600 bg-red-100 border border-red-200 rounded-full'
+                        ? 'text-purple-700 bg-purple-100 border border-purple-200 rounded-full'
                         : 'text-black border border-gray-300 rounded-full hover:text-gray-600'
                       }`}
                     style={{

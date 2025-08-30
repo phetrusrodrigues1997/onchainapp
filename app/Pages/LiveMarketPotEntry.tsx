@@ -183,13 +183,13 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
           {/* <div className="grid grid-cols-2 gap-6 mb-8">
             <div className="bg-white p-4 rounded-lg border-2 border-black">
               <div className="text-sm text-black mb-1">Pot Balance</div>
-              <div className="text-xl font-bold text-red-600">
+              <div className="text-xl font-bold text-purple-700">
                 {formatEthBalance(potBalance)} ETH
               </div>
             </div>
             <div className="bg-white p-4 rounded-lg border-2 border-black">
               <div className="text-sm text-black mb-1">Participants</div>
-              <div className="text-xl font-bold text-red-600">
+              <div className="text-xl font-bold text-purple-700">
                 {participants?.length || 0}
               </div>
             </div>
@@ -198,9 +198,9 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
 
           {/* Status Messages */}
           {message && (
-            <div className="bg-white border-l-4 border-red-600 text-black px-6 py-4 rounded-r-lg mb-6 shadow-sm">
+            <div className="bg-white border-l-4 border-purple-700 text-black px-6 py-4 rounded-r-lg mb-6 shadow-sm">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-red-600 rounded-full mr-3"></div>
+                <div className="w-2 h-2 bg-purple-700 rounded-full mr-3"></div>
                 <p className="font-medium">{message}</p>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
                 <button
                   onClick={handleEnterPot}
                   disabled={isLoading || isPending}
-                  className="w-full bg-red-600 hover:bg-black disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg"
+                  className="w-full bg-purple-700 hover:bg-black disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-all duration-300 flex items-center justify-center shadow-lg"
                 >
                   {isLoading && lastAction === 'enter' ? (
                     <>
@@ -237,22 +237,22 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
           {/* Instructions */}
           <div className="bg-white text-black rounded-xl p-6 border border-gray-400">
             <h3 className="text-xl font-bold mb-4 flex items-center">
-              <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center mr-3">
+              {/* <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center mr-3">
                 <div className="w-2 h-2 bg-white rounded-full "></div>
-              </div>
+              </div> */}
               How it works
             </h3>
             <div className="space-y-3">
               <div className="flex items-start">
-                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
+                <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
                 <p className="text-black">Pay $0.01 (in ETH) to enter the live prediction market</p>
               </div>
               <div className="flex items-start">
-                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>
+                <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>
                 <p className="text-black">Make predictions on hourly questions</p>
               </div>
               <div className="flex items-start">
-                <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</div>
+                <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</div>
                 <p className="text-black">Winners share the pot equally at round end</p>
               </div>
             </div>

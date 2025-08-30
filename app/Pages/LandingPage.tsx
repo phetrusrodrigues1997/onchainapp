@@ -538,26 +538,26 @@ const handleMarketClick = (marketId: string) => {
       <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-700 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gray-900 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
         
         <div className="max-w-md mx-auto text-center relative z-10 px-6">
           <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10">
             Logo/Text
-            {/* <div className="bg-gradient-to-br from-red-600 via-red-500 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-900/25 relative overflow-hidden px-6 py-4">
+            {/* <div className="bg-gradient-to-br from-purple-700 via-purple-1000 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-900/25 relative overflow-hidden px-6 py-4">
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
               <span className="text-xl font-black text-white drop-shadow-lg relative z-10 tracking-tight">prediwin.com</span>
             </div> */}
             
             {/* Title */}
-            <h1 className="text-3xl font-black text-red-600 mb-4 tracking-tight">Prediwin</h1>
+            <h1 className="text-3xl font-black text-purple-700 mb-4 tracking-tight">Prediwin</h1>
             <p className="text-gray-600 text-base mb-8">Loading prediction markets...</p>
             
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full transition-all duration-300 ease-out relative"
+                className="h-full bg-gradient-to-r from-purple-1000 to-purple-700 rounded-full transition-all duration-300 ease-out relative"
                 style={{ width: `${loadingProgress}%` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
@@ -571,9 +571,9 @@ const handleMarketClick = (marketId: string) => {
             
             {/* Animated dots */}
             <div className="flex justify-center gap-1 mt-6">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce delay-100"></div>
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce delay-200"></div>
+              <div className="w-2 h-2 bg-purple-1000 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-1000 rounded-full animate-bounce delay-100"></div>
+              <div className="w-2 h-2 bg-purple-1000 rounded-full animate-bounce delay-200"></div>
             </div>
           </div>
         </div>
@@ -769,7 +769,7 @@ const handleMarketClick = (marketId: string) => {
               handleMarketClick(market.id);
             }
           }}
-          className={`group cursor-pointer relative overflow-hidden transition-all duration-500 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] ${
+          className={`group cursor-pointer relative overflow-hidden transition-all duration-500 hover:shadow-purple-100 ${
             isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
           }`}
           style={{
@@ -778,7 +778,7 @@ const handleMarketClick = (marketId: string) => {
         >
           <div className={`p-3 h-full transition-all duration-300 border-b border-gray-200 ${
             market.tabId === selectedMarket 
-              ? 'bg-white shadow-lg shadow-red-100/50' 
+              ? 'bg-white shadow-lg shadow-purple-100/50' 
               : 'bg-white'
           }`}>
             {/* Background Gradient Accent */}
@@ -842,7 +842,7 @@ const handleMarketClick = (marketId: string) => {
                   <span className="text-sm font-medium text-gray-700">Negative</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
-                    <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
+                    <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
                       No
                     </button>
                   </div>
@@ -853,7 +853,7 @@ const handleMarketClick = (marketId: string) => {
                 <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                   YES
                 </button>
-                <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+                <button className="bg-purple-100 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                   NO
                 </button>
               </div>
@@ -869,13 +869,13 @@ const handleMarketClick = (marketId: string) => {
                 className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 {bookmarkLoading === market.id ? (
-                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-purple-700 border-t-transparent"></div>
                 ) : (
                   <Bookmark 
                     className={`w-4 h-4 transition-all duration-200 ${
                       bookmarkedMarkets.has(market.id) 
-                        ? 'text-red-600 fill-red-600' 
-                        : 'text-gray-500 group-hover:text-red-600 group-hover:fill-red-600'
+                        ? 'text-purple-700 fill-purple-700' 
+                        : 'text-gray-500 group-hover:text-purple-700 group-hover:fill-purple-700'
                     }`} 
                   />
                 )}
@@ -897,7 +897,7 @@ const handleMarketClick = (marketId: string) => {
     <div className="md:hidden">
       {isLoadingMore && (
         <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-700"></div>
           <span className="ml-3 text-gray-600">Loading more markets...</span>
         </div>
       )}
@@ -906,7 +906,7 @@ const handleMarketClick = (marketId: string) => {
         <div className="text-center py-6">
           <button
             onClick={loadMoreMarkets}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            className="bg-purple-700 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
           >
             Load More Markets ({allMarkets - displayedMarketsCount} remaining)
           </button>
@@ -1008,7 +1008,7 @@ const handleMarketClick = (marketId: string) => {
                           handleMarketClick(market.id);
                         }
                       }}
-                      className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
+                      className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
                         isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
                       } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''}`}
                       style={{
@@ -1061,7 +1061,7 @@ const handleMarketClick = (marketId: string) => {
                               <span className="text-xs font-medium text-gray-700">Negative</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
-                                <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
+                                <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
                                   No
                                 </button>
                               </div>
@@ -1072,7 +1072,7 @@ const handleMarketClick = (marketId: string) => {
                             <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                               YES
                             </button>
-                            <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                            <button className="bg-purple-100 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                               NO
                             </button>
                           </div>
@@ -1088,13 +1088,13 @@ const handleMarketClick = (marketId: string) => {
                             className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
                           >
                             {bookmarkLoading === market.id ? (
-                              <div className="w-3 h-3 animate-spin rounded-full border-2 border-red-600 border-t-transparent"></div>
+                              <div className="w-3 h-3 animate-spin rounded-full border-2 border-purple-700 border-t-transparent"></div>
                             ) : (
                               <Bookmark 
                                 className={`w-3 h-3 transition-all duration-200 ${
                                   bookmarkedMarkets.has(market.id) 
-                                    ? 'text-red-600 fill-red-600' 
-                                    : 'text-gray-500 group-hover:text-red-600 group-hover:fill-red-600'
+                                    ? 'text-purple-700 fill-purple-700' 
+                                    : 'text-gray-500 group-hover:text-purple-700 group-hover:fill-purple-700'
                                 }`} 
                               />
                             )}
@@ -1116,7 +1116,7 @@ const handleMarketClick = (marketId: string) => {
               <>
                 {isLoadingMore && (
                   <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600"></div>
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-700"></div>
                     <span className="ml-4 text-gray-600 text-lg">Loading more markets...</span>
                   </div>
                 )}
@@ -1125,7 +1125,7 @@ const handleMarketClick = (marketId: string) => {
                   <div className="text-center py-8">
                     <button
                       onClick={loadMoreMarkets}
-                      className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                      className="bg-purple-700 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                     >
                       Load More Markets ({allMarkets - displayedMarketsCount} remaining)
                     </button>
@@ -1142,7 +1142,7 @@ const handleMarketClick = (marketId: string) => {
         <div className="max-w-4xl mx-auto text-center">
           <div className="space-y-4 mb-12">
             <h2 className="text-4xl font-light text-gray-900 tracking-tight">
-              <span className="text-red-600 font-medium">Thousands</span> of winners,
+              <span className="text-purple-700 font-medium">Thousands</span> of winners,
             </h2>
             <h3 className="text-3xl font-black text-gray-900 tracking-tight">
               will you be next?
@@ -1152,12 +1152,12 @@ const handleMarketClick = (marketId: string) => {
           {/* Minimalist Entry Button */}
           <button
             onClick={() => handleMarketClick('Trending')}
-            className="group relative bg-black border-2 border-black text-white px-20 py-5 rounded-lg font-semibold text-xl tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden shadow-xl hover:shadow-red-200"
+            className="group relative bg-black border-2 border-black text-white px-20 py-5 rounded-lg font-semibold text-xl tracking-[0.1em] uppercase transition-all duration-300 hover:bg-purple-700 hover:border-purple-700 hover:text-white overflow-hidden shadow-xl hover:shadow-purple-200"
           >
             <span className="relative z-10">Enter</span>
             
             {/* Sliding fill effect */}
-            <div className="absolute inset-0 bg-red-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+            <div className="absolute inset-0 bg-purple-700 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
             
             {/* Subtle arrows that appear on hover */}
             <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">
@@ -1174,7 +1174,7 @@ const handleMarketClick = (marketId: string) => {
       <section id="call-to-action" className="relative z-10 px-6 mt-16 mb-16 md:hidden">
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
-            <span className="text-red-600 font-medium">Thousands</span> of winners,
+            <span className="text-purple-700 font-medium">Thousands</span> of winners,
           </h2>
           <h3 className="text-xl font-black text-gray-900 mb-10 tracking-tight">
             will you be next?
@@ -1183,12 +1183,12 @@ const handleMarketClick = (marketId: string) => {
           {/* Minimalist Entry Button - Mobile */}
           <button
             onClick={() => handleMarketClick('Trending')}
-            className="group relative bg-white border-2 border-black text-black px-12 py-4 rounded-lg font-semibold text-base tracking-[0.1em] uppercase transition-all duration-300 hover:bg-red-600 hover:border-red-600 hover:text-white overflow-hidden mx-auto shadow-lg hover:shadow-red-200"
+            className="group relative bg-white border-2 border-black text-black px-12 py-4 rounded-lg font-semibold text-base tracking-[0.1em] uppercase transition-all duration-300 hover:bg-purple-700 hover:border-purple-700 hover:text-white overflow-hidden mx-auto shadow-lg hover:shadow-purple-200"
           >
             <span className="relative z-10">Enter</span>
             
             {/* Sliding fill effect */}
-            <div className="absolute inset-0 bg-red-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
+            <div className="absolute inset-0 bg-purple-700 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>
             
             {/* Subtle arrows that appear on hover */}
             <div className="absolute left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">
@@ -1201,7 +1201,7 @@ const handleMarketClick = (marketId: string) => {
         </div>
       </section>
 
-      <footer className="relative z-10 px-6 py-10 bg-white text-center text-red-600 text-sm shadow-md">
+      <footer className="relative z-10 px-6 py-10 bg-white text-center text-purple-700 text-sm shadow-md">
         &copy; {new Date().getFullYear()} {t.footerText}
       </footer>
       
