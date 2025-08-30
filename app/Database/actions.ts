@@ -1974,4 +1974,67 @@ export async function isMarketBookmarked(walletAddress: string, marketId: string
   }
 }
 
+export async function getPredictionPercentages(marketId: string) {
+  try {
+    console.log(`📊 Calculating prediction percentages for market: ${marketId}`);
+
+    // Determine which table to query based on market ID
+    let totalPositive = 0;
+    let totalNegative = 0;
+
+    if (marketId === 'Trending' || marketId === 'Featured') {
+      // Query FeaturedBets table
+      const featuredBets = await db
+        .select({
+          prediction: FeaturedBets.prediction
+        })
+        .from(FeaturedBets);
+      
+      featuredBets.forEach(bet => {
+        if (bet.prediction === 'positive') {
+          totalPositive++;
+        } else if (bet.prediction === 'negative') {
+          totalNegative++;
+        }
+      });
+    } else if (marketId === 'Crypto') {
+      // Query CryptoBets table  
+      const cryptoBets = await db
+        .select({
+          prediction: CryptoBets.prediction
+        })
+        .from(CryptoBets);
+      
+      cryptoBets.forEach(bet => {
+        if (bet.prediction === 'positive') {
+          totalPositive++;
+        } else if (bet.prediction === 'negative') {
+          totalNegative++;
+        }
+      });
+    }
+
+    const totalPredictions = totalPositive + totalNegative;
+    
+    if (totalPredictions === 0) {
+      return { positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 };
+    }
+
+    const positivePercentage = Math.round((totalPositive / totalPredictions) * 100);
+    const negativePercentage = Math.round((totalNegative / totalPredictions) * 100);
+
+    console.log(`📊 Results for ${marketId}: ${positivePercentage}% positive, ${negativePercentage}% negative (${totalPredictions} total)`);
+
+    return {
+      positivePercentage,
+      negativePercentage,
+      totalPredictions
+    };
+
+  } catch (error) {
+    console.error("Error calculating prediction percentages:", error);
+    return { positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 };
+  }
+}
+
 

@@ -7,7 +7,7 @@ import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets, Market } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
-import { addBookmark, removeBookmark, isMarketBookmarked } from '../Database/actions';
+import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages } from '../Database/actions';
 
 interface LandingPageProps {
   activeSection: string;
@@ -73,6 +73,13 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   // Bookmark state
   const [bookmarkedMarkets, setBookmarkedMarkets] = useState<Set<string>>(new Set());
   const [bookmarkLoading, setBookmarkLoading] = useState<string | null>(null);
+  
+  // Prediction percentages state
+  const [predictionPercentages, setPredictionPercentages] = useState<Record<string, {
+    positivePercentage: number;
+    negativePercentage: number;
+    totalPredictions: number;
+  }>>({});
   
   // Pagination state
   const [displayedMarketsCount, setDisplayedMarketsCount] = useState(12);
@@ -339,6 +346,37 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       clearTimeout(timeoutId);
     };
   }, [address, isConnected]); // Removed marketOptions and t to prevent excessive re-runs
+
+  // Load prediction percentages for markets with contract addresses
+  useEffect(() => {
+    const loadPredictionPercentages = async () => {
+      if (!isConnected || !address) return;
+
+      try {
+        console.log('📊 Loading prediction percentages...');
+        
+        const marketsWithContracts = ['Trending', 'Crypto']; // Markets that have prediction data
+        const percentagePromises = marketsWithContracts.map(async (marketId) => {
+          const percentages = await getPredictionPercentages(marketId);
+          return { marketId, percentages };
+        });
+
+        const results = await Promise.all(percentagePromises);
+        const percentagesMap = results.reduce((acc, { marketId, percentages }) => {
+          acc[marketId] = percentages;
+          return acc;
+        }, {} as Record<string, any>);
+
+        setPredictionPercentages(percentagesMap);
+        console.log('📊 Loaded prediction percentages:', percentagesMap);
+
+      } catch (error) {
+        console.error('Error loading prediction percentages:', error);
+      }
+    };
+
+    loadPredictionPercentages();
+  }, [address, isConnected]);
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
@@ -797,15 +835,38 @@ const handleMarketClick = (marketId: string) => {
               </div>
             </div>
 
-            {/* Trading Buttons */}
-            <div className="grid grid-cols-2 gap-2 mb-2">
-              <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                YES
-              </button>
-              <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                NO
-              </button>
-            </div>
+            {/* Prediction Percentages */}
+            {predictionPercentages[market.tabId || market.id] ? (
+              <div className="space-y-2 mb-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Positive</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].positivePercentage}%</span>
+                    <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                      Yes
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">Negative</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
+                    <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                      No
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+                  YES
+                </button>
+                <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+                  NO
+                </button>
+              </div>
+            )}
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
@@ -871,7 +932,7 @@ const handleMarketClick = (marketId: string) => {
       <section className="relative z-10 px-6 -mt-24 pb-16 hidden md:block">
         <div className="max-w-7xl mx-auto">
           {/* All Markets Display - Full Width Grid */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 gap-4">
                 {(() => {
                   // Get all markets and deduplicate by ID
                   const allMarkets = marketOptions.map(option => {
@@ -998,15 +1059,38 @@ const handleMarketClick = (marketId: string) => {
                           </div>
                         </div>
 
-                        {/* Trading Buttons */}
-                        <div className="grid grid-cols-2 gap-2 mb-2">
-                          <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
-                            YES
-                          </button>
-                          <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
-                            NO
-                          </button>
-                        </div>
+                        {/* Prediction Percentages */}
+                        {predictionPercentages[market.tabId || market.id] ? (
+                          <div className="space-y-2 mb-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-gray-700">Positive</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].positivePercentage}%</span>
+                                <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                                  Yes
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-gray-700">Negative</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
+                                <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                                  No
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                              YES
+                            </button>
+                            <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                              NO
+                            </button>
+                          </div>
+                        )}
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
