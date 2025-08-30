@@ -723,10 +723,10 @@ const handleMarketClick = (marketId: string) => {
             )}
             
             {/* Header with Icon and Question - Horizontal Layout */}
-            <div className="flex items-start gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-3">
               {/* Small Square Image */}
               <div className="flex-shrink-0">
-                <div className="rounded-lg w-12 h-12 bg-white overflow-hidden relative">
+                <div className="rounded-lg w-16 h-16 bg-white overflow-hidden relative">
                   {market.icon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={market.icon} 
@@ -742,8 +742,14 @@ const handleMarketClick = (marketId: string) => {
               </div>
               
               {/* Question */}
-              <div className="flex-1">
-                <p className="text-base font-normal leading-tight font-['SF_Pro_Display','-apple-system','BlinkMacSystemFont','Inter','Segoe_UI','Roboto',sans-serif] tracking-[-0.01em]" style={{color: '#000000', textShadow: '0 0 1px rgba(0,0,0,0.8)'}}>
+              <div className="flex-1 flex items-start">
+                <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
+                  color: '#000000', 
+                  fontWeight: '510',
+                  minHeight: '2.5rem',
+                  display: 'flex',
+                  alignItems: market.question.length > 50 ? 'flex-start' : 'center'
+                }}>
                   {market.question}
                 </p>
               </div>
@@ -761,16 +767,7 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
-              <div className="flex items-center space-x-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-gray-300"></div>        
-                <span className="text-sm font-semibold text-gray-500">
-                  {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
-                </span>
-              </div>
-              
-              <div className="text-center">
-                <div className="text-sm font-bold text-gray-500">{market.potSize}</div>
-              </div>
+              <div className="text-sm font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-400" style={{fontWeight: '350'}}>{market.potSize}</div>
               
               <button
                 onClick={(e) => handleBookmarkToggle(market, e)}
@@ -935,7 +932,7 @@ const handleMarketClick = (marketId: string) => {
                           
                           {/* Question */}
                           <div className="flex-1">
-                            <p className="text-sm font-normal leading-tight line-clamp-3 font-['SF_Pro_Display','-apple-system','BlinkMacSystemFont','Inter','Segoe_UI','Roboto',sans-serif] tracking-[-0.01em]" style={{color: '#000000', textShadow: '0 0 1px rgba(0,0,0,0.8)'}}>
+                            <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#000000', fontWeight: '510'}}>
                               {market.question}
                             </p>
                           </div>
@@ -952,17 +949,8 @@ const handleMarketClick = (marketId: string) => {
                         </div>
 
                         {/* Stats Footer - Compact */}
-                        <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                          <div className="flex items-center space-x-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-                            <span className="text-[10px] font-medium text-gray-500">
-                              {availableMarkets.includes(market.name.toLowerCase()) ? 'Available' : 'Soon'}
-                            </span>
-                          </div>
-                          
-                          <div className="text-center">
-                            <div className="text-[10px] font-bold text-gray-500 leading-none">{market.potSize}</div>
-                          </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                          <div className="text-[10px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize}</div>
                           
                           <button
                             onClick={(e) => handleBookmarkToggle(market, e)}
