@@ -21,7 +21,7 @@ const PREDICTION_POT_CLONING_ABI = [
 ] as const;
 
 
-const FACTORY_CONTRACT_ADDRESS = '0x8A4927599Ce20aF7fAB7b363EfB4a5a1ec96A4AF' as const;
+const FACTORY_CONTRACT_ADDRESS = '0x34c2fF1bb3a8cbF05a7a98f70143DD6F22Df3490' as const;
 
 interface CreatePotPageProps {
   navigateToPrivatePot?: (contractAddress: string) => void;
