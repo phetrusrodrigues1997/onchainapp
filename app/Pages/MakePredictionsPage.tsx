@@ -9,6 +9,7 @@ import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
 import { getPrice } from '../Constants/getPrice';
 import { useQueryClient } from '@tanstack/react-query';
+import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 
 // UK timezone helper function (simplified and more reliable)
 const getUKTime = (date: Date = new Date()): Date => {
@@ -35,17 +36,14 @@ const getTableTypeFromContract = (contractAddress: string): string => {
   
   if (market?.id === 'Trending') return 'featured';
   if (market?.id === 'crypto') return 'crypto';
+  if (market?.id === 'stocks') return 'stocks';
   
   // Fallback for unknown contracts
   return 'featured';
 };
 
-// Keep the type for existing code compatibility
-const tableMapping = {
-  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-} as const;
-
+// Use centralized table mapping from config
+const tableMapping = CONTRACT_TO_TABLE_MAPPING;
 type TableType = typeof tableMapping[keyof typeof tableMapping];
 
 // Contract ABI for PredictionPot (includes both read and write functions)

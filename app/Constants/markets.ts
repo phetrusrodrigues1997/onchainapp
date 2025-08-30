@@ -68,9 +68,10 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
     id: 'stocks',
     name: 'Stocks',
     symbol: '',
+    contractAddress: '0x3349594e7DCFFB7E2fdC2734556D5C31A57b9992',
     color: '#228B22',
-    question: '',
-    icon: '',
+    question: 'Will Tesla stock end the day higher?',
+    icon: 'https://assets.finbold.com/uploads/2025/03/Short-squeeze-alert-for-Tesla-stock-1024x682.jpg',
     currentPrice: '$190',
     participants: 49,
     potSize: '$490',
@@ -494,9 +495,10 @@ else if (category === 'gaming') {
  else if (category === 'stocks') {
   return [
     {
-    id: 'tesla',
+    id: 'stocks',
     name: 'Tesla',
     symbol: 'TSLA',
+    contractAddress: '0x3349594e7DCFFB7E2fdC2734556D5C31A57b9992',
     color: '#E31837',
     question: t.teslaQuestion ?? '',
     icon: 'https://assets.finbold.com/uploads/2025/03/Short-squeeze-alert-for-Tesla-stock-1024x682.jpg',

@@ -2,9 +2,9 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import {  Messages, FeaturedBets, CryptoBets, LivePredictions, Bookmarks } from "./schema"; // Import the schema
+import {  Messages, FeaturedBets, CryptoBets, StocksBets, LivePredictions, Bookmarks } from "./schema"; // Import the schema
 import { eq, sql, and, inArray } from "drizzle-orm";
-import { WrongPredictions, WrongPredictionsCrypto } from "./schema";
+import { WrongPredictions, WrongPredictionsCrypto, WrongPredictionsStocks } from "./schema";
 import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes, PredictionIdeas } from "./schema";
@@ -90,8 +90,10 @@ const getTableFromType = (tableType: string) => {
       return FeaturedBets;
     case 'crypto':
       return CryptoBets;
+    case 'stocks':
+      return StocksBets;
     default:
-      throw new Error(`Invalid table type: ${tableType}. Must be 'featured' or 'crypto'`);
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured', 'crypto', or 'stocks'`);
   }
 };
 
@@ -101,8 +103,10 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
       return WrongPredictions;
     case 'crypto':
       return WrongPredictionsCrypto;
+    case 'stocks':
+      return WrongPredictionsStocks;
     default:
-      throw new Error(`Invalid table type: ${tableType}. Must be 'featured' or 'crypto'`);
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured', 'crypto', or 'stocks'`);
   }
 };
 
@@ -2006,6 +2010,21 @@ export async function getPredictionPercentages(marketId: string) {
         .from(CryptoBets);
       
       cryptoBets.forEach(bet => {
+        if (bet.prediction === 'positive') {
+          totalPositive++;
+        } else if (bet.prediction === 'negative') {
+          totalNegative++;
+        }
+      });
+    } else if (marketId === 'stocks') {
+      // Query StocksBets table  
+      const stocksBets = await db
+        .select({
+          prediction: StocksBets.prediction
+        })
+        .from(StocksBets);
+      
+      stocksBets.forEach(bet => {
         if (bet.prediction === 'positive') {
           totalPositive++;
         } else if (bet.prediction === 'negative') {

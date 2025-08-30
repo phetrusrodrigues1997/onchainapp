@@ -33,8 +33,24 @@ export const WrongPredictionsCrypto = pgTable("wrong_predictions_crypto", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const WrongPredictionsStocks = pgTable("wrong_predictions_stocks", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("walletAddress").notNull(),
+  wrongPredictionDate: text("wrong_prediction_date").notNull(), // Date they made wrong prediction
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 
 export const CryptoBets = pgTable("crypto_bets", {
+  id: serial("id").primaryKey(), // Auto-incrementing ID as primary key
+  walletAddress: text("wallet_address").notNull(), // Bettor's wallet address
+  prediction: text("prediction").notNull(), // "positive" or "negative"
+  betDate: text("bet_date").notNull(), // Date of the bet (YYYY-MM-DD format)
+  createdAt: timestamp("created_at").defaultNow().notNull(), // When the bet was placed
+  
+});
+
+export const StocksBets = pgTable("stocks_bets", {
   id: serial("id").primaryKey(), // Auto-incrementing ID as primary key
   walletAddress: text("wallet_address").notNull(), // Bettor's wallet address
   prediction: text("prediction").notNull(), // "positive" or "negative"

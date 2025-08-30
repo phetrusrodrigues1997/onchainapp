@@ -5,6 +5,7 @@ import { getAllEvidenceSubmissions } from '../Database/actions';
 import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
+import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 
 // Dynamic market discovery
 const getMarketsWithContracts = () => {
@@ -13,15 +14,9 @@ const getMarketsWithContracts = () => {
   return allMarkets.filter(market => market.contractAddress);
 };
 
-// Map contract address to table type for database queries
+// Map contract address to table type for database queries using centralized mapping
 const getTableTypeFromContract = (contractAddress: string): string => {
-  // Legacy mapping for existing contracts
-  const legacyMapping: Record<string, string> = {
-    "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-    "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-  };
-  
-  return legacyMapping[contractAddress] || contractAddress.slice(2, 8).toLowerCase();
+  return CONTRACT_TO_TABLE_MAPPING[contractAddress as keyof typeof CONTRACT_TO_TABLE_MAPPING] || contractAddress.slice(2, 8).toLowerCase();
 };
 
 type TableType = "featured" | "crypto" | string;

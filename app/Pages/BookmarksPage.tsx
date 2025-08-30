@@ -5,6 +5,7 @@ import { useAccount, useReadContract } from 'wagmi';
 import Cookies from 'js-cookie';
 import { Bookmark, Clock, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
+import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import LoadingScreen from '../Components/LoadingScreen';
 
 interface BookmarksPageProps {
@@ -23,11 +24,8 @@ interface BookmarkItem {
   bookmarkedAt: Date;
 }
 
-// Contract addresses mapping (same as TutorialBridge)
-const CONTRACT_ADDRESSES = {
-  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-} as const;
+// Use centralized contract mapping from config
+const CONTRACT_ADDRESSES = CONTRACT_TO_TABLE_MAPPING;
 
 // Prediction Pot ABI (same as TutorialBridge)
 const PREDICTION_POT_ABI = [

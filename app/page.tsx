@@ -51,6 +51,7 @@ export default function App() {
 
   // Carousel state
   const [selectedMarket, setSelectedMarket] = useState('Trending');
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [showLeftArrow2, setShowLeftArrow2] = useState(false);
@@ -58,7 +59,7 @@ export default function App() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const carouselRef = useRef<HTMLDivElement>(null);
   const carousel2Ref = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
+  const moreDropdownRef = useRef<HTMLDivElement>(null);
 
   // Get market options for carousels
   const t = getTranslation(currentLanguage);
@@ -229,6 +230,23 @@ export default function App() {
 
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
+
+  // Click outside handler for More dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
+        setIsMoreDropdownOpen(false);
+      }
+    };
+
+    if (isMoreDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMoreDropdownOpen]);
 
   // Carousel effects
   useEffect(() => {
@@ -437,11 +455,10 @@ export default function App() {
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
                     className={`group flex-shrink-0 text-xl flex items-center gap-2 px-2 py-2 transition-all duration-300 ${selectedMarket === market.id
-                        ? 'text-black'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'text-black font-semibold'
+                        : 'text-[#5D636F] hover:text-gray-700'
                       }`}
                     style={{
-                      fontWeight: selectedMarket === market.id ? '600' : '500',
                       minWidth: 'fit-content',
                       height: 'auto',
                       fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
@@ -452,8 +469,11 @@ export default function App() {
                     </span>
                   </button>
                 ))}
-                <div className="relative inline-block text-left">
-  <button onClick={() => setOpen(!open)} className="flex items-center text-gray-500 hover:text-gray-700">
+                <div className="relative inline-block text-left mt-1" ref={moreDropdownRef}>
+  <button 
+    onClick={() => setIsMoreDropdownOpen(!isMoreDropdownOpen)} 
+    className="flex items-center text-[#5D636F] hover:text-gray-700 px-2 py-2"
+  >
     <span
       className="whitespace-nowrap tracking-tight"
       style={{ fontSize: "15px" }}
@@ -461,7 +481,7 @@ export default function App() {
       More
     </span>
     <svg
-      className="w-4 h-4 ml-1"
+      className={`w-4 h-4 ml-1 transition-transform duration-200 ${isMoreDropdownOpen ? 'rotate-180' : ''}`}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -472,21 +492,45 @@ export default function App() {
   </button>
 
   {/* Dropdown menu */}
-  {open && (
-  <div className="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
+  {isMoreDropdownOpen && (
+  <div className="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
     <div className="py-1">
-      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      <button 
+        onClick={() => {
+          setActiveSection('ideas');
+          setIsMoreDropdownOpen(false);
+        }}
+        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
         Ideas
-      </a>
-      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      </button>
+      <button 
+        onClick={() => {
+          setActiveSection('profile');
+          setIsMoreDropdownOpen(false);
+        }}
+        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
         Leaderboard
-      </a>
-      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      </button>
+      <button 
+        onClick={() => {
+          setActiveSection('createPot');
+          setIsMoreDropdownOpen(false);
+        }}
+        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
         Create
-      </a>
-      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      </button>
+      <button 
+        onClick={() => {
+          setActiveSection('bookmarks');
+          setIsMoreDropdownOpen(false);
+        }}
+        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
         My markets
-      </a>
+      </button>
     </div>
   </div>
   )}

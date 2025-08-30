@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign, TrendingUp, Trophy, Users, Clock, ArrowRight } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useAccount, useReadContract } from 'wagmi';
+import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 
 interface DashboardProps {
   activeSection: string;
@@ -11,11 +12,8 @@ interface DashboardProps {
   selectedMarket?: string;
 }
 
-// Contract addresses mapping
-const CONTRACT_ADDRESSES = {
-  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-} as const;
+// Use centralized contract mapping from config
+const CONTRACT_ADDRESSES = CONTRACT_TO_TABLE_MAPPING;
 
 // Prediction Pot ABI
 const PREDICTION_POT_ABI = [

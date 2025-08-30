@@ -16,18 +16,14 @@ import {
   processReEntry,
   debugWrongPredictions,
 } from '../Database/actions';
-import { ENFORCE_SATURDAY_RESTRICTIONS } from '../Database/config';
+import { ENFORCE_SATURDAY_RESTRICTIONS, CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import { updateWinnerStats } from '../Database/OwnerActions';
 import { clear } from 'console';
 import LoadingScreen from '../Components/LoadingScreen';
 
 
-// Define table identifiers instead of passing table objects
-const tableMapping = {
-  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-} as const;
-
+// Use centralized table mapping from config
+const tableMapping = CONTRACT_TO_TABLE_MAPPING;
 type TableType = typeof tableMapping[keyof typeof tableMapping];
 // Updated Contract ABI for SimplePredictionPot (ETH-based)
 const PREDICTION_POT_ABI = [

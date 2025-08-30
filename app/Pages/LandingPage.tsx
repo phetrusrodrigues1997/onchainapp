@@ -8,6 +8,7 @@ import { Language, getTranslation, supportedLanguages } from '../Languages/langu
 import { getMarkets, Market } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages } from '../Database/actions';
+import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 
 interface LandingPageProps {
   activeSection: string;
@@ -26,11 +27,8 @@ const getContractAddress = (marketId: string): string | null => {
   return market?.contractAddress || null;
 };
 
-// Contract addresses mapping for participant checking
-const CONTRACT_ADDRESSES = {
-  "0xb526c2Ee313f9D4866D8e5238C148f35EF73ed9F": "featured",
-  "0x8C80DDC694A590d472d543e428A5e11FDF6cCEf0": "crypto",
-} as const;
+// Use centralized contract mapping from config
+const CONTRACT_ADDRESSES = CONTRACT_TO_TABLE_MAPPING;
 
 // Prediction Pot ABI for participant checking
 const PREDICTION_POT_ABI = [
@@ -50,7 +48,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const selectedMarket = propSelectedMarket;
   const { alertState, showAlert, closeAlert } = useCustomAlert();
-  const availableMarkets = ["random topics", "crypto"];
+  const availableMarkets = ["random topics", "crypto", "stocks"];
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -350,12 +348,10 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   // Load prediction percentages for markets with contract addresses
   useEffect(() => {
     const loadPredictionPercentages = async () => {
-      if (!isConnected || !address) return;
-
       try {
         console.log('📊 Loading prediction percentages...');
         
-        const marketsWithContracts = ['Trending', 'Crypto']; // Markets that have prediction data
+        const marketsWithContracts = ['Trending', 'Crypto', 'stocks']; // Markets that have prediction data
         const percentagePromises = marketsWithContracts.map(async (marketId) => {
           const percentages = await getPredictionPercentages(marketId);
           return { marketId, percentages };
@@ -376,7 +372,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     };
 
     loadPredictionPercentages();
-  }, [address, isConnected]);
+  }, []); // Load percentages once on component mount, no dependency on wallet connection
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
@@ -769,12 +765,7 @@ const handleMarketClick = (marketId: string) => {
       <div key={`mobile-${market.id}-${index}`}>
         <div 
           onClick={() => {
-            if (!isSwapping && market.tabId) {
-              handleMarketSelection(market.tabId, displayedMarkets);
-              // Add delay before navigation to allow animation
-              setTimeout(() => handleMarketClick(market.id), 300);
-            } else if (!isSwapping) {
-              // Fallback for markets without tabId
+            if (!isSwapping) {
               handleMarketClick(market.id);
             }
           }}
@@ -870,7 +861,7 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
-              <div className="text-sm font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-400" style={{fontWeight: '350'}}>{market.potSize}</div>
+              <div className="text-sm font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-400" style={{fontWeight: '350'}}>{market.potSize} • ⇄ Weekly</div>
               
               <button
                 onClick={(e) => handleBookmarkToggle(market, e)}
@@ -1013,12 +1004,7 @@ const handleMarketClick = (marketId: string) => {
                     <div
                       key={`desktop-${market.id}-${index}`}
                       onClick={() => {
-                        if (!isSwapping && market.tabId) {
-                          handleMarketSelection(market.tabId, displayedMarkets);
-                          // Add delay before navigation to allow animation
-                          setTimeout(() => handleMarketClick(market.id), 300);
-                        } else if (!isSwapping) {
-                          // Fallback for markets without tabId
+                        if (!isSwapping) {
                           handleMarketClick(market.id);
                         }
                       }}
@@ -1094,7 +1080,7 @@ const handleMarketClick = (marketId: string) => {
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
-                          <div className="text-[10px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize}</div>
+                          <div className="text-[10px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} • ⇄ Weekly</div>
                           
                           <button
                             onClick={(e) => handleBookmarkToggle(market, e)}
