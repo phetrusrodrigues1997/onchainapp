@@ -368,7 +368,7 @@ export default function App() {
                     placeholder="Search markets..."
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="w-[350px] pl-10 pr-10 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
+                    className="w-[530px] pl-10 pr-10 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <span className="text-gray-400 text-sm font-mono">/</span>
@@ -592,7 +592,7 @@ export default function App() {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 w-full max-w-full">
               {/* Desktop Search Bar - Left side */}
-              <div className="hidden md:flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-1">
                 <div className="relative w-56">
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -609,7 +609,7 @@ export default function App() {
                 </div>
 
                 {/* Filter Symbol */}
-                <div className="flex items-center justify-center w-9 h-9 bg-gray-100 rounded-lg">
+                <div className="flex items-center justify-center w-9 h-9 bg-white rounded-lg">
                   <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
@@ -617,7 +617,7 @@ export default function App() {
 
                 {/* Bookmark/Save Symbol */}
                 <button
-                  className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors z-20 relative"
+                  className="flex items-center justify-center w-10 h-10 bg-white rounded-lg cursor-pointer hover:bg-gray-200 transition-colors z-20 relative"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
