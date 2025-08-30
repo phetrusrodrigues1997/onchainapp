@@ -11,11 +11,6 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.jpg',
   },
-  themeColor: '#ffffff', // <-- this controls the status bar color
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default', // try "black-translucent" or "white-translucent"
-  },
 };
 
 export default function RootLayout({
