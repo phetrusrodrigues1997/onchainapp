@@ -320,7 +320,7 @@ export default function App() {
 
       {/* Hide header and all content when LandingPage is loading */}
       {!isLandingPageLoading && (
-        <header className="z-50 bg-[#fdfdfd] px-4 pt-0 pb-0 md:py-2 sticky top-0 md:border-b border-gray-200">
+        <header className="z-50 bg-white px-4 md:py-2 sticky top-0 border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex flex-col">
           {/* Top row with main header elements */}
           <div className="flex justify-between items-center">
