@@ -379,12 +379,12 @@ export default function App() {
               {/* Ideas link */}
               <button
                 onClick={() => setActiveSection('ideas')}
-                className={` bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-red-100 ${isConnected ? ' md:-mr-4 ' : 'mr-4 hidden'}`}
+                className={`hidden md:inline-flex bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-red-100 ${isConnected ? ' md:-mr-4 ' : 'mr-4'}`}
               >
                 Ideas
               </button>
 
-              <div className={`wallet-container ${isMobile ? '-ml-2' : '-ml-8'}`}>
+              <div className={`wallet-container ${isMobile ? 'ml-8' : '-ml-8'}`}>
                 <Wallet>
                   <ConnectWallet
                     text={isMobile ? "Sign In" : "Sign In"}
