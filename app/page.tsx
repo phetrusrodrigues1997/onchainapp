@@ -780,7 +780,7 @@ export default function App() {
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'createPot' ? 'bg-transparent' : ''
               }`}>
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M12 5v14m-7-7h14"></path>
               </svg>
             </div>
