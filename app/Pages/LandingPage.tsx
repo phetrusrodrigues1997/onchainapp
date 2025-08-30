@@ -769,9 +769,9 @@ const handleMarketClick = (marketId: string) => {
               handleMarketClick(market.id);
             }
           }}
-          className={`group cursor-pointer relative overflow-hidden transition-all duration-500 hover:shadow-purple-100 ${
-            isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
-          }`}
+          className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
+                        isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
+                      } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''}`}
           style={{
             '--swap-distance': swapDistance
           } as React.CSSProperties}
