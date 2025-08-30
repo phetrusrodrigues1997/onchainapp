@@ -11,6 +11,17 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.jpg',
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  other: {
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'light-content',
+    'theme-color': '#ffffff',
+  },
 };
 
 export default function RootLayout({
