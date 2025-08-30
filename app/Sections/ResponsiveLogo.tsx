@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-const ResponsiveLogo = () => {
+interface ResponsiveLogoProps {
+  onClick?: () => void;
+}
+
+const ResponsiveLogo = ({ onClick }: ResponsiveLogoProps) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -23,7 +27,10 @@ const ResponsiveLogo = () => {
 
   return (
     <div className="logo-container">
-      <span className="relative inline-block font-sans">
+      <span 
+        className="relative inline-block font-sans cursor-pointer" 
+        onClick={onClick}
+      >
         {isMobile ? (
           // Mobile version - prevent text and image wrapping
           <span className="flex items-center whitespace-nowrap text-2xl font-extrabold tracking-wide">
@@ -34,7 +41,7 @@ const ResponsiveLogo = () => {
   alt="Icon"
   width={38}
   height={26}
-  className="ml-2 flex-shrink-0"
+  className="flex-shrink-0"
 />
             
           </span>
@@ -48,7 +55,7 @@ const ResponsiveLogo = () => {
   alt="Icon"
   width={38}
   height={26}
-  className="ml-2 flex-shrink-0"
+  className="flex-shrink-0"
 />
           </span>
 
