@@ -1445,46 +1445,15 @@ useEffect(() => {
             
             // CRITICAL DEBUGGING: Let's capture the exact transaction data
             console.log("🚨 CRITICAL ISSUE ANALYSIS:");
-            console.log("🔍 Wallet signing address:", await window?.ethereum?.request?.({ method: 'eth_accounts' })?.[0]);
             console.log("🔍 Connected account:", address);
             console.log("🔍 Contract owner:", owner);
-            console.log("🔍 Block number:", await window?.ethereum?.request?.({ method: 'eth_blockNumber' }));
             
             // Log the exact function call data that would be sent
             const functionSignature = '0x2d55f207'; // distributePot function selector
             const encodedArgs = addresses.map(addr => addr.slice(2).padStart(64, '0')).join('');
             console.log("🔍 Transaction data would be:", functionSignature + encodedArgs);
             
-            // Check if there are any pending transactions from this address
-            try {
-              const pendingNonce = await window?.ethereum?.request?.({ 
-                method: 'eth_getTransactionCount', 
-                params: [address, 'pending'] 
-              });
-              const latestNonce = await window?.ethereum?.request?.({ 
-                method: 'eth_getTransactionCount', 
-                params: [address, 'latest'] 
-              });
-              console.log("🔍 Nonce check:", { pending: pendingNonce, latest: latestNonce, difference: parseInt(pendingNonce, 16) - parseInt(latestNonce, 16) });
-            } catch (nonceError) {
-              console.log("⚠️ Could not check nonce:", nonceError);
-            }
-            
-            // DIRECT CONTRACT CALL TEST: Let's see what the contract actually returns
-            console.log("🧪 Testing direct contract call...");
-            try {
-              const ownerCall = await window?.ethereum?.request?.({
-                method: 'eth_call',
-                params: [{
-                  to: contractAddress,
-                  data: '0x8da5cb5b' // owner() function selector
-                }, 'latest']
-              });
-              console.log("🔍 Direct owner() call result:", ownerCall);
-              console.log("🔍 Does it match your address?", ownerCall?.toLowerCase() === address?.toLowerCase());
-            } catch (directCallError) {
-              console.log("❌ Direct contract call failed:", directCallError);
-            }
+            // Transaction validation completed
             
             console.log("✅ Executing distributePot transaction...");
             

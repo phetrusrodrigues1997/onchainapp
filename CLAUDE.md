@@ -104,6 +104,7 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 
 ### Blockchain Integration
 - **Smart Contracts**: PredictionPot contracts handle ETH pot entry and winner distribution
+- **⚠️ CRITICAL CONTRACT ISSUE RESOLVED**: Original PredictionPot.sol had permanent corruption bug using `transfer()` which fails with 2300 gas limit when sending to smart contracts. **FIXED CONTRACT DEPLOYED**: `PredictionPotFixed` at `0xd1547F5bC0390F5020B2A80F262e28ccfeF2bf9c` uses `call()` instead of `transfer()` to prevent permanent distribution failures
 - **Factory Contract**: `PredictionPotWithCloning` at `0xeE44be339B390726865aAC73435B96552C0697d3` enables users to create private pots
 - **EIP-1167 Cloning**: Gas-efficient deployment of new prediction pots using minimal proxy pattern
 - **OnchainKit & Wagmi**: Wallet connections, transaction handling, and Base network integration

@@ -10,7 +10,8 @@
       "Read(C:\\Users\\grasi\\Downloads/**)",
       "WebFetch(domain:basescan.org)",
       "WebFetch(domain:base.blockscout.com)",
-      "Bash(npx hardhat run:*)"
+      "Bash(npx hardhat run:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": [],
