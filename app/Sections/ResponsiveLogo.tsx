@@ -27,7 +27,7 @@ const ResponsiveLogo = () => {
         {isMobile ? (
           // Mobile version - prevent text and image wrapping
           <span className="flex items-center whitespace-nowrap text-2xl font-extrabold tracking-wide">
-            <span className="text-red-600">Prediwin</span>
+            <span className="text-red-600">PrediWin</span>
             <span className="text-black">.com</span>
             <Image
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
@@ -40,7 +40,7 @@ const ResponsiveLogo = () => {
           
         ) : (
           <span className="flex items-center whitespace-nowrap text-3xl font-extrabold tracking-wide">
-            <span className="text-red-600">Prediwin</span>
+            <span className="text-red-600">PrediWin</span>
             <span className="text-black">.com</span>
             <Image
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Flag_of_the_United_States_%28Web_Colors%29.svg/960px-Flag_of_the_United_States_%28Web_Colors%29.svg.png"
