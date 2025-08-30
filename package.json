@@ -16,7 +16,7 @@
     "@coinbase/agentkit-langchain": "^0.2.3-nightly.20250307.28",
     "@coinbase/cdp-agentkit-core": "^0.0.14",
     "@coinbase/cdp-langchain": "^0.0.15",
-    "@coinbase/onchainkit": "^0.37.6",
+    "@coinbase/onchainkit": "^0.38.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@langchain/openai": "^0.4.4",

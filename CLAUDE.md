@@ -279,6 +279,7 @@ console.log('📑 Loaded 12 bookmarks');
 
 ## Development Notes
 
+- **OnchainKit Version**: Currently on `0.38.2` (upgraded from `0.37.6`). Note: 0.37.6 had mobile wallet modal black background issue, 0.38.5+ has desktop z-index issues. 0.38.2 has mobile issue but desktop works - waiting for OnchainKit team to fix mobile modal bug in future releases.
 - **SPA Architecture**: Single-page application with conditional rendering based on `activeSection`
 - **Wallet-First Design**: Most functionality requires wallet connection and Base network
 - **Database Operations**: All data persistence uses Drizzle ORM with PostgreSQL

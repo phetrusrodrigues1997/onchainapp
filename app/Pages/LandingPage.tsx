@@ -698,17 +698,17 @@ const handleMarketClick = (marketId: string) => {
               handleMarketClick(market.id);
             }
           }}
-          className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] ${
+          className={`group cursor-pointer relative overflow-hidden transition-all duration-500 hover:shadow-[0_25px_50px_rgba(220,38,38,0.15)] ${
             isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
           }`}
           style={{
             '--swap-distance': swapDistance
           } as React.CSSProperties}
         >
-          <div className={`rounded-2xl p-3 h-full transition-all duration-300 ${
+          <div className={`p-3 h-full transition-all duration-300 border-b border-gray-200 ${
             market.tabId === selectedMarket 
-              ? 'bg-white border border-gray-200 shadow-lg shadow-red-100/50 ring-1 ring-red-100' 
-              : 'bg-white border border-gray-200 hover:border-gray-300'
+              ? 'bg-white shadow-lg shadow-red-100/50' 
+              : 'bg-white'
           }`}>
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
@@ -743,7 +743,7 @@ const handleMarketClick = (marketId: string) => {
               
               {/* Question */}
               <div className="flex-1">
-                <p className="text-base font-semibold text-gray-900 leading-tight">
+                <p className="text-base font-normal leading-tight font-['SF_Pro_Display','-apple-system','BlinkMacSystemFont','Inter','Segoe_UI','Roboto',sans-serif] tracking-[-0.01em]" style={{color: '#000000', textShadow: '0 0 1px rgba(0,0,0,0.8)'}}>
                   {market.question}
                 </p>
               </div>
@@ -935,7 +935,7 @@ const handleMarketClick = (marketId: string) => {
                           
                           {/* Question */}
                           <div className="flex-1">
-                            <p className="text-sm font-semibold text-gray-900 leading-tight line-clamp-3">
+                            <p className="text-sm font-normal leading-tight line-clamp-3 font-['SF_Pro_Display','-apple-system','BlinkMacSystemFont','Inter','Segoe_UI','Roboto',sans-serif] tracking-[-0.01em]" style={{color: '#000000', textShadow: '0 0 1px rgba(0,0,0,0.8)'}}>
                               {market.question}
                             </p>
                           </div>
