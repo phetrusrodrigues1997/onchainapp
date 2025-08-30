@@ -1335,23 +1335,21 @@ useEffect(() => {
       </p>
       <button
         onClick={async () => {
-          console.log("🚀 STARTING POT DISTRIBUTION");
           setIsLoading(true);
           setLastAction('distributePot');
           
           try {
-            // Determine winners
+            // Step 1: Determine winners
             const winnersString = await determineWinners(selectedTableType, participants || []);
-            console.log("🎯 Winners found:", winnersString);
             
-            if (!winnersString || winnersString.trim() === "") {
+            if (!winnersString?.trim()) {
               showMessage("No winners found for this round", true);
               setIsLoading(false);
               setLastAction('none');
               return;
             }
             
-            // Parse winner addresses
+            // Step 2: Parse and validate addresses
             const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
             if (addresses.length === 0) {
               showMessage("No valid winner addresses found", true);
@@ -1360,130 +1358,22 @@ useEffect(() => {
               return;
             }
             
-            console.log(`✅ Found ${addresses.length} winner(s):`, addresses);
             showMessage(`Found ${addresses.length} winner(s). Distributing pot...`);
-            
-            // Store winners for confirmation handler
             setWinnerAddresses(winnersString);
             
-            // Validate before transaction
+            // Step 3: Distribute pot using blockchain contract
+            await writeContract({
+              address: contractAddress as `0x${string}`,
+              abi: PREDICTION_POT_ABI,
+              functionName: 'distributePot',
+              args: [addresses],
+              gas: BigInt(300000)
+            });
             
-            // Basic validation
-            const invalidAddresses = addresses.filter(addr => !addr.startsWith('0x') || addr.length !== 42);
-            if (invalidAddresses.length > 0) {
-              throw new Error(`Invalid addresses: ${invalidAddresses.join(', ')}`);
-            }
-            
-            if (!potBalance || potBalance <= BigInt(0)) {
-              throw new Error("Cannot distribute empty pot");
-            }
-            
-            if (!isOwner || !owner || address?.toLowerCase() !== owner?.toLowerCase()) {
-              throw new Error("Only contract owner can distribute pot");
-            }
-            
-            // Read current contract state to debug why distributePot might revert
-            try {
-              console.log("🔍 Reading current contract state...");
-              console.log("📊 Current contract owner:", owner);
-              console.log("📊 Current user address:", address);
-              console.log("📊 Owner match:", address?.toLowerCase() === owner?.toLowerCase());
-              console.log("📊 Participants array:", participants);
-              console.log("📊 Participants count:", participants?.length || 0);
-              console.log("📊 Pot balance (wei):", potBalance?.toString());
-              console.log("📊 Pot balance (ETH):", potBalance ? formatUnits(potBalance, 18) : '0');
-              console.log("📊 Winners array:", addresses);
-              console.log("📊 Winners count:", addresses.length);
-              
-              // Calculate share to match contract logic
-              if (potBalance && addresses.length > 0) {
-                const share = potBalance / BigInt(addresses.length);
-                console.log("📊 Calculated share per winner (wei):", share.toString());
-                console.log("📊 Share > 0:", share > BigInt(0));
-                console.log("📊 Share (ETH):", formatUnits(share, 18));
-                
-                if (share <= BigInt(0)) {
-                  console.log("❌ CRITICAL: Share calculation would be 0 - contract will revert");
-                  throw new Error(`Calculated share is ${share} - contract requires share > 0`);
-                }
-              }
-              
-              // Check if participants array is actually populated on-chain
-              if (!participants || participants.length === 0) {
-                console.log("⚠️ WARNING: No participants found on-chain - distributePot will revert");
-                throw new Error("No participants in pot - cannot distribute to empty pot");
-              }
-              
-              // Verify the winner address is actually in the participants array
-              const winnerInParticipants = participants.some(p => 
-                p.toLowerCase() === addresses[0].toLowerCase()
-              );
-              
-              if (!winnerInParticipants) {
-                console.log("⚠️ WARNING: Winner not found in participants array");
-                console.log("📊 Winner:", addresses[0]);
-                console.log("📊 Participants:", participants);
-                throw new Error("Winner address not in participants array");
-              }
-              
-              console.log("✅ Contract state validation passed");
-              
-              // Try a simulated call first to see if it would revert
-              console.log("🧪 Testing distributePot with simulated call...");
-              try {
-                // This won't actually execute, just simulate
-                const simulationResult = await fetch(`https://base.blockscout.com/api?module=proxy&action=eth_call&to=${contractAddress}&data=0x${Buffer.from(`distributePot(${addresses.join(',')})`).toString('hex')}`);
-                console.log("📊 Simulation result:", { ok: simulationResult.ok });
-              } catch (simError) {
-                console.log("⚠️ Simulation failed (this might be normal):", simError);
-              }
-              
-            } catch (contractStateError) {
-              console.log("❌ Contract state validation failed:", contractStateError);
-              throw contractStateError;
-            }
-            
-            // CRITICAL DEBUGGING: Let's capture the exact transaction data
-            console.log("🚨 CRITICAL ISSUE ANALYSIS:");
-            console.log("🔍 Connected account:", address);
-            console.log("🔍 Contract owner:", owner);
-            
-            // Log the exact function call data that would be sent
-            const functionSignature = '0x2d55f207'; // distributePot function selector
-            const encodedArgs = addresses.map(addr => addr.slice(2).padStart(64, '0')).join('');
-            console.log("🔍 Transaction data would be:", functionSignature + encodedArgs);
-            
-            // Transaction validation completed
-            
-            console.log("✅ Executing distributePot transaction...");
-            
-            try {
-              await writeContract({
-                address: contractAddress as `0x${string}`,
-                abi: PREDICTION_POT_ABI,
-                functionName: 'distributePot',
-                args: [addresses],
-                gas: BigInt(500000), // Increased gas limit
-                gasPrice: BigInt(1000000000), // 1 Gwei
-              });
-              console.log("✅ writeContract call completed successfully");
-            } catch (writeError) {
-              console.log("❌ writeContract failed with error:", writeError);
-              console.log("📊 writeContract error details:", {
-                errorMessage: writeError instanceof Error ? writeError.message : 'Unknown error',
-                errorName: writeError instanceof Error ? writeError.name : 'Unknown',
-                contractAddress,
-                addresses,
-                potBalance: potBalance?.toString()
-              });
-              throw writeError; // Re-throw to be caught by outer try-catch
-            }
-            
-            console.log("✅ Transaction submitted successfully!");
             showMessage("Pot distribution transaction submitted! Waiting for confirmation...");
             
           } catch (error) {
-            console.log("❌ Distribution failed:", error);
+            console.error("Distribution failed:", error);
             showMessage("Failed to process winners and distribute pot", true);
             setIsLoading(false);
             setLastAction('none');
