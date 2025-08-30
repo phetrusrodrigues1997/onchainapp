@@ -640,7 +640,7 @@ const handleMarketClick = (marketId: string) => {
     <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
 
       {/* Markets Grid */}
-      <section className="relative z-10 md:px-6 pt-2 md:mt-[5.5rem]">
+      <section className="relative z-10 px-2 md:px-6 pt-2 md:mt-[5.5rem]">
         <div className="md:max-w-7xl md:mx-auto">
           
 {/* Mobile Markets Display - All Markets */}
