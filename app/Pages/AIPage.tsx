@@ -669,7 +669,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
             Games Hub
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            Challenge your mind and earn rewards <span className="text-4xl">👻</span>
+            Challenge your mind and earn rewards <span className="text-4xl">👑</span>
           </p>
         </div>
         

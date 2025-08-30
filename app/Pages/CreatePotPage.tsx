@@ -342,7 +342,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
         {/* Simple Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Private Markets <span className="text-4xl">👻</span>
+            Private Markets <span className="text-4xl">🎉</span>
           </h1>
         
           
