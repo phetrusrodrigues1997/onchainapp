@@ -54,6 +54,20 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Animation state for selected market
+  const [animatingMarket, setAnimatingMarket] = useState<string | null>(null);
+  const [previousSelectedMarket, setPreviousSelectedMarket] = useState(selectedMarket);
+  
+  // Trigger animation when selectedMarket changes
+  useEffect(() => {
+    if (selectedMarket !== previousSelectedMarket) {
+      setAnimatingMarket(selectedMarket);
+      setPreviousSelectedMarket(selectedMarket);
+      const timer = setTimeout(() => setAnimatingMarket(null), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedMarket, previousSelectedMarket]);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
   // Bookmark state
@@ -666,10 +680,38 @@ const handleMarketClick = (marketId: string) => {
         )
       : allMarkets;
 
-    // Reorder: selected market first, then others (match by tabId)
+    // Reorder: selected market first, then others (match by tabId) - move displaced market further down
     const selectedMarketData = filteredMarkets.find(market => market.tabId === selectedMarket);
     const otherMarkets = filteredMarkets.filter(market => market.tabId !== selectedMarket);
-    const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : filteredMarkets;
+    
+    // Insert the selected market first, but put the previously selected market at position 16 instead of 2
+    let orderedMarkets: typeof filteredMarkets = [];
+    if (selectedMarketData) {
+      // Debug logging
+      console.log('selectedMarket:', selectedMarket);
+      console.log('previousSelectedMarket:', previousSelectedMarket);
+      
+      orderedMarkets = [selectedMarketData];
+      
+      // We want to move "Featured" market to position 16+, so filter it out from early positions
+      const featuredMarket = otherMarkets.find(market => market.tabId === 'Featured');
+      const otherMarketsFiltered = otherMarkets.filter(market => market.tabId !== 'Featured');
+      
+      // Add first 15 other markets (excluding Featured)
+      orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(0, 15)];
+      
+      // Add the Featured market at position 16+ (only if it's not the currently selected market)
+      if (featuredMarket && selectedMarket !== 'Featured') {
+        orderedMarkets = [...orderedMarkets, featuredMarket];
+      }
+      
+      // Add any remaining markets
+      orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(15)];
+      
+      console.log('orderedMarkets first 5:', orderedMarkets.slice(0, 5).map(m => m.tabId));
+    } else {
+      orderedMarkets = filteredMarkets;
+    }
     
     // Apply pagination
     const displayedMarkets = orderedMarkets.slice(0, displayedMarketsCount);
@@ -757,10 +799,10 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Trading Buttons */}
             <div className="grid grid-cols-2 gap-2 mb-2">
-              <button className="bg-blue-50 hover:bg-blue-200 border border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 YES
               </button>
-              <button className="bg-purple-50 hover:bg-purple-200 border border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
+              <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
                 NO
               </button>
             </div>
@@ -865,10 +907,32 @@ const handleMarketClick = (marketId: string) => {
                       )
                     : allMarkets;
 
-                  // Reorder: selected market first, then others (match by tabId)
+                  // Reorder: selected market first, then others (match by tabId) - move displaced market further down
                   const selectedMarketData = filteredMarkets.find(market => market.tabId === selectedMarket);
                   const otherMarkets = filteredMarkets.filter(market => market.tabId !== selectedMarket);
-                  const orderedMarkets = selectedMarketData ? [selectedMarketData, ...otherMarkets] : filteredMarkets;
+                  
+                  // Insert the selected market first, but put the previously selected market at position 16 instead of 2
+                  let orderedMarkets: typeof filteredMarkets = [];
+                  if (selectedMarketData) {
+                    orderedMarkets = [selectedMarketData];
+                    
+                    // We want to move "Featured" market to position 16+, so filter it out from early positions
+                    const featuredMarket = otherMarkets.find(market => market.tabId === 'Featured');
+                    const otherMarketsFiltered = otherMarkets.filter(market => market.tabId !== 'Featured');
+                    
+                    // Add first 15 other markets (excluding Featured)
+                    orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(0, 15)];
+                    
+                    // Add the Featured market at position 16+ (only if it's not the currently selected market)
+                    if (featuredMarket && selectedMarket !== 'Featured') {
+                      orderedMarkets = [...orderedMarkets, featuredMarket];
+                    }
+                    
+                    // Add any remaining markets
+                    orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(15)];
+                  } else {
+                    orderedMarkets = filteredMarkets;
+                  }
                   
                   // Apply pagination for desktop
                   const displayedMarkets = orderedMarkets.slice(0, displayedMarketsCount);
@@ -899,16 +963,12 @@ const handleMarketClick = (marketId: string) => {
                       }}
                       className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-[0_25px_40px_rgba(220,38,38,0.15)] ${
                         isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
-                      }`}
+                      } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''}`}
                       style={{
                         '--swap-distance': swapDistance
                       } as React.CSSProperties}
                     >
-                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 ${
-                        market.tabId === selectedMarket 
-                          ? 'bg-gradient-to-br from-red-50 to-white border-2 border-red-200 shadow-lg shadow-red-100/50 ring-1 ring-red-100' 
-                          : 'bg-white border border-gray-200 hover:border-gray-300' 
-                      }`}>
+                      <div className="rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white border border-gray-200 hover:border-gray-300">
                         
                         
                         {/* Header with Icon and Question - Mobile Style Layout */}
@@ -940,10 +1000,10 @@ const handleMarketClick = (marketId: string) => {
 
                         {/* Trading Buttons */}
                         <div className="grid grid-cols-2 gap-2 mb-2">
-                          <button className="bg-blue-50 hover:bg-blue-200 border border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                          <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                             YES
                           </button>
-                          <button className="bg-purple-50 hover:bg-purple-200 border border-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
+                          <button className="bg-purple-50 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
                             NO
                           </button>
                         </div>

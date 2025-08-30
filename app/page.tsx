@@ -53,8 +53,11 @@ export default function App() {
   const [selectedMarket, setSelectedMarket] = useState('Featured');
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [showLeftArrow2, setShowLeftArrow2] = useState(false);
+  const [showRightArrow2, setShowRightArrow2] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const carouselRef = useRef<HTMLDivElement>(null);
+  const carousel2Ref = useRef<HTMLDivElement>(null);
 
   // Get market options for carousels
   const t = getTranslation(currentLanguage);
@@ -131,6 +134,15 @@ export default function App() {
     }
   };
 
+  const updateArrowVisibility2 = () => {
+    const container = carousel2Ref.current;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setShowLeftArrow2(scrollLeft > 0);
+      setShowRightArrow2(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
   const scrollLeft = () => {
     const container = carouselRef.current;
     if (container) {
@@ -145,11 +157,32 @@ export default function App() {
     }
   };
 
+  const scrollLeft2 = () => {
+    const container = carousel2Ref.current;
+    if (container) {
+      container.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight2 = () => {
+    const container = carousel2Ref.current;
+    if (container) {
+      container.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
     const { scrollLeft, scrollWidth, clientWidth } = container;
     setShowLeftArrow(scrollLeft > 0);
     setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+  };
+
+  const handleScroll2 = (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setShowLeftArrow2(scrollLeft > 0);
+    setShowRightArrow2(scrollLeft < scrollWidth - clientWidth - 1);
   };
 
   // Reset live pot entry state when switching sections
@@ -165,6 +198,8 @@ export default function App() {
       setIsMobileSearchActive(false);
     }
   }, [activeSection]);
+
+
 
   // Check for market parameter in URL on component mount
   useEffect(() => {
@@ -205,6 +240,30 @@ export default function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       updateArrowVisibility();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [selectedMarket]);
+
+  // Force arrow visibility check when marketOptions change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateArrowVisibility();
+      updateArrowVisibility2();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [marketOptions]);
+
+  // Second carousel effects
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateArrowVisibility2();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [shuffledMarkets]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateArrowVisibility2();
     }, 100);
     return () => clearTimeout(timer);
   }, [selectedMarket]);
@@ -325,11 +384,11 @@ export default function App() {
                 Ideas
               </button>
 
-              <div className={`wallet-container ${isMobile ? '-ml-2' : ''}`}>
+              <div className={`wallet-container ${isMobile ? '-ml-2' : '-ml-8'}`}>
                 <Wallet>
                   <ConnectWallet
-                    text={isMobile ? "Sign In" : "Connect Wallet"}
-                    className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-red-600 hover:bg-black !px-4 !py-2 !min-w-0' : 'bg-red-600 hover:bg-black !px-8 !py-3'}`}
+                    text={isMobile ? "Sign In" : "Sign In"}
+                    className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-red-600 hover:bg-black !px-4 !py-2 !min-w-0' : 'bg-red-600 hover:bg-black !px-4 !py-2 !min-w-0 !w-24 !whitespace-nowrap ml-8'}`}
                   >
                     {isConnected && (
                       <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 hover:from-purple-500 hover:via-pink-600 hover:to-red-600 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
@@ -359,44 +418,22 @@ export default function App() {
 
           {/* Market Carousel - only show on home section, on its own line */}
           {activeSection === 'home' && (
-            <div className="relative mt-3 md:translate-y-2">
-              {/* Left Arrow - Hidden on mobile */}
-              {showLeftArrow && (
-                <button
-                  onClick={scrollLeft}
-                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
-                >
-                  <ChevronLeft className="w-4 h-4 text-gray-600" />
-                </button>
-              )}
-
-              {/* Right Arrow - Hidden on mobile */}
-              {showRightArrow && (
-                <button
-                  onClick={scrollRight}
-                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
-                >
-                  <ChevronRight className="w-4 h-4 text-gray-600" />
-                </button>
-              )}
-
-              {/* Scrollable Markets Container */}
-              <div
-                ref={carouselRef}
-                className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
-                onScroll={handleScroll}
+            <div className="mt-3 md:translate-y-2">
+              {/* Markets Container - Show first 13 on desktop, all on mobile */}
+              <div className="flex gap-2 overflow-x-auto md:overflow-visible scrollbar-hide pb-1"
                 style={{
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none'
                 }}
               >
-                {marketOptions.map((market) => (
+                {/* Show first 13 items on desktop, all on mobile */}
+                {(isMobile ? marketOptions : marketOptions.slice(0, 13)).map((market) => (
                   <button
                     key={market.id}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 flex items-center gap-2 px-4 py-2 transition-all duration-300 ${selectedMarket === market.id
+                    className={`group flex-shrink-0 text-xl flex items-center gap-2 px-2 py-2 transition-all duration-300 ${selectedMarket === market.id
                         ? 'text-black'
-                        : 'text-gray-500 hover:text-gray-600'
+                        : 'text-gray-500 hover:text-gray-700'
                       }`}
                     style={{
                       fontWeight: selectedMarket === market.id ? '600' : '500',
@@ -405,7 +442,7 @@ export default function App() {
                       fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
                     }}
                   >
-                    <span className="text-sm whitespace-nowrap tracking-tight">
+                    <span className="whitespace-nowrap tracking-tight" style={{fontSize: '15px'}}>
                       {market.name}
                     </span>
                   </button>
@@ -462,9 +499,9 @@ export default function App() {
 
       {/* Second Carousel - Personalized Labels (Below mobile search bar) */}
       {!isLandingPageLoading && activeSection === 'home' && (
-        <section className="relative z-10 px-4 py-1 md:py-3 bg-white">
+        <section className="relative z-10 px-4 py-1 md:py-3 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full max-w-full">
               {/* Desktop Search Bar - Left side */}
               <div className="hidden md:flex items-center gap-3">
                 <div className="relative w-56">
@@ -518,25 +555,49 @@ export default function App() {
               </div>
 
               {/* Carousel - Right side on desktop, full width on mobile */}
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 flex-1"
-                style={{
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none'
-                }}
-              >
+              <div className="relative flex-1 min-w-0 overflow-hidden">
+                {/* Left Arrow for second carousel - Hidden on mobile */}
+                <button
+                  onClick={scrollLeft2}
+                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
+                  style={{ display: showLeftArrow2 ? 'flex' : 'none' }}
+                >
+                  <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+
+                {/* Right Arrow for second carousel - Hidden on mobile */}
+                {showRightArrow2 && (
+                  <button
+                    onClick={scrollRight2}
+                    className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white shadow-lg rounded-full items-center justify-center hover:bg-gray-50 transition-colors border border-gray-200"
+                  >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  </button>
+                )}
+
+                <div 
+                  ref={carousel2Ref}
+                  className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 max-w-full"
+                  onScroll={handleScroll2}
+                  style={{
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    maxWidth: '100%'
+                  }}
+                >
                 {shuffledMarkets.map((market) => (
                   <button
                     key={`personalized-${market.id}`}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 flex items-center gap-2 px-4 py-2 transition-all duration-300 ${selectedMarket === market.id
-                        ? 'text-red-600 bg-red-100 rounded-full'
-                        : 'text-gray-400 hover:text-gray-600'
+                    className={`group flex-shrink-0 flex items-center gap-1 px-4 py-2 transition-all duration-300 ${selectedMarket === market.id
+                        ? 'text-red-600 bg-red-100 border border-red-200 rounded-full'
+                        : 'text-black border border-gray-300 rounded-full hover:text-gray-600'
                       }`}
                     style={{
-                      fontWeight: selectedMarket === market.id ? '500' : '400',
+                      fontWeight: selectedMarket === market.id ? '500' : '500',
                       minWidth: 'fit-content',
                       height: 'auto',
-                      fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+                      // fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
                     }}
                   >
                     <span className="text-sm whitespace-nowrap tracking-tight">
@@ -544,6 +605,7 @@ export default function App() {
                     </span>
                   </button>
                 ))}
+                </div>
               </div>
             </div>
           </div>

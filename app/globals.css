@@ -253,6 +253,22 @@ body::before {
   animation: pulse 1.5s infinite ease-in-out;
 }
 
+@keyframes scaleOnce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-scale-once {
+  animation: scaleOnce 0.6s ease-in-out;
+}
+
 
 button[aria-label="Toggle menu"] {
   background-color: white !important;
@@ -284,6 +300,13 @@ button[aria-label="Toggle menu"]:hover svg {
   
   [data-testid="ockConnectWallet_Container"] span {
     color: white !important;
+  }
+}
+
+/* Desktop ConnectWallet button width control */
+@media (min-width: 768px) {
+  [data-testid="ockConnectWallet_Container"] {
+    width: 120px !important;
   }
 }
 
