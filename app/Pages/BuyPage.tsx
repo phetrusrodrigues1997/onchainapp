@@ -4,7 +4,8 @@ import { Buy } from '@coinbase/onchainkit/buy';
 import { ETHToken } from '../Constants/coins';
 import { useAccount, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
-import { ArrowDown, CreditCard, Wallet, Download, Copy, Check, QrCode } from 'lucide-react';
+import { Wallet, Copy, Check, QrCode } from 'lucide-react';
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { getPrice } from '../Constants/getPrice';
 
 interface BuySectionProps {
@@ -12,19 +13,14 @@ interface BuySectionProps {
   setActiveSection?: (section: string) => void;
 }
 
-const tokens = [
-  { name: "ETH", token: ETHToken, description: "For everything", usage: "Pot entries & gas fees" },
-];
-
 const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection }) => {
-  const [selectedTokenIndex, setSelectedTokenIndex] = useState<number>(0);
-  const selectedToken = tokens[selectedTokenIndex];
-  const [activeTab, setActiveTab] = useState<'buy' | 'receive'>('buy');
   const { address, isConnected } = useAccount();
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
+  const [isReceiveOpen, setIsReceiveOpen] = useState(false);
+  const [isCryptoOpen, setIsCryptoOpen] = useState(true);
 
   // Get ETH balance
   const ethBalance = useBalance({
@@ -92,7 +88,7 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
       styleTag.innerHTML = `
         [data-testid="ockBuyButton_Button"],
         [data-testid="ockSwapButton_Button"] {
-          background-color: #ee0000 !important;
+          background-color: #9333EA !important;
           border: 2px solid #e5e7eb !important;
           border-radius: 12px !important;
           transition: all 0.2s ease !important;
@@ -138,50 +134,7 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
           box-shadow: none !important;
         }
 
-        /* Fix dropdown overflow issues */
-        .ock-dropdown,
-        [role="listbox"],
-        [role="menu"],
-        [data-testid*="dropdown"],
-        [data-testid*="select"],
-        .ock-select-dropdown,
-        .ock-buy-dropdown {
-          max-height: 300px !important;
-          overflow-y: auto !important;
-          z-index: 9999 !important;
-          position: absolute !important;
-        }
-
-        /* Custom scrollbar for dropdown */
-        .ock-dropdown::-webkit-scrollbar,
-        [role="listbox"]::-webkit-scrollbar,
-        [data-testid*="dropdown"]::-webkit-scrollbar,
-        [data-testid*="select"]::-webkit-scrollbar {
-          width: 6px !important;
-        }
-
-        .ock-dropdown::-webkit-scrollbar-track,
-        [role="listbox"]::-webkit-scrollbar-track,
-        [data-testid*="dropdown"]::-webkit-scrollbar-track,
-        [data-testid*="select"]::-webkit-scrollbar-track {
-          background: #f1f5f9 !important;
-          border-radius: 3px !important;
-        }
-
-        .ock-dropdown::-webkit-scrollbar-thumb,
-        [role="listbox"]::-webkit-scrollbar-thumb,
-        [data-testid*="dropdown"]::-webkit-scrollbar-thumb,
-        [data-testid*="select"]::-webkit-scrollbar-thumb {
-          background: #cbd5e1 !important;
-          border-radius: 3px !important;
-        }
-
-        .ock-dropdown::-webkit-scrollbar-thumb:hover,
-        [role="listbox"]::-webkit-scrollbar-thumb:hover,
-        [data-testid*="dropdown"]::-webkit-scrollbar-thumb:hover,
-        [data-testid*="select"]::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8 !important;
-        }
+        
       `;
     };
 
@@ -226,201 +179,203 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
     };
   }, []);
 
-  return (
-    <div className="min-h-screen bg-white" style={{ minHeight: 'calc(100vh + 400px)' }}>
-      <div className="pt-12 pb-24">
-      
-
-        {/* Tab Navigation */}
-        <div className="max-w-lg mx-auto px-4 mb-8">
-          <div className="flex bg-gray-100 rounded-2xl p-2">
-            <button
-              onClick={() => setActiveTab('buy')}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
-                activeTab === 'buy'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <CreditCard className="w-4 h-4" />
-                Buy ETH
+  // Receive ETH Dropdown Component
+  const ReceiveETHDropdown = ({ address, ethBalance, ethToUsd, copied, showQR, copyAddressToClipboard, setShowQR }: any) => {
+    return (
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <button
+          onClick={() => setIsReceiveOpen(!isReceiveOpen)}
+          className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+        >
+          <span className="text-black font-semibold pr-4">Receive ETH</span>
+          {isReceiveOpen ? (
+            <FaChevronUp className="text-gray-600 flex-shrink-0" />
+          ) : (
+            <FaChevronDown className="text-gray-600 flex-shrink-0" />
+          )}
+        </button>
+        
+        {isReceiveOpen && (
+          <div className="px-6 py-4 bg-white border-t border-gray-300">
+            {/* Address Card */}
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Your Wallet Address</h3>
+                <p className="text-gray-600 text-sm">Share this address to receive ETH on Base network</p>
               </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('receive')}
-              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
-                activeTab === 'receive'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Download className="w-4 h-4" />
-                Receive ETH
-              </div>
-            </button>
-          </div>
-        </div>
 
-        {/* Tab Content */}
-        {activeTab === 'buy' ? (
-          // Buy Tab Content
-          <div className="max-w-lg mx-auto px-4">
-            {/* Balance Display */}
-            {isConnected && address && (
-              <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
+              {/* Address Display */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                <div className="font-mono text-sm text-gray-900 break-all text-center leading-relaxed">
+                  {address}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={copyAddressToClipboard}
+                  className="flex items-center justify-center gap-2 bg-purple-700 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setShowQR(!showQR)}
+                  className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>QR Code</span>
+                </button>
+              </div>
+            </div>
+
+            {/* QR Code Section */}
+            {showQR && (
+              <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-lg mb-6">
                 <div className="text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <img 
-                      src={ETHToken.image || ''} 
-                      alt="ETH"
-                      className="w-6 h-6 object-cover"
-                    />
-                    <h2 className="text-lg font-bold text-gray-900">
-                      {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
-                    </h2>
+                  <h3 className="text-lg font-bold text-gray-900 mb-6">QR Code</h3>
+                  
+                  {/* QR Code Display */}
+                  <div className="bg-white rounded-2xl p-6 mb-6 inline-block shadow-inner">
+                    <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center mx-auto">
+                      {/* Placeholder QR pattern */}
+                      <div className="grid grid-cols-8 gap-1">
+                        {Array.from({ length: 64 }, (_, i) => (
+                          <div
+                            key={i}
+                            className={`w-2 h-2 ${
+                              Math.random() > 0.5 ? 'bg-black' : 'bg-white'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-gray-600 font-medium">ETH Balance</p>
+
+                  <p className="text-gray-600 text-sm mb-4">
+                    Scan this QR code to get the wallet address
+                  </p>
+
+                  <button
+                    onClick={() => setShowQR(false)}
+                    className="text-gray-500 hover:text-gray-700 font-medium"
+                  >
+                    Hide QR Code
+                  </button>
                 </div>
               </div>
             )}
 
+            {/* Network Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+              <div className="flex items-center justify-center gap-2 text-blue-700 text-sm font-semibold mb-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Base Network</span>
+              </div>
+              <p className="text-blue-600 text-xs">
+                Only send ETH on Base network to this address
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // New to Crypto Dropdown Component - Collapsible
+  const NewToCryptoDropdown = () => {
+    return (
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
+        <button
+          onClick={() => setIsCryptoOpen(!isCryptoOpen)}
+          className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+        >
+          <span className="text-black font-semibold pr-4">New to Crypto?</span>
+          {isCryptoOpen ? (
+            <FaChevronUp className="text-gray-600 flex-shrink-0" />
+          ) : (
+            <FaChevronDown className="text-gray-600 flex-shrink-0" />
+          )}
+        </button>
+        
+        {isCryptoOpen && (
+          <div className="px-6 py-4 bg-white border-t border-gray-300">
             <div className="bg-white rounded-xl border-2 border-gray-200 p-6 hover:border-gray-300 transition-all duration-300 shadow-lg">
               <div className="flex items-center gap-2 mb-4">
                 <Wallet className="w-5 h-5 text-gray-600" />
                 <h2 className="text-lg font-semibold text-gray-900">Purchase ETH</h2>
               </div>
+              <p className="text-gray-600 text-sm mb-4">
+                New to crypto? Purchase ETH easily with your credit card or bank account to get started with PrediWin.
+              </p>
               <Buy toToken={ETHToken} />
             </div>
           </div>
-        ) : (
-          // Receive Tab Content
-          <div className="max-w-lg mx-auto px-4">
-            {!isConnected || !address ? (
-              <div className="bg-white rounded-xl border-2 border-gray-200 p-8 text-center shadow-lg">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Wallet className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Connect Wallet</h3>
-                <p className="text-gray-600">Connect your wallet to view your receive address</p>
-              </div>
-            ) : (
-              <>
-                {/* Balance Display */}
-                <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <img 
-                        src={ETHToken.image || ''} 
-                        alt="ETH"
-                        className="w-6 h-6 object-cover"
-                      />
-                      <h2 className="text-lg font-bold text-gray-900">
-                        {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
-                      </h2>
-                    </div>
-                    <p className="text-gray-600 font-medium">ETH Balance</p>
-                  </div>
-                </div>
-
-                {/* Address Card */}
-                <div className="bg-white rounded-xl border-2 border-gray-200 p-6 mb-6 shadow-lg">
-                  <div className="text-center mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">Your Wallet Address</h3>
-                    <p className="text-gray-600 text-sm">Share this address to receive ETH on Base network</p>
-                  </div>
-
-                  {/* Address Display */}
-                  <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                    <div className="font-mono text-sm text-gray-900 break-all text-center leading-relaxed">
-                      {address}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      onClick={copyAddressToClipboard}
-                      className="flex items-center justify-center gap-2 bg-purple-700 hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
-                    >
-                      {copied ? (
-                        <>
-                          <Check className="w-4 h-4" />
-                          <span>Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-4 h-4" />
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
-
-                    <button
-                      onClick={() => setShowQR(!showQR)}
-                      className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
-                    >
-                      <QrCode className="w-4 h-4" />
-                      <span>QR Code</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* QR Code Section */}
-                {showQR && (
-                  <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-lg mb-6">
-                    <div className="text-center">
-                      <h3 className="text-lg font-bold text-gray-900 mb-6">QR Code</h3>
-                      
-                      {/* QR Code Display */}
-                      <div className="bg-white rounded-2xl p-6 mb-6 inline-block shadow-inner">
-                        <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center mx-auto">
-                          {/* Placeholder QR pattern */}
-                          <div className="grid grid-cols-8 gap-1">
-                            {Array.from({ length: 64 }, (_, i) => (
-                              <div
-                                key={i}
-                                className={`w-2 h-2 ${
-                                  Math.random() > 0.5 ? 'bg-black' : 'bg-white'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-gray-600 text-sm mb-4">
-                        Scan this QR code to get the wallet address
-                      </p>
-
-                      <button
-                        onClick={() => setShowQR(false)}
-                        className="text-gray-500 hover:text-gray-700 font-medium"
-                      >
-                        Hide QR Code
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Network Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 text-blue-700 text-sm font-semibold mb-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span>Base Network</span>
-                  </div>
-                  <p className="text-blue-600 text-xs">
-                    Only send ETH on Base network to this address
-                  </p>
-                </div>
-                
-          
-        
-              </>
-            )}
-          </div>
         )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-white" style={{ minHeight: 'calc(100vh + 400px)' }}>
+      <div className="pt-12 pb-24">
+      
+
+        {/* Page Content */}
+        <div className="max-w-lg mx-auto px-4">
+          {!isConnected || !address ? (
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-8 text-center shadow-lg">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Wallet className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Connect Wallet</h3>
+              <p className="text-gray-600">Connect your wallet to view your receive address</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Balance Display */}
+              <div className="flex justify-end mb-2 translate-y-4">
+                <div className="px-3 py-2 rounded-lg max-w-full">
+                  <div className="flex items-center gap-2 justify-end">
+                    <img 
+                      src={ETHToken.image || ''} 
+                      alt="ETH"
+                      className="w-4 h-4 object-cover flex-shrink-0"
+                    />
+                    <span className="text-sm font-semibold text-gray-700 text-right">
+                      Your balance: <span className="text-sm font-semibold text-green-500">{ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Receive ETH Dropdown */}
+              <ReceiveETHDropdown 
+                address={address}
+                ethBalance={ethBalance}
+                ethToUsd={ethToUsd}
+                copied={copied}
+                showQR={showQR}
+                copyAddressToClipboard={copyAddressToClipboard}
+                setShowQR={setShowQR}
+              />
+
+              {/* New to Crypto Dropdown - Always Open */}
+              <NewToCryptoDropdown />
+            </div>
+          )}
+        </div>
         
       </div>
     </div>

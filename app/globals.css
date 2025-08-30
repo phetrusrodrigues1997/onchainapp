@@ -6,10 +6,13 @@
 
 
 
-   :root {
-  --background-start: #333333; /* Tailwind green-900 */
-  --background-mid: #444444;   /* Blended midpoint */
-  --background-end: #a16207;   /* Tailwind yellow-800 */
+:root {
+  --background-start: #333333;
+  /* Tailwind green-900 */
+  --background-mid: #444444;
+  /* Blended midpoint */
+  --background-end: #a16207;
+  /* Tailwind yellow-800 */
 }
 
 
@@ -17,19 +20,34 @@
 /* in your global CSS or Tailwind add-on */
 
 @keyframes gradientMove {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
 }
+
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradientMove 6s ease infinite alternate;
 }
 
 @keyframes shine {
-  0%   { transform: translateX(-100%) skewX(-15deg); }
-  80%  { transform: translateX(200%) skewX(-15deg); }
-  100% { transform: translateX(200%) skewX(-15deg); }
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+
+  80% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
 }
+
 .animate-shine {
   content: "";
   position: absolute;
@@ -37,12 +55,10 @@
   left: -30%;
   width: 150%;
   height: 200%;
-  background: linear-gradient(
-    120deg,
-    rgba(255,255,255,0) 0%,
-    rgba(255,255,255,0.4) 50%,
-    rgba(255,255,255,0) 100%
-  );
+  background: linear-gradient(120deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%);
   animation: shine 2.5s ease-in-out infinite;
 }
 
@@ -50,12 +66,10 @@
 
 html,
 body {
-  background: linear-gradient(
-    to bottom,
-    var(--background-end) 0%,
-    var(--background-mid) 40%,
-    var(--background-start) 100%
-  ) !important;
+  background: linear-gradient(to bottom,
+      var(--background-end) 0%,
+      var(--background-mid) 40%,
+      var(--background-start) 100%) !important;
 }
 
 
@@ -68,26 +82,33 @@ body::before {
   height: 100%;
   pointer-events: none;
   z-index: -1;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 255, 100, 0.05),
-    transparent 70%
-  );
+  background: radial-gradient(ellipse at center,
+      rgba(0, 255, 100, 0.05),
+      transparent 70%);
 }
 
 .bouncing-flag {
-  width: 36px; /* Smaller size for better fit */
+  width: 36px;
+  /* Smaller size for better fit */
   height: auto;
   animation: bounce 2s infinite ease-in-out;
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
+
   40% {
-    transform: translateY(-15px); /* Reduced bounce height */
+    transform: translateY(-15px);
+    /* Reduced bounce height */
   }
+
   60% {
     transform: translateY(-7px);
   }
@@ -108,8 +129,10 @@ body::before {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenChip_Button"] {
-    background-color: #E0E0E0 !important; /* from-gray-700 to-gray-800 */
-  }}
+    background-color: #E0E0E0 !important;
+    /* from-gray-700 to-gray-800 */
+  }
+}
 
 
 
@@ -118,8 +141,9 @@ body::before {
 
 @media (prefers-color-scheme: dark) {
   .flex.h-12.items-center.px-2.pl-4.ock-bg-default.ock-border-radius.ock-border-line-default {
-    background: white !important; /* from-gray-700 to-gray-800 */
-    
+    background: white !important;
+    /* from-gray-700 to-gray-800 */
+
   }
 }
 
@@ -132,13 +156,15 @@ body::before {
 
 
 .mt-2.text-purple-1000.text-center {
-  display: none !important; /* Override Tailwind's text-purple-1000 */
+  display: none !important;
+  /* Override Tailwind's text-purple-1000 */
 }
 
 @keyframes marquee {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(-100%);
   }
@@ -151,13 +177,14 @@ body::before {
 }
 
 
-.css-1u9des2-indicatorSeparator{
-  display:none !important;
+.css-1u9des2-indicatorSeparator {
+  display: none !important;
 }
 
 
 [data-testid="ockIdentity_Text"] {
-  color: #000000 !important; /* Tailwind's green-500 */
+  color: #000000 !important;
+  /* Tailwind's green-500 */
 }
 
 
@@ -168,18 +195,22 @@ body::before {
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTransactionButton_Button"] {
     background: white !important;
-    color: black !important; /* from-gray-700 to-gray-800 */
+    color: black !important;
+    /* from-gray-700 to-gray-800 */
   }
 }
 
 @media (prefers-color-scheme: dark) {
-[data-testid="ockAvatar_ImageContainer"] {
-  display: none !important; /* green-600 */
-}
+  [data-testid="ockAvatar_ImageContainer"] {
+    display: none !important;
+    /* green-600 */
+  }
 
 }
+
 [data-testid="ockAvatar_ImageContainer"] {
-  display: none !important; /* green-600 */
+  display: none !important;
+  /* green-600 */
 }
 
 
@@ -191,47 +222,45 @@ body::before {
 
 @media (prefers-color-scheme: dark) {
   [data-testid="ockTokenRow_Container"] {
-    background: white !important; /* green-600 */
+    background: white !important;
+    /* green-600 */
     color: black !important;
   }
-  }
-
- 
-
-
-
- 
-
-  
- 
-
-  /* Ensuring the SVG icon color does not change in dark mode */
-  [data-testid="ock-toggleSvg"] path {
-    fill: currentColor !important;
-  }
-
-
-
-
-/* .flex.h-12.items-center.px-2.pl-4.ock-bg-default.ock-border-radius.ock-border-line-default.border {
-  
-} */
+}
 
 
 
 
 
-.default-light.flex.w-\[375px\].flex-col.overflow-hidden.ock-border-radius.ock-border-line-default.border{
+
+
+
+
+
+/* Ensuring the SVG icon color does not change in dark mode */
+[data-testid="ock-toggleSvg"] path {
+  fill: currentColor !important;
+}
+
+
+
+
+
+.default-light.flex.w-\[375px\].flex-col.overflow-hidden.ock-border-radius.ock-border-line-default.border {
   width: 512px !important;
-  border:none !important;
+  border: none !important;
 }
 
 [data-testid="ockWalletDropdown"] {
-  background: #111827 !important; /* gray-900 */
+  background: #111827 !important;
+  /* gray-900 */
   color: white !important;
-  border-radius: 0.5rem !important; /* rounded-lg */
-  border: 1px solid #6B7280 !important; /* gray-500 */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; /* shadow-lg */
+  border-radius: 0.5rem !important;
+  /* rounded-lg */
+  border: 1px solid #6B7280 !important;
+  /* gray-500 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  /* shadow-lg */
 }
 
 @keyframes pulse {
@@ -239,10 +268,12 @@ body::before {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
   }
+
   50% {
     transform: scale(1.1);
     box-shadow: 0 0 0 8px rgba(0, 0, 0, 0.1);
   }
+
   100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
@@ -257,9 +288,11 @@ body::before {
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     transform: scale(1);
   }
@@ -297,7 +330,7 @@ button[aria-label="Toggle menu"]:hover svg {
   [data-testid="ockConnectWallet_Container"] {
     color: white !important;
   }
-  
+
   [data-testid="ockConnectWallet_Container"] span {
     color: white !important;
   }
