@@ -875,7 +875,7 @@ const handleMarketClick = (marketId: string) => {
                     className={`w-4 h-4 transition-all duration-200 ${
                       bookmarkedMarkets.has(market.id) 
                         ? 'text-purple-700 fill-purple-700' 
-                        : 'text-gray-500 group-hover:text-purple-700 group-hover:fill-purple-700'
+                        : 'text-gray-500'
                     }`} 
                   />
                 )}
@@ -1008,7 +1008,7 @@ const handleMarketClick = (marketId: string) => {
                           handleMarketClick(market.id);
                         }
                       }}
-                      className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
+                      className={`group hover:scale-[1.004] rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
                         isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
                       } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''}`}
                       style={{
@@ -1094,7 +1094,7 @@ const handleMarketClick = (marketId: string) => {
                                 className={`w-3 h-3 transition-all duration-200 ${
                                   bookmarkedMarkets.has(market.id) 
                                     ? 'text-purple-700 fill-purple-700' 
-                                    : 'text-gray-500 group-hover:text-purple-700 group-hover:fill-purple-700'
+                                    : 'text-gray-500 '
                                 }`} 
                               />
                             )}
