@@ -413,7 +413,7 @@ export default function App() {
                     {isConnected && (
                       <div className="flex items-center gap-2">
                         <Bell className="w-5 h-5 text-gray-600 hover:text-gray-800 cursor-pointer transition-colors" />
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-400 via-violet-500 via-fuchsia-500 via-rose-500 via-amber-400 to-teal-500 hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-red-600 via-red-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
                       </div>
                     )}
                   </ConnectWallet>
