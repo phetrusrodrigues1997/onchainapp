@@ -644,7 +644,7 @@ const handleMarketClick = (marketId: string) => {
         <div className="max-w-7xl mx-auto">
           
 {/* Mobile Markets Display - All Markets */}
-<div className="max-w-md mx-auto md:hidden space-y-4 -translate-y-2">
+<div className="md:hidden space-y-4 -translate-y-2">
   {(() => {
     // Get all markets and deduplicate by ID
     const allMarkets = marketOptions.map(option => {
@@ -728,7 +728,7 @@ const handleMarketClick = (marketId: string) => {
         : '0px';
       
       return (
-      <div key={`mobile-${market.id}-${index}`} className="max-w-md mx-auto">
+      <div key={`mobile-${market.id}-${index}`}>
         <div 
           onClick={() => {
             if (!isSwapping && market.tabId) {

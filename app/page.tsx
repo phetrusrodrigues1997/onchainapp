@@ -58,6 +58,7 @@ export default function App() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const carouselRef = useRef<HTMLDivElement>(null);
   const carousel2Ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
 
   // Get market options for carousels
   const t = getTranslation(currentLanguage);
@@ -420,7 +421,7 @@ export default function App() {
           {activeSection === 'home' && (
             <div className="mt-3 md:translate-y-2 pt-2 md:pt-0 ">
               {/* Markets Container - Show first 13 on desktop, all on mobile */}
-              <div className="flex gap-2 overflow-x-auto md:overflow-visible scrollbar-hide pb-1"
+              <div className="flex overflow-x-auto md:overflow-visible scrollbar-hide pb-1"
                 style={{
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none'
@@ -447,6 +448,46 @@ export default function App() {
                     </span>
                   </button>
                 ))}
+                <div className="relative inline-block text-left">
+  <button onClick={() => setOpen(!open)} className="flex items-center text-gray-500 hover:text-gray-700">
+    <span
+      className="whitespace-nowrap tracking-tight"
+      style={{ fontSize: "15px" }}
+    >
+      More
+    </span>
+    <svg
+      className="w-4 h-4 ml-1"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  {/* Dropdown menu */}
+  {open && (
+  <div className="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block">
+    <div className="py-1">
+      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        Ideas
+      </a>
+      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        Leaderboard
+      </a>
+      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        Create
+      </a>
+      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        My markets
+      </a>
+    </div>
+  </div>
+  )}
+</div>
+
               </div>
             </div>
           )}
