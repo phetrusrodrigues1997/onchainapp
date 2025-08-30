@@ -912,7 +912,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                         <div className="text-xs text-gray-600">YES Votes</div>
                       </div>
                       <div className="text-center">
-                        <div className={`text-lg font-bold ${outcomeVotingStatus.negativeVotes > outcomeVotingStatus.positiveVotes ? 'text-red-700' : 'text-gray-600'}`}>
+                        <div className={`text-lg font-bold ${outcomeVotingStatus.negativeVotes > outcomeVotingStatus.positiveVotes ? 'text-purple-700' : 'text-gray-600'}`}>
                           {outcomeVotingStatus.negativeVotes}
                         </div>
                         <div className="text-xs text-gray-600">NO Votes</div>
@@ -1106,10 +1106,10 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                     
                     <button
                       onClick={() => handleMakePrediction('negative')}
-                      className="group bg-purple-100 border-2 border-purple-200 hover:border-red-400 hover:bg-purple-100 rounded-xl p-6 sm:p-8 transition-all duration-200 text-center transform hover:scale-105 hover:-translate-y-1 shadow-sm hover:shadow-lg"
+                      className="group bg-purple-100 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-100 rounded-xl p-6 sm:p-8 transition-all duration-200 text-center transform hover:scale-105 hover:-translate-y-1 shadow-sm hover:shadow-lg"
                     >
                       <TrendingDown className="w-10 h-10 sm:w-12 sm:h-12 text-purple-700 mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform" />
-                      <span className="text-xl sm:text-2xl font-bold text-red-800">NO</span>
+                      <span className="text-xl sm:text-2xl font-bold text-purple-800">NO</span>
                       <p className="text-xs sm:text-sm text-purple-700 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         Predict negative outcome
                       </p>
@@ -1139,7 +1139,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                     <div className="text-sm text-green-600">YES Votes</div>
                   </div>
                   <div className="bg-purple-100 rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-red-800">{outcomeVotingStatus.negativeVotes}</div>
+                    <div className="text-2xl font-bold text-purple-800">{outcomeVotingStatus.negativeVotes}</div>
                     <div className="text-sm text-purple-700">NO Votes</div>
                   </div>
                 </div>
@@ -1177,7 +1177,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                       <button
                         onClick={() => handleOutcomeVote('negative')}
                         disabled={isVotingOutcome}
-                        className="w-full bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-red-400 font-medium transition-colors"
+                        className="w-full bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-700 disabled:bg-purple-400 font-medium transition-colors"
                       >
                         {isVotingOutcome ? 'Updating...' : 'Change to NO'}
                       </button>
@@ -1203,7 +1203,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                       <button
                         onClick={() => handleOutcomeVote('negative')}
                         disabled={isVotingOutcome}
-                        className="bg-purple-700 text-white px-6 py-4 rounded-lg hover:bg-red-700 disabled:bg-red-400 font-medium transition-all duration-200 flex items-center justify-center gap-2 transform hover:scale-105 disabled:hover:scale-100"
+                        className="bg-purple-700 text-white px-6 py-4 rounded-lg hover:bg-purple-700 disabled:bg-purple-400 font-medium transition-all duration-200 flex items-center justify-center gap-2 transform hover:scale-105 disabled:hover:scale-100"
                       >
                         {isVotingOutcome ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1299,7 +1299,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                               YES
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-purple-100 text-red-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
                               <TrendingDown className="w-3 h-3 mr-1" />
                               NO
                             </span>

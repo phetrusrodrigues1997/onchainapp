@@ -572,7 +572,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
                 </div>
                 <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
                   timeRemaining <= 5 
-                    ? 'bg-purple-100 text-red-700' 
+                    ? 'bg-purple-100 text-purple-700' 
                     : timeRemaining <= 10 
                     ? 'bg-yellow-100 text-yellow-700'
                     : 'bg-gray-100 text-gray-600'
@@ -596,7 +596,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
                     if (index === currentQuestion.correctAnswer) {
                       buttonClass += "border-green-500 bg-green-50 text-green-700";
                     } else if (index === selectedAnswer && !isCorrect) {
-                      buttonClass += "border-purple-1000 bg-purple-100 text-red-700";
+                      buttonClass += "border-purple-1000 bg-purple-100 text-purple-700";
                     } else {
                       buttonClass += "border-gray-200 text-gray-500";
                     }
@@ -639,7 +639,7 @@ const GamesHub = ({ activeSection, setActiveSection }: AIPageProps) => {
         {showResult && (
           <div className="text-center">
             <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full mb-6 ${
-              isCorrect ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-red-700'
+              isCorrect ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
             }`}>
               {isCorrect ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
               {isCorrect ? 'Correct!' : timeRemaining === 0 ? 'Time\'s up!' : 'Incorrect'}

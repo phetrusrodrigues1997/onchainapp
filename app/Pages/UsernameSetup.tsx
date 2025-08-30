@@ -74,7 +74,7 @@
 //             className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ease-in-out"
 //           />
 //           {error && (
-//             <p className="text-red-400 text-sm mt-2 flex items-center">
+//             <p className="text-purple-400 text-sm mt-2 flex items-center">
 //               <span className="mr-1">⚠️</span> {error}
 //             </p>
 //           )}

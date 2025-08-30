@@ -219,11 +219,11 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
         
         {/* Wallet Balance Section */}
         {isConnected && address && (
-          <div className="relative bg-gradient-to-br from-black via-gray-900 to-black rounded-xl md:rounded-2xl p-3 md:p-4 mb-3 md:mb-4 text-white shadow-2xl shadow-red-900/20 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-black via-gray-900 to-black rounded-xl md:rounded-2xl p-3 md:p-4 mb-3 md:mb-4 text-white shadow-2xl shadow-purple-900/20 overflow-hidden">
             {/* Decorative background elements */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-700/10 via-gray-600/10 to-black/10"></div>
             <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-purple-1000/20 to-gray-400/20 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-tr from-red-400/20 to-white/10 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-16 h-16 md:w-24 md:h-24 bg-gradient-to-tr from-purple-400/20 to-white/10 rounded-full blur-2xl"></div>
             
             <div className="relative z-10">
               {/* Header */}
@@ -268,7 +268,7 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
                 <div className="md:col-span-1 flex flex-col gap-1.5 md:gap-2">
                   <button
                     onClick={() => setActiveSection('messagesPage')}
-                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-700 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg md:rounded-xl px-3 py-2 md:py-2.5 border border-purple-1000/50 transition-all duration-300 group shadow-lg hover:shadow-purple-1000/25 hover:scale-105"
+                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-700 to-purple-700 hover:from-purple-700 hover:to-purple-800 rounded-lg md:rounded-xl px-3 py-2 md:py-2.5 border border-purple-1000/50 transition-all duration-300 group shadow-lg hover:shadow-purple-1000/25 hover:scale-105"
                   >
                     <MessageCircle className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
                     <span className="text-white text-xs md:text-sm font-semibold">Messages</span>

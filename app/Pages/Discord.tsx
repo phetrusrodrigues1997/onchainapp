@@ -22,7 +22,7 @@ const HowItWorksSection: React.FC = () => {
   const faqItems: FAQItem[] = [
     {
       question: "How does PrediWin work?",
-      answer: "PrediWin.com is a prediction market platform that offers two main experiences. The first are Public Markets, which are weekly competitions where users make predictions on global events. These competitions run from Sunday to Friday, and the entry fee starts low at the beginning of the week and gradually increases. The second are Private Markets, which allow you to create your own custom prediction topics. You can then invite friends to join by sharing a link."
+      answer: "PrediWin.com is a prediction market platform that offers two main experiences. The first are Public Markets, which are weekly competitions where users make daily predictions on global events. These competitions run from Sunday to Friday, and the entry fee starts low at the beginning of the week and gradually increases. Players get eliminated daily for making a wrong prediction. They may choose to re-enter the tournament by paying a re-entry fee. The second are Private Markets, which allow you to create your own custom prediction topics. You can then invite friends to join by sharing a link."
     },
     {
       question: "What is the weekly schedule for Public Markets?",

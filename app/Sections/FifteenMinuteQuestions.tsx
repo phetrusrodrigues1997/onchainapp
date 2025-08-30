@@ -912,7 +912,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
             </div>
             <div className="flex items-center space-x-2">
               <span className={`text-xs font-mono transition-colors duration-300 ${
-                currentQuestion.timeRemaining < 60 ? 'text-red-400' : 'text-white'
+                currentQuestion.timeRemaining < 60 ? 'text-purple-400' : 'text-white'
               }`}>
                 {formatTime(currentQuestion.timeRemaining)}
               </span>
@@ -1020,7 +1020,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                 <div className={`relative px-8 py-6 rounded-lg border-4 ${
                   userPrediction === 'positive' 
                     ? 'bg-green-100 border-green-600 text-green-800' 
-                    : 'bg-purple-100 border-purple-700 text-red-800'
+                    : 'bg-purple-100 border-purple-700 text-purple-800'
                 }`}>
                   <div className="flex items-center justify-center space-x-3">
                     <span className="text-3xl">
@@ -1210,7 +1210,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                       </div>
                       <div className="flex justify-between mb-2">
                         <span>Evidence Window:</span>
-                        <span className={`font-bold ${isEvidenceWindowActive() ? 'text-green-400' : 'text-red-400'}`}>
+                        <span className={`font-bold ${isEvidenceWindowActive() ? 'text-green-400' : 'text-purple-400'}`}>
                           {isEvidenceWindowActive() ? 'ACTIVE' : 'EXPIRED'}
                         </span>
                       </div>
@@ -1384,7 +1384,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
                 {processMessage && (
                   <div className={`mt-4 p-3 rounded-lg ${
                     processMessage.includes('Failed') || processMessage.includes('Please enter') 
-                      ? 'bg-red-900/50 border border-purple-1000 text-purple-200' 
+                      ? 'bg-purple-900/50 border border-purple-1000 text-purple-200' 
                       : 'bg-green-900/50 border border-green-500 text-green-200'
                   }`}>
                     {processMessage}

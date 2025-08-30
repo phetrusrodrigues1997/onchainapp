@@ -186,11 +186,11 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     const initializeApp = async () => {
       // Simulate progressive loading - 4 second total duration
       const loadingSteps = [
-        { progress: 15, delay: 400, label: 'Loading markets...' },
-        { progress: 30, delay: 600, label: 'Fetching data...' },
-        { progress: 50, delay: 700, label: 'Setting up interface...' },
-        { progress: 75, delay: 800, label: 'Finalizing...' },
-        { progress: 100, delay: 600, label: 'Ready!' }
+        { progress: 15, delay: 100, label: 'Loading markets...' },
+        { progress: 30, delay: 300, label: 'Fetching data...' },
+        { progress: 50, delay: 400, label: 'Setting up interface...' },
+        { progress: 75, delay: 500, label: 'Finalizing...' },
+        { progress: 100, delay: 300, label: 'Ready!' }
       ];
       
       for (const step of loadingSteps) {
@@ -545,7 +545,7 @@ const handleMarketClick = (marketId: string) => {
         <div className="max-w-md mx-auto text-center relative z-10 px-6">
           <div className="bg-white/80 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-12 shadow-2xl shadow-gray-900/10">
             Logo/Text
-            {/* <div className="bg-gradient-to-br from-purple-700 via-purple-1000 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-900/25 relative overflow-hidden px-6 py-4">
+            {/* <div className="bg-gradient-to-br from-purple-700 via-purple-1000 to-gray-900 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-purple-900/25 relative overflow-hidden px-6 py-4">
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
               <span className="text-xl font-black text-white drop-shadow-lg relative z-10 tracking-tight">prediwin.com</span>
             </div> */}
@@ -560,7 +560,7 @@ const handleMarketClick = (marketId: string) => {
                 className="h-full bg-gradient-to-r from-purple-1000 to-purple-700 rounded-full transition-all duration-300 ease-out relative"
                 style={{ width: `${loadingProgress}%` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-purple-600 animate-pulse"></div>
               </div>
             </div>
             
@@ -906,7 +906,7 @@ const handleMarketClick = (marketId: string) => {
         <div className="text-center py-6">
           <button
             onClick={loadMoreMarkets}
-            className="bg-purple-700 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            className="bg-purple-700 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
           >
             Load More Markets ({allMarkets - displayedMarketsCount} remaining)
           </button>
@@ -1125,7 +1125,7 @@ const handleMarketClick = (marketId: string) => {
                   <div className="text-center py-8">
                     <button
                       onClick={loadMoreMarkets}
-                      className="bg-purple-700 hover:bg-red-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                      className="bg-purple-700 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                     >
                       Load More Markets ({allMarkets - displayedMarketsCount} remaining)
                     </button>

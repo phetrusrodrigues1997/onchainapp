@@ -285,10 +285,10 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     switch (urgency) {
       case 'critical':
         return {
-          container: `bg-gradient-to-r from-purple-100 to-purple-200 border-2 border-red-400 ${baseColor === 'blue' ? 'animate-pulse' : 'animate-bounce'}`,
-          text: 'text-red-800',
+          container: `bg-gradient-to-r from-purple-100 to-purple-200 border-2 border-purple-400 ${baseColor === 'blue' ? 'animate-pulse' : 'animate-bounce'}`,
+          text: 'text-purple-800',
           icon: 'bg-purple-700',
-          timer: 'text-red-900'
+          timer: 'text-purple-900'
         };
       case 'urgent':
         return {
@@ -712,7 +712,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 flex items-center justify-center relative overflow-hidden">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-1/3 left-1/3 w-72 h-72 bg-red-900 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/3 left-1/3 w-72 h-72 bg-purple-900 rounded-full blur-3xl"></div>
         </div>
         
         <div className="max-w-md mx-auto text-center relative z-10">
@@ -788,7 +788,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 <div className={`bg-gradient-to-br backdrop-blur-xl border-2 rounded-2xl p-6 mb-6 mt-16 shadow-xl relative overflow-hidden ${
                   marketOutcome?.outcome === 'positive' 
                     ? 'from-green-50 via-white to-green-50 border-green-200 shadow-green-900/10' 
-                    : 'from-purple-100 via-white to-purple-100 border-purple-200 shadow-red-900/10'
+                    : 'from-purple-100 via-white to-purple-100 border-purple-200 shadow-purple-900/10'
                 }`}>
                   <div className="flex items-center justify-center gap-6">
                     <div className={`w-16 h-16 bg-gradient-to-br rounded-xl flex items-center justify-center shadow-lg ${
@@ -810,7 +810,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                           : 'from-purple-100/80 to-white/80 border-purple-200/30'
                       }`}>
                         <div className={`text-2xl font-black tracking-tight ${
-                          marketOutcome?.outcome === 'positive' ? 'text-green-700' : 'text-red-700'
+                          marketOutcome?.outcome === 'positive' ? 'text-green-700' : 'text-purple-700'
                         }`}>
                           {marketOutcome?.outcome === 'positive' ? 'YES' : 'NO'}
                         </div>
@@ -1178,7 +1178,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         {message && (
           <div className={`p-6 rounded-2xl mb-8 text-center backdrop-blur-xl border shadow-xl transform animate-in fade-in duration-500 ${
             message.includes('Failed') || message.includes('Error') 
-              ? 'bg-purple-100/80 border-purple-200/50 text-red-700 shadow-red-900/10' 
+              ? 'bg-purple-100/80 border-purple-200/50 text-purple-700 shadow-purple-900/10' 
               : 'bg-green-50/80 border-green-200/50 text-green-700 shadow-green-900/10'
           }`}>
             <p className="font-bold text-lg">{message}</p>
@@ -1349,7 +1349,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                                 ? 'bg-orange-100 text-orange-800'
                                 : submission.status === 'approved'
                                 ? 'bg-green-100 text-green-800'
-                                : 'bg-purple-100 text-red-800'
+                                : 'bg-purple-100 text-purple-800'
                             }`}>
                               {submission.status.toUpperCase()}
                             </span>

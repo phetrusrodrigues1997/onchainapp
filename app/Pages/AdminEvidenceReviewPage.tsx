@@ -151,7 +151,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
       case 'approved':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'rejected':
-        return 'bg-purple-100 text-red-800 border-purple-200';
+        return 'bg-purple-100 text-purple-800 border-purple-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -271,7 +271,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
                 <div className={`inline-flex items-center px-4 py-2 rounded-xl font-bold text-lg ${
                   marketOutcome.outcome === 'positive' 
                     ? 'bg-green-200 text-green-800' 
-                    : 'bg-purple-200 text-red-800'
+                    : 'bg-purple-200 text-purple-800'
                 }`}>
                   {marketOutcome.outcome === 'positive' ? 'POSITIVE' : 'NEGATIVE'}
                 </div>

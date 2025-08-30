@@ -263,7 +263,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
               <p className="text-gray-600 mb-6">Start bookmarking markets to see them here.</p>
               <button
                 onClick={() => setActiveSection('home')}
-                className="bg-purple-700 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="bg-purple-700 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 Explore Markets
               </button>
