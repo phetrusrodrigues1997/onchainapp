@@ -452,18 +452,19 @@ export default function App() {
                 {/* Show first 13 items on desktop, all on mobile */}
                 {(isMobile ? marketOptions : marketOptions.slice(0, 13)).map((market) => (
                   <button
-                    key={market.id}
-                    onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 text-xl flex items-center gap-2 px-2 py-2 transition-all duration-300 ${selectedMarket === market.id
-                        ? 'text-black font-semibold'
-                        : 'text-[#5D636F] hover:text-gray-700'
-                      }`}
-                    style={{
-                      minWidth: 'fit-content',
-                      height: 'auto',
-                      fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
-                    }}
-                  >
+  key={market.id}
+  onClick={() => setSelectedMarket(market.id)}
+  className={`group flex-shrink-0 text-xl flex items-center gap-2 px-2 py-2 transition-all duration-300
+    ${selectedMarket === market.id
+      ? 'text-black font-semibold'
+      : 'text-black font-medium opacity-60 hover:opacity-100'
+    }`}
+  style={{
+    minWidth: 'fit-content',
+    height: 'auto',
+    fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+  }}
+>
                     <span className="whitespace-nowrap tracking-tight" style={{fontSize: '15px'}}>
                       {market.name}
                     </span>

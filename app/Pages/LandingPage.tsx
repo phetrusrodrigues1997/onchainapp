@@ -833,7 +833,7 @@ const handleMarketClick = (marketId: string) => {
                   <span className="text-sm font-medium text-gray-700">Positive</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].positivePercentage}%</span>
-                    <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                    <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
                       Yes
                     </button>
                   </div>
@@ -842,7 +842,7 @@ const handleMarketClick = (marketId: string) => {
                   <span className="text-sm font-medium text-gray-700">Negative</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
-                    <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                    <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
                       No
                     </button>
                   </div>
@@ -1052,7 +1052,7 @@ const handleMarketClick = (marketId: string) => {
                               <span className="text-xs font-medium text-gray-700">Positive</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].positivePercentage}%</span>
-                                <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                                <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
                                   Yes
                                 </button>
                               </div>
@@ -1061,7 +1061,7 @@ const handleMarketClick = (marketId: string) => {
                               <span className="text-xs font-medium text-gray-700">Negative</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
-                                <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200">
+                                <button className="bg-purple-50 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
                                   No
                                 </button>
                               </div>
