@@ -418,7 +418,7 @@ export default function App() {
 
           {/* Market Carousel - only show on home section, on its own line */}
           {activeSection === 'home' && (
-            <div className="mt-3 md:translate-y-2 pt-2 md:pt-0 border-b md:border-b-0 border-gray-200">
+            <div className="mt-3 md:translate-y-2 pt-2 md:pt-0 ">
               {/* Markets Container - Show first 13 on desktop, all on mobile */}
               <div className="flex gap-2 overflow-x-auto md:overflow-visible scrollbar-hide pb-1"
                 style={{
