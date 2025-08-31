@@ -925,8 +925,8 @@ const handleMarketClick = (marketId: string) => {
                 
                 if (userIsParticipant) {
                   return (
-                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
-                      Entered
+                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                      Entered ✓
                     </div>
                   );
                 } else {
@@ -1175,8 +1175,8 @@ const handleMarketClick = (marketId: string) => {
                             
                             if (userIsParticipant) {
                               return (
-                                <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
-                                  Entered
+                                <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                                  Entered ✓
                                 </div>
                               );
                             } else {

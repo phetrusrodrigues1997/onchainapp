@@ -502,7 +502,7 @@ export default function App() {
                 {/* Bell button - separate from wallet */}
                 {isConnected && !(isNavigationMenuOpen && isMobile) && (
                   <button
-                    className="relative p-2 hover:bg-gray-100 rounded-full transition-colors z-50 translate-x-4 md:translate-x-16"
+                    className="relative p-2 hover:bg-gray-100 rounded-full transition-colors z-50 translate-x-12 md:translate-x-16"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -527,7 +527,7 @@ export default function App() {
                     className={`${isConnected ? '!bg-transparent !border-none !shadow-none !p-0' : ''} ${isMobile ? 'bg-purple-700 hover:bg-black !px-4 !py-2 !min-w-0' : 'bg-purple-700 hover:bg-black !px-4 !py-2 !min-w-0 !w-24 !whitespace-nowrap ml-8'}`}
                   >
                     {isConnected && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 translate-x-6 md:translate-x-0">
                         {/* Show balance on mobile, colorful circle on desktop */}
                         {isMobile ? (
                           <button
