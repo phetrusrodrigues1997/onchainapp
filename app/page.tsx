@@ -784,7 +784,7 @@ export default function App() {
                 <path d="M12 5v14m-7-7h14"></path>
               </svg>
             </div>
-            <span className="text-[13px] font-medium">Create</span>
+            <span className="text-[13px] font-medium -translate-y-0.5">Create</span>
           </button>
 
           <button
@@ -798,7 +798,7 @@ export default function App() {
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1V3H9V1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM17 20H7V9H17V20Z" />
               </svg>
             </div>
-            <span className="text-[13px] font-medium">How it works</span>
+            <span className="text-[13px] font-medium translate-y-0.5">How it works</span>
           </button>
 
           

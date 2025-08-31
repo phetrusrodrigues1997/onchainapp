@@ -831,28 +831,28 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
                 {/* Evidence Submission Interface - Collapsible */}
                 {isEvidenceWindowActive() && !hasUserSubmittedEvidence() && (
-                  <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 backdrop-blur-xl border-2 border-orange-200 rounded-3xl p-8 mb-8 shadow-2xl shadow-orange-900/10 relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-purple-50 via-white to-purple-50 backdrop-blur-xl border-2 border-purple-300 rounded-3xl p-8 mb-8 shadow-2xl shadow-purple-900/20 relative overflow-hidden">
                     {/* Collapsible Header */}
                     <div 
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-purple-50/50 rounded-2xl p-2 -m-2 transition-colors duration-200"
                       onClick={() => setIsEvidenceSectionExpanded(!isEvidenceSectionExpanded)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+                          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
                             <AlertTriangle className="w-8 h-8 text-white" />
                           </div>
                           <div className="text-left">
                             <h3 className="text-xl font-black text-gray-900 mb-1 tracking-tight">Dispute the Outcome?</h3>
                             <div className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-orange-600" />
-                              <p className="text-orange-800 font-bold text-sm">
+                              <Clock className="w-4 h-4 text-purple-600" />
+                              <p className="text-purple-800 font-bold text-sm">
                                 {formatTimeRemaining(timeUntilEvidenceExpires)} remaining
                               </p>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 text-orange-600">
+                        <div className="flex items-center gap-2 text-purple-600">
                           <span className="text-sm font-medium">
                             {isEvidenceSectionExpanded ? 'Collapse' : 'Expand'}
                           </span>
@@ -867,31 +867,31 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                     {/* Collapsible Content */}
                     {isEvidenceSectionExpanded && (
                       <div className="mt-8 space-y-6">
-                        <div className="bg-orange-100 rounded-2xl p-4 border border-orange-200">
-                          <p className="text-orange-700 text-sm text-center">
+                        <div className="bg-purple-100 rounded-2xl p-4 border border-purple-200">
+                          <p className="text-purple-800 text-sm text-center font-medium">
                             Submit evidence against this outcome within the time limit
                           </p>
                         </div>
 
                         <div>
-                          <label className="block text-gray-700 font-bold mb-3">
+                          <label className="block text-gray-900 font-bold mb-3">
                             Evidence Against Outcome
                           </label>
                           <textarea
                             value={evidenceText}
                             onChange={(e) => setEvidenceText(e.target.value)}
                             placeholder="Provide detailed evidence why this outcome is incorrect. Include links, sources, or explanations..."
-                            className="w-full text-black h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                            className="w-full text-black h-32 p-4 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none transition-all duration-200"
                             disabled={isSubmittingEvidence}
                           />
                         </div>
 
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+                        <div className="bg-gradient-to-r from-black to-gray-900 border border-gray-700 rounded-2xl p-6">
                           <div className="flex items-start gap-3">
-                            <AlertTriangle className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" />
-                            <div className="text-yellow-800">
-                              <p className="font-bold mb-2">Evidence Submission Terms:</p>
-                              <ul className="text-sm space-y-1">
+                            <AlertTriangle className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
+                            <div className="text-white">
+                              <p className="font-bold mb-2 text-purple-300">Evidence Submission Terms:</p>
+                              <ul className="text-sm space-y-1 text-gray-300">
                                 <li>• Submit detailed evidence to dispute the outcome</li>
                                 <li>• Include sources, links, or clear explanations</li>
                                 <li>• Admin will review within 24 hours</li>
@@ -904,7 +904,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                         <button
                           onClick={handleEvidenceSubmission}
                           disabled={!evidenceText.trim() || isSubmittingEvidence}
-                          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3"
+                          className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3"
                         >
                           {isSubmittingEvidence ? (
                             <>
@@ -1194,16 +1194,36 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             {/* New Question Timer */}
             {(() => {
               const urgency = getTimerUrgency(timeUntilNewQuestion.hours, timeUntilNewQuestion.minutes, timeUntilNewQuestion.seconds);
-              const styling = getTimerStyling(urgency, 'red');
+              
+              // Custom styling for purple/black/white theme
+              let containerClass, textClass, iconClass, timerClass;
+              
+              if (urgency === 'critical') {
+                containerClass = 'bg-gradient-to-r from-purple-100 to-white border-2 border-purple-500 animate-pulse';
+                textClass = 'text-purple-900';
+                iconClass = 'bg-purple-700';
+                timerClass = 'text-purple-900';
+              } else if (urgency === 'urgent') {
+                containerClass = 'bg-gradient-to-r from-purple-50 to-white border-2 border-purple-300 animate-pulse';
+                textClass = 'text-purple-800';
+                iconClass = 'bg-purple-600';
+                timerClass = 'text-purple-900';
+              } else {
+                containerClass = 'bg-gradient-to-r from-black to-gray-900 border border-gray-800';
+                textClass = 'text-white';
+                iconClass = 'bg-purple-700';
+                timerClass = 'text-white';
+              }
+              
               return (
-                <div className={`${styling.container} rounded-xl p-3 sm:p-4`}>
+                <div className={`${containerClass} rounded-xl p-3 sm:p-4`}>
                   <div className="flex items-center justify-between">
-                    <div className={`${styling.text} font-medium text-sm sm:text-base`}>New Question</div>
+                    <div className={`${textClass} font-bold text-sm sm:text-base`}>New Question</div>
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className={`w-5 h-5 sm:w-6 sm:h-6 ${styling.icon} rounded-full flex items-center justify-center`}>
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 ${iconClass} rounded-full flex items-center justify-center`}>
                         <Clock className="w-3 h-3 text-white" />
                       </div>
-                      <span className={`font-bold ${styling.timer} text-base sm:text-lg tracking-wider`}>
+                      <span className={`font-bold ${timerClass} text-base sm:text-lg tracking-wider`}>
                         {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
                         {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
                         {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}

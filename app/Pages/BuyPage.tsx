@@ -179,6 +179,7 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
     };
   }, []);
 
+
   // Receive ETH Dropdown Component
   const ReceiveETHDropdown = ({ address, ethBalance, ethToUsd, copied, showQR, copyAddressToClipboard, setShowQR }: any) => {
     return (
@@ -319,6 +320,8 @@ const BuySection: React.FC<BuySectionProps> = ({ activeSection, setActiveSection
               <p className="text-gray-600 text-sm mb-4">
                 New to crypto? Purchase ETH easily with your credit card or bank account to get started with PrediWin.
               </p>
+              
+              
               <Buy toToken={ETHToken} />
             </div>
           </div>
