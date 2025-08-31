@@ -58,6 +58,7 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
     { id: 'buy', label: 'Fund Account' },
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
+    { id: 'bookmarks', label: 'My pots' },
     { id: 'ideas', label: 'Ideas' },
     { id: 'discord', label: 'Help' },
   ];

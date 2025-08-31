@@ -391,9 +391,9 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                         <div className="text-sm text-green-600 font-medium">
                           Enter →
                         </div>
-                        <div className="text-xs text-gray-500 font-mono">
+                        {/* <div className="text-xs text-gray-500 font-mono">
                           {contractAddress.slice(0, 8)}...{contractAddress.slice(-6)}
-                        </div>
+                        </div> */}
                       </div>
                     </button>
                   );

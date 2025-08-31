@@ -244,15 +244,15 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
             </h3>
             <div className="space-y-3">
               <div className="flex items-start">
-                <div className="w-7 h-6 bg-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1-</div>
+                <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
                 <p className="text-black">Pay $0.01 (in ETH) to enter the live prediction pot</p>
               </div>
               <div className="flex items-start">
-                <div className="w-7 h-6 bg-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2-</div>
+                <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>
                 <p className="text-black">Make predictions on hourly questions</p>
               </div>
               <div className="flex items-start">
-                <div className="w-7 h-6 bg-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3-</div>
+                <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">3</div>
                 <p className="text-black">Winners share the pot equally at round end</p>
               </div>
             </div>

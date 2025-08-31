@@ -104,6 +104,16 @@ export default function App() {
     return ethValue * currentEthPrice;
   };
 
+  // Helper function to format balance with conditional decimals
+  const formatBalance = (ethAmount: bigint): string => {
+    const usdValue = ethToUsd(ethAmount);
+    if (usdValue > 10) {
+      return `$${Math.round(usdValue)}`;
+    } else {
+      return `$${usdValue.toFixed(2)}`;
+    }
+  };
+
   // State for shuffled markets to avoid hydration mismatch
   const [shuffledMarkets, setShuffledMarkets] = useState(marketOptions);
 
@@ -494,7 +504,7 @@ export default function App() {
                   >
                     <div className="text-xs text-gray-500 whitespace-nowrap">Your balance</div>
                     <div className="text-sm font-semibold text-purple-700 whitespace-nowrap">
-                      {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+                      {ethBalance.data ? formatBalance(ethBalance.data.value) : '$0.00'}
                     </div>
                   </button>
                 )}
@@ -536,7 +546,7 @@ export default function App() {
                           >
                             <div className="text-[10px] text-gray-500 whitespace-nowrap">Balance</div>
                             <div className="text-xs font-semibold text-purple-700 whitespace-nowrap">
-                              {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+                              {ethBalance.data ? formatBalance(ethBalance.data.value) : '$0.00'}
                             </div>
                           </button>
                         ) : (
