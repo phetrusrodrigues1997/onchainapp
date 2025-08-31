@@ -591,7 +591,7 @@ const handleMarketClick = (marketId: string) => {
             </div> */}
             
             {/* Title */}
-            <h1 className="text-3xl font-black text-purple-700 mb-4 tracking-tight">Prediwin</h1>
+            <h1 className="text-3xl font-black text-purple-700 mb-4 tracking-tight">PrediWin</h1>
             <p className="text-gray-600 text-base mb-8">Loading your questions...</p>
             
             {/* Progress Bar */}

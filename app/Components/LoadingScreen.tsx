@@ -9,7 +9,7 @@ interface LoadingScreenProps {
 }
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
-  title = "Prediwin", 
+  title = "PrediWin", 
   subtitle = "Loading prediction markets...", 
   showProgress = false
 }) => {
