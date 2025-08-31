@@ -85,15 +85,11 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
     }
   }, [address]);
 
-  // Mark announcements as read after they're loaded
+  // Mark announcements as read immediately when they're loaded
   useEffect(() => {
     if (address && announcements.length > 0) {
-      // Wait a bit for user to see the announcements, then mark as read
-      const timer = setTimeout(() => {
-        markAllAnnouncementsAsRead();
-      }, 2000);
-      
-      return () => clearTimeout(timer);
+      // Mark as read immediately to prevent flashing purple dot
+      markAllAnnouncementsAsRead();
     }
   }, [address, announcements]);
 

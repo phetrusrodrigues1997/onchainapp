@@ -150,7 +150,7 @@ export default function App() {
     }
   }, [isConnected, address]);
 
-  // Clear unread state when user visits announcements page
+  // Clear unread state immediately when user visits announcements page
   useEffect(() => {
     if (activeSection === 'messagesPage') {
       setHasUnreadAnnouncementsState(false);
@@ -439,15 +439,38 @@ export default function App() {
               {/* Spacer to push buttons to the right */}
               <div className="hidden md:flex flex-1"></div>
 
-              {/* Ideas link */}
-              <button
-                onClick={() => setActiveSection('ideas')}
-                className={`hidden md:inline-flex bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-purple-100 ${isConnected ? '' : 'md:mr-4'}`}
-              >
-                Ideas
-              </button>
+              {/* Right-side button group - closer together */}
+              <div className="flex items-center gap-2">
+                {/* Ideas link */}
+                <button
+                  onClick={() => setActiveSection('ideas')}
+                  className={`hidden md:inline-flex bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-purple-100 ${isConnected ? 'translate-x-16' : 'translate-x-6'}`}
+                >
+                  Ideas
+                </button>
 
-              <div className={`wallet-container ${isMobile ? 'ml-8' : '-ml-8'}`}>
+                {/* Bell button - separate from wallet */}
+                {isConnected && (
+                  <button
+                    className="relative p-2 hover:bg-gray-100 rounded-full transition-colors z-50 translate-x-4 md:translate-x-16"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Bell button clicked');
+                      setActiveSection('messagesPage');
+                    }}
+                    type="button"
+                  >
+                    <Bell className="w-5 h-5 text-gray-600 hover:text-gray-800 transition-colors" />
+                    {/* Purple dot indicator for unread announcements */}
+                    {hasUnreadAnnouncementsState && (
+                      <div className="absolute top-1 right-1 w-3 h-3 bg-purple-700 rounded-full border-2 border-white animate-pulse"></div>
+                    )}
+                  </button>
+                )}
+
+                {/* Wallet container */}
+                <div className={`wallet-container ${isMobile ? 'ml-0' : 'ml-0'}`}>
                 <Wallet>
                   <ConnectWallet
                     text={isMobile ? "Sign In" : "Sign In"}
@@ -455,16 +478,6 @@ export default function App() {
                   >
                     {isConnected && (
                       <div className="flex items-center gap-2">
-                        <div className="relative">
-                          <Bell 
-                            className="w-5 h-5 text-gray-600 hover:text-gray-800 cursor-pointer transition-colors" 
-                            onClick={() => setActiveSection('messagesPage')}
-                          />
-                          {/* Purple dot indicator for unread announcements */}
-                          {hasUnreadAnnouncementsState && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-700 rounded-full border-2 border-white animate-pulse"></div>
-                          )}
-                        </div>
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-700 via-purple-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
                       </div>
                     )}
@@ -487,6 +500,7 @@ export default function App() {
                     <WalletDropdownDisconnect />
                   </WalletDropdown>
                 </Wallet>
+                </div>
               </div>
             </div>
           </div>

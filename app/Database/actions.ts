@@ -2,8 +2,8 @@
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import {  Messages, FeaturedBets, CryptoBets, StocksBets, LivePredictions, Bookmarks } from "./schema"; // Import the schema
-import { eq, sql, and, inArray } from "drizzle-orm";
+import {  Messages, FeaturedBets, CryptoBets, StocksBets, LivePredictions, Bookmarks, UserAnnouncementReads } from "./schema"; // Import the schema
+import { eq, sql, and, inArray, notInArray } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto, WrongPredictionsStocks } from "./schema";
 import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
@@ -2255,8 +2255,7 @@ export async function getUserParticipatingContracts(userAddress: string) {
 
 /**
  * Gets unread announcements for a user
- * Simplified approach: announcements from last 30 days are considered "new"
- * Users see announcements as unread if they're recent, regardless of individual read status
+ * Returns announcements that haven't been marked as read by this specific user
  */
 export async function getUnreadAnnouncements(userAddress: string) {
   try {
@@ -2264,36 +2263,71 @@ export async function getUnreadAnnouncements(userAddress: string) {
     const userContracts = await getUserParticipatingContracts(userAddress);
     const contractAddresses = userContracts.map(c => c.contractAddress);
     
-    // Get recent announcements (last 7 days) 
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // Get all announcements that this user has read
+    const userReadAnnouncements = await db
+      .select({ announcementId: UserAnnouncementReads.announcementId })
+      .from(UserAnnouncementReads)
+      .where(eq(UserAnnouncementReads.walletAddress, userAddress));
     
-    // Global announcements (always show recent ones)
-    const globalAnnouncements = await db
+    const readAnnouncementIds = userReadAnnouncements.map(r => r.announcementId);
+    
+    // Global announcements (excluding ones this user has read)
+    let globalAnnouncementsQuery = db
       .select()
       .from(Messages)
       .where(
         and(
           eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
-          eq(Messages.to, ANNOUNCEMENT_RECIPIENT),
-          sql`${Messages.datetime} > ${sevenDaysAgo.toISOString()}`
+          eq(Messages.to, ANNOUNCEMENT_RECIPIENT)
         )
       );
     
-    // Contract-specific announcements (only for user's contracts)
+    // Add exclusion for read announcements if any exist
+    if (readAnnouncementIds.length > 0) {
+      globalAnnouncementsQuery = db
+        .select()
+        .from(Messages)
+        .where(
+          and(
+            eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+            eq(Messages.to, ANNOUNCEMENT_RECIPIENT),
+            notInArray(Messages.id, readAnnouncementIds)
+          )
+        );
+    }
+    
+    const globalAnnouncements = await globalAnnouncementsQuery;
+    
+    // Contract-specific announcements (excluding ones this user has read, for user's contracts)
     let contractAnnouncements: any[] = [];
     if (contractAddresses.length > 0) {
-      contractAnnouncements = await db
+      let contractAnnouncementsQuery = db
         .select()
         .from(Messages)
         .where(
           and(
             eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
             eq(Messages.to, CONTRACT_PARTICIPANTS),
-            inArray(Messages.contractAddress, contractAddresses),
-            sql`${Messages.datetime} > ${sevenDaysAgo.toISOString()}`
+            inArray(Messages.contractAddress, contractAddresses)
           )
         );
+      
+      // Add exclusion for read announcements if any exist
+      if (readAnnouncementIds.length > 0) {
+        contractAnnouncementsQuery = db
+          .select()
+          .from(Messages)
+          .where(
+            and(
+              eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+              eq(Messages.to, CONTRACT_PARTICIPANTS),
+              inArray(Messages.contractAddress, contractAddresses),
+              notInArray(Messages.id, readAnnouncementIds)
+            )
+          );
+      }
+      
+      contractAnnouncements = await contractAnnouncementsQuery;
     }
     
     return [...globalAnnouncements, ...contractAnnouncements]
@@ -2306,16 +2340,40 @@ export async function getUnreadAnnouncements(userAddress: string) {
 }
 
 /**
- * Marks announcements as read for a user
- * Simplified: We just store a "last read" timestamp per user
+ * Marks announcements as read for a specific user
  */
 export async function markAnnouncementsAsRead(userAddress: string, announcementIds: number[]) {
   try {
-    // For now, we'll just log that the user viewed announcements
-    // In a full implementation, you might want a separate UserSettings table
-    console.log(`📖 User ${userAddress} viewed ${announcementIds.length} announcements`);
+    if (announcementIds.length === 0) {
+      return { success: true };
+    }
+
+    // Check which announcements this user hasn't already marked as read
+    const existingReads = await db
+      .select({ announcementId: UserAnnouncementReads.announcementId })
+      .from(UserAnnouncementReads)
+      .where(
+        and(
+          eq(UserAnnouncementReads.walletAddress, userAddress),
+          inArray(UserAnnouncementReads.announcementId, announcementIds)
+        )
+      );
+
+    const alreadyReadIds = existingReads.map(r => r.announcementId);
+    const unreadIds = announcementIds.filter(id => !alreadyReadIds.includes(id));
+
+    // Insert read records for announcements not yet read by this user
+    if (unreadIds.length > 0) {
+      const readRecords = unreadIds.map(announcementId => ({
+        walletAddress: userAddress,
+        announcementId: announcementId
+      }));
+
+      await db.insert(UserAnnouncementReads).values(readRecords);
+    }
     
-    // Return success (simplified implementation)
+    console.log(`📖 User ${userAddress} marked ${unreadIds.length} new announcements as read (${alreadyReadIds.length} already read)`);
+    
     return { success: true };
   } catch (error) {
     console.error("Error marking announcements as read:", error);

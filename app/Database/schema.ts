@@ -173,3 +173,11 @@ export const Bookmarks = pgTable("bookmarks", {
   bookmarkedAt: timestamp("bookmarked_at").defaultNow().notNull(), // When bookmarked
 });
 
+// User announcement read status - tracks which users have read which announcements
+export const UserAnnouncementReads = pgTable("user_announcement_reads", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(), // User who read the announcement
+  announcementId: integer("announcement_id").notNull(), // Message ID from Messages table
+  readAt: timestamp("read_at").defaultNow().notNull(), // When the user read it
+});
+
