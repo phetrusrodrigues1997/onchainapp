@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { formatUnits } from 'viem';
 import { User, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
+import { hasUnreadAnnouncements } from './Database/actions';
 import PredictionPotTest from './Pages/PredictionPotTest';
 import LandingPage from './Pages/LandingPage';
 import MakePredicitions from './Pages/MakePredictionsPage';
@@ -48,6 +49,7 @@ export default function App() {
   const [isMobileSearchActive, setIsMobileSearchActive] = useState(false); // Track mobile search state
   const [searchQuery, setSearchQuery] = useState(''); // Search functionality
   const [isLandingPageLoading, setIsLandingPageLoading] = useState(activeSection === 'home'); // Track LandingPage loading state
+  const [hasUnreadAnnouncementsState, setHasUnreadAnnouncementsState] = useState(false); // Track unread announcements
 
   // Carousel state
   const [selectedMarket, setSelectedMarket] = useState('Trending');
@@ -118,6 +120,42 @@ export default function App() {
   const handleLivePotEntry = () => {
     setHasEnteredLivePot(true);
   };
+
+  // Function to check for unread announcements
+  const checkUnreadAnnouncements = async () => {
+    if (!address) {
+      setHasUnreadAnnouncementsState(false);
+      return;
+    }
+    
+    try {
+      const hasUnread = await hasUnreadAnnouncements(address);
+      setHasUnreadAnnouncementsState(hasUnread);
+    } catch (error) {
+      console.error('Error checking unread announcements:', error);
+      setHasUnreadAnnouncementsState(false);
+    }
+  };
+
+  // Check for unread announcements when user connects/disconnects
+  useEffect(() => {
+    if (isConnected && address) {
+      checkUnreadAnnouncements();
+      
+      // Set up periodic check every 30 seconds
+      const interval = setInterval(checkUnreadAnnouncements, 30000);
+      return () => clearInterval(interval);
+    } else {
+      setHasUnreadAnnouncementsState(false);
+    }
+  }, [isConnected, address]);
+
+  // Clear unread state when user visits announcements page
+  useEffect(() => {
+    if (activeSection === 'messagesPage') {
+      setHasUnreadAnnouncementsState(false);
+    }
+  }, [activeSection]);
 
 
   // Search functionality
@@ -412,7 +450,16 @@ export default function App() {
                   >
                     {isConnected && (
                       <div className="flex items-center gap-2">
-                        <Bell className="w-5 h-5 text-gray-600 hover:text-gray-800 cursor-pointer transition-colors" />
+                        <div className="relative">
+                          <Bell 
+                            className="w-5 h-5 text-gray-600 hover:text-gray-800 cursor-pointer transition-colors" 
+                            onClick={() => setActiveSection('messagesPage')}
+                          />
+                          {/* Purple dot indicator for unread announcements */}
+                          {hasUnreadAnnouncementsState && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-700 rounded-full border-2 border-white animate-pulse"></div>
+                          )}
+                        </div>
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-700 via-purple-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
                       </div>
                     )}

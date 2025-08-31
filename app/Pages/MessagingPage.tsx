@@ -2,21 +2,21 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAccount } from 'wagmi';
+import { Megaphone, Plus, Calendar, User } from 'lucide-react';
 import { 
-  getAllMessages,
-  getUnreadMessages,
-  sendMessage,
-  markAsRead,
-  deleteMessage 
+  createAnnouncement,
+  getAllAnnouncements,
+  getUserContractAnnouncements,
+  getUnreadAnnouncements,
+  markAnnouncementsAsRead 
 } from '../Database/actions';
 
-interface Message {
+interface Announcement {
   id: number;
-  from: string;
-  to: string;
   message: string;
-  read: boolean;
   datetime: string;
+  contractAddress?: string;
+  isContractSpecific?: boolean;
 }
 
 interface MessagingPageProps {
@@ -27,59 +27,83 @@ interface MessagingPageProps {
 const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
   const { address, isConnected } = useAccount();
   
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<string>('');
-  const [newMessage, setNewMessage] = useState<string>('');
-  const [newRecipient, setNewRecipient] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [showNewMessage, setShowNewMessage] = useState<boolean>(false);
-  const [status, setStatus] = useState<string>('');
-  const [showSidebar, setShowSidebar] = useState<boolean>(true);
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Special admin wallet address
+  const SPECIAL_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
+  const isSpecialUser = address && address.toLowerCase() === SPECIAL_ADDRESS.toLowerCase();
 
-  const loadMessages = async () => {
+  // State for announcements
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [newAnnouncement, setNewAnnouncement] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>('');
+  
+  const announcementsEndRef = useRef<HTMLDivElement>(null);
+
+  // Load announcements from database (both global and contract-specific)
+  const loadAnnouncements = async () => {
     if (!address) return;
     
     try {
       setLoading(true);
-      const allMessages = await getAllMessages(address);
-      setMessages(allMessages || []);
+      
+      // Get both global and contract-specific announcements for this user
+      const allAnnouncements = await getUserContractAnnouncements(address);
+      
+      // Convert database format to component format
+      const formattedAnnouncements: Announcement[] = allAnnouncements.map(announcement => ({
+        id: announcement.id,
+        message: announcement.message,
+        datetime: announcement.datetime,
+        contractAddress: announcement.contractAddress || undefined,
+        isContractSpecific: !!announcement.contractAddress,
+      }));
+      
+      setAnnouncements(formattedAnnouncements);
     } catch (error) {
-      console.error("Error loading messages:", error);
-      setStatus('Failed to load messages');
+      console.error("Error loading announcements:", error);
+      setStatus('Failed to load announcements');
     } finally {
       setLoading(false);
     }
   };
 
+  // Mark announcements as read when user loads the page
+  const markAllAnnouncementsAsRead = async () => {
+    if (!address || announcements.length === 0) return;
+    
+    try {
+      const announcementIds = announcements.map(a => a.id);
+      await markAnnouncementsAsRead(address, announcementIds);
+    } catch (error) {
+      console.error("Error marking announcements as read:", error);
+    }
+  };
+
   useEffect(() => {
     if (address) {
-      loadMessages();
+      loadAnnouncements();
     }
   }, [address]);
 
-  // Set initial sidebar state based on screen size
+  // Mark announcements as read after they're loaded
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setShowSidebar(true);
-      } else if (!selectedConversation && !showNewMessage) {
-        setShowSidebar(true);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [selectedConversation, showNewMessage]);
+    if (address && announcements.length > 0) {
+      // Wait a bit for user to see the announcements, then mark as read
+      const timer = setTimeout(() => {
+        markAllAnnouncementsAsRead();
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [address, announcements]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, selectedConversation]);
+  }, [announcements]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    announcementsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const showStatus = (msg: string) => {
@@ -87,89 +111,33 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
     setTimeout(() => setStatus(''), 3000);
   };
 
-  const getConversations = () => {
-    const conversations = new Map<string, { 
-      otherParty: string; 
-      lastMessage: Message; 
-      unreadCount: number; 
-    }>();
+  const handleAddAnnouncement = async () => {
+    if (!address || !newAnnouncement.trim()) return;
     
-    messages.forEach(msg => {
-      const otherParty = msg.from === address ? msg.to : msg.from;
-      const existing = conversations.get(otherParty);
-      
-      if (!existing || new Date(msg.datetime) > new Date(existing.lastMessage.datetime)) {
-        const unreadCount = messages.filter(m => 
-          m.from === otherParty && m.to === address && !m.read
-        ).length;
-        
-        conversations.set(otherParty, {
-          otherParty,
-          lastMessage: msg,
-          unreadCount
-        });
-      }
-    });
-    
-    return Array.from(conversations.values()).sort((a, b) => 
-      new Date(b.lastMessage.datetime).getTime() - new Date(a.lastMessage.datetime).getTime()
-    );
-  };
-
-  const getConversationMessages = (otherParty: string) => {
-    return messages
-      .filter(msg => 
-        (msg.from === address && msg.to === otherParty) ||
-        (msg.from === otherParty && msg.to === address)
-      )
-      .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime());
-  };
-
-  const handleSendMessage = async () => {
-    if (!address || !newMessage.trim()) return;
-    
-    const recipient = selectedConversation || newRecipient;
-    if (!recipient.trim()) {
-      showStatus('Please enter a recipient address');
+    if (!isSpecialUser) {
+      showStatus('Unauthorized: Only admin can add announcements');
       return;
     }
 
     try {
       setLoading(true);
-      const datetime = new Date().toISOString();
       
-      await sendMessage(address, recipient.trim(), newMessage.trim(), datetime);
+      // Create announcement in database
+      await createAnnouncement(newAnnouncement.trim());
       
-      setNewMessage('');
-      setNewRecipient('');
-      setShowNewMessage(false);
+      // Reload announcements to get updated list
+      await loadAnnouncements();
       
-      await loadMessages();
+      setNewAnnouncement('');
+      setShowAddForm(false);
       
-      if (!selectedConversation) {
-        setSelectedConversation(recipient.trim());
-      }
-      
-      showStatus('Message sent');
+      showStatus('Announcement posted successfully');
     } catch (error) {
-      console.error("Error sending message:", error);
-      showStatus('Failed to send message');
+      console.error("Error adding announcement:", error);
+      showStatus('Failed to post announcement');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleMarkAsRead = async (messageId: number) => {
-    try {
-      await markAsRead(messageId);
-      await loadMessages();
-    } catch (error) {
-      console.error("Error marking message as read:", error);
-    }
-  };
-
-  const formatAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   const formatTime = (datetime: string) => {
@@ -177,303 +145,208 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
     const now = new Date();
     const diffHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
     
-    if (diffHours < 24) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (diffHours < 1) {
+      return 'Just now';
+    } else if (diffHours < 24) {
+      const hours = Math.floor(diffHours);
+      return `${hours}h ago`;
     } else {
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      const days = Math.floor(diffHours / 24);
+      return `${days}d ago`;
     }
   };
 
   if (!isConnected || !address) {
     return (
-      <div className="min-h-screen bg-[#fdfdfd] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center max-w-md mx-auto">
-          <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-8">
-            <span className="text-white text-2xl">💬</span>
+          <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-8">
+            <Megaphone className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-light text-black mb-4 tracking-tight">
-            Messages
+          <h1 className="text-3xl font-bold text-purple-700 mb-4 tracking-tight">
+            Global Announcements
           </h1>
           <p className="text-gray-600 text-lg leading-relaxed">
-            Connect your wallet to send and receive messages
+            Connect your wallet to see the latest updates and announcements
           </p>
         </div>
       </div>
     );
   }
 
-  const conversations = getConversations();
-  const conversationMessages = selectedConversation ? getConversationMessages(selectedConversation) : [];
-
   return (
-    <div className="min-h-screen bg-[#fdfdfd]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+      <div className="border-b border-purple-200 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => setActiveSection('profile')}
-                className="group inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors duration-200"
+                className="group inline-flex items-center gap-2 text-gray-500 hover:text-purple-700 transition-colors duration-200"
               >
                 <span className="transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
                 <span className="text-sm tracking-wide uppercase hidden sm:inline">Back</span>
               </button>
               
-              {/* Mobile sidebar toggle */}
-              <button
-                onClick={() => setShowSidebar(!showSidebar)}
-                className="md:hidden p-2 text-gray-500 hover:text-black transition-colors duration-200"
-              >
-                <span className="text-lg">☰</span>
-              </button>
-              
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">💬</span>
+                <div className="w-12 h-12 bg-purple-700 rounded-full flex items-center justify-center shadow-lg">
+                  <Megaphone className="text-white w-6 h-6" />
                 </div>
-                <h1 className="text-xl sm:text-2xl font-light text-black tracking-tight">Messages</h1>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-purple-700 tracking-tight">Global Announcements</h1>
+                  <p className="text-sm text-gray-600">Latest updates from the PrediWin team</p>
+                </div>
               </div>
             </div>
             
-            <button
-              onClick={() => setShowNewMessage(true)}
-              className="bg-black text-white px-3 py-2 sm:px-4 hover:bg-gray-800 transition-colors duration-200"
-            >
-              <span className="text-sm tracking-wide uppercase">✚</span>
-            </button>
+            {/* Add announcement button - only visible to admin */}
+            {isSpecialUser && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-purple-700 text-white px-4 py-2 rounded-lg hover:bg-purple-800 transition-colors duration-200 flex items-center gap-2 shadow-lg"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm font-semibold uppercase tracking-wide">Add</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto flex relative h-[calc(100vh-80px)]">
-        {/* Mobile overlay */}
-        {showSidebar && (
-          <div 
-            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-5"
-            onClick={() => setShowSidebar(false)}
-          />
-        )}
-        
-        {/* Conversations Sidebar */}
-        <div className={`${
-          showSidebar ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 fixed md:relative z-10 w-full sm:w-80 md:w-1/3 h-full border-r border-gray-200 bg-white transition-transform duration-300 ease-in-out`}>
-          <div className="p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {/* Add announcement form - only visible to admin */}
+        {isSpecialUser && showAddForm && (
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-8 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-light text-black tracking-wide">Conversations</h2>
+              <h3 className="text-lg font-semibold text-purple-700">Create New Announcement</h3>
               <button
-                onClick={() => setShowSidebar(false)}
-                className="md:hidden p-2 text-gray-500 hover:text-black transition-colors duration-200"
+                onClick={() => setShowAddForm(false)}
+                className="text-gray-500 hover:text-purple-700 transition-colors duration-200"
               >
                 ✕
               </button>
             </div>
             
-            {loading && conversations.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">Loading...</div>
-            ) : conversations.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <p className="mb-4">No conversations yet</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-purple-700 mb-2">
+                  Announcement Message
+                </label>
+                <textarea
+                  value={newAnnouncement}
+                  onChange={(e) => setNewAnnouncement(e.target.value)}
+                  placeholder="Enter your announcement message here..."
+                  rows={4}
+                  className="w-full p-3 border border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors duration-200 resize-none"
+                />
+              </div>
+              
+              <div className="flex gap-3">
                 <button
-                  onClick={() => {
-                    setShowNewMessage(true);
-                    setSelectedConversation('');
-                    setShowSidebar(false); // Hide sidebar on mobile when starting new conversation
-                  }}
-                  className="text-black underline hover:text-[#0000fe] text-sm"
+                  onClick={handleAddAnnouncement}
+                  disabled={loading || !newAnnouncement.trim()}
+                  className="bg-purple-700 text-white px-6 py-2 rounded-lg hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 font-semibold"
                 >
-                  Start a conversation
+                  {loading ? 'Posting...' : 'Post Announcement'}
                 </button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {conversations.map((conv) => (
-                  <button
-                    key={conv.otherParty}
-                    onClick={() => {
-                      setSelectedConversation(conv.otherParty);
-                      setShowNewMessage(false);
-                      setShowSidebar(false); // Hide sidebar on mobile when conversation is selected
-                      // Mark messages as read
-                      messages
-                        .filter(m => m.from === conv.otherParty && m.to === address && !m.read)
-                        .forEach(m => handleMarkAsRead(m.id));
-                    }}
-                    className={`w-full text-left p-4 border border-gray-200 hover:border-black transition-all duration-200 ${
-                      selectedConversation === conv.otherParty ? 'bg-black text-white' : 'bg-white text-black'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-sm">
-                        {formatAddress(conv.otherParty)}
-                      </span>
-                      {conv.unreadCount > 0 && (
-                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                          selectedConversation === conv.otherParty ? 'bg-white text-black' : 'bg-black text-white'
-                        }`}>
-                          {conv.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                    <p className={`text-sm truncate ${
-                      selectedConversation === conv.otherParty ? 'text-gray-300' : 'text-gray-600'
-                    }`}>
-                      {conv.lastMessage.message}
-                    </p>
-                    <span className={`text-xs ${
-                      selectedConversation === conv.otherParty ? 'text-gray-400' : 'text-gray-500'
-                    }`}>
-                      {formatTime(conv.lastMessage.datetime)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-gray-50 w-full md:w-auto">
-          {selectedConversation || showNewMessage ? (
-            <>
-              {/* Chat Header */}
-              <div className="bg-white border-b border-gray-200 p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Mobile back to conversations button */}
-                    <button
-                      onClick={() => setShowSidebar(true)}
-                      className="md:hidden p-2 text-gray-500 hover:text-black transition-colors duration-200"
-                    >
-                      ←
-                    </button>
-                    <div>
-                      {showNewMessage ? (
-                        <h3 className="text-lg font-light text-black tracking-wide">New Message</h3>
-                      ) : (
-                        <h3 className="text-lg font-light text-black tracking-wide">
-                          {formatAddress(selectedConversation)}
-                        </h3>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setSelectedConversation('');
-                      setShowNewMessage(false);
-                      setShowSidebar(true); // Show sidebar when closing chat on mobile
-                    }}
-                    className="text-gray-500 hover:text-black transition-colors duration-200"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-                {showNewMessage ? (
-                  <div className="bg-white border border-gray-200 p-4 sm:p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-gray-700 mb-2 tracking-wide uppercase">
-                          Recipient Address
-                        </label>
-                        <input
-                          type="text"
-                          value={newRecipient}
-                          onChange={(e) => setNewRecipient(e.target.value)}
-                          placeholder="0x..."
-                          className="w-full p-3 border border-gray-300 focus:border-black focus:outline-none transition-colors duration-200 font-mono text-sm text-black"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  conversationMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.from === address ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-3 ${
-                          msg.from === address
-                            ? 'bg-black text-white'
-                            : 'bg-white text-black border border-gray-200'
-                        }`}
-                      >
-                        <p className="text-sm leading-relaxed">{msg.message}</p>
-                        <span
-                          className={`text-xs mt-1 block ${
-                            msg.from === address ? 'text-gray-300' : 'text-gray-500'
-                          }`}
-                        >
-                          {formatTime(msg.datetime)}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Message Input */}
-              <div className="bg-white border-t border-gray-200 p-4 sm:p-6">
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 p-3 text-black border border-gray-300 focus:border-black focus:outline-none transition-colors duration-200"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    disabled={loading}
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={loading || !newMessage.trim()}
-                    className="bg-black text-white px-4 sm:px-6 py-3 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
-                  >
-                    <span className="text-sm tracking-wide uppercase">
-                      {loading ? 'Sending...' : 'Send'}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-gray-600 text-2xl">💬</span>
-                </div>
-                <p className="text-gray-600 mb-4">Select a conversation to start messaging</p>
                 <button
-                  onClick={() => {
-                    setShowNewMessage(true);
-                    setSelectedConversation('');
-                    setShowSidebar(false); // Hide sidebar on mobile when starting new conversation
-                  }}
-                  className="text-black underline hover:text-[#0000fe] text-sm tracking-wide uppercase"
+                  onClick={() => setShowAddForm(false)}
+                  className="border border-purple-200 text-purple-700 px-6 py-2 rounded-lg hover:bg-purple-50 transition-colors duration-200 font-semibold"
                 >
-                  Start New Conversation
+                  Cancel
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Announcements List */}
+        <div className="space-y-6">
+          {announcements.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Megaphone className="text-purple-400 w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No announcements yet</h3>
+              <p className="text-gray-600">Check back later for updates from the team.</p>
+            </div>
+          ) : (
+            announcements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className={`bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-200 ${
+                  announcement.isContractSpecific 
+                    ? 'border-green-200 bg-gradient-to-r from-green-50 to-white' 
+                    : 'border-purple-200'
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    announcement.isContractSpecific 
+                      ? 'bg-green-700' 
+                      : 'bg-purple-700'
+                  }`}>
+                    <Megaphone className="text-white w-5 h-5" />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <User className={`w-4 h-4 ${
+                          announcement.isContractSpecific ? 'text-green-600' : 'text-purple-600'
+                        }`} />
+                        <span className={`text-sm font-semibold ${
+                          announcement.isContractSpecific ? 'text-green-700' : 'text-purple-700'
+                        }`}>
+                          PrediWin Team
+                        </span>
+                      </div>
+                      
+                      {/* Market-specific badge */}
+                      {announcement.isContractSpecific && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                          🎯 Market Update
+                        </span>
+                      )}
+                      
+                      {/* Global announcement badge */}
+                      {!announcement.isContractSpecific && (
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                          📢 Global
+                        </span>
+                      )}
+                      
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Calendar className="w-3 h-3" />
+                        <span className="text-xs">{formatTime(announcement.datetime)}</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-800 leading-relaxed text-sm sm:text-base">
+                      {announcement.message}
+                    </p>
+                    
+                    {/* Contract address for debugging (you can remove this later) */}
+                    {announcement.contractAddress && (
+                      <p className="text-xs text-gray-500 mt-2 font-mono">
+                        Contract: {announcement.contractAddress.slice(0, 6)}...{announcement.contractAddress.slice(-4)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
           )}
+          
+          <div ref={announcementsEndRef} />
         </div>
       </div>
 
       {/* Status Message */}
       {status && (
-        <div className="fixed bottom-6 right-6 bg-black text-white px-4 py-2 shadow-lg">
-          <p className="text-sm tracking-wide">{status}</p>
+        <div className="fixed bottom-6 right-6 bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg">
+          <p className="text-sm font-semibold">{status}</p>
         </div>
       )}
     </div>

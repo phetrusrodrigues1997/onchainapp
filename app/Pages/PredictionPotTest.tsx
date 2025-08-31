@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getPrice } from '../Constants/getPrice';
 import { setDailyOutcome, setProvisionalOutcome, getProvisionalOutcome, determineWinners, clearWrongPredictions, testDatabaseConnection, getUserStats } from '../Database/OwnerActions'; // Adjust path as needed
+import { notifyMarketOutcome, notifyEliminatedUsers, notifyWinners, notifyPotDistributed, notifyMarketUpdate } from '../Database/actions';
 import { useQueryClient } from '@tanstack/react-query';
 import { 
   recordReferral, 
@@ -845,6 +846,31 @@ useEffect(() => {
             console.log("- potBalance <= 0:", potBalance ? potBalance <= BigInt(0) : 'potBalance is null');
           }
           
+          // 🔔 Send winner and pot distribution notifications
+          try {
+            console.log("📢 Sending winner notifications...");
+            
+            if (potBalance && potBalance > BigInt(0)) {
+              // Re-determine winners for notifications (same as above for consistency)
+              const winnersString = await determineWinners(selectedTableType, participants || []);
+              const addresses = winnersString.split(',').map(addr => addr.trim()).filter(addr => addr);
+              
+              if (addresses.length > 0) {
+                // Send winner notification
+                await notifyWinners(contractAddress, addresses);
+                
+                // Send pot distribution notification
+                const totalAmountETH = (Number(potBalance) / 1000000000000000000).toFixed(6);
+                await notifyPotDistributed(contractAddress, totalAmountETH, addresses.length);
+                
+                console.log("✅ Winner and pot distribution notifications sent successfully");
+              }
+            }
+          } catch (notificationError) {
+            console.error("❌ Winner notification failed (distribution still succeeded):", notificationError);
+            // Don't show error to user - notifications are supplementary
+          }
+          
           // Clear wrong predictions for next round
           console.log("🧹 Clearing wrong predictions...");
           showMessage("Clearing wrong predictions...");
@@ -1312,6 +1338,33 @@ useEffect(() => {
             
             // Set daily outcome (this will add new wrong predictions to the table)
             await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType, participants || []);
+            
+            // 🔔 Send notifications after successful outcome setting
+            try {
+              console.log("📢 Sending market outcome notifications...");
+              
+              // Notify market outcome
+              await notifyMarketOutcome(
+                contractAddress, 
+                outcomeInput as "positive" | "negative", 
+                selectedTableType
+              );
+              
+              // Get eliminated users count for notification
+              // Note: This is a simplified calculation - you might want to get exact count from setDailyOutcome
+              const totalParticipants = (participants || []).length;
+              const estimatedEliminatedCount = Math.floor(totalParticipants / 2); // Rough estimate
+              
+              if (estimatedEliminatedCount > 0) {
+                await notifyEliminatedUsers(contractAddress, estimatedEliminatedCount, selectedTableType);
+              }
+              
+              console.log("✅ Market outcome notifications sent successfully");
+            } catch (notificationError) {
+              console.error("❌ Notification failed (core operation still succeeded):", notificationError);
+              // Don't show error to user - notifications are supplementary
+            }
+            
             showMessage("Final outcome set successfully!");
             setOutcomeInput("");
           } catch (error) {

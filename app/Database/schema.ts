@@ -8,6 +8,7 @@ export const Messages = pgTable("Messages", {
   message: text("message").notNull(), // The message content
   read: boolean("read").default(false).notNull(), // Read status, default to false
   datetime: text("datetime").notNull(), // Timestamp of when the message was sent
+  contractAddress: text("contract_address"), // Optional: For contract-specific announcements
 });
 
 export const FeaturedBets = pgTable("featured_bets", {

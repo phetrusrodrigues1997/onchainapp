@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Upload, Trophy, Award, Crown, Wallet, DollarSign, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { saveImageUrl, getLatestImageUrl, getUserStats, getLeaderboard, getUserRank } from '../Database/actions';
@@ -264,22 +264,14 @@ const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => 
                   </div>
                 </div>
                 
-                {/* Action Buttons - Takes 1/3 on desktop, full width on mobile */}
+                {/* Action Button - Takes 1/3 on desktop, full width on mobile */}
                 <div className="md:col-span-1 flex flex-col gap-1.5 md:gap-2">
                   <button
-                    onClick={() => setActiveSection('messagesPage')}
+                    onClick={() => setActiveSection('referralProgram')}
                     className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-700 to-purple-700 hover:from-purple-700 hover:to-purple-800 rounded-lg md:rounded-xl px-3 py-2 md:py-2.5 border border-purple-1000/50 transition-all duration-300 group shadow-lg hover:shadow-purple-1000/25 hover:scale-105"
                   >
-                    <MessageCircle className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
-                    <span className="text-white text-xs md:text-sm font-semibold">Messages</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => setActiveSection('referralProgram')}
-                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-white to-gray-100 hover:from-gray-100 hover:to-white rounded-lg md:rounded-xl px-3 py-2 md:py-2.5 border border-gray-300 transition-all duration-300 group shadow-lg hover:shadow-gray-500/25 hover:scale-105"
-                  >
-                    <Trophy className="w-3.5 h-3.5 text-purple-700 group-hover:scale-110 transition-transform duration-200" />
-                    <span className="text-purple-700 text-xs md:text-sm font-semibold">Referrals</span>
+                    <Trophy className="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform duration-200" />
+                    <span className="text-white text-xs md:text-sm font-semibold">Referrals</span>
                   </button>
                 </div>
               </div>

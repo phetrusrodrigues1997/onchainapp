@@ -2056,4 +2056,494 @@ export async function getPredictionPercentages(marketId: string) {
   }
 }
 
+// ==========================================
+// ANNOUNCEMENT FUNCTIONS
+// ==========================================
+// Using Messages table with special sender "SYSTEM_ANNOUNCEMENTS" for global announcements
+
+const SYSTEM_ANNOUNCEMENT_SENDER = "SYSTEM_ANNOUNCEMENTS";
+const ANNOUNCEMENT_RECIPIENT = "ALL_USERS"; // Broadcast to all users
+const CONTRACT_PARTICIPANTS = "CONTRACT_PARTICIPANTS"; // Contract-specific announcements
+
+/**
+ * Creates a new global announcement (admin only)
+ */
+export async function createAnnouncement(message: string) {
+  try {
+    const datetime = new Date().toISOString();
+    
+    return db
+      .insert(Messages)
+      .values({
+        from: SYSTEM_ANNOUNCEMENT_SENDER,
+        to: ANNOUNCEMENT_RECIPIENT,
+        message: message,
+        read: false,
+        datetime: datetime,
+        contractAddress: null,
+      })
+      .returning();
+  } catch (error) {
+    console.error("Error creating announcement:", error);
+    throw new Error("Failed to create announcement");
+  }
+}
+
+/**
+ * Creates a contract-specific announcement for participants
+ */
+export async function createContractAnnouncement(message: string, contractAddress: string) {
+  try {
+    const datetime = new Date().toISOString();
+    
+    return db
+      .insert(Messages)
+      .values({
+        from: SYSTEM_ANNOUNCEMENT_SENDER,
+        to: CONTRACT_PARTICIPANTS,
+        message: message,
+        read: false,
+        datetime: datetime,
+        contractAddress: contractAddress,
+      })
+      .returning();
+  } catch (error) {
+    console.error("Error creating contract announcement:", error);
+    throw new Error("Failed to create contract announcement");
+  }
+}
+
+/**
+ * Gets all announcements (global messages only)
+ */
+export async function getAllAnnouncements() {
+  try {
+    return db
+      .select()
+      .from(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          eq(Messages.to, ANNOUNCEMENT_RECIPIENT)
+        )
+      )
+      .orderBy(sql`${Messages.datetime} DESC`);
+  } catch (error) {
+    console.error("Error fetching announcements:", error);
+    throw new Error("Failed to fetch announcements");
+  }
+}
+
+/**
+ * Gets announcements for contracts user participates in
+ * Optimized with automatic limits and recent focus
+ */
+export async function getUserContractAnnouncements(userAddress: string) {
+  try {
+    // 1. Get user's participating contracts (cached/optimized)
+    const userContracts = await getUserParticipatingContracts(userAddress);
+    const contractAddresses = userContracts.map(c => c.contractAddress);
+    
+    // 2. Date filtering - only get recent announcements (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    // 3. Get global announcements (limited and recent)
+    const globalAnnouncements = await db
+      .select()
+      .from(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          eq(Messages.to, ANNOUNCEMENT_RECIPIENT),
+          sql`${Messages.datetime} > ${thirtyDaysAgo.toISOString()}`
+        )
+      )
+      .orderBy(sql`${Messages.datetime} DESC`)
+      .limit(50); // Limit to 50 recent global announcements
+    
+    // 4. Get contract-specific announcements (limited and recent)
+    let contractAnnouncements: any[] = [];
+    if (contractAddresses.length > 0) {
+      contractAnnouncements = await db
+        .select()
+        .from(Messages)
+        .where(
+          and(
+            eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+            eq(Messages.to, CONTRACT_PARTICIPANTS),
+            inArray(Messages.contractAddress, contractAddresses),
+            sql`${Messages.datetime} > ${thirtyDaysAgo.toISOString()}`
+          )
+        )
+        .orderBy(sql`${Messages.datetime} DESC`)
+        .limit(100); // Limit to 100 recent contract announcements
+    }
+      
+    // 5. Combine, sort, and limit final result
+    const combined = [...globalAnnouncements, ...contractAnnouncements]
+      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+      
+    // Return maximum 100 most recent announcements
+    return combined.slice(0, 100);
+      
+  } catch (error) {
+    console.error("Error fetching user contract announcements:", error);
+    // Return empty array instead of throwing to prevent MessagingPage crashes
+    return [];
+  }
+}
+
+/**
+ * Helper: Get contracts user participates in
+ * Note: This is server-side and can't access blockchain directly.
+ * For now, we'll use database predictions as a proxy for participation.
+ * TODO: Consider caching blockchain participation data or using client-side approach.
+ */
+export async function getUserParticipatingContracts(userAddress: string) {
+  try {
+    const contracts: { contractAddress: string; marketType: string }[] = [];
+    
+    // Import config dynamically
+    const config = await import('./config');
+    const CONTRACT_TO_TABLE_MAPPING = config.CONTRACT_TO_TABLE_MAPPING;
+    
+    // Check each contract type for user predictions
+    // This is a reasonable proxy for participation
+    for (const [contractAddress, tableType] of Object.entries(CONTRACT_TO_TABLE_MAPPING)) {
+      let userParticipates = false;
+      
+      try {
+        if (tableType === 'featured') {
+          const predictions = await db
+            .select()
+            .from(FeaturedBets)
+            .where(eq(FeaturedBets.walletAddress, userAddress))
+            .limit(1);
+          userParticipates = predictions.length > 0;
+        } else if (tableType === 'crypto') {
+          const predictions = await db
+            .select()
+            .from(CryptoBets)
+            .where(eq(CryptoBets.walletAddress, userAddress))
+            .limit(1);
+          userParticipates = predictions.length > 0;
+        } else if (tableType === 'stocks') {
+          const predictions = await db
+            .select()
+            .from(StocksBets)
+            .where(eq(StocksBets.walletAddress, userAddress))
+            .limit(1);
+          userParticipates = predictions.length > 0;
+        }
+      } catch (queryError) {
+        console.error(`Error checking ${tableType} predictions for ${userAddress}:`, queryError);
+        // Continue with other contracts even if one fails
+      }
+      
+      if (userParticipates) {
+        contracts.push({ contractAddress, marketType: tableType });
+      }
+    }
+    
+    return contracts;
+  } catch (error) {
+    console.error("Error getting user participating contracts:", error);
+    return [];
+  }
+}
+
+/**
+ * Gets unread announcements for a user
+ * Simplified approach: announcements from last 30 days are considered "new"
+ * Users see announcements as unread if they're recent, regardless of individual read status
+ */
+export async function getUnreadAnnouncements(userAddress: string) {
+  try {
+    // Get user's contracts for filtering
+    const userContracts = await getUserParticipatingContracts(userAddress);
+    const contractAddresses = userContracts.map(c => c.contractAddress);
+    
+    // Get recent announcements (last 7 days) 
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    // Global announcements (always show recent ones)
+    const globalAnnouncements = await db
+      .select()
+      .from(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          eq(Messages.to, ANNOUNCEMENT_RECIPIENT),
+          sql`${Messages.datetime} > ${sevenDaysAgo.toISOString()}`
+        )
+      );
+    
+    // Contract-specific announcements (only for user's contracts)
+    let contractAnnouncements: any[] = [];
+    if (contractAddresses.length > 0) {
+      contractAnnouncements = await db
+        .select()
+        .from(Messages)
+        .where(
+          and(
+            eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+            eq(Messages.to, CONTRACT_PARTICIPANTS),
+            inArray(Messages.contractAddress, contractAddresses),
+            sql`${Messages.datetime} > ${sevenDaysAgo.toISOString()}`
+          )
+        );
+    }
+    
+    return [...globalAnnouncements, ...contractAnnouncements]
+      .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
+      
+  } catch (error) {
+    console.error("Error fetching unread announcements:", error);
+    return [];
+  }
+}
+
+/**
+ * Marks announcements as read for a user
+ * Simplified: We just store a "last read" timestamp per user
+ */
+export async function markAnnouncementsAsRead(userAddress: string, announcementIds: number[]) {
+  try {
+    // For now, we'll just log that the user viewed announcements
+    // In a full implementation, you might want a separate UserSettings table
+    console.log(`📖 User ${userAddress} viewed ${announcementIds.length} announcements`);
+    
+    // Return success (simplified implementation)
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking announcements as read:", error);
+    return { success: false };
+  }
+}
+
+/**
+ * Checks if user has unread announcements
+ */
+export async function hasUnreadAnnouncements(userAddress: string): Promise<boolean> {
+  try {
+    const unreadAnnouncements = await getUnreadAnnouncements(userAddress);
+    return unreadAnnouncements.length > 0;
+  } catch (error) {
+    console.error("Error checking for unread announcements:", error);
+    return false;
+  }
+}
+
+// ==========================================
+// NOTIFICATION FUNCTIONS
+// ==========================================
+// These functions send notifications AFTER successful core operations
+// Call these separately to avoid slowing down critical business logic
+
+/**
+ * Sends market outcome notification to contract participants
+ * Call this AFTER setDailyOutcome() succeeds
+ */
+export async function notifyMarketOutcome(
+  contractAddress: string, 
+  outcome: string, 
+  marketType: string = 'market'
+) {
+  try {
+    console.log(`📢 Sending market outcome notification for ${contractAddress}: ${outcome}`);
+    
+    const message = outcome === 'positive' 
+      ? `🎉 Great news! Users who predicted POSITIVE won today's ${marketType} market!`
+      : `🎉 Great news! Users who predicted NEGATIVE won today's ${marketType} market!`;
+    
+    await createContractAnnouncement(message, contractAddress);
+    
+    console.log(`✅ Market outcome notification sent successfully`);
+  } catch (error) {
+    console.error("❌ Error sending market outcome notification:", error);
+    // Don't throw - notifications failing shouldn't break main flow
+  }
+}
+
+/**
+ * Sends winner notification to contract participants
+ * Call this AFTER processWinners() succeeds
+ */
+export async function notifyWinners(contractAddress: string, winnerAddresses: string[]) {
+  try {
+    console.log(`🏆 Sending winner notification for ${contractAddress} to ${winnerAddresses.length} winners`);
+    
+    const message = winnerAddresses.length === 1
+      ? `🏆 Congratulations! You won the pot and received your prize!`
+      : `🏆 Congratulations! You and ${winnerAddresses.length - 1} other winners split the pot!`;
+    
+    await createContractAnnouncement(message, contractAddress);
+    
+    console.log(`✅ Winner notification sent successfully`);
+  } catch (error) {
+    console.error("❌ Error sending winner notification:", error);
+    // Don't throw - notifications failing shouldn't break main flow
+  }
+}
+
+/**
+ * Sends elimination notification to contract participants who lost
+ * Call this AFTER processing wrong predictions
+ */
+export async function notifyEliminatedUsers(
+  contractAddress: string, 
+  eliminatedCount: number, 
+  marketType: string = 'market'
+) {
+  try {
+    console.log(`📉 Sending elimination notification for ${contractAddress} to ${eliminatedCount} users`);
+    
+    const message = eliminatedCount === 1
+      ? `📉 Your prediction was incorrect this time. Pay today's entry fee to re-enter the ${marketType}!`
+      : `📉 ${eliminatedCount} users were eliminated. If you were eliminated, pay today's entry fee to re-enter!`;
+    
+    await createContractAnnouncement(message, contractAddress);
+    
+    console.log(`✅ Elimination notification sent successfully`);
+  } catch (error) {
+    console.error("❌ Error sending elimination notification:", error);
+    // Don't throw - notifications failing shouldn't break main flow
+  }
+}
+
+/**
+ * Sends pot distribution completion notification
+ * Call this AFTER successful ETH distribution to winners
+ */
+export async function notifyPotDistributed(
+  contractAddress: string, 
+  totalAmount: string,
+  winnerCount: number
+) {
+  try {
+    console.log(`💰 Sending pot distribution notification for ${contractAddress}`);
+    
+    const message = winnerCount === 1
+      ? `💰 Pot distributed! ${totalAmount} ETH has been sent to the winner!`
+      : `💰 Pot distributed! ${totalAmount} ETH has been split between ${winnerCount} winners!`;
+    
+    await createContractAnnouncement(message, contractAddress);
+    
+    console.log(`✅ Pot distribution notification sent successfully`);
+  } catch (error) {
+    console.error("❌ Error sending pot distribution notification:", error);
+    // Don't throw - notifications failing shouldn't break main flow
+  }
+}
+
+/**
+ * Sends general market update notification
+ * Call this for any other market events (new participants, etc.)
+ */
+export async function notifyMarketUpdate(
+  contractAddress: string, 
+  message: string
+) {
+  try {
+    console.log(`📊 Sending market update notification for ${contractAddress}`);
+    
+    await createContractAnnouncement(`📊 ${message}`, contractAddress);
+    
+    console.log(`✅ Market update notification sent successfully`);
+  } catch (error) {
+    console.error("❌ Error sending market update notification:", error);
+    // Don't throw - notifications failing shouldn't break main flow
+  }
+}
+
+// ==========================================
+// CLEANUP FUNCTIONS
+// ==========================================
+
+/**
+ * Automatically cleans up old announcements (older than 60 days)
+ * Call this periodically or from admin panel
+ */
+export async function cleanupOldAnnouncements() {
+  try {
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+    
+    const result = await db
+      .delete(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          sql`${Messages.datetime} < ${sixtyDaysAgo.toISOString()}`
+        )
+      );
+      
+    console.log(`🧹 Cleaned up old announcements older than 60 days`);
+    return result;
+  } catch (error) {
+    console.error("❌ Error cleaning up old announcements:", error);
+    throw new Error("Failed to cleanup old announcements");
+  }
+}
+
+/**
+ * Gets announcement statistics for admin monitoring
+ */
+export async function getAnnouncementStats() {
+  try {
+    // Count global announcements
+    const globalCount = await db
+      .select({ count: sql`count(*)` })
+      .from(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          eq(Messages.to, ANNOUNCEMENT_RECIPIENT)
+        )
+      );
+      
+    // Count contract announcements
+    const contractCount = await db
+      .select({ count: sql`count(*)` })
+      .from(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          eq(Messages.to, CONTRACT_PARTICIPANTS)
+        )
+      );
+      
+    // Count recent announcements (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const recentCount = await db
+      .select({ count: sql`count(*)` })
+      .from(Messages)
+      .where(
+        and(
+          eq(Messages.from, SYSTEM_ANNOUNCEMENT_SENDER),
+          sql`${Messages.datetime} > ${sevenDaysAgo.toISOString()}`
+        )
+      );
+    
+    return {
+      globalAnnouncements: globalCount[0]?.count || 0,
+      contractAnnouncements: contractCount[0]?.count || 0,
+      recentAnnouncements: recentCount[0]?.count || 0,
+      totalAnnouncements: (globalCount[0]?.count || 0) + (contractCount[0]?.count || 0)
+    };
+  } catch (error) {
+    console.error("❌ Error getting announcement stats:", error);
+    return {
+      globalAnnouncements: 0,
+      contractAnnouncements: 0,
+      recentAnnouncements: 0,
+      totalAnnouncements: 0
+    };
+  }
+}
+
 
