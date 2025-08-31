@@ -170,13 +170,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => setActiveSection('profile')}
-                className="group inline-flex items-center gap-2 text-gray-500 hover:text-purple-700 transition-colors duration-200"
-              >
-                <span className="transform group-hover:-translate-x-1 transition-transform duration-200">←</span>
-                <span className="text-sm tracking-wide uppercase hidden sm:inline">Back</span>
-              </button>
+              
               
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-purple-700 rounded-full flex items-center justify-center shadow-lg">
