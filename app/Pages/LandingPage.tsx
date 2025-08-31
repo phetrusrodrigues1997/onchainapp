@@ -884,25 +884,20 @@ const handleMarketClick = (marketId: string) => {
                         <path
                           d="M 10 45 A 40 40 0 0 1 90 45"
                           stroke={
-                            Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                    predictionPercentages[market.tabId || market.id].negativePercentage) >= 80 ? '#10b981' :
-                            Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                    predictionPercentages[market.tabId || market.id].negativePercentage) >= 60 ? '#f59e0b' :
-                            Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                    predictionPercentages[market.tabId || market.id].negativePercentage) >= 40 ? '#f97316' : '#ef4444'
+                            predictionPercentages[market.tabId || market.id].positivePercentage >= 80 ? '#10b981' :
+                            predictionPercentages[market.tabId || market.id].positivePercentage >= 60 ? '#f59e0b' :
+                            predictionPercentages[market.tabId || market.id].positivePercentage >= 40 ? '#f97316' : '#ef4444'
                           }
                           strokeWidth="6"
                           fill="none"
                           strokeLinecap="round"
-                          strokeDasharray={`${Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                                     predictionPercentages[market.tabId || market.id].negativePercentage) * 1.26} 126`}
+                          strokeDasharray={`${predictionPercentages[market.tabId || market.id].positivePercentage * 1.26} 126`}
                           className="transition-all duration-300"
                         />
                       </svg>
                     </div>
                     <div className="text-lg font-bold text-gray-900">
-                      {Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                              predictionPercentages[market.tabId || market.id].negativePercentage)}%
+                      {predictionPercentages[market.tabId || market.id].positivePercentage}%
                     </div>
                     <div className="text-xs text-gray-500">chance</div>
                   </div>
@@ -1124,25 +1119,20 @@ const handleMarketClick = (marketId: string) => {
                                     <path
                                       d="M 10 45 A 40 40 0 0 1 90 45"
                                       stroke={
-                                        Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                                predictionPercentages[market.tabId || market.id].negativePercentage) >= 80 ? '#10b981' :
-                                        Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                                predictionPercentages[market.tabId || market.id].negativePercentage) >= 60 ? '#f59e0b' :
-                                        Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                                predictionPercentages[market.tabId || market.id].negativePercentage) >= 40 ? '#f97316' : '#ef4444'
+                                        predictionPercentages[market.tabId || market.id].positivePercentage >= 80 ? '#10b981' :
+                                        predictionPercentages[market.tabId || market.id].positivePercentage >= 60 ? '#f59e0b' :
+                                        predictionPercentages[market.tabId || market.id].positivePercentage >= 40 ? '#f97316' : '#ef4444'
                                       }
                                       strokeWidth="6"
                                       fill="none"
                                       strokeLinecap="round"
-                                      strokeDasharray={`${Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                                                 predictionPercentages[market.tabId || market.id].negativePercentage) * 1.26} 126`}
+                                      strokeDasharray={`${predictionPercentages[market.tabId || market.id].positivePercentage * 1.26} 126`}
                                       className="transition-all duration-300"
                                     />
                                   </svg>
                                 </div>
                                 <div className="text-lg font-bold text-gray-900">
-                                  {Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
-                                          predictionPercentages[market.tabId || market.id].negativePercentage)}%
+                                  {predictionPercentages[market.tabId || market.id].positivePercentage}%
                                 </div>
                                 <div className="text-xs text-gray-500">chance</div>
                               </div>
