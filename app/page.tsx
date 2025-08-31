@@ -932,7 +932,7 @@ export default function App() {
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <span className="text-[11px] md:text-[13px] font-medium -translate-x-1 truncate max-w-[60px]">
+            <span className="text-[11px] md:text-[13px] font-medium truncate max-w-[60px]">
               {isConnected && ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
             </span>
           </button>
