@@ -23,77 +23,77 @@ const HowItWorksSection: React.FC = () => {
   const faqItems: FAQItem[] = [
     {
       question: "How does PrediWin work?",
-      answer: "PrediWin.com is a prediction market platform that offers two main experiences. The first are Public Markets, which are weekly competitions where users make daily predictions on global events. These competitions run from Sunday to Friday, and the entry fee starts low at the beginning of the week and gradually increases. Players get eliminated daily for making a wrong prediction. They may choose to re-enter the tournament by paying a re-entry fee. The second are Private Markets, which allow you to create your own custom prediction topics. You can then invite friends to join by sharing a link."
+      answer: "PrediWin.com is a prediction Pot platform that offers two main experiences. The first are Public Pots, which are weekly competitions where users make daily predictions on global events. These competitions run from Sunday to Friday, and the entry fee starts low at the beginning of the week and gradually increases. Players get eliminated daily for making a wrong prediction. They may choose to re-enter the tournament by paying a re-entry fee. The second are Private Pots, which allow you to create your own custom prediction topics. You can then invite friends to join by sharing a link."
     },
     {
-      question: "What is the weekly schedule for Public Markets?",
-      answer: "Sunday-Friday: Market entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - markets are closed and winners are determined at midnight UTC with market distribution. Private Markets have no schedule - you control when they open and close."
+      question: "What is the weekly schedule for Public Pots?",
+      answer: "Sunday-Friday: Pot entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - Pots are closed and winners are determined at midnight UTC with Pot distribution. Private Pots have no schedule - you control when they open and close."
     },
     {
       question: "What happens if I make a wrong prediction?",
-      answer: "In Public Markets: If you predict incorrectly, you'll be eliminated but can re-enter by paying the current day's entry fee, the goal is to stay in the tournament until friday when the last prediction is made and the winners are determined on Saturday. In Private Markets: The market creator decides the final date, outcome and winners- you cannot re-enter a private market after the winners have been determined."
+      answer: "In Public Pots: If you predict incorrectly, you'll be eliminated but can re-enter by paying the current day's entry fee, the goal is to stay in the tournament until friday when the last prediction is made and the winners are determined on Saturday. In Private Pots: The Pot creator decides the final date, outcome and winners- you cannot re-enter a private Pot after the winners have been determined."
     },
     {
-      question: "What are Private Markets and how do they work?",
-      answer: "Private Markets are custom prediction markets you create on any topic - crypto prices, sports outcomes, world events, or fun questions with friends. As the creator, you set the entry fee, invite participants via a shareable link, and decide the winners. It's perfect for friend groups, teams, or communities who want their own prediction competitions."
+      question: "What are Private Pots and how do they work?",
+      answer: "Private Pots are custom prediction Pots you create on any topic - crypto prices, sports outcomes, world events, or fun questions with friends. As the creator, you set the entry fee, invite participants via a shareable link, and decide the winners. It's perfect for friend groups, teams, or communities who want their own prediction competitions."
     },
     {
-      question: "How do I create and share a Private Market?",
-      answer: "Go to 'Private Markets' in the navigation menu, set your market name and description, then deploy it for minimal gas fees (~$0.01-0.05 on Base). You'll receive a shareable URL that you can send to friends via text, social media, or email. Anyone with the link can join your market by paying the entry fee you set."
+      question: "How do I create and share a Private Pot?",
+      answer: "Go to 'Private Pots' in the navigation menu, set your Pot name and description, then deploy it for minimal gas fees (~$0.01-0.05 on Base). You'll receive a shareable URL that you can send to friends via text, social media, or email. Anyone with the link can join your Pot by paying the entry fee you set."
     },
     {
-      question: "Who controls Private Markets?",
-      answer: "As the market creator, you have full control. You set the entry amount, manage participants, decide when to close entries, determine the winning outcome, and distribute rewards to winners. The platform provides tools to see all participants and their predictions in a beautiful interface."
+      question: "Who controls Private Pots?",
+      answer: "As the Pot creator, you have full control. You set the entry amount, manage participants, decide when to close entries, determine the winning outcome, and distribute rewards to winners. The platform provides tools to see all participants and their predictions in a beautiful interface."
     },
     {
-      question: "How do Private Market participants join?",
+      question: "How do Private Pot participants join?",
       answer: "Friends click your shared link, connect their wallet, pay the entry fee in USDC, and make their prediction. They can see all other participants (by wallet address or email if submitted), entry amounts, and prediction status. It's fully transparent so everyone can see who predicted what."
     },
     {
       question: "Why do I need Ethereum to place predictions?",
-      answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering markets, making predictions, and claiming winnings. You'll also need USDC to pay the actual market's entry fees."
+      answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering Pots, making predictions, and claiming winnings. You'll also need USDC to pay the actual Pot's entry fees."
     },
     
     {
-      question: "How are entry fees calculated in Public Markets?",
-      answer: "Public Markets follow a dynamic pricing model to encourage early participation: Sunday (0.01 USDC), Monday (0.02 USDC), Tuesday (0.03 USDC), Wednesday (0.04 USDC), Thursday (0.05 USDC), Friday (0.06 USDC). Saturday is closed for results. Private Markets let you set any entry fee you want."
+      question: "How are entry fees calculated in Public Pots?",
+      answer: "Public Pots follow a dynamic pricing model to encourage early participation: Sunday (0.01 USDC), Monday (0.02 USDC), Tuesday (0.03 USDC), Wednesday (0.04 USDC), Thursday (0.05 USDC), Friday (0.06 USDC). Saturday is closed for results. Private Pots let you set any entry fee you want."
     },
   
     {
       question: "How does the referral system work?",
-      answer: "Each user gets a unique 8-character referral code. When 3 friends enter markets using your code and make confirmed USDC payments, you earn 1 free market entry. This system includes fraud protection to ensure legitimate referrals and works for both Public and Private Markets."
+      answer: "Each user gets a unique 8-character referral code. When 3 friends enter Pots using your code and make confirmed USDC payments, you earn 1 free Pot entry. This system includes fraud protection to ensure legitimate referrals and works for both Public and Private Pots."
     },
     {
       question: "What types of events can I predict?",
-      answer: "Public Markets cover cryptocurrency prices, stock movements, sports, and world events. Private Markets are unlimited - create markets on anything: 'Will it rain tomorrow?', 'Who wins the office fantasy league?', 'Will our friend get the job?', crypto prices, sports bets with friends, or any measurable outcome you can think of."
+      answer: "Public Pots cover cryptocurrency prices, stock movements, sports, and world events. Private Pots are unlimited - create Pots on anything: 'Will it rain tomorrow?', 'Who wins the office fantasy league?', 'Will our friend get the job?', crypto prices, sports bets with friends, or any measurable outcome you can think of."
     },
     {
       question: "How do I make predictions?",
-      answer: "After entering a market, you choose YES or NO for the outcome (or positive/negative for price movements). In Public Markets, you can make one prediction per day and update it before cutoff. In Private Markets, you typically make one prediction per market topic set by the creator."
+      answer: "After entering a Pot, you choose YES or NO for the outcome (or positive/negative for price movements). In Public Pots, you can make one prediction per day and update it before cutoff. In Private Pots, you typically make one prediction per Pot topic set by the creator."
     },
     {
       question: "When and how are winners determined?",
-      answer: "Public Markets: Winners are determined every Saturday at midnight UTC based on actual event outcomes. Private Markets: The market creator decides when to close predictions, determines the actual outcome, and distributes rewards to winners through the smart contract."
+      answer: "Public Pots: Winners are determined every Saturday at midnight UTC based on actual event outcomes. Private Pots: The Pot creator decides when to close predictions, determines the actual outcome, and distributes rewards to winners through the smart contract."
     },
     {
       question: "How do I get my winnings?",
-      answer: "Winnings are automatically distributed through smart contracts on the Base network. Once you're determined as a winner, the USDC is sent directly to your connected wallet - no manual claiming required. This works the same for both Public and Private Markets."
+      answer: "Winnings are automatically distributed through smart contracts on the Base network. Once you're determined as a winner, the USDC is sent directly to your connected wallet - no manual claiming required. This works the same for both Public and Private Pots."
     },
     {
-      question: "What's the difference between Public and Private Markets?",
-      answer: "Public Markets: Weekly competitions, set schedule, automatic outcomes, compete with everyone. Private Markets: You create custom topics, set your own rules, invite specific friends, control timing and outcomes. Both use the same USDC payment system and smart contracts for security."
+      question: "What's the difference between Public and Private Pots?",
+      answer: "Public Pots: Weekly competitions, set schedule, automatic outcomes, compete with everyone. Private Pots: You create custom topics, set your own rules, invite specific friends, control timing and outcomes. Both use the same USDC payment system and smart contracts for security."
     },
     {
       question: "Can I participate without crypto experience?",
       answer: "Yes and no! The platform includes a comprehensive 5-step tutorial and a built-in buy page where you can easily purchase USDC and ETH using Coinbase OnChainKit. The interface is designed to be user-friendly for crypto beginners. We recommend users familiarize themselves with basic crypto concepts like wallets, gas fees, and USDC before participating."
     },
     {
-      question: "What are Live Markets?",
-      answer: "Live Markets are hourly prediction rounds that activate after entering a live pot. Once you pay the entry fee, you'll participate in structured hourly question sessions covering various topics. It's a time-based format designed for users who enjoy regular prediction challenges with scheduled results every hour."
+      question: "What are Live Pots?",
+      answer: "Live Pots are hourly prediction rounds that activate after entering a live pot. Once you pay the entry fee, you'll participate in structured hourly question sessions covering various topics. It's a time-based format designed for users who enjoy regular prediction challenges with scheduled results every hour."
     },
     {
       question: "Is this gambling?",
-      answer: "PrediWin is a prediction market platform focused on forecasting skills rather than gambling. Users make informed predictions about real-world events using their knowledge and analysis, similar to platforms like Polymarket or Kalshi. Private Markets add a social element where friends compete on topics they care about."
+      answer: "PrediWin is a prediction Pot platform focused on forecasting skills rather than gambling. Users make informed predictions about real-world events using their knowledge and analysis, similar to platforms like PolyPot or Kalshi. Private Pots add a social element where friends compete on topics they care about."
     }
   ];
 
