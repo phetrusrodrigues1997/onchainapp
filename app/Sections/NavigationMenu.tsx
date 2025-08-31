@@ -96,7 +96,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
                       setActiveSection(item.id);
                       setIsMenuOpen(false);
                     }}
-                    className={`block w-full text-left py-4 text-lg border-b border-gray-100 ${
+                    className={`block w-full text-left py-4 text-lg ${
                       activeSection === item.id
                         ? 'text-[#000070] font-medium'
                         : 'text-black hover:text-[#000070]'
