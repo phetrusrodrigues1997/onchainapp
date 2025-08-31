@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useAccount, useReadContract } from 'wagmi';
+import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { User, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
 import { hasUnreadAnnouncements } from './Database/actions';
@@ -32,6 +32,7 @@ import IdeasPage from './Pages/IdeasPage';
 import AdminEvidenceReviewPage from './Pages/AdminEvidenceReviewPage';
 import { getMarkets } from './Constants/markets';
 import { Language, getTranslation, supportedLanguages } from './Languages/languages';
+import { getPrice } from './Constants/getPrice';
 
 
 
@@ -51,6 +52,13 @@ export default function App() {
   const [isLandingPageLoading, setIsLandingPageLoading] = useState(activeSection === 'home'); // Track LandingPage loading state
   const [hasUnreadAnnouncementsState, setHasUnreadAnnouncementsState] = useState(false); // Track unread announcements
   const [isNavigationMenuOpen, setIsNavigationMenuOpen] = useState(false); // Track navigation menu state
+  const [ethPrice, setEthPrice] = useState<number | null>(null); // ETH price in USD
+
+  // Get ETH balance
+  const ethBalance = useBalance({
+    address,
+    chainId: 8453
+  });
 
   // Carousel state
   const [selectedMarket, setSelectedMarket] = useState('Trending');
@@ -67,6 +75,34 @@ export default function App() {
   // Get market options for carousels
   const t = getTranslation(currentLanguage);
   const marketOptions = getMarkets(t, 'options');
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+      } catch (error) {
+        console.error('Failed to fetch ETH price:', error);
+        setEthPrice(4700); // Fallback price
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Helper function to convert ETH to USD
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
 
   // State for shuffled markets to avoid hydration mismatch
   const [shuffledMarkets, setShuffledMarkets] = useState(marketOptions);
@@ -450,13 +486,15 @@ export default function App() {
 
               {/* Right-side button group - closer together */}
               <div className="flex items-center gap-2">
-                {/* Ideas link */}
-                <button
-                  onClick={() => setActiveSection('ideas')}
-                  className={`hidden md:inline-flex bg-gray-100 text-gray-700 hover:text-black font-medium text-sm md:text-base transition-colors duration-200 z-10 relative px-3 py-1 rounded-md hover:bg-purple-100 ${isConnected ? 'translate-x-16' : 'translate-x-6'}`}
-                >
-                  Ideas
-                </button>
+                {/* Balance display */}
+                {isConnected && (
+                  <div className={`hidden md:flex flex-col items-center bg-transparent text-gray-700 font-medium text-sm transition-colors duration-200 z-10 relative px-4 py-1 rounded-md min-w-fit translate-x-16`}>
+                    <div className="text-xs text-gray-500 whitespace-nowrap">Your balance</div>
+                    <div className="text-sm font-semibold text-green-600 whitespace-nowrap">
+                      {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+                    </div>
+                  </div>
+                )}
 
                 {/* Bell button - separate from wallet */}
                 {isConnected && !(isNavigationMenuOpen && isMobile) && (
@@ -894,7 +932,9 @@ export default function App() {
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <span className="text-[13px] font-medium">My Pots</span>
+            <span className="text-[11px] md:text-[13px] font-medium -translate-x-1 truncate max-w-[60px]">
+              {isConnected && ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+            </span>
           </button>
         </div>
         </div>
