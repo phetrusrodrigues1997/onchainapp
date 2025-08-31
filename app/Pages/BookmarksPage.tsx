@@ -351,9 +351,9 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
               <div className="flex items-center gap-2 mb-6">
                 <Users className="w-6 h-6 text-green-600" />
                 <h2 className="text-xl font-bold text-gray-900">Pots You've Entered</h2>
-                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
+                {/* <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
                   {userPots.length} Active
-                </span>
+                </span> */}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
