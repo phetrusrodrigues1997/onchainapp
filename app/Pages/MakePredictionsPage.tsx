@@ -1188,7 +1188,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         {/* Universal Dual Timer System - Always Visible */}
         <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-2xl shadow-gray-900/10">
           <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-4 sm:mb-6">Important Information</h3>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-4 sm:mb-6">You must return tomorrow</h3>
             
 
             {/* New Question Timer */}
@@ -1218,7 +1218,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               return (
                 <div className={`${containerClass} rounded-xl p-3 sm:p-4`}>
                   <div className="flex items-center justify-between">
-                    <div className={`${textClass} font-bold text-sm sm:text-base`}>New Question</div>
+                    <div className={`${textClass} font-bold text-sm sm:text-base`}>Next Question in:</div>
                     <div className="flex items-center gap-2 sm:gap-3">
                       <div className={`w-5 h-5 sm:w-6 sm:h-6 ${iconClass} rounded-full flex items-center justify-center`}>
                         <Clock className="w-3 h-3 text-white" />
