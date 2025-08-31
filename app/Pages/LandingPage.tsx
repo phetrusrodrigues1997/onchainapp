@@ -116,10 +116,30 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const loadMoreMarkets = () => {
     if (isLoadingMore) return;
     
+    // Get marketOptions to avoid reference before initialization
+    const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
+    
+    // Check if there are actually more markets to load
+    const totalAvailableMarkets = searchQuery 
+      ? currentMarketOptions.filter(option => {
+          const marketData = getMarkets(getTranslation(currentLanguage), option.id);
+          const market = marketData[0];
+          return market && (
+            market.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            market.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }).length
+      : currentMarketOptions.length;
+    
+    // Don't load more if we've already displayed all available markets
+    if (displayedMarketsCount >= totalAvailableMarkets) {
+      return;
+    }
+    
     setIsLoadingMore(true);
     // Simulate loading delay for better UX
     setTimeout(() => {
-      setDisplayedMarketsCount(prev => prev + MARKETS_PER_PAGE);
+      setDisplayedMarketsCount(prev => Math.min(prev + MARKETS_PER_PAGE, totalAvailableMarkets));
       setIsLoadingMore(false);
     }, 500);
   };
@@ -134,6 +154,26 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     const handleScroll = () => {
       if (isLoadingMore) return;
       
+      // Get marketOptions inside the effect to avoid reference before initialization
+      const currentMarketOptions = getMarkets(getTranslation(currentLanguage), 'options');
+      
+      // Check if there are more markets to load before triggering scroll load
+      const totalAvailableMarkets = searchQuery 
+        ? currentMarketOptions.filter(option => {
+            const marketData = getMarkets(getTranslation(currentLanguage), option.id);
+            const market = marketData[0];
+            return market && (
+              market.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              market.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+          }).length
+        : currentMarketOptions.length;
+      
+      // Don't trigger loading if we've already displayed all available markets
+      if (displayedMarketsCount >= totalAvailableMarkets) {
+        return;
+      }
+      
       // Check if user scrolled near bottom of page
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
@@ -146,7 +186,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoadingMore]);
+  }, [isLoadingMore, displayedMarketsCount, searchQuery, currentLanguage]);
   
   
 
