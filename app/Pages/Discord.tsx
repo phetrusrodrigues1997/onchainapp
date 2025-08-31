@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaDiscord } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 interface FAQItem {
   question: string;
@@ -135,17 +136,19 @@ const HowItWorksSection: React.FC = () => {
             href="https://discord.gg/8H9Hxc4Y"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors text-sm"
           >
-            Discord Support
+            <FaDiscord size={16} />
+            <span>Discord Support</span>
           </a>
           <a
             href="https://x.com/Prediwin"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+            className="flex items-center space-x-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
           >
-            Follow on X
+            <FaXTwitter size={16} />
+            <span>Follow on X</span>
           </a>
         </div>
       </div>

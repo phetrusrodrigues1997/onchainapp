@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAccount } from 'wagmi';
+import { FaDiscord } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 interface NavigationMenuProps {
   activeSection: string;
@@ -50,28 +52,94 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
         {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Menu dropdown - shown for both desktop and mobile when hamburger is clicked */}
+      {/* Menu dropdown/overlay - different styles for mobile and desktop */}
       {isMenuOpen && (
-        <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg left-0">
-        <div className="py-2">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveSection(item.id);
-                setIsMenuOpen(false);
-              }}
-              className={`block w-full text-left px-4 py-2 ${
-                activeSection === item.id
-                  ? 'bg-gray-100 text-[#000070]'
-                  : 'text-black hover:bg-gray-50'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
+        <>
+          {isMobile ? (
+            // Mobile overlay with peek-through background
+            <div className="fixed top-0 left-0 w-4/5 h-full bg-white z-50 flex flex-col shadow-lg">
+              {/* Header with close button */}
+              <div className="flex justify-end p-4">
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-2 rounded-lg"
+                  aria-label="Close menu"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              {/* Menu items - pushed higher */}
+              <div className="flex flex-col justify-start px-6 -mt-16">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`block w-full text-left py-4 text-lg border-b border-gray-100 ${
+                      activeSection === item.id
+                        ? 'text-[#000070] font-medium'
+                        : 'text-black hover:text-[#000070]'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Social media buttons */}
+              <div className="px-6 py-6 border-t border-gray-100 mt-auto">
+                <p className="text-gray-600 text-sm mb-4 text-center">
+                  Still have questions? Join our community for more support.
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <a
+                    href="https://discord.gg/8H9Hxc4Y"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors text-sm"
+                  >
+                    <FaDiscord size={16} />
+                    <span>Discord Support</span>
+                  </a>
+                  <a
+                    href="https://x.com/Prediwin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                  >
+                    <FaXTwitter size={16} />
+                    <span>Follow on X</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Desktop dropdown (unchanged)
+            <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg left-0">
+              <div className="py-2">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveSection(item.id);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`block w-full text-left px-4 py-2 ${
+                      activeSection === item.id
+                        ? 'bg-gray-100 text-[#000070]'
+                        : 'text-black hover:bg-gray-50'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </nav>
   );
