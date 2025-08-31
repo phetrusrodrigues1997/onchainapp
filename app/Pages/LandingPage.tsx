@@ -592,7 +592,7 @@ const handleMarketClick = (marketId: string) => {
             
             {/* Title */}
             <h1 className="text-3xl font-black text-purple-700 mb-4 tracking-tight">Prediwin</h1>
-            <p className="text-gray-600 text-base mb-8">Loading prediction markets...</p>
+            <p className="text-gray-600 text-base mb-8">Loading your questions...</p>
             
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
@@ -938,7 +938,7 @@ const handleMarketClick = (marketId: string) => {
       {isLoadingMore && (
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-700"></div>
-          <span className="ml-3 text-gray-600">Loading more markets...</span>
+          <span className="ml-3 text-gray-600">Loading more pots...</span>
         </div>
       )}
       
@@ -948,7 +948,7 @@ const handleMarketClick = (marketId: string) => {
             onClick={loadMoreMarkets}
             className="bg-purple-700 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
           >
-            Load More Markets ({allMarkets - displayedMarketsCount} remaining)
+            Load More Pots ({allMarkets - displayedMarketsCount} remaining)
           </button>
         </div>
       )}
@@ -1157,7 +1157,7 @@ const handleMarketClick = (marketId: string) => {
                 {isLoadingMore && (
                   <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-700"></div>
-                    <span className="ml-4 text-gray-600 text-lg">Loading more markets...</span>
+                    <span className="ml-4 text-gray-600 text-lg">Loading more pots...</span>
                   </div>
                 )}
                 
@@ -1167,7 +1167,7 @@ const handleMarketClick = (marketId: string) => {
                       onClick={loadMoreMarkets}
                       className="bg-purple-700 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
                     >
-                      Load More Markets ({allMarkets - displayedMarketsCount} remaining)
+                      Load More Pots ({allMarkets - displayedMarketsCount} remaining)
                     </button>
                   </div>
                 )}

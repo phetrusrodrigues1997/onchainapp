@@ -417,7 +417,7 @@ export default function App() {
                   </div>
                   <input
                     type="text"
-                    placeholder="Search markets..."
+                    placeholder="Search pots..."
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
                     className="w-[530px] pl-10 pr-10 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
@@ -605,7 +605,7 @@ export default function App() {
         }}
         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
       >
-        My markets
+        My pots
       </button>
     </div>
   </div>
@@ -630,7 +630,7 @@ export default function App() {
           </div>
           <input
             type="text"
-            placeholder="Search markets..."
+            placeholder="Search pots..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-transparent border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors duration-200"
@@ -894,7 +894,7 @@ export default function App() {
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
             </div>
-            <span className="text-[13px] font-medium">My Markets</span>
+            <span className="text-[13px] font-medium">My Pots</span>
           </button>
         </div>
         </div>

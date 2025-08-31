@@ -169,7 +169,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
             <div className="w-8 h-8 border-2 border-white rounded-full"></div>
           </div>
           <h2 className="text-2xl font-semibold text-black mb-4">Wallet Connection Required</h2>
-          <p className="text-black mb-6">Connect your wallet to access live prediction markets and start earning rewards.</p>
+          <p className="text-black mb-6">Connect your wallet to access live prediction pots and start earning rewards.</p>
         </div>
       </div>
     );
@@ -214,7 +214,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
               <div>
                 <div className="flex items-center mb-3">
                   <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
-                  <h3 className="text-lg font-semibold text-black">Enter Market</h3>
+                  <h3 className="text-lg font-semibold text-black">Enter Pot</h3>
                 </div>
                 <button
                   onClick={handleEnterPot}
@@ -224,7 +224,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
                   {isLoading && lastAction === 'enter' ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Entering Market...
+                      Entering Pot...
                     </>
                   ) : (
                     `Enter ($${ENTRY_FEE_USD.toFixed(2)})`
@@ -245,7 +245,7 @@ export default function LiveMarketPotEntry({ onPotEntered, contractAddress }: Li
             <div className="space-y-3">
               <div className="flex items-start">
                 <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">1</div>
-                <p className="text-black">Pay $0.01 (in ETH) to enter the live prediction market</p>
+                <p className="text-black">Pay $0.01 (in ETH) to enter the live prediction pot</p>
               </div>
               <div className="flex items-start">
                 <div className="w-6 h-6 bg-purple-700 rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">2</div>

@@ -329,7 +329,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
     // Simple check - just check database state (more reliable than on-chain)
     if (userParticipant) {
-      showAlert('You have already entered this market.', 'warning', 'Already Entered');
+      showAlert('You have already entered this pot.', 'warning', 'Already Entered');
       return;
     }
 
@@ -463,7 +463,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       const result = await updatePotDetails(contractAddress, address, updates);
       
       if (result.success) {
-        showAlert('Market details updated successfully!', 'success', 'Updated!');
+        showAlert('Pot details updated successfully!', 'success', 'Updated!');
         // Refresh pot details
         const details = await getPotDetails(contractAddress);
         setPotDetails(details);
@@ -475,7 +475,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
       }
     } catch (error) {
       console.error('Error updating pot details:', error);
-      showAlert('Failed to update market details', 'error', 'Update Failed');
+      showAlert('Failed to update pot details', 'error', 'Update Failed');
     }
   };
 
@@ -589,7 +589,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
       } catch (error) {
         console.error('Error distributing pot:', error);
-        showAlert('Failed to distribute market. Check console for details.', 'error', 'Distribution Failed');
+        showAlert('Failed to distribute pot. Check console for details.', 'error', 'Distribution Failed');
         // Reset states on error
         setLastAction('');
         setIsLoading(false);
@@ -675,12 +675,12 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
   // Show loading screen for first 2 seconds
   if (isInitialLoading) {
-    return <LoadingScreen title="Prediwin" subtitle="Preparing your prediction market..." />;
+    return <LoadingScreen title="Prediwin" subtitle="Preparing your prediction pot..." />;
   }
 
   // Show loading while pot details are being fetched
   if (isPotLoading && !isInitialLoading) {
-    return <LoadingScreen title="Prediwin" subtitle="Loading market details..." />;
+    return <LoadingScreen title="Prediwin" subtitle="Loading pot details..." />;
   }
 
   // Show error if pot doesn't exist after loading attempt
@@ -693,9 +693,9 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Market Not Found</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Pot Not Found</h2>
           <p className="text-gray-600 mb-6">
-            This prediction market doesn't exist or hasn't been registered in our system yet.
+            This prediction pot doesn't exist or hasn't been registered in our system yet.
           </p>
           <div className="space-y-3 mb-6">
             <p className="text-sm text-gray-500">Contract Address:</p>
@@ -723,7 +723,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             className="text-gray-600 hover:text-black mb-6 flex items-center gap-2 font-medium transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Markets
+            Back to Pots
           </button>
           
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
@@ -803,7 +803,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             {/* Market Details Section */}
             <div className="mb-8 pb-6 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Market Details</h3>
+                <h3 className="text-lg font-medium text-gray-900">Pot Details</h3>
                 {!isEditingDetails && (
                   <button
                     onClick={startEditingDetails}
@@ -820,13 +820,13 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               {isEditingDetails ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Market Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Pot Name</label>
                     <input
                       type="text"
                       value={editingPotName}
                       onChange={(e) => setEditingPotName(e.target.value)}
                       className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                      placeholder="Enter market name"
+                      placeholder="Enter pot name"
                     />
                   </div>
                   <div>
@@ -836,7 +836,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                       onChange={(e) => setEditingDescription(e.target.value)}
                       className="w-full text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent resize-none"
                       rows={3}
-                      placeholder="Enter market description"
+                      placeholder="Enter pot description"
                     />
                   </div>
                   <div className="flex gap-3">
@@ -858,8 +858,8 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
               ) : (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="mb-3">
-                    <div className="text-sm text-gray-600 mb-1">Market Name:</div>
-                    <div className="font-medium text-gray-900">{potDetails?.potName || 'Unnamed Market'}</div>
+                    <div className="text-sm text-gray-600 mb-1">Pot Name:</div>
+                    <div className="font-medium text-gray-900">{potDetails?.potName || 'Unnamed Pot'}</div>
                   </div>
                   <div>
                     <div className="text-sm text-gray-600 mb-1">Description:</div>
@@ -994,7 +994,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
 
             {/* Status Info */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Market Status</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Pot Status</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Accepting Entries:</span>
@@ -1032,7 +1032,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
           {/* Enter Market */}
           {!userParticipant && isAcceptingEntries && (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Enter Market</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Enter Pot</h2>
               
               <div className="bg-gray-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
@@ -1066,10 +1066,10 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                     ) : isPending || isConfirming ? (
                       <div className="flex items-center justify-center gap-3">
                         <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm sm:text-base">Entering Market...</span>
+                        <span className="text-sm sm:text-base">Entering Pot...</span>
                       </div>
                     ) : (
-                      'Enter Market'
+                      'Enter Pot'
                     )}
                   </button>
                 </div>
@@ -1128,7 +1128,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                   <Target className="w-6 h-6 text-purple-600" />
                 </div>
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">Vote on Outcome</h2>
-                <p className="text-gray-600 text-sm sm:text-base">What outcome do you think this market should have?</p>
+                <p className="text-gray-600 text-sm sm:text-base">What outcome do you think this pot should have?</p>
               </div>
 
               {/* Outcome Voting Progress */}
@@ -1216,7 +1216,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                       </button>
                     </div>
                     <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
-                      Your vote helps determine the final outcome of this market
+                      Your vote helps determine the final outcome of this pot
                     </p>
                   </div>
                 )}
@@ -1244,7 +1244,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Market Participants</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Pot Participants</h2>
                 <p className="text-sm text-gray-500 mt-1">{participantsData.length} participants</p>
               </div>
               <button
@@ -1268,7 +1268,7 @@ const PrivatePotInterface: React.FC<PrivatePotInterfaceProps> = ({
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Participants Yet</h3>
-                  <p className="text-gray-500">This market doesn't have any participants yet.</p>
+                  <p className="text-gray-500">This pot doesn't have any participants yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">

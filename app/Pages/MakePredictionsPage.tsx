@@ -335,7 +335,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     // Set the market question if available
     if (savedQuestion) {
       setMarketQuestion(savedQuestion);
-      console.log('Loaded market question:', savedQuestion);
+      console.log('Loaded pot question:', savedQuestion);
     }
     
     // Validate contract address is in our allowed list
@@ -440,7 +440,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         console.log('No provisional outcome set yet');
       }
     } catch (error) {
-      console.error('Error loading market outcome:', error);
+      console.error('Error loading pot outcome:', error);
     }
   }, [contractAddress, selectedTableType, address, loadUserEvidenceSubmission]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -654,10 +654,10 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const refreshMarketData = async () => {
     try {
       await loadMarketOutcome();
-      showMessage('Market data refreshed');
+      showMessage('Pot data refreshed');
     } catch (error) {
-      console.error('Error refreshing market data:', error);
-      showMessage('Failed to refresh market data');
+      console.error('Error refreshing pot data:', error);
+      showMessage('Failed to refresh pot data');
     }
   };
 
@@ -721,9 +721,9 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               <Shield className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Access Required</h1>
-            <p className="text-gray-600 mb-8 text-lg">You must join the market first</p>
+            <p className="text-gray-600 mb-8 text-lg">You must join the pot first</p>
             <button className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300">
-              Enter Market
+              Enter Pot
             </button>
           </div>
         </div>
@@ -758,7 +758,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Re-entry Required</h2>
               <p className="text-gray-600 text-sm mb-6">
-                Wrong prediction in {selectedTableType === 'featured' ? 'Trending Market' : 'Crypto Market'}. Pay today&apos;s entry fee to continue.
+                Wrong prediction in {selectedTableType === 'featured' ? 'Trending' : 'Crypto'}. Pay today&apos;s entry fee to continue.
               </p>
               
               <button
@@ -958,7 +958,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                       </p>
                       <div className="bg-gray-100 rounded-2xl p-6 border border-gray-200">
                         <p className="text-gray-700 font-medium">
-                          The market outcome is now final and pot distribution will proceed
+                          The pot outcome is now final and pot distribution will proceed
                         </p>
                       </div>
                     </div>

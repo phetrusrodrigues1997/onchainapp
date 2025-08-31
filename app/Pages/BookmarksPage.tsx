@@ -191,7 +191,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
         <div className="text-center">
           <Bookmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Connect Your Wallet</h2>
-          <p className="text-gray-600">Connect your wallet to view your bookmarked markets.</p>
+          <p className="text-gray-600">Connect your wallet to view your bookmarked pots.</p>
         </div>
       </div>
     );
@@ -208,9 +208,9 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Bookmark className="w-8 h-8 text-purple-700" />
-            <h1 className="text-3xl font-bold text-gray-900">Your Markets</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Your Pots</h1>
           </div>
-          <p className="text-gray-600">Markets you've bookmarked and entered</p>
+          <p className="text-gray-600">Pots you've bookmarked and entered</p>
         </div>
 
         {/* Tab Navigation */}
@@ -260,12 +260,12 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
             <div className="text-center py-16">
               <Bookmark className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">No bookmarks yet</h2>
-              <p className="text-gray-600 mb-6">Start bookmarking markets to see them here.</p>
+              <p className="text-gray-600 mb-6">Start bookmarking questions to see them here.</p>
               <button
                 onClick={() => setActiveSection('home')}
                 className="bg-purple-700 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
-                Explore Markets
+                Explore
               </button>
             </div>
           ) : (
@@ -320,7 +320,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                       onClick={() => handleViewMarket(bookmark)}
                       className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                     >
-                      {bookmark.contractAddress ? 'View Market' : 'Go to Category'}
+                      {bookmark.contractAddress ? 'View Pot' : 'Go to Category'}
                     </button>
                     {bookmark.contractAddress && (
                       <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full self-center">
@@ -337,20 +337,20 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
           userPots.length === 0 ? (
             <div className="text-center py-16">
               <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">No markets entered yet</h2>
-              <p className="text-gray-600 mb-6">Enter prediction markets to start competing and making predictions.</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">No pots entered yet</h2>
+              <p className="text-gray-600 mb-6">Enter prediction pots to start competing and making predictions.</p>
               <button
                 onClick={() => setActiveSection('home')}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
-                Find Markets to Enter
+                Find Pots to Enter
               </button>
             </div>
           ) : (
             <div>
               <div className="flex items-center gap-2 mb-6">
                 <Users className="w-6 h-6 text-green-600" />
-                <h2 className="text-xl font-bold text-gray-900">Markets You've Entered</h2>
+                <h2 className="text-xl font-bold text-gray-900">Pots You've Entered</h2>
                 <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
                   {userPots.length} Active
                 </span>
@@ -359,7 +359,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userPots.map((contractAddress) => {
                   const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                  const marketName = marketType === 'featured' ? 'Trending Market' : 'Crypto Market';
+                  const marketName = marketType === 'featured' ? 'Trending' : 'Crypto';
                   
                   return (
                     <button 
@@ -384,7 +384,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                       </div>
                       
                       <div className="text-sm text-gray-600 mb-3">
-                        You're participating in this market. Click to make predictions and check your status.
+                        You're participating in this pot. Click to make predictions and check your status.
                       </div>
                       
                       <div className="flex items-center justify-between">
@@ -404,10 +404,10 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                 <div className="flex items-start gap-3">
                   <Trophy className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-green-900 mb-1">Your Active Markets</h4>
+                    <h4 className="font-semibold text-green-900 mb-1">Your Active Pots</h4>
                     <p className="text-green-700 text-sm">
-                      You're currently participating in {userPots.length} prediction market{userPots.length !== 1 ? 's' : ''}. 
-                      Click on any market above to make predictions and compete for the pot.
+                      You're currently participating in {userPots.length} pot{userPots.length !== 1 ? 's' : ''}. 
+                      Click on any pot above to make predictions and compete for the pot.
                     </p>
                   </div>
                 </div>

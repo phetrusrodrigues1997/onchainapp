@@ -917,7 +917,7 @@ useEffect(() => {
 
   // Show loading screen for first 2 seconds or during post-entry processing
   if (isInitialLoading || postEntryLoading) {
-    return <LoadingScreen title="Prediwin" subtitle="Preparing your markets..." />;
+    return <LoadingScreen title="Prediwin" subtitle="Preparing your pots..." />;
   }
 
   return (
@@ -1021,13 +1021,13 @@ useEffect(() => {
                   ⚠️ Re-entry Required
                 </div>
                 <div className="text-gray-600 font-light mb-4 leading-relaxed">
-                  You made a wrong prediction in <span className="font-medium">{selectedTableType === 'featured' ? 'Trending Market' : 'Crypto Market'}</span> and need to pay <span className="font-medium">today's entry fee</span> to re-enter this specific market.
+                  You made a wrong prediction in <span className="font-medium">{selectedTableType === 'featured' ? 'Trending' : 'Crypto'}</span> and need to pay <span className="font-medium">today's entry fee</span> to re-enter this specific pot.
                 </div>
                 
                 
                 
                 <div className="text-gray-500 text-sm mb-6 font-light">
-                  Pay the re-entry fee to resume predicting in this market
+                  Pay the re-entry fee to resume predicting in this pot
                 </div>
                 
                 <button
@@ -1341,7 +1341,7 @@ useEffect(() => {
             
             // 🔔 Send notifications after successful outcome setting
             try {
-              console.log("📢 Sending market outcome notifications...");
+              console.log("📢 Sending pot outcome notifications...");
               
               // Notify market outcome
               await notifyMarketOutcome(
@@ -1359,7 +1359,7 @@ useEffect(() => {
                 await notifyEliminatedUsers(contractAddress, estimatedEliminatedCount, selectedTableType);
               }
               
-              console.log("✅ Market outcome notifications sent successfully");
+              console.log("✅ Pot outcome notifications sent successfully");
             } catch (notificationError) {
               console.error("❌ Notification failed (core operation still succeeded):", notificationError);
               // Don't show error to user - notifications are supplementary

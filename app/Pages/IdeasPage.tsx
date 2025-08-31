@@ -236,7 +236,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
           <div className="text-center py-12 text-gray-500">
             <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-medium mb-2">No ideas yet</h3>
-            <p className="mb-6">Be the first to share a prediction market insight!</p>
+            <p className="mb-6">Be the first to share a prediction insight!</p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="bg-purple-700 text-white px-6 py-2 rounded-full font-medium hover:bg-purple-700 transition-colors"
@@ -362,7 +362,7 @@ const IdeasPage = ({ activeSection, setActiveSection }: IdeasPageProps) => {
                     <textarea
                       value={idea}
                       onChange={(e) => setIdea(e.target.value)}
-                      placeholder="Share your prediction market insight, strategy, or question..."
+                      placeholder="Share your prediction insight, strategy, or question..."
                       rows={4}
                       className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-1000 focus:border-purple-1000 resize-none"
                       maxLength={500}

@@ -180,7 +180,7 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
           <div className="grid md:grid-cols-3 gap-4">
             <button
               onClick={() => {
-                const text = `Join me on PrediWin prediction markets! Use my referral code ${referralCode} when entering your first pot. https://prediwin.com`;
+                const text = `Join me on PrediWin! Use my referral code ${referralCode} when entering your first pot. https://prediwin.com`;
                 navigator.clipboard.writeText(text);
                 showMessage('Message copied to clipboard');
               }}
@@ -195,7 +195,7 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
             </button>
             
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me on PrediWin prediction markets! Use my referral code ${referralCode} when entering your first pot.`)}&url=https://prediwin.com`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Join me on PrediWin! Use my referral code ${referralCode} when entering your first pot.`)}&url=https://prediwin.com`}
               target="_blank"
               rel="noopener noreferrer"
               className="group p-6 bg-white border border-gray-300 hover:border-black hover:bg-black transition-all duration-200 text-center block"
@@ -210,7 +210,7 @@ const ReferralProgram = ({ setActiveSection }: ReferralProgramProps) => {
             
             <button
               onClick={() => {
-                const text = `Join me on PrediWin prediction markets! Use my referral code ${referralCode} when entering your first pot. https://prediwin.com`;
+                const text = `Join me on PrediWin! Use my referral code ${referralCode} when entering your first pot. https://prediwin.com`;
                 if (navigator.share) {
                   navigator.share({
                     title: 'PrediWin Referral',

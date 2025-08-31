@@ -303,7 +303,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                       {/* Market-specific badge */}
                       {announcement.isContractSpecific && (
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                          🎯 Market Update
+                          🎯 Pot Update
                         </span>
                       )}
                       

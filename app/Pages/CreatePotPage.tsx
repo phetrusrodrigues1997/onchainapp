@@ -60,7 +60,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
   React.useEffect(() => {
     if (isConfirmed && receipt) {
       // Simple success - let user check transaction manually if needed
-      showAlert('Market created successfully! Transaction confirmed on Base network.', 'success', 'Success!');
+      showAlert('Pot created successfully! Transaction confirmed on Base network.', 'success', 'Success!');
       
       // Try to extract clone address, but don't fail if we can't
       try {
@@ -90,7 +90,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
   // Handle My Markets button click with loading screen
   const handleMyMarketsClick = async () => {
     if (!address) {
-      showAlert('Please connect your wallet to view your markets', 'warning', 'Wallet Required');
+      showAlert('Please connect your wallet to view your pots', 'warning', 'Wallet Required');
       return;
     }
     
@@ -123,7 +123,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
     // Check if pot exists in database
     const potDetails = await getPotDetails(joinAddress);
     if (!potDetails) {
-      showAlert('Market not found. Make sure the contract address is correct.', 'error', 'Market Not Found');
+      showAlert('Pot not found. Make sure the contract address is correct.', 'error', 'Pot Not Found');
       return;
     }
 
@@ -146,7 +146,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
       });
     } catch (error) {
       console.error('Error creating pot:', error);
-      showAlert('Failed to create market. Please try again.', 'error', 'Creation Failed');
+      showAlert('Failed to create pot. Please try again.', 'error', 'Creation Failed');
     }
   };
 
@@ -162,7 +162,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
               <Check className="w-8 h-8 text-white" />
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Market Created!</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Pot Created!</h1>
             <p className="text-lg text-gray-600 mb-8">
               &quot;{potName}&quot; is now live and ready for participants
             </p>
@@ -174,7 +174,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
                   className="bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
                 >
                   <ExternalLink className="w-4 h-4" />
-                  Open Market
+                  Open Pot
                 </button>
               )}
               <button
@@ -211,13 +211,13 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
           </button>
           
           {/* Simple Header */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Markets</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">My Pots</h1>
 
           {/* Markets List */}
           <div className="space-y-4">
             {myPots.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600 mb-6">You haven&apos;t created any markets yet.</p>
+                <p className="text-gray-600 mb-6">You haven&apos;t created any pots yet.</p>
                 <button
                   onClick={() => {
                     setShowMyPots(false);
@@ -225,7 +225,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
                   }}
                   className="bg-purple-700 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors"
                 >
-                  Create Your First Market
+                  Create Your First Pot
                 </button>
               </div>
             ) : (
@@ -277,13 +277,13 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
           </button>
           
           {/* Simple Header */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Create Market</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Create Pot</h1>
 
           {/* Simple Form */}
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Market Name
+                Pot Name
               </label>
               <input
                 type="text"
@@ -319,13 +319,13 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
                   {isPending ? 'Creating...' : 'Confirming...'}
                 </>
               ) : (
-                'Create Market'
+                'Create Pot'
               )}
             </button>
             
             {!address && (
               <p className="text-center text-sm text-purple-1000">
-                Connect your wallet to create a market
+                Connect your wallet to create a pot
               </p>
             )}
           </div>
@@ -342,7 +342,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
         {/* Simple Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Private Markets <span className="text-4xl">🎉</span>
+            Private Pots <span className="text-4xl">🎉</span>
           </h1>
         
           
@@ -375,7 +375,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
             onClick={() => setShowCreateForm(true)}
             className="w-full bg-black text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-gray-500 transition-colors"
           >
-            Create New Market
+            Create New Pot
           </button>
           
           <button
@@ -389,7 +389,7 @@ const CreatePotPage = ({ navigateToPrivatePot }: CreatePotPageProps) => {
                 Loading...
               </>
             ) : (
-              'My Markets'
+              'My Pots'
             )}
           </button>
         </div>

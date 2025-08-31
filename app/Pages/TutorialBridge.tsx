@@ -206,13 +206,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     // Get selected market from cookie
     const getSelectedMarket = () => {
       const selectedMarketAddress = Cookies.get('selectedMarket');
-      console.log('Selected market address from cookie:', selectedMarketAddress);
+      console.log('Selected pot address from cookie:', selectedMarketAddress);
       
       // Check if the selected market address exists in our CONTRACT_ADDRESSES
       if (selectedMarketAddress && selectedMarketAddress in CONTRACT_ADDRESSES) {
         const marketType = CONTRACT_ADDRESSES[selectedMarketAddress as keyof typeof CONTRACT_ADDRESSES];
         setMarketInfo({ 
-          name: marketType === 'featured' ? 'Trending Market' : 'Crypto Market', 
+          name: marketType === 'featured' ? 'Trending' : 'Crypto', 
           section: 'bitcoinPot',  // Both markets use the same section, PredictionPotTest handles the difference
           address: selectedMarketAddress 
         });
@@ -220,7 +220,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         // Default to first market if no cookie or unknown address
         const defaultAddress = contractAddresses[0];
         setMarketInfo({ 
-          name: 'Trending Market', 
+          name: 'Trending', 
           section: 'bitcoinPot',
           address: defaultAddress 
         });
@@ -243,13 +243,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <Trophy className="w-8 h-8 text-purple-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Markets</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Pots</h2>
           <div className="flex items-center justify-center space-x-2 text-gray-600">
             <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
             <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
             <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
-          <p className="text-gray-500 text-sm mt-4">Fetching latest prices and market data...</p>
+          <p className="text-gray-500 text-sm mt-4">Fetching latest prices and pot data...</p>
         </div>
       </div>
     );
@@ -267,7 +267,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Fund Your Account</h2>
               <p className="text-gray-600 mb-6">
-                You need at least $0.01 worth of ETH to participate in prediction markets. 
+                You need at least $0.01 worth of ETH to participate in prediction pots. 
                 Current balance: <span className="font-semibold text-red-500">
                   ${ethBalance.data ? ethToUsd(ethBalance.data.value).toFixed(4) : '$0.00'}
                 </span>
@@ -333,7 +333,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   }}
 >
   <span className="md:hidden">Enter →</span>
-  <span className="hidden md:inline">Enter Market →</span>
+  <span className="hidden md:inline">Enter Pot →</span>
 </button>
 
           
@@ -395,22 +395,22 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               onClick={() => setShowActiveMarkets(!showActiveMarkets)}
               className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
-              <h4 className="font-semibold mb-1">My Markets</h4>
-              <p className="text-sm text-gray-600">View markets you've already entered</p>
+              <h4 className="font-semibold mb-1">My Pots</h4>
+              <p className="text-sm text-gray-600">View pots you've already entered</p>
             </button>
             
             {/* User's Active Markets - Mobile: Show right after Make Predictions button */}
             {showActiveMarkets && isConnected && userPots.length > 0 && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold">Your Active Markets</h3>
+                  <h3 className="text-lg font-bold">Your Active Pots</h3>
                   <Trophy className="w-5 h-5 text-black" />
                 </div>
                 
                 <div className="grid grid-cols-1 gap-3">
                   {userPots.map((contractAddress) => {
                     const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                    const marketName = marketType === 'featured' ? 'Trending Market' : 'Crypto Market';
+                    const marketName = marketType === 'featured' ? 'Trending' : 'Crypto';
                     
                     const handleMarketClick = () => {
                       Cookies.set('selectedMarket', contractAddress);
@@ -443,12 +443,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             {/* Mobile: Show message if no active markets */}
             {showActiveMarkets && isConnected && userPots.length === 0 && (
               <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600 mb-3">You haven't entered any markets yet.</p>
+                <p className="text-gray-600 mb-3">You haven't entered any pots yet.</p>
                 <button 
                   onClick={() => setActiveSection('bitcoinPot')}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
                 >
-                  Enter a Market →
+                  Enter a Pot →
                 </button>
               </div>
             )}
@@ -456,7 +456,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             {/* Mobile: Show connect wallet message */}
             {showActiveMarkets && !isConnected && (
               <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600">Connect your wallet to see your active markets.</p>
+                <p className="text-gray-600">Connect your wallet to see your active pots.</p>
               </div>
             )}
             
@@ -464,8 +464,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               onClick={() => setActiveSection('createPot')}
               className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
             >
-              <h4 className="font-semibold mb-1">Create Private Market</h4>
-              <p className="text-sm text-gray-600">Deploy your own prediction market</p>
+              <h4 className="font-semibold mb-1">Create Private Pot</h4>
+              <p className="text-sm text-gray-600">Deploy your own prediction pot</p>
             </button>
             
             <button 
@@ -485,15 +485,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
               >
                 <h4 className="font-semibold mb-1">Make Predictions</h4>
-                <p className="text-sm text-gray-600">Predict on markets you've already entered</p>
+                <p className="text-sm text-gray-600">Predict on pots you've already entered</p>
               </button>
               
               <button 
                 onClick={() => setActiveSection('createPot')}
                 className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
               >
-                <h4 className="font-semibold mb-1">Create Private Market</h4>
-                <p className="text-sm text-gray-600">Deploy your own prediction market</p>
+                <h4 className="font-semibold mb-1">Create Private Pot</h4>
+                <p className="text-sm text-gray-600">Deploy your own prediction pot</p>
               </button>
               
               <button 
@@ -509,14 +509,14 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             {showActiveMarkets && isConnected && userPots.length > 0 && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold">Your Active Markets</h3>
+                  <h3 className="text-lg font-bold">Your Active Pots</h3>
                   <Trophy className="w-5 h-5 text-black" />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {userPots.map((contractAddress) => {
                     const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                    const marketName = marketType === 'featured' ? 'Trending Market' : 'Crypto Market';
+                    const marketName = marketType === 'featured' ? 'Trending' : 'Crypto';
                     
                     const handleMarketClick = () => {
                       Cookies.set('selectedMarket', contractAddress);
@@ -549,12 +549,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             {/* Desktop: Show message if no active markets */}
             {showActiveMarkets && isConnected && userPots.length === 0 && (
               <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600 mb-3">You haven't entered any markets yet.</p>
+                <p className="text-gray-600 mb-3">You haven't entered any pots yet.</p>
                 <button 
                   onClick={() => setActiveSection('bitcoinPot')}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
                 >
-                  Enter a Market →
+                  Enter a pot →
                 </button>
               </div>
             )}
@@ -562,7 +562,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             {/* Desktop: Show connect wallet message */}
             {showActiveMarkets && !isConnected && (
               <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600">Connect your wallet to see your active markets.</p>
+                <p className="text-gray-600">Connect your wallet to see your active pots.</p>
               </div>
             )}
           </div>
