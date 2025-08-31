@@ -1980,19 +1980,21 @@ export async function isMarketBookmarked(walletAddress: string, marketId: string
 
 export async function getPredictionPercentages(marketId: string) {
   try {
-    console.log(`📊 Calculating prediction percentages for market: ${marketId}`);
+    // Use the SAME date calculation functions that store predictions for consistency
+    const tomorrowDateStr = getTomorrowUKDateString(); // Tomorrow's UK date
 
     // Determine which table to query based on market ID
     let totalPositive = 0;
     let totalNegative = 0;
 
     if (marketId === 'Trending' || marketId === 'Featured') {
-      // Query FeaturedBets table
+      // Query FeaturedBets table - only for tomorrow's date
       const featuredBets = await db
         .select({
           prediction: FeaturedBets.prediction
         })
-        .from(FeaturedBets);
+        .from(FeaturedBets)
+        .where(eq(FeaturedBets.betDate, tomorrowDateStr));
       
       featuredBets.forEach(bet => {
         if (bet.prediction === 'positive') {
@@ -2002,12 +2004,13 @@ export async function getPredictionPercentages(marketId: string) {
         }
       });
     } else if (marketId === 'Crypto') {
-      // Query CryptoBets table  
+      // Query CryptoBets table - only for tomorrow's date  
       const cryptoBets = await db
         .select({
           prediction: CryptoBets.prediction
         })
-        .from(CryptoBets);
+        .from(CryptoBets)
+        .where(eq(CryptoBets.betDate, tomorrowDateStr));
       
       cryptoBets.forEach(bet => {
         if (bet.prediction === 'positive') {
@@ -2017,12 +2020,13 @@ export async function getPredictionPercentages(marketId: string) {
         }
       });
     } else if (marketId === 'stocks') {
-      // Query StocksBets table  
+      // Query StocksBets table - only for tomorrow's date  
       const stocksBets = await db
         .select({
           prediction: StocksBets.prediction
         })
-        .from(StocksBets);
+        .from(StocksBets)
+        .where(eq(StocksBets.betDate, tomorrowDateStr));
       
       stocksBets.forEach(bet => {
         if (bet.prediction === 'positive') {
@@ -2041,8 +2045,6 @@ export async function getPredictionPercentages(marketId: string) {
 
     const positivePercentage = Math.round((totalPositive / totalPredictions) * 100);
     const negativePercentage = Math.round((totalNegative / totalPredictions) * 100);
-
-    console.log(`📊 Results for ${marketId}: ${positivePercentage}% positive, ${negativePercentage}% negative (${totalPredictions} total)`);
 
     return {
       positivePercentage,

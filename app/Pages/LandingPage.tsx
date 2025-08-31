@@ -412,7 +412,15 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     };
 
     loadPredictionPercentages();
-  }, []); // Load percentages once on component mount, no dependency on wallet connection
+
+    // Set up periodic refresh every 30 seconds to get latest predictions
+    const interval = setInterval(() => {
+      console.log('📊 Refreshing prediction percentages...');
+      loadPredictionPercentages();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []); // Load percentages once on component mount and set up refresh interval
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
