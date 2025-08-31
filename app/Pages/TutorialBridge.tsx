@@ -58,6 +58,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   
   const { address, isConnected } = useAccount();
 
@@ -71,11 +73,14 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   useEffect(() => {
     const fetchEthPrice = async () => {
       try {
+        setIsLoadingPrice(true);
         const price = await getPrice('ETH');
         setEthPrice(price);
+        setIsLoadingPrice(false);
       } catch (error) {
         console.error('Failed to fetch ETH price:', error);
         setEthPrice(4700); // Fallback price
+        setIsLoadingPrice(false);
       }
     };
 
@@ -86,6 +91,18 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     
     return () => clearInterval(interval);
   }, []);
+
+  // Handle initial loading completion
+  useEffect(() => {
+    // Wait for price to load and wallet connection to be established
+    if (!isLoadingPrice && (isConnected === false || (isConnected && ethBalance.isSuccess))) {
+      const timer = setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 500); // Small delay to ensure smooth transition
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoadingPrice, isConnected, ethBalance.isSuccess]);
 
   // Check user participation in pots
   useEffect(() => {
@@ -217,6 +234,26 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     return () => clearInterval(interval);
   }, []);
 
+
+  // Show loading screen while background processes complete
+  if (isInitialLoad) {
+    return (
+      <div className="min-h-screen bg-white text-black flex items-center justify-center p-6">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <Trophy className="w-8 h-8 text-purple-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Markets</h2>
+          <div className="flex items-center justify-center space-x-2 text-gray-600">
+            <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+          <p className="text-gray-500 text-sm mt-4">Fetching latest prices and market data...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If user has insufficient ETH balance, show funding message
   if (hasInsufficientBalance) {
