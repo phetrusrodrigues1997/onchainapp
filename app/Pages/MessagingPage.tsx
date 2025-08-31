@@ -320,9 +320,15 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                       </div>
                     </div>
                     
-                    <p className="text-gray-800 leading-relaxed text-sm sm:text-base">
-                      {announcement.message}
-                    </p>
+                   <p className="text-gray-800 leading-relaxed text-sm sm:text-base">
+  {announcement.message.split("\n").map((line, i) => (
+    <span key={i}>
+      {line}
+      <br />
+    </span>
+  ))}
+</p>
+
                     
                     {/* Contract address for debugging (you can remove this later) */}
                     {announcement.contractAddress && (
