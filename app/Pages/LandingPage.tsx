@@ -919,23 +919,38 @@ const handleMarketClick = (marketId: string) => {
             <div className="flex justify-between items-center pt-2">
               <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot<span className="ml-4"style={{fontWeight: '350'}}>⇄ Weekly</span></div>
               
-              <button
-                onClick={(e) => handleBookmarkToggle(market, e)}
-                disabled={bookmarkLoading === market.id}
-                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                {bookmarkLoading === market.id ? (
-                  <div className="w-4 h-4 animate-spin rounded-full border-2 border-purple-700 border-t-transparent"></div>
-                ) : (
-                  <Bookmark 
-                    className={`w-4 h-4 transition-all duration-200 ${
-                      bookmarkedMarkets.has(market.id) 
-                        ? 'text-purple-700 fill-purple-700' 
-                        : 'text-gray-500'
-                    }`} 
-                  />
-                )}
-              </button>
+              {(() => {
+                const contractAddress = getContractAddress(market.id);
+                const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
+                
+                if (userIsParticipant) {
+                  return (
+                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
+                      Entered
+                    </div>
+                  );
+                } else {
+                  return (
+                    <button
+                      onClick={(e) => handleBookmarkToggle(market, e)}
+                      disabled={bookmarkLoading === market.id}
+                      className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      {bookmarkLoading === market.id ? (
+                        <div className="w-4 h-4 animate-spin rounded-full border-2 border-purple-700 border-t-transparent"></div>
+                      ) : (
+                        <Bookmark 
+                          className={`w-4 h-4 transition-all duration-200 ${
+                            bookmarkedMarkets.has(market.id) 
+                              ? 'text-purple-700 fill-purple-700' 
+                              : 'text-gray-500'
+                          }`} 
+                        />
+                      )}
+                    </button>
+                  );
+                }
+              })()}
             </div>
           </div>
         </div>
@@ -1154,23 +1169,38 @@ const handleMarketClick = (marketId: string) => {
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
               <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot<span className="ml-4"style={{fontWeight: '350'}}>⇄ Weekly</span></div>
                           
-                          <button
-                            onClick={(e) => handleBookmarkToggle(market, e)}
-                            disabled={bookmarkLoading === market.id}
-                            className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-                          >
-                            {bookmarkLoading === market.id ? (
-                              <div className="w-3 h-3 animate-spin rounded-full border-2 border-purple-700 border-t-transparent"></div>
-                            ) : (
-                              <Bookmark 
-                                className={`w-3 h-3 transition-all duration-200 ${
-                                  bookmarkedMarkets.has(market.id) 
-                                    ? 'text-purple-700 fill-purple-700' 
-                                    : 'text-gray-500 '
-                                }`} 
-                              />
-                            )}
-                          </button>
+                          {(() => {
+                            const contractAddress = getContractAddress(market.id);
+                            const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
+                            
+                            if (userIsParticipant) {
+                              return (
+                                <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
+                                  Entered
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <button
+                                  onClick={(e) => handleBookmarkToggle(market, e)}
+                                  disabled={bookmarkLoading === market.id}
+                                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                                >
+                                  {bookmarkLoading === market.id ? (
+                                    <div className="w-3 h-3 animate-spin rounded-full border-2 border-purple-700 border-t-transparent"></div>
+                                  ) : (
+                                    <Bookmark 
+                                      className={`w-3 h-3 transition-all duration-200 ${
+                                        bookmarkedMarkets.has(market.id) 
+                                          ? 'text-purple-700 fill-purple-700' 
+                                          : 'text-gray-500 '
+                                      }`} 
+                                    />
+                                  )}
+                                </button>
+                              );
+                            }
+                          })()}
                         </div>
                       </div>
                     </div>

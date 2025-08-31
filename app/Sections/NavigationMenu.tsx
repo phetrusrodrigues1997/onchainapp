@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { FaDiscord } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
 
@@ -14,6 +14,7 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -113,6 +114,19 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
                     {item.label}
                   </button>
                 ))}
+                
+                {/* Log out option - only show on mobile when wallet is connected */}
+                {isConnected && (
+                  <button
+                    onClick={() => {
+                      disconnect();
+                      setIsMenuOpen(false);
+                    }}
+                    className="block w-full text-left py-4 text-lg text-red-600 hover:text-red-700 border-t border-gray-100 mt-2"
+                  >
+                    Log out
+                  </button>
+                )}
               </div>
               
               {/* Social media buttons */}

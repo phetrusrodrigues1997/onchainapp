@@ -488,12 +488,15 @@ export default function App() {
               <div className="flex items-center gap-2">
                 {/* Balance display */}
                 {isConnected && (
-                  <div className={`hidden md:flex flex-col items-center bg-transparent text-gray-700 font-medium text-sm transition-colors duration-200 z-10 relative px-4 py-1 rounded-md min-w-fit translate-x-16`}>
+                  <button
+                    onClick={() => setActiveSection('buy')}
+                    className={`hidden md:flex flex-col items-center bg-transparent text-gray-700 font-medium text-sm transition-colors duration-200 z-10 relative px-4 py-1 rounded-md min-w-fit translate-x-16 hover:bg-gray-100 cursor-pointer`}
+                  >
                     <div className="text-xs text-gray-500 whitespace-nowrap">Your balance</div>
-                    <div className="text-sm font-semibold text-green-600 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-purple-700 whitespace-nowrap">
                       {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
                     </div>
-                  </div>
+                  </button>
                 )}
 
                 {/* Bell button - separate from wallet */}
@@ -525,7 +528,20 @@ export default function App() {
                   >
                     {isConnected && (
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-700 via-purple-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
+                        {/* Show balance on mobile, colorful circle on desktop */}
+                        {isMobile ? (
+                          <button
+                            onClick={() => setActiveSection('buy')}
+                            className="flex flex-col items-center bg-transparent text-gray-700 font-medium text-xs hover:bg-gray-100 cursor-pointer px-2 py-1 rounded-md transition-colors duration-200"
+                          >
+                            <div className="text-[10px] text-gray-500 whitespace-nowrap">Balance</div>
+                            <div className="text-xs font-semibold text-purple-700 whitespace-nowrap">
+                              {ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+                            </div>
+                          </button>
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-700 via-purple-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
+                        )}
                       </div>
                     )}
                   </ConnectWallet>
@@ -933,7 +949,7 @@ export default function App() {
               </svg>
             </div>
             <span className="text-[11px] md:text-[13px] font-medium truncate max-w-[60px]">
-              {isConnected && ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : 'My pots'}
+               My pots
             </span>
           </button>
         </div>
