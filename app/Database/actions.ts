@@ -2530,10 +2530,10 @@ export async function getAnnouncementStats() {
       );
     
     return {
-      globalAnnouncements: globalCount[0]?.count || 0,
-      contractAnnouncements: contractCount[0]?.count || 0,
-      recentAnnouncements: recentCount[0]?.count || 0,
-      totalAnnouncements: (globalCount[0]?.count || 0) + (contractCount[0]?.count || 0)
+      globalAnnouncements: Number(globalCount[0]?.count) || 0,
+      contractAnnouncements: Number(contractCount[0]?.count) || 0,
+      recentAnnouncements: Number(recentCount[0]?.count) || 0,
+      totalAnnouncements: (Number(globalCount[0]?.count) || 0) + (Number(contractCount[0]?.count) || 0)
     };
   } catch (error) {
     console.error("❌ Error getting announcement stats:", error);
