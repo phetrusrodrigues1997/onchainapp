@@ -7,10 +7,10 @@ import { FaXTwitter } from 'react-icons/fa6';
 interface NavigationMenuProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
-  
+  onMenuToggle?: (isOpen: boolean) => void;
 }
 
-const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps) => {
+const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: NavigationMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { address, isConnected } = useAccount();
@@ -29,6 +29,13 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     // Clean up
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
+
+  // Notify parent when menu state changes
+  useEffect(() => {
+    if (onMenuToggle) {
+      onMenuToggle(isMenuOpen);
+    }
+  }, [isMenuOpen, onMenuToggle]);
 
 
   // Menu items - different for mobile and desktop

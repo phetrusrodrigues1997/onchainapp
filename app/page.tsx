@@ -50,6 +50,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState(''); // Search functionality
   const [isLandingPageLoading, setIsLandingPageLoading] = useState(activeSection === 'home'); // Track LandingPage loading state
   const [hasUnreadAnnouncementsState, setHasUnreadAnnouncementsState] = useState(false); // Track unread announcements
+  const [isNavigationMenuOpen, setIsNavigationMenuOpen] = useState(false); // Track navigation menu state
 
   // Carousel state
   const [selectedMarket, setSelectedMarket] = useState('Trending');
@@ -393,7 +394,11 @@ export default function App() {
             <div className="flex items-center flex-1">
               {/* Hamburger menu - shows on both desktop and mobile at left edge */}
               <div>
-                <NavigationMenu activeSection={activeSection} setActiveSection={setActiveSection} />
+                <NavigationMenu 
+                  activeSection={activeSection} 
+                  setActiveSection={setActiveSection} 
+                  onMenuToggle={setIsNavigationMenuOpen}
+                />
               </div>
 
               {/* Logo */}
@@ -454,7 +459,7 @@ export default function App() {
                 </button>
 
                 {/* Bell button - separate from wallet */}
-                {isConnected && (
+                {isConnected && !(isNavigationMenuOpen && isMobile) && (
                   <button
                     className="relative p-2 hover:bg-gray-100 rounded-full transition-colors z-50 translate-x-4 md:translate-x-16"
                     onClick={(e) => {

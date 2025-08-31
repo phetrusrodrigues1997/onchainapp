@@ -10,6 +10,7 @@ import {
   getUnreadAnnouncements,
   markAnnouncementsAsRead 
 } from '../Database/actions';
+import LoadingScreen from '../Components/LoadingScreen';
 
 interface Announcement {
   id: number;
@@ -35,6 +36,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [status, setStatus] = useState<string>('');
   
@@ -64,6 +66,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
       setStatus('Failed to load announcements');
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
 
@@ -144,6 +147,17 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
       return `${days}d ago`;
     }
   };
+
+  // Show loading screen during initial load
+  if (initialLoading && isConnected && address) {
+    return (
+      <LoadingScreen 
+        title="Global Announcements"
+        subtitle="Loading your latest updates and notifications..."
+        showProgress={false}
+      />
+    );
+  }
 
   if (!isConnected || !address) {
     return (
