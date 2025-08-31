@@ -833,8 +833,8 @@ const handleMarketClick = (marketId: string) => {
               </div>
             )}
             
-            {/* Header with Icon and Question - Horizontal Layout */}
-            <div className="flex items-center gap-3 mb-3">
+            {/* Header with Icon, Question, and Percentage */}
+            <div className="flex items-start gap-3 mb-3 relative">
               {/* Small Square Image */}
               <div className="flex-shrink-0">
                 <div className="rounded-lg w-16 h-16 bg-white overflow-hidden relative">
@@ -853,7 +853,7 @@ const handleMarketClick = (marketId: string) => {
               </div>
               
               {/* Question */}
-              <div className="flex-1 flex items-start">
+              <div className="flex-1 flex items-start pr-16">
                 <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
                   color: '#000000', 
                   fontWeight: '510',
@@ -864,40 +864,61 @@ const handleMarketClick = (marketId: string) => {
                   {market.question}
                 </p>
               </div>
+
+              {/* Percentage Display - Top Right */}
+              {predictionPercentages[market.tabId || market.id] && (
+                <div className="absolute top-0 right-0">
+                  <div className="text-right flex flex-col items-end">
+                    {/* Thermometer Arc */}
+                    <div className="w-12 h-6 mb-1 relative">
+                      <svg className="w-12 h-6" viewBox="0 0 100 50">
+                        {/* Background arc */}
+                        <path
+                          d="M 10 45 A 40 40 0 0 1 90 45"
+                          stroke="#e5e7eb"
+                          strokeWidth="6"
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                        {/* Progress arc */}
+                        <path
+                          d="M 10 45 A 40 40 0 0 1 90 45"
+                          stroke={
+                            Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                    predictionPercentages[market.tabId || market.id].negativePercentage) >= 80 ? '#10b981' :
+                            Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                    predictionPercentages[market.tabId || market.id].negativePercentage) >= 60 ? '#f59e0b' :
+                            Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                    predictionPercentages[market.tabId || market.id].negativePercentage) >= 40 ? '#f97316' : '#ef4444'
+                          }
+                          strokeWidth="6"
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeDasharray={`${Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                                     predictionPercentages[market.tabId || market.id].negativePercentage) * 1.26} 126`}
+                          className="transition-all duration-300"
+                        />
+                      </svg>
+                    </div>
+                    <div className="text-lg font-bold text-gray-900">
+                      {Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                              predictionPercentages[market.tabId || market.id].negativePercentage)}%
+                    </div>
+                    <div className="text-xs text-gray-500">chance</div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Prediction Percentages */}
-            {predictionPercentages[market.tabId || market.id] ? (
-              <div className="space-y-2 mb-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Positive</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].positivePercentage}%</span>
-                    <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
-                      Yes
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Negative</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
-                    <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
-                      No
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                  YES
-                </button>
-                <button className="bg-purple-100 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-lg font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md">
-                  NO
-                </button>
-              </div>
-            )}
+            {/* Yes/No Buttons - Side by Side in Center */}
+            <div className="flex justify-center gap-2 mb-3">
+              <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-24 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[220px]">
+                Yes
+              </button>
+              <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-24 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[220px]">
+                No
+              </button>
+            </div>
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
@@ -1058,8 +1079,8 @@ const handleMarketClick = (marketId: string) => {
                       <div className="rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white border border-gray-200 hover:border-gray-300">
                         
                         
-                        {/* Header with Icon and Question - Mobile Style Layout */}
-                        <div className="flex items-start gap-3 mb-3">
+                        {/* Header with Icon, Question, and Percentage */}
+                        <div className="flex items-start gap-3 mb-3 relative">
                           {/* Small Square Image */}
                           <div className="flex-shrink-0">
                             <div className="rounded-lg w-20 h-20 bg-white overflow-hidden relative">
@@ -1078,45 +1099,66 @@ const handleMarketClick = (marketId: string) => {
                           </div>
                           
                           {/* Question */}
-                          <div className="flex-1">
+                          <div className="flex-1 pr-16">
                             <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#000000', fontWeight: '510'}}>
                               {market.question}
                             </p>
                           </div>
+
+                          {/* Percentage Display - Top Right */}
+                          {predictionPercentages[market.tabId || market.id] && (
+                            <div className="absolute top-0 right-0">
+                              <div className="text-right flex flex-col items-end">
+                                {/* Thermometer Arc */}
+                                <div className="w-12 h-6 mb-1 relative">
+                                  <svg className="w-12 h-6" viewBox="0 0 100 50">
+                                    {/* Background arc */}
+                                    <path
+                                      d="M 10 45 A 40 40 0 0 1 90 45"
+                                      stroke="#e5e7eb"
+                                      strokeWidth="6"
+                                      fill="none"
+                                      strokeLinecap="round"
+                                    />
+                                    {/* Progress arc */}
+                                    <path
+                                      d="M 10 45 A 40 40 0 0 1 90 45"
+                                      stroke={
+                                        Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                                predictionPercentages[market.tabId || market.id].negativePercentage) >= 80 ? '#10b981' :
+                                        Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                                predictionPercentages[market.tabId || market.id].negativePercentage) >= 60 ? '#f59e0b' :
+                                        Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                                predictionPercentages[market.tabId || market.id].negativePercentage) >= 40 ? '#f97316' : '#ef4444'
+                                      }
+                                      strokeWidth="6"
+                                      fill="none"
+                                      strokeLinecap="round"
+                                      strokeDasharray={`${Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                                                 predictionPercentages[market.tabId || market.id].negativePercentage) * 1.26} 126`}
+                                      className="transition-all duration-300"
+                                    />
+                                  </svg>
+                                </div>
+                                <div className="text-lg font-bold text-gray-900">
+                                  {Math.max(predictionPercentages[market.tabId || market.id].positivePercentage, 
+                                          predictionPercentages[market.tabId || market.id].negativePercentage)}%
+                                </div>
+                                <div className="text-xs text-gray-500">chance</div>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Prediction Percentages */}
-                        {predictionPercentages[market.tabId || market.id] ? (
-                          <div className="space-y-2 mb-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-gray-700">Positive</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].positivePercentage}%</span>
-                                <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
-                                  Yes
-                                </button>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-medium text-gray-700">Negative</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold">{predictionPercentages[market.tabId || market.id].negativePercentage}%</span>
-                                <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 w-12">
-                                  No
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-2 mb-2">
-                            <button className="bg-blue-50 hover:bg-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
-                              YES
-                            </button>
-                            <button className="bg-purple-100 hover:bg-purple-200 hover:border-purple-300 text-purple-700 hover:text-purple-800 py-2 px-3 rounded-md text-xs font-bold uppercase tracking-wide transition-all duration-200 hover:scale-105">
-                              NO
-                            </button>
-                          </div>
-                        )}
+                        {/* Yes/No Buttons - Side by Side in Center */}
+                        <div className="flex justify-center gap-2 mb-3">
+                          <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]">
+                            Yes
+                          </button>
+                          <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]">
+                            No
+                          </button>
+                        </div>
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
