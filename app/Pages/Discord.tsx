@@ -100,7 +100,7 @@ const HowItWorksSection: React.FC = () => {
   return (
     <div className="w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md border border-gray-300">
       <h2 className="text-2xl font-bold text-black text-center mb-8">
-        How PrediWin Works - Frequently Asked Questions
+       Frequently Asked Questions
       </h2>
       
       <div className="space-y-4">
