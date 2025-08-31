@@ -31,8 +31,19 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
   }, []);
 
 
-  // Menu items
-  const menuItems = [
+  // Menu items - different for mobile and desktop
+  const mobileMenuItems = [
+    { id: 'home', label: 'Home' },
+    { id: 'liveMarkets', label: 'Live Markets' },
+    { id: 'createPot', label: 'Private Markets' },
+    { id: 'buy', label: 'Fund Account' },
+    { id: 'AI', label: 'Games' },
+    { id: 'profile', label: 'Stats & Rankings' },
+    { id: 'ideas', label: 'Ideas' },
+    { id: 'discord', label: 'Help' },
+  ];
+
+  const desktopMenuItems = [
     { id: 'home', label: 'Home' },
     { id: 'liveMarkets', label: 'Live Markets' },
     { id: 'createPot', label: 'Private Markets' },
@@ -78,7 +89,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               
               {/* Menu items - pushed higher */}
               <div className="flex flex-col justify-start px-6 -mt-16">
-                {menuItems.map((item) => (
+                {mobileMenuItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => {
@@ -97,16 +108,16 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
               </div>
               
               {/* Social media buttons */}
-              <div className="px-6 py-6 border-t border-gray-100 mt-auto">
-                <p className="text-gray-600 text-sm mb-4 text-center">
+              <div className="px-4 py-6 border-t border-gray-100 mt-auto">
+                <p className="text-gray-600 text-xs mb-4 text-center">
                   Still have questions? Join our community for more support.
                 </p>
-                <div className="flex justify-center space-x-4">
+                <div className="flex flex-col space-y-3">
                   <a
                     href="https://discord.gg/8H9Hxc4Y"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors text-sm"
+                    className="flex items-center justify-center space-x-2 px-3 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition-colors text-sm"
                   >
                     <FaDiscord size={16} />
                     <span>Discord Support</span>
@@ -115,7 +126,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
                     href="https://x.com/Prediwin"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center space-x-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                    className="flex items-center justify-center space-x-2 px-3 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
                   >
                     <FaXTwitter size={16} />
                     <span>Follow on X</span>
@@ -128,7 +139,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
             // Desktop dropdown (unchanged)
             <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg left-0">
               <div className="py-2">
-                {menuItems.map((item) => (
+                {desktopMenuItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => {
