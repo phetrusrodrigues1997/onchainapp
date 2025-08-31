@@ -385,7 +385,7 @@ export default function App() {
         <header className="z-50 bg-white px-4 md:py-2 sticky top-0 border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex flex-col">
           {/* Top row with main header elements */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center translate-y-3 md:translate-y-0">
             <div className="flex items-center flex-1">
               {/* Hamburger menu - shows on both desktop and mobile at left edge */}
               <div>
