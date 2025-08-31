@@ -30,6 +30,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
+
   // Menu items
   const menuItems = [
     { id: 'home', label: 'Home' },
@@ -56,8 +57,14 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
       {isMenuOpen && (
         <>
           {isMobile ? (
-            // Mobile overlay with peek-through background
-            <div className="fixed top-0 left-0 w-4/5 h-full bg-white z-50 flex flex-col shadow-lg">
+            <>
+              {/* Invisible backdrop to prevent clicks on background elements */}
+              <div 
+                className="fixed inset-0 z-40"
+                onClick={() => setIsMenuOpen(false)}
+              />
+              {/* Mobile overlay with peek-through background */}
+              <div id="mobile-menu-overlay" className="fixed top-0 left-0 w-4/5 h-full bg-white z-50 flex flex-col shadow-lg">
               {/* Header with close button */}
               <div className="flex justify-end p-4">
                 <button
@@ -116,6 +123,7 @@ const NavigationMenu = ({ activeSection, setActiveSection }: NavigationMenuProps
                 </div>
               </div>
             </div>
+            </>
           ) : (
             // Desktop dropdown (unchanged)
             <div className="absolute bg-white top-12 z-50 w-48 mt-2 rounded-md shadow-lg left-0">
