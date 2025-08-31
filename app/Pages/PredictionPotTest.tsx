@@ -213,6 +213,18 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   }, []);
 
+  // Add state for voting preference
+  const [votingPreference, setVotingPreference] = useState<string | null>(null);
+  const [selectedMarketForVoting, setSelectedMarketForVoting] = useState<string | null>(null);
+  
+  // Load voting preference from cookies
+  useEffect(() => {
+    const preference = Cookies.get('votingPreference');
+    const marketForVoting = Cookies.get('selectedMarketForVoting');
+    setVotingPreference(preference || null);
+    setSelectedMarketForVoting(marketForVoting || null);
+  }, []);
+
   // Load referral data when wallet connects or market changes
   useEffect(() => {
     if (address && selectedTableType) {
@@ -1047,6 +1059,26 @@ useEffect(() => {
 
           {/* User will be automatically redirected to MakePredictionsPage if already a participant */}
 
+
+          {/* Voting Preference Display */}
+          {isConnected && contractAddress && !isParticipant && !reEntryFee && votingPreference && selectedMarketForVoting && (
+            <div className="mb-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="text-2xl">🎯</span>
+                  <h3 className="text-lg font-semibold text-gray-900">Your Prediction Ready</h3>
+                </div>
+                <p className="text-gray-700">
+                  You are about to vote for: <span className="font-bold text-purple-700">
+                    {votingPreference === 'positive' ? 'Yes' : 'No'}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  This will be automatically submitted when you make predictions
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* User Actions - Show countdown or pot entry based on day */}
           {isConnected && contractAddress && !isParticipant && !reEntryFee && (

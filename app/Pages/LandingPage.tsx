@@ -907,10 +907,42 @@ const handleMarketClick = (marketId: string) => {
 
             {/* Yes/No Buttons - Side by Side in Center */}
             <div className="flex justify-center gap-2 mb-3">
-              <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-24 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[220px]">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('Yes button clicked for market:', market.id);
+                  Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                  // Visual feedback
+                  e.currentTarget.style.backgroundColor = '#10b981';
+                  e.currentTarget.style.color = 'white';
+                  // Navigate to market after brief visual feedback
+                  setTimeout(() => {
+                    handleMarketClick(market.id);
+                  }, 300);
+                }}
+                className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-24 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[220px]"
+              >
                 Yes
               </button>
-              <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-24 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[220px]">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('No button clicked for market:', market.id);
+                  Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                  // Visual feedback
+                  e.currentTarget.style.backgroundColor = '#ef4444';
+                  e.currentTarget.style.color = 'white';
+                  // Navigate to market after brief visual feedback
+                  setTimeout(() => {
+                    handleMarketClick(market.id);
+                  }, 300);
+                }}
+                className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-24 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[220px]"
+              >
                 No
               </button>
             </div>
@@ -1157,10 +1189,42 @@ const handleMarketClick = (marketId: string) => {
 
                         {/* Yes/No Buttons - Side by Side in Center */}
                         <div className="flex justify-center gap-2 mb-3">
-                          <button className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              console.log('Yes button clicked for market:', market.id);
+                              Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                              // Visual feedback
+                              e.currentTarget.style.backgroundColor = '#10b981';
+                              e.currentTarget.style.color = 'white';
+                              // Navigate to market after brief visual feedback
+                              setTimeout(() => {
+                                handleMarketClick(market.id);
+                              }, 300);
+                            }}
+                            className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
+                          >
                             Yes
                           </button>
-                          <button className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              console.log('No button clicked for market:', market.id);
+                              Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                              // Visual feedback
+                              e.currentTarget.style.backgroundColor = '#ef4444';
+                              e.currentTarget.style.color = 'white';
+                              // Navigate to market after brief visual feedback
+                              setTimeout(() => {
+                                handleMarketClick(market.id);
+                              }, 300);
+                            }}
+                            className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
+                          >
                             No
                           </button>
                         </div>

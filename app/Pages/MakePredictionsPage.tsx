@@ -140,6 +140,11 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   // Re-entry transaction state
   const [isReEntryLoading, setIsReEntryLoading] = useState<boolean>(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+
+  // Voting preference from cookies
+  const [votingPreference, setVotingPreference] = useState<string | null>(null);
+  const [selectedMarketForVoting, setSelectedMarketForVoting] = useState<string | null>(null);
+  const [hasAutoSubmitted, setHasAutoSubmitted] = useState<boolean>(false);
   
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -338,6 +343,13 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       console.log('Loaded pot question:', savedQuestion);
     }
     
+    // Load voting preference from cookies
+    const preference = Cookies.get('votingPreference');
+    const marketForVoting = Cookies.get('selectedMarketForVoting');
+    setVotingPreference(preference || null);
+    setSelectedMarketForVoting(marketForVoting || null);
+    console.log('Loaded voting preference:', preference, 'for market:', marketForVoting);
+    
     // Validate contract address is in our allowed list
     if (savedContract && tableMapping[savedContract as keyof typeof tableMapping]) {
       setContractAddress(savedContract);
@@ -370,6 +382,42 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const isParticipant = address && participants && Array.isArray(participants) 
     ? participants.some(participant => participant.toLowerCase() === address.toLowerCase())
     : false;
+
+  // Auto-submission effect for voting preference
+  useEffect(() => {
+    const autoSubmitPrediction = async () => {
+      // Only auto-submit if:
+      // 1. User has a voting preference from landing page
+      // 2. User is connected and is a participant
+      // 3. User hasn't already made a prediction (no tomorrowsBet)
+      // 4. Betting is allowed
+      // 5. Haven't already auto-submitted
+      // 6. Data is fully loaded
+      if (
+        votingPreference &&
+        selectedMarketForVoting &&
+        address &&
+        isParticipant &&
+        !tomorrowsBet &&
+        isBettingAllowed() &&
+        !hasAutoSubmitted &&
+        isDataLoaded &&
+        !isLoading
+      ) {
+        console.log('Auto-submitting prediction:', votingPreference, 'for market:', selectedMarketForVoting);
+        setHasAutoSubmitted(true);
+        
+        // Clear cookies after auto-submission
+        Cookies.remove('votingPreference');
+        Cookies.remove('selectedMarketForVoting');
+        
+        // Auto-submit the prediction
+        await handlePlaceBet(votingPreference as 'positive' | 'negative');
+      }
+    };
+
+    autoSubmitPrediction();
+  }, [votingPreference, selectedMarketForVoting, address, isParticipant, tomorrowsBet, isDataLoaded, isLoading, hasAutoSubmitted]);
 
   // Load user's evidence submission if any - now takes outcomeDate parameter to avoid race condition
   const loadUserEvidenceSubmission = useCallback(async (outcomeDate: string) => {
@@ -1109,7 +1157,22 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             
             <div className="relative z-10">
               <div className="text-center mb-6">
-                <h2 className="text-3xl font-black text-black mb-3 tracking-tight">Your Call?</h2>
+                {votingPreference && !tomorrowsBet ? (
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-black text-purple-700 mb-2 tracking-tight">
+                      Auto-Submitting Your Choice
+                    </h2>
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-3 max-w-md mx-auto">
+                      <p className="text-gray-700 text-sm">
+                        Submitting: <span className="font-bold text-purple-700">
+                          {votingPreference === 'positive' ? 'Yes' : 'No'}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <h2 className="text-3xl font-black text-black mb-3 tracking-tight">Your Call?</h2>
+                )}
                 {marketQuestion && (
                   <div className="bg-black text-white rounded-2xl p-3 mb-4 mx-auto max-w-md">
                     <p className="text-white font-semibold text-sm leading-relaxed">
