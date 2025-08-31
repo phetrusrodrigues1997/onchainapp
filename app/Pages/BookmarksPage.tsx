@@ -216,6 +216,24 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
         {/* Tab Navigation */}
         <div className="flex space-x-1 mb-8 bg-gray-100 p-1 rounded-lg">
           <button
+            onClick={() => setActiveTab('entered')}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md font-medium transition-colors ${
+              activeTab === 'entered'
+                ? 'bg-white text-green-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <Trophy className="w-5 h-5" />
+            Entered pots
+            {userPots.length > 0 && (
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                activeTab === 'entered' ? 'bg-green-100' : 'bg-gray-200'
+              }`}>
+                {userPots.length}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab('bookmarks')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md font-medium transition-colors ${
               activeTab === 'bookmarks'
@@ -230,24 +248,6 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                 activeTab === 'bookmarks' ? 'bg-purple-100' : 'bg-gray-200'
               }`}>
                 {bookmarks.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('entered')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md font-medium transition-colors ${
-              activeTab === 'entered'
-                ? 'bg-white text-green-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <Trophy className="w-5 h-5" />
-            Entered
-            {userPots.length > 0 && (
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                activeTab === 'entered' ? 'bg-green-100' : 'bg-gray-200'
-              }`}>
-                {userPots.length}
               </span>
             )}
           </button>
