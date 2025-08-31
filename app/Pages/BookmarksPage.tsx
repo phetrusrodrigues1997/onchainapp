@@ -46,7 +46,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   
   // Markets you've entered functionality
   const [userPots, setUserPots] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<'bookmarks' | 'entered'>('bookmarks');
+  const [activeTab, setActiveTab] = useState<'bookmarks' | 'entered'>('entered');
 
   // Get contract addresses array - memoized to prevent re-creation
   const contractAddresses = useMemo(() => 
