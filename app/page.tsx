@@ -933,7 +933,7 @@ export default function App() {
               </svg>
             </div>
             <span className="text-[11px] md:text-[13px] font-medium truncate max-w-[60px]">
-              {isConnected && ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : '$0.00'}
+              {isConnected && ethBalance.data ? `$${ethToUsd(ethBalance.data.value).toFixed(2)}` : 'My pots'}
             </span>
           </button>
         </div>
