@@ -31,7 +31,7 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       question: "What is the weekly schedule for Public pots?",
-      answer: "Sunday-Friday: pot entry and predictions are open. Entry fees increase daily from 0.01 USDC (Sunday) to 0.06 USDC (Friday). Saturday: Results day - pots are closed and winners are determined at midnight UTC with pot distribution. Private pots have no schedule - you control when they open and close."
+      answer: "Sunday-Friday: pot entry and predictions are open. Entry fees increase daily from $0.01 (Sunday) to $0.06 (Friday). Saturday: Results day - pots are closed and winners are determined at midnight UTC with pot distribution. Private pots have no schedule - you control when they open and close."
     },
     {
       question: "What happens if I make a wrong prediction?",
@@ -51,21 +51,21 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       question: "How do Private pot participants join?",
-      answer: "Friends click your shared link, connect their wallet, pay the entry fee in USDC, and make their prediction. They can see all other participants (by wallet address or email if submitted), entry amounts, and prediction status. It's fully transparent so everyone can see who predicted what."
+      answer: "Friends click your shared link, connect their wallet, pay the entry fee in ETH, and make their prediction. They can see all other participants (by wallet address or email if submitted), entry amounts, and prediction status. It's fully transparent so everyone can see who predicted what."
     },
     {
       question: "Why do I need Ethereum to place predictions?",
-      answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering pots, making predictions, and claiming winnings. You'll also need USDC to pay the actual pot's entry fees."
+      answer: "You need ETH for gas fees on the Base network (usually ~$0.01-0.05 per transaction). This covers the blockchain transaction costs for entering pots, making predictions, and claiming winnings. You'll also need ETH to pay the actual pot's entry fees."
     },
     
     {
       question: "How are entry fees calculated in Public pots?",
-      answer: "Public pots follow a dynamic pricing model to encourage early participation: Sunday (0.01 USDC), Monday (0.02 USDC), Tuesday (0.03 USDC), Wednesday (0.04 USDC), Thursday (0.05 USDC), Friday (0.06 USDC). Saturday is closed for results. Private pots let you set any entry fee you want."
+      answer: "Public pots follow a dynamic pricing model to encourage early participation: Sunday ($0.01), Monday ($0.02), Tuesday ($0.03), Wednesday ($0.04), Thursday ($0.05), Friday ($0.06). Saturday is closed for results. Private pots let you set any entry fee you want."
     },
   
     {
       question: "How does the referral system work?",
-      answer: "Each user gets a unique 8-character referral code. When 3 friends enter pots using your code and make confirmed USDC payments, you earn 1 free pot entry. This system includes fraud protection to ensure legitimate referrals and works for both Public and Private pots."
+      answer: "Each user gets a unique 8-character referral code. When 3 friends succesfully enter pots using your code, you earn 1 free pot entry. This system includes fraud protection to ensure legitimate referrals and works for both Public and Private pots."
     },
     {
       question: "What types of events can I predict?",
@@ -81,15 +81,12 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       question: "How do I get my winnings?",
-      answer: "Winnings are automatically distributed through smart contracts on the Base network. Once you're determined as a winner, the USDC is sent directly to your connected wallet - no manual claiming required. This works the same for both Public and Private pots."
+      answer: "Winnings are automatically distributed through smart contracts on the Base network. Once you're determined as a winner, the ETH is sent directly to your connected wallet - no manual claiming required. This works the same for both Public and Private pots."
     },
-    {
-      question: "What's the difference between Public and Private pots?",
-      answer: "Public pots: Weekly competitions, set schedule, automatic outcomes, compete with everyone. Private pots: You create custom topics, set your own rules, invite specific friends, control timing and outcomes. Both use the same USDC payment system and smart contracts for security."
-    },
+    
     {
       question: "Can I participate without crypto experience?",
-      answer: "Yes and no! The platform includes a comprehensive 5-step tutorial and a built-in buy page where you can easily purchase USDC and ETH using Coinbase OnChainKit. The interface is designed to be user-friendly for crypto beginners. We recommend users familiarize themselves with basic crypto concepts like wallets, gas fees, and USDC before participating."
+      answer: "Not yet! The platform includes a comprehensive 5-step tutorial and a built-in buy page where you can easily purchase ETH using Coinbase OnChainKit. The interface is designed to be user-friendly for crypto beginners. We recommend users familiarize themselves with basic crypto concepts like wallets, gas fees, and ETH before participating."
     },
     {
       question: "What are Live pots?",
