@@ -38,7 +38,6 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [status, setStatus] = useState<string>('');
   
-  const announcementsEndRef = useRef<HTMLDivElement>(null);
 
   // Load announcements from database (both global and contract-specific)
   const loadAnnouncements = async () => {
@@ -98,13 +97,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
     }
   }, [address, announcements]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [announcements]);
-
-  const scrollToBottom = () => {
-    announcementsEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Removed automatic scroll to bottom behavior
 
   const showStatus = (msg: string) => {
     setStatus(msg);
@@ -238,7 +231,7 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
                   onChange={(e) => setNewAnnouncement(e.target.value)}
                   placeholder="Enter your announcement message here..."
                   rows={4}
-                  className="w-full p-3 border border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors duration-200 resize-none"
+                  className="w-full p-3 border border-purple-200 rounded-lg focus:border-purple-500 focus:outline-none transition-colors duration-200 resize-none text-black"
                 />
               </div>
               
@@ -339,7 +332,6 @@ const MessagingPage = ({ setActiveSection }: MessagingPageProps) => {
             ))
           )}
           
-          <div ref={announcementsEndRef} />
         </div>
       </div>
 

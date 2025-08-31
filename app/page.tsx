@@ -239,6 +239,11 @@ export default function App() {
     }
   }, [activeSection]);
 
+  // Scroll to top when activeSection changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeSection]);
+
 
 
   // Check for market parameter in URL on component mount
