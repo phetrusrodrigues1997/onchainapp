@@ -1931,7 +1931,7 @@ export async function getUserBookmarks(walletAddress: string) {
       .select()
       .from(Bookmarks)
       .where(eq(Bookmarks.walletAddress, walletAddress))
-      .orderBy(desc(Bookmarks.bookmarkedAt))
+      .orderBy(desc(Bookmarks.id))
       .limit(100); // Reasonable limit to prevent huge queries
 
     const queryTime = Date.now() - startTime;

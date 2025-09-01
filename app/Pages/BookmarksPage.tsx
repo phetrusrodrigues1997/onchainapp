@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import Cookies from 'js-cookie';
-import { Bookmark, Clock, X, Trophy, Users, TrendingUp } from 'lucide-react';
+import { Bookmark, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import LoadingScreen from '../Components/LoadingScreen';
@@ -21,7 +21,6 @@ interface BookmarkItem {
   marketQuestion: string;
   marketCategory: string;
   contractAddress?: string | null;
-  bookmarkedAt: Date;
 }
 
 // Use centralized contract mapping from config
@@ -148,13 +147,6 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
 
   const handleViewMarket = (bookmark: BookmarkItem) => {
     if (bookmark.contractAddress) {
@@ -282,10 +274,6 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                           {bookmark.marketCategory}
                         </span>
-                        <div className="flex items-center text-gray-500 text-sm">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {formatDate(bookmark.bookmarkedAt)}
-                        </div>
                       </div>
 
                       {/* Market Question */}

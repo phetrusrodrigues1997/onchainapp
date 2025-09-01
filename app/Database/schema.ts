@@ -170,7 +170,6 @@ export const Bookmarks = pgTable("bookmarks", {
   marketQuestion: text("market_question").notNull(), // Market question for display
   marketCategory: text("market_category").notNull(), // Category (Featured, Crypto, etc.)
   contractAddress: text("contract_address"), // Contract address if available
-  bookmarkedAt: timestamp("bookmarked_at").defaultNow().notNull(), // When bookmarked
 });
 
 // User announcement read status - tracks which users have read which announcements
