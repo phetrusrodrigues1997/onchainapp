@@ -42,25 +42,25 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
   // Menu items - different for mobile and desktop
   const mobileMenuItems = [
     { id: 'home', label: 'Home' },
-    { id: 'liveMarkets', label: 'Live Markets' },
+    { id: 'discord', label: 'How it works' },
     { id: 'createPot', label: 'Private Markets' },
     { id: 'buy', label: 'Fund Account' },
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
     { id: 'ideas', label: 'Ideas' },
-    { id: 'discord', label: 'Help' },
+    { id: 'liveMarkets', label: 'Live Markets' },
   ];
 
   const desktopMenuItems = [
     { id: 'home', label: 'Home' },
-    { id: 'liveMarkets', label: 'Live Markets' },
+    { id: 'discord', label: 'How it works' },
     { id: 'createPot', label: 'Private Markets' },
     { id: 'buy', label: 'Fund Account' },
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
     { id: 'bookmarks', label: 'My pots' },
     { id: 'ideas', label: 'Ideas' },
-    { id: 'discord', label: 'Help' },
+    { id: 'liveMarkets', label: 'Live Markets' },
   ];
 
   return (
