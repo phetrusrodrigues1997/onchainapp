@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Private Pot Creation System (New)
 - **Create Custom Pots**: Users can deploy their own private prediction markets on any topic
-- **Factory Contract**: `0xeE44be339B390726865aAC73435B96552C0697d3` enables cheap EIP-1167 cloning of prediction pots
+- **Factory Contract**:  enables cheap EIP-1167 cloning of prediction pots
 - **User-Owned Markets**: Each created pot is owned and controlled by the creator
 - **Flexible Topics**: Crypto prices, sports outcomes, world events, or any custom prediction
 - **Gas-Efficient**: Users pay minimal Base network gas fees (~$0.01-0.05) for pot creation
@@ -72,6 +72,10 @@ npm run lint
 - `app/Pages/`: Main application pages (LandingPage, Markets, MakePredictionPage, createPotPage, etc.)
 - `app/Sections/`: Reusable UI components (NavigationMenu, ResponsiveLogo)
 - `app/Database/`: Database schema and actions using Drizzle ORM
+  - `actions.ts`: Main database operations
+  - `actions3.ts`: Pot participation history functions (NEW)
+  - `OwnerActions.ts`: Admin/owner operations
+  - `schema.ts`: Complete database schema definitions
 - `app/Constants/`: Configuration files for markets, coins, and pricing
 - `app/Languages/`: Internationalization support
 
@@ -84,6 +88,12 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - `FeaturedBets`: Primary prediction markets (walletAddress, prediction, betDate, createdAt) - covers Bitcoin and featured assets
 - `CryptoBets`: General crypto prediction markets
 - `WrongPredictions`/`WrongPredictionsCrypto`: Tracking incorrect predictions and re-entry fees
+
+#### Pot Participation History System (NEW - 2025)
+- `PotParticipationHistory`: Complete audit trail of pot entry/exit events (walletAddress, contractAddress, tableType, eventType, eventDate, eventTimestamp)
+- **Fair Eligibility System**: Tracks who was eligible for predictions on specific dates to prevent unfair penalties
+- **Same-Day Entry Protection**: Users entering mid-week aren't penalized for missing predictions before their entry date
+- **Event-Based Tracking**: Records 'entry' and 'exit' events with precise timestamps for accurate eligibility determination
 
 #### Referral System Tables (New)
 - `ReferralCodes`: Unique 8-character codes per user (walletAddress, referralCode, createdAt)
@@ -105,7 +115,7 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 ### Blockchain Integration
 - **Smart Contracts**: PredictionPot contracts handle ETH pot entry and winner distribution
 - **⚠️ CRITICAL CONTRACT ISSUE RESOLVED**: Original PredictionPot.sol had permanent corruption bug using `transfer()` which fails with 2300 gas limit when sending to smart contracts. **FIXED CONTRACT DEPLOYED**: `PredictionPotFixed` at `0xd1547F5bC0390F5020B2A80F262e28ccfeF2bf9c` uses `call()` instead of `transfer()` to prevent permanent distribution failures
-- **Factory Contract**: `PredictionPotWithCloning` at `0xeE44be339B390726865aAC73435B96552C0697d3` enables users to create private pots
+- **Factory Contract**: `PredictionPotWithCloning` enables users to create private pots
 - **EIP-1167 Cloning**: Gas-efficient deployment of new prediction pots using minimal proxy pattern
 - **OnchainKit & Wagmi**: Wallet connections, transaction handling, and Base network integration
 - **ETH Payments**: Users send ETH directly for pot entries (amounts calculated from USD values)
@@ -150,8 +160,11 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 
 ### Prediction Logic (`MakePredictionsPage.tsx`)
 - **Weekly Prediction Window**: Users can make predictions Sunday-Friday
+- **Same-Day Predictions**: Users can predict starting from their entry day (including same day)
 - **Tomorrow's Predictions**: Users forecast next day's asset price movements
 - **One Prediction Per Day**: System prevents multiple predictions, allows updates before cutoff
+- **Immediate Penalty System**: `checkMissedPredictionPenalty()` runs on page load to instantly block users with missed predictions
+- **Fair Eligibility**: Only penalizes users who were actually eligible for missed predictions (no penalties for pre-entry dates)
 - **Re-entry System**: Wrong predictors must pay today's entry fee to re-enter markets
 - **Day-Based UI Logic**:
   - **Sunday-Friday**: Shows normal prediction interface (positive/negative buttons)
@@ -197,8 +210,18 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **UI Integration**: Minimalist design matching the "You're in the Pot" aesthetic
 - **Clear Messaging**: Uses "today's entry fee" instead of specific amounts for cleaner UX
 
+### Missed Prediction Penalty System (NEW - 2025)
+- **Immediate Page-Level Checking**: `checkMissedPredictionPenalty()` runs when users visit MakePredictionsPage
+- **Fair Eligibility Logic**: Uses `PotParticipationHistory` to determine who should have made predictions
+- **Same-Day Entry Protection**: Users entering today aren't penalized for today's missed predictions  
+- **Instant Blocking UI**: Users with penalties see immediate block screen with re-entry button
+- **Automatic Penalty Addition**: Missed predictions automatically added to wrong predictions table
+- **Single Source of Truth**: Replaced complex `setDailyOutcome` logic with clean page-level validation
+- **Database Functions**: `recordPotEntry()`, `isUserActiveOnDate()`, `getEligiblePredictors()`, `checkMissedPredictionPenalty()`
+- **Production Architecture**: Eliminates race conditions and provides immediate user feedback
+
 ### Private Pot Creation System (`createPotPage.tsx`)
-- **Factory Contract Integration**: Uses deployed `PredictionPotWithCloning` at `0xeE44be339B390726865aAC73435B96552C0697d3`
+- **Factory Contract Integration**: Uses deployed `PredictionPotWithCloning` at `0x34c2fF1bb3a8cbF05a7a98f70143DD6F22Df3490`
 - **Three-State UI Flow**: Landing page → Create form → Success confirmation
 - **Custom Pot Details**: Users input pot name and description for their prediction market
 - **EIP-1167 Cloning**: Creates cheap proxy contracts (~$0.01-0.05 gas on Base)
@@ -356,4 +379,6 @@ This fix ensures pot distribution will **never fail again** due to recipient add
 - **ETH Amount Calculation**: All ETH amounts calculated from USD values with proper wei precision handling
 - **Dynamic Pricing System**: Daily entry fees increase from Sunday (~$0.01 USD) to Friday (~$0.06 USD) in ETH
 - **Multi-Asset Support**: Platform designed for predictions beyond crypto (stocks, sports, etc.)
-- in the page, let's also display the eth balance for the buy tab, whereas right now we only display it for the receive tab
+- **Immediate Penalty System**: Page-level validation prevents delayed surprises and provides instant feedback
+- **Event-Based History Tracking**: Complete audit trail of all pot participation for fair penalty determination
+- **Same-Day Prediction Eligibility**: Users can predict starting from their entry day (including entry day itself)
