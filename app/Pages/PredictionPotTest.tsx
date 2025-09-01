@@ -17,6 +17,7 @@ import {
   processReEntry,
   debugWrongPredictions,
 } from '../Database/actions';
+import { recordPotEntry } from '../Database/actions3';
 import { ENFORCE_SATURDAY_RESTRICTIONS, CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import { updateWinnerStats } from '../Database/OwnerActions';
 import { clear } from 'console';
@@ -696,6 +697,15 @@ useEffect(() => {
       setPostEntryLoading(true); // Start post-entry loading
       setJustEnteredPot(true);
       
+      // Record the pot entry in participation history
+      if (address) {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        recordPotEntry(address, contractAddress, selectedTableType, today).catch(() => {
+          // Silently handle pot entry recording errors
+          console.warn('Failed to record pot entry in participation history');
+        });
+      }
+      
       // Now consume the free entry after successful transaction
       if (usedDiscountedEntry && address) {
         consumeFreeEntry(address).catch(() => {
@@ -742,6 +752,13 @@ useEffect(() => {
           // Remove user from wrong predictions table
           const success = await processReEntry(address!, selectedTableType);
           if (success) {
+            // Record the re-entry in participation history
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+            recordPotEntry(address!, contractAddress, selectedTableType, today).catch(() => {
+              // Silently handle pot entry recording errors
+              console.warn('Failed to record re-entry in participation history');
+            });
+            
             setIsLoading(false);
             showMessage('Re-entry successful! You can now predict again.');
             setReEntryFee(null); // Clear re-entry fee
@@ -1382,7 +1399,8 @@ useEffect(() => {
             console.log('🔴 Setting daily outcome:', { outcome, dateParam, tableType: selectedTableType });
             
             // Set daily outcome (this will add new wrong predictions to the table)
-            await setDailyOutcome(outcome as "positive" | "negative", selectedTableType, participants || [], dateParam);
+            // Note: Non-predictor penalties are now handled at the page level
+            await setDailyOutcome(outcome as "positive" | "negative", selectedTableType, dateParam);
             
             // 🔔 Send notifications after successful outcome setting
             try {

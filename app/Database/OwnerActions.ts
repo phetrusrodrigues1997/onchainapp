@@ -41,9 +41,10 @@ export async function testDatabaseConnection() {
 
 /**
  * Sets the final outcome and processes winners immediately.
+ * Only handles actual wrong predictions - non-predictor penalties are handled at page level.
  * @param outcome - Either "positive" or "negative".
  * @param tableType - Table type ('featured' or 'crypto').
- * @param contractParticipants - List of participants from the contract.
+ * @param targetDate - Optional: YYYY-MM-DD format. If not provided, uses today's date.
  */
 
 const getTableFromType = (tableType: string) => {
@@ -211,7 +212,6 @@ export async function getProvisionalOutcome(tableType: string, outcomeDate?: str
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
   tableType: string,
-  contractParticipants: string[] = [],
   targetDate?: string // Optional: YYYY-MM-DD format. If not provided, uses today's date
 ) {
   const opposite = outcome === "positive" ? "negative" : "positive";
@@ -272,44 +272,14 @@ export async function setDailyOutcome(
         eq(betsTable.betDate, finalTargetDate)
       ));
 
-    // Filter to only include wrong predictions from current pot participants
-    let wrongBets = allWrongBets;
-    if (contractParticipants.length > 0) {
-      const normalizedParticipants = contractParticipants.map(addr => addr.toLowerCase());
-      wrongBets = allWrongBets.filter(bet => 
-        normalizedParticipants.includes(bet.walletAddress.toLowerCase())
-      );
+    // Process wrong predictions (users who predicted incorrectly)
+    // Note: Non-predictor penalties are now handled at the page level via checkMissedPredictionPenalty()
+    if (allWrongBets.length > 0) {
+      console.log(`❌ Processing ${allWrongBets.length} wrong predictions for ${finalTargetDate}`);
       
+      const wrongPredictionDate = finalTargetDate;
       
-      // Find participants who didn't predict (these will be eliminated)
-      const nonPredictors = contractParticipants.filter(participant => 
-        !allPredictors.some(predictor => predictor.walletAddress.toLowerCase() === participant.toLowerCase())
-      );
-      
-      // Add non-predictors to wrong predictions table so they must pay re-entry fee
-      if (nonPredictors.length > 0) {
-        
-        const todayDateString = finalTargetDate; // Use the same date string we calculated above
-        
-        const nonPredictorRecords = nonPredictors.map(participant => ({
-          walletAddress: participant,
-          wrongPredictionDate: todayDateString,
-        }));
-
-        await db
-          .insert(wrongPredictionTable)
-          .values(nonPredictorRecords)
-          .onConflictDoNothing();
-          
-      }
-    } else {
-      console.warn("No contract participants provided to setDailyOutcome - using old logic (potential exploit!)");
-    }
-
-    if (wrongBets.length > 0) {
-      const wrongPredictionDate = finalTargetDate; // Use the same date string we calculated above
-      
-      const wrongAddresses = wrongBets.map(bet => ({
+      const wrongAddresses = allWrongBets.map(bet => ({
         walletAddress: bet.walletAddress,
         wrongPredictionDate: wrongPredictionDate,
       }));
@@ -327,6 +297,8 @@ export async function setDailyOutcome(
             eq(betsTable.betDate, finalTargetDate)
           ));
       }
+    } else {
+      console.log(`✅ No wrong predictions found for ${finalTargetDate}`);
     }
     
     // Only clear ALL predictions on non-Saturday days

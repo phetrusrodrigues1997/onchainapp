@@ -172,6 +172,17 @@ export const Bookmarks = pgTable("bookmarks", {
   contractAddress: text("contract_address"), // Contract address if available
 });
 
+// Pot participation history - tracks entry/exit events for fair prediction requirements
+export const PotParticipationHistory = pgTable("pot_participation_history", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(), // User's wallet address
+  contractAddress: text("contract_address").notNull(), // Which pot contract
+  tableType: text("table_type").notNull(), // featured/crypto/etc - for easier querying
+  eventType: text("event_type").notNull(), // 'entry' or 'exit'
+  eventDate: text("event_date").notNull(), // YYYY-MM-DD format when event occurred
+  eventTimestamp: timestamp("event_timestamp").defaultNow().notNull(), // Exact timestamp of event
+});
+
 // User announcement read status - tracks which users have read which announcements
 export const UserAnnouncementReads = pgTable("user_announcement_reads", {
   id: serial("id").primaryKey(),
