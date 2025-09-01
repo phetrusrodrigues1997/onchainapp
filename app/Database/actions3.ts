@@ -1,14 +1,18 @@
+"use server";
+
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { PotParticipationHistory } from './schema';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set');
+// Initialize database connection only when needed (server-side)
+function getDb() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set');
+  }
+  const sql = neon(process.env.DATABASE_URL);
+  return drizzle(sql);
 }
-
-const sql = neon(process.env.DATABASE_URL);
-const db = drizzle(sql);
 
 /**
  * Records when a user enters a pot
@@ -22,7 +26,7 @@ export async function recordPotEntry(
   try {
     console.log(`📝 Recording pot entry for ${walletAddress} in ${tableType} pot on ${eventDate}`);
     
-    await db.insert(PotParticipationHistory).values({
+    await getDb().insert(PotParticipationHistory).values({
       walletAddress: walletAddress.toLowerCase(),
       contractAddress: contractAddress.toLowerCase(),
       tableType,
@@ -55,7 +59,7 @@ export async function recordPotExit(
   try {
     console.log(`📝 Recording pot exit for ${walletAddress} from ${tableType} pot on ${eventDate}`);
     
-    await db.insert(PotParticipationHistory).values({
+    await getDb().insert(PotParticipationHistory).values({
       walletAddress: walletAddress.toLowerCase(),
       contractAddress: contractAddress.toLowerCase(),
       tableType,
@@ -90,7 +94,7 @@ export async function isUserActiveOnDate(
     console.log(`🔍 Checking if ${walletAddress} was active on ${targetDate} in pot ${contractAddress}`);
     
     // Get all entry/exit events for this user and contract up to the target date
-    const events = await db
+    const events = await getDb()
       .select()
       .from(PotParticipationHistory)
       .where(
@@ -135,7 +139,7 @@ export async function getEligiblePredictors(
     console.log(`🎯 Getting eligible predictors for pot ${contractAddress} on ${targetDate}`);
     
     // Get all entry/exit events for this contract up to the target date
-    const events = await db
+    const events = await getDb()
       .select()
       .from(PotParticipationHistory)
       .where(eq(PotParticipationHistory.contractAddress, contractAddress.toLowerCase()))
@@ -201,7 +205,7 @@ export async function getUserParticipationHistory(
         )
       : eq(PotParticipationHistory.walletAddress, walletAddress.toLowerCase());
 
-    const events = await db
+    const events = await getDb()
       .select()
       .from(PotParticipationHistory)
       .where(whereConditions);
