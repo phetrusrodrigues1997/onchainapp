@@ -1105,7 +1105,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               <div className="bg-white border-2 border-black rounded-3xl shadow-2xl overflow-hidden relative">
                 {/* Header Section */}
                 <div className="bg-black text-white px-6 py-4 text-center">
-                  <h2 className="text-2xl font-bold tracking-tight">Current Prediction</h2>
+                  <h2 className="text-2xl font-bold tracking-tight">You Chose</h2>
                   <p className="text-gray-300 text-sm mt-1">
                     For: {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString('en-US', { 
                       weekday: 'long', 

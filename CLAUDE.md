@@ -73,7 +73,7 @@ npm run lint
 - `app/Sections/`: Reusable UI components (NavigationMenu, ResponsiveLogo)
 - `app/Database/`: Database schema and actions using Drizzle ORM
   - `actions.ts`: Main database operations
-  - `actions3.ts`: Pot participation history functions (NEW)
+  - `actions3.ts`: Pot participation history functions + Live chart data (NEW 2025)
   - `OwnerActions.ts`: Admin/owner operations
   - `schema.ts`: Complete database schema definitions
 - `app/Constants/`: Configuration files for markets, coins, and pricing
@@ -81,6 +81,8 @@ npm run lint
 
 ### Main Application Flow
 The main app component (`app/page.tsx`) uses a section-based navigation system where different pages are rendered based on `activeSection` state. Navigation is handled through the `NavigationMenu` component.
+
+**Updated Navigation (2025)**: When users click markets from LandingPage, they are **always routed to TutorialBridge dashboard** (instead of automatic redirects to different pages based on participation status). This ensures all users see the live prediction chart and can make informed decisions about their next steps.
 
 ### Database Schema
 
@@ -188,12 +190,19 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
   - Next Elimination: Counts to tomorrow's midnight (24 hours after new question)
 - **State Independence**: Timers maintain consistent countdown regardless of prediction actions
 
-### Tutorial System (`TutorialBridge.tsx`)
-- **5-Step Tutorial**: Guides new users through the weekly game cycle
-- **Updated Content**: Reflects accurate timing and schedules for pot entry and predictions
-- **Bilingual Support**: English and Portuguese translations
-- **Cookie-Based**: Remembers if user has completed tutorial
-- **Clean Terminology**: Updated to use prediction-focused language
+### TutorialBridge Dashboard (`TutorialBridge.tsx`) - **MAJOR UPDATE (2025)**
+- **Live Prediction Chart**: Real-time SVG timeline showing Yes/No prediction sentiment throughout the day
+  - **3-Hour Intervals**: Chart displays data every 3 hours (12am, 3am, 6am, 9am, 12pm, 3pm, 6pm, 9pm)
+  - **Live Data**: Only shows completed time periods, grows throughout the day as more data comes in
+  - **Y-Axis Separation**: Yes line slightly above, No line slightly below to prevent overlap when percentages are similar
+  - **Professional Design**: Percentage labels on right side, AM/PM time format, thin lines with data points
+  - **Top-Left Legend**: Current percentages with colored dots (election results style)
+- **Database Integration**: Uses `getHourlyPredictionData()` from `actions3.ts` to fetch tomorrow's predictions grouped by hour
+- **Rules Summary Dropdown**: Collapsible section with game rules (replaces old tutorial steps)
+- **Always Accessible**: Removed automatic redirects - all users now see this dashboard regardless of participation status
+- **Strategic Enter Button**: Positioned absolutely in top-right corner, always visible while viewing chart data
+- **Real-time Updates**: Chart refreshes every 30 seconds showing live sentiment changes
+- **Market-Specific Data**: Chart shows data for the currently selected pot (Featured/Trending vs Crypto)
 
 ### Buy Page System (`BuyPage.tsx`)
 - **ETH Purchase Support**: Users can purchase ETH via Coinbase OnChainKit

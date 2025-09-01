@@ -3,7 +3,7 @@
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { eq, and, desc, asc } from 'drizzle-orm';
-import { PotParticipationHistory } from './schema';
+import { PotParticipationHistory, FeaturedBets, CryptoBets, StocksBets } from './schema';
 
 // Initialize database connection only when needed (server-side)
 function getDb() {
@@ -369,5 +369,185 @@ async function addMissedPredictionPenalty(
   } catch (error) {
     console.error('Error adding missed prediction penalty:', error);
     return { success: false, message: 'Failed to add penalty' };
+  }
+}
+
+// UK timezone helper functions (copied from actions.ts for consistency)
+const getUKOffset = (date: Date): number => {
+  // Create a date in UK timezone and compare to UTC
+  const ukDateString = date.toLocaleString('en-GB', { 
+    timeZone: 'Europe/London',
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  });
+  
+  const utcDateString = date.toLocaleString('en-GB', { 
+    timeZone: 'UTC',
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false
+  });
+  
+  // Parse both dates and find the difference
+  const ukTime = new Date(ukDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
+  const utcTime = new Date(utcDateString.replace(/(\d{2})\/(\d{2})\/(\d{4}), (.+)/, '$3-$2-$1 $4'));
+  
+  return ukTime.getTime() - utcTime.getTime(); // Difference in milliseconds
+};
+
+const getUKTime = (date: Date = new Date()): Date => {
+  const ukOffset = getUKOffset(date);
+  return new Date(date.getTime() + ukOffset);
+};
+
+const getTodayUKDateString = (): string => {
+  const ukTime = getUKTime();
+  return ukTime.toISOString().split('T')[0];
+};
+
+const getTomorrowUKDateString = (date: Date = new Date()): string => {
+  const ukTime = getUKTime(date);
+  ukTime.setDate(ukTime.getDate() + 1); // Add 1 day to UK time
+  return ukTime.toLocaleDateString('en-GB', {
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit' 
+  }).split('/').reverse().join('-'); // Convert DD/MM/YYYY to YYYY-MM-DD
+};
+
+const getTableFromType = (tableType: string) => {
+  switch (tableType) {
+    case 'featured':
+      return FeaturedBets;
+    case 'crypto':
+      return CryptoBets;
+    case 'stocks':
+      return StocksBets;
+    default:
+      throw new Error(`Invalid table type: ${tableType}. Must be 'featured', 'crypto', or 'stocks'`);
+  }
+};
+
+export async function getHourlyPredictionData(marketId: string, tableType: string) {
+  try {
+    // Use the SAME date calculation functions that store predictions for consistency
+    const tomorrowDateStr = getTomorrowUKDateString(); // Tomorrow's UK date
+    
+    // Get current UK time to determine which time periods to show
+    const currentUKTime = getUKTime();
+    const currentHour = currentUKTime.getHours();
+    
+    // All possible time slots (every 3 hours) with AM/PM format
+    const allTimeSlots = [
+      { hour: '12am', startHour: 0, endHour: 2, positive: 0, negative: 0 },
+      { hour: '3am', startHour: 3, endHour: 5, positive: 0, negative: 0 },
+      { hour: '6am', startHour: 6, endHour: 8, positive: 0, negative: 0 },
+      { hour: '9am', startHour: 9, endHour: 11, positive: 0, negative: 0 },
+      { hour: '12pm', startHour: 12, endHour: 14, positive: 0, negative: 0 },
+      { hour: '3pm', startHour: 15, endHour: 17, positive: 0, negative: 0 },
+      { hour: '6pm', startHour: 18, endHour: 20, positive: 0, negative: 0 },
+      { hour: '9pm', startHour: 21, endHour: 23, positive: 0, negative: 0 },
+    ];
+    
+    // Determine which time slots to include based on current time
+    const timeSlots = allTimeSlots.filter(slot => {
+      return currentHour >= slot.startHour;
+    });
+    
+    // If no complete periods yet (e.g., it's 1 AM, we're still in the first period), 
+    // include at least the current period
+    if (timeSlots.length === 0) {
+      timeSlots.push(allTimeSlots[0]);
+    }
+
+    const db = getDb();
+    const betsTable = getTableFromType(tableType);
+    
+    // Query the appropriate table for tomorrow's predictions with creation time
+    const bets = await db
+      .select({
+        prediction: betsTable.prediction,
+        createdAt: betsTable.createdAt
+      })
+      .from(betsTable)
+      .where(eq(betsTable.betDate, tomorrowDateStr));
+
+    // Process each bet and assign to appropriate time slot
+    bets.forEach(bet => {
+      const betDate = new Date(bet.createdAt);
+      const hour = betDate.getHours(); // Get hour in 24-hour format
+      
+      // Find which time slot this hour belongs to
+      const timeSlot = timeSlots.find(slot => hour >= slot.startHour && hour <= slot.endHour);
+      
+      if (timeSlot) {
+        if (bet.prediction === 'positive') {
+          timeSlot.positive++;
+        } else if (bet.prediction === 'negative') {
+          timeSlot.negative++;
+        }
+      }
+    });
+
+    // Calculate cumulative percentages for each time slot
+    let cumulativePositive = 0;
+    let cumulativeNegative = 0;
+    
+    const chartData = timeSlots.map(slot => {
+      cumulativePositive += slot.positive;
+      cumulativeNegative += slot.negative;
+      
+      const total = cumulativePositive + cumulativeNegative;
+      
+      if (total === 0) {
+        return {
+          time: slot.hour,
+          positivePercentage: 50,
+          negativePercentage: 50,
+          totalPredictions: 0
+        };
+      }
+      
+      const positivePercentage = Math.round((cumulativePositive / total) * 100);
+      const negativePercentage = Math.round((cumulativeNegative / total) * 100);
+      
+      return {
+        time: slot.hour,
+        positivePercentage,
+        negativePercentage,
+        totalPredictions: total
+      };
+    });
+
+    return chartData;
+
+  } catch (error) {
+    console.error("Error getting hourly prediction data:", error);
+    // Return default data structure on error - just show current period
+    const currentUKTime = getUKTime();
+    const currentHour = currentUKTime.getHours();
+    
+    // Determine current time slot (every 3 hours) in AM/PM format
+    let currentTimeSlot = '12am';
+    if (currentHour >= 21) currentTimeSlot = '9pm';
+    else if (currentHour >= 18) currentTimeSlot = '6pm';
+    else if (currentHour >= 15) currentTimeSlot = '3pm';
+    else if (currentHour >= 12) currentTimeSlot = '12pm';
+    else if (currentHour >= 9) currentTimeSlot = '9am';
+    else if (currentHour >= 6) currentTimeSlot = '6am';
+    else if (currentHour >= 3) currentTimeSlot = '3am';
+    
+    return [
+      { time: currentTimeSlot, positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 }
+    ];
   }
 }

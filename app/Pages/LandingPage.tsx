@@ -555,23 +555,10 @@ const handleMarketClick = (marketId: string) => {
       expires: 7 // Cookie expires in 7 days
     });
     
-    // Check if user is the special owner address
-    const SPECIAL_ADDRESS = '0xA90611B6AFcBdFa9DDFfCB2aa2014446297b6680';
-    const isOwner = address && address.toLowerCase() === SPECIAL_ADDRESS.toLowerCase();
-    const isParticipant = isUserParticipant(contractAddress);
-    
-    // Route based on user type and participation status
+    // Always route to TutorialBridge (dashboard) so users can see the chart and choose their action
     setTimeout(() => {
-      if (isOwner) {
-        console.log('Owner detected, routing to PredictionPotTest');
-        setActiveSection('bitcoinPot');
-      } else if (isParticipant) {
-        console.log('Participant detected, routing to MakePredictions');
-        setActiveSection('makePrediction');
-      } else {
-        console.log('Non-participant, routing to TutorialBridge');
-        setActiveSection('dashboard');
-      }
+      console.log('Routing to TutorialBridge dashboard');
+      setActiveSection('dashboard');
     }, 200);
     
   } else {

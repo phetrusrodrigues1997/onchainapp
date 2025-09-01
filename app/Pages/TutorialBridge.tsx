@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar, DollarSign, TrendingUp, Trophy, Users, Clock, ArrowRight, Wallet } from 'lucide-react';
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Cookies from 'js-cookie';
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
+import { getPredictionPercentages } from '../Database/actions';
+import { getHourlyPredictionData } from '../Database/actions3';
 
 interface DashboardProps {
   activeSection: string;
@@ -57,9 +60,18 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [userPots, setUserPots] = useState<string[]>([]);
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
+  const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
+  const [hourlyData, setHourlyData] = useState<Array<{
+    time: string;
+    positivePercentage: number;
+    negativePercentage: number;
+    totalPredictions: number;
+  }>>([
+    { time: '12am', positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 },
+  ]);
   
   const { address, isConnected } = useAccount();
 
@@ -103,6 +115,41 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       return () => clearTimeout(timer);
     }
   }, [isLoadingPrice, isConnected, ethBalance.isSuccess]);
+
+  // Load hourly prediction data for the selected market
+  useEffect(() => {
+    const loadHourlyData = async () => {
+      try {
+        if (marketInfo.address) {
+          // Determine market type based on contract address (same logic as LandingPage)
+          const marketType = CONTRACT_TO_TABLE_MAPPING[marketInfo.address as keyof typeof CONTRACT_TO_TABLE_MAPPING];
+          let marketId = '';
+          
+          if (marketType === 'featured') {
+            marketId = 'Trending';
+          } else if (marketType === 'crypto') {
+            marketId = 'Crypto';
+          }
+          
+          if (marketId) {
+            console.log('📊 Loading hourly prediction data for market:', marketId, 'tableType:', marketType);
+            const data = await getHourlyPredictionData(marketId, marketType);
+            setHourlyData(data);
+            console.log('📊 Loaded hourly prediction data:', data);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading hourly prediction data:', error);
+        // Keep default data on error
+      }
+    };
+
+    loadHourlyData();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(loadHourlyData, 30000);
+    return () => clearInterval(interval);
+  }, [marketInfo.address]);
 
   // Check user participation in pots
   useEffect(() => {
@@ -346,226 +393,219 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           `}</style>
           
           {/* Centered Headers - Always perfectly centered */}
-          <div className="text-center mb-6">
-            <div className="flex items-center justify-center mb-3 md:mb-4">
-              <Trophy className="w-10 h-10 md:w-12 md:h-12 text-black" />
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
-              How it works
+          <div className="text-center mb-8">
+            <h2 className="text-xl md:text-2xl font-bold mb-6 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
+              Tomorrow's Predictions
             </h2>
             
-          </div>
-          
-          <div className="text-center max-w-3xl mx-auto px-2">
-            <p className="text-gray-600 mb-6 text-sm md:text-base">
-              
-                Can you predict what's going to happen tomorrow and survive until Saturday?
-            </p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 text-left">
-              <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
-                <h4 className="font-bold mb-2 text-sm md:text-base">🎯 Daily Predictions</h4>
-                <p className="text-xs md:text-sm text-gray-600">Make correct predictions each day to stay alive</p>
+            {/* Timeline Chart */}
+            <div className="max-w-4xl mx-auto px-4">
+              {/* SVG Line Chart */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 p-6 mb-4 relative">
+                <svg
+                  viewBox="0 0 400 200"
+                  className="w-full h-48 md:h-64"
+                  style={{ minHeight: '200px' }}
+                >
+                  {/* Top-left Legend */}
+                  <g>
+                    {/* Yes percentage with green dot */}
+                    <circle cx="15" cy="15" r="4" fill="#10b981" />
+                    <text x="25" y="18" fontSize="12" fill="#666" fontWeight="500">
+                      Yes {hourlyData[hourlyData.length - 1]?.positivePercentage || 50}%
+                    </text>
+                    
+                    {/* No percentage with blue dot */}
+                    <circle cx="15" cy="35" r="4" fill="#3b82f6" />
+                    <text x="25" y="38" fontSize="12" fill="#666" fontWeight="500">
+                      No {hourlyData[hourlyData.length - 1]?.negativePercentage || 50}%
+                    </text>
+                  </g>
+
+                  {/* Grid lines */}
+                  {[0, 25, 50, 75, 100].map((y) => (
+                    <line
+                      key={y}
+                      x1="40"
+                      y1={170 - (y * 1.1)}
+                      x2="380"
+                      y2={170 - (y * 1.1)}
+                      stroke="#f0f0f0"
+                      strokeWidth="1"
+                    />
+                  ))}
+                  
+                  {/* Y-axis labels - Moved to right side */}
+                  {[0, 25, 50, 75, 100].map((y) => (
+                    <text
+                      key={y}
+                      x="390"
+                      y={175 - (y * 1.1)}
+                      fontSize="12"
+                      fill="#888"
+                      textAnchor="start"
+                    >
+                      {y}%
+                    </text>
+                  ))}
+                  
+                  {/* X-axis labels - Always show full timeline every 3 hours */}
+                  {['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'].map((timeLabel, index) => (
+                    <text
+                      key={timeLabel}
+                      x={50 + (index * 47.14)} // 330 / 7 spaces = ~47.14 units apart
+                      y="190"
+                      fontSize="12"
+                      fill="#888"
+                      textAnchor="middle"
+                    >
+                      {timeLabel}
+                    </text>
+                  ))}
+                  
+                  {/* Yes (Positive) Line - Green */}
+                  {hourlyData.length > 1 && (
+                    <path
+                      d={hourlyData.map((point, index) => {
+                        // Map time to x-axis position
+                        const timeMap: Record<string, number> = {
+                          '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
+                        };
+                        const xIndex = timeMap[point.time] || 0;
+                        const x = 50 + (xIndex * 47.14);
+                        // Add slight upward offset (+1.5 pixels) to Yes line
+                        const y = 170 - (point.positivePercentage * 1.1) - 1.5;
+                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      }).join(' ')}
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                  
+                  {/* No (Negative) Line - Blue */}
+                  {hourlyData.length > 1 && (
+                    <path
+                      d={hourlyData.map((point, index) => {
+                        // Map time to x-axis position
+                        const timeMap: Record<string, number> = {
+                          '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
+                        };
+                        const xIndex = timeMap[point.time] || 0;
+                        const x = 50 + (xIndex * 47.14);
+                        // Add slight downward offset (+1.5 pixels) to No line  
+                        const y = 170 - (point.negativePercentage * 1.1) + 1.5;
+                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      }).join(' ')}
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                  
+                  {/* Data points - Green (Yes) */}
+                  {hourlyData.map((point, index) => {
+                    // Map time to x-axis position
+                    const timeMap: Record<string, number> = {
+                      '00:00': 0, '02:00': 1, '04:00': 2, '06:00': 3, '08:00': 4, '10:00': 5,
+                      '12:00': 6, '14:00': 7, '16:00': 8, '18:00': 9, '20:00': 10, '22:00': 11
+                    };
+                    const xIndex = timeMap[point.time] || 0;
+                    const x = 50 + (xIndex * 28.33);
+                    // Add slight upward offset to match Yes line
+                    const y = 170 - (point.positivePercentage * 1.1) - 1.5;
+                    return (
+                      <circle
+                        key={`pos-${index}`}
+                        cx={x}
+                        cy={y}
+                        r="3"
+                        fill="#10b981"
+                        stroke="white"
+                        strokeWidth="1.5"
+                      />
+                    );
+                  })}
+                  
+                  {/* Data points - Blue (No) */}
+                  {hourlyData.map((point, index) => {
+                    // Map time to x-axis position
+                    const timeMap: Record<string, number> = {
+                      '00:00': 0, '02:00': 1, '04:00': 2, '06:00': 3, '08:00': 4, '10:00': 5,
+                      '12:00': 6, '14:00': 7, '16:00': 8, '18:00': 9, '20:00': 10, '22:00': 11
+                    };
+                    const xIndex = timeMap[point.time] || 0;
+                    const x = 50 + (xIndex * 28.33);
+                    // Add slight downward offset to match No line
+                    const y = 170 - (point.negativePercentage * 1.1) + 1.5;
+                    return (
+                      <circle
+                        key={`neg-${index}`}
+                        cx={x}
+                        cy={y}
+                        r="3"
+                        fill="#3b82f6"
+                        stroke="white"
+                        strokeWidth="1.5"
+                      />
+                    );
+                  })}
+                </svg>
               </div>
               
-              <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
-                <h4 className="font-bold mb-2 text-sm md:text-base">⚡ Get Eliminated?</h4>
-                <p className="text-xs md:text-sm text-gray-600">Re-enter by paying today's entry fee</p>
-              </div>
-              
-              <div className="bg-gray-50 p-3 md:p-4 rounded-lg sm:col-span-2 md:col-span-1">
-                <h4 className="font-bold mb-2 text-sm md:text-base">🏆 Win Big</h4>
-                <p className="text-xs md:text-sm text-gray-600">Survivors split the pot on Saturday</p>
-              </div>
+              {/* Total Predictions Count */}
+              <p className="text-sm text-gray-500 text-center">
+                {hourlyData[hourlyData.length - 1]?.totalPredictions || 0} total predictions made today
+              </p>
             </div>
           </div>
         </div>
 
 
-        {/* Additional Options */}
-        <div className="border border-gray-200 rounded-lg p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">Other Options</h2>
-            <Users className="w-6 h-6 text-black" />
-          </div>
+        {/* Rules Summary Dropdown */}
+        <div className="border border-gray-300 rounded-lg overflow-hidden mb-8">
+          <button
+            onClick={() => setIsRulesOpen(!isRulesOpen)}
+            className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+          >
+            <span className="text-black font-semibold pr-4">Rules Summary - How it works</span>
+            {isRulesOpen ? (
+              <FaChevronUp className="text-gray-600 flex-shrink-0" />
+            ) : (
+              <FaChevronDown className="text-gray-600 flex-shrink-0" />
+            )}
+          </button>
           
-          {/* Mobile: Stack layout with Active Markets after Make Predictions */}
-          <div className="md:hidden space-y-4">
-            <button 
-              onClick={() => setShowActiveMarkets(!showActiveMarkets)}
-              className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
-            >
-              <h4 className="font-semibold mb-1">My Pots</h4>
-              <p className="text-sm text-gray-600">View pots you've already entered</p>
-            </button>
-            
-            {/* User's Active Markets - Mobile: Show right after Make Predictions button */}
-            {showActiveMarkets && isConnected && userPots.length > 0 && (
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold">Your Active Pots</h3>
-                  <Trophy className="w-5 h-5 text-black" />
-                </div>
+          {isRulesOpen && (
+            <div className="px-6 py-4 bg-white border-t border-gray-300">
+              <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-lg">
+                <p className="text-gray-600 mb-6 text-sm md:text-base">
+                  Can you predict what's going to happen tomorrow and survive until Saturday?
+                </p>
                 
-                <div className="grid grid-cols-1 gap-3">
-                  {userPots.map((contractAddress) => {
-                    const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                    const marketName = marketType === 'featured' ? 'Trending' : 'Crypto';
-                    
-                    const handleMarketClick = () => {
-                      Cookies.set('selectedMarket', contractAddress);
-                      setActiveSection('bitcoinPot');
-                    };
-                    
-                    return (
-                      <button 
-                        key={contractAddress}
-                        onClick={handleMarketClick}
-                        className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-semibold text-green-800 text-sm">{marketName}</h4>
-                            <p className="text-xs text-green-600">You're participating</p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-green-500 text-xs">✓</div>
-                            <ArrowRight className="w-4 h-4 text-green-600" />
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 text-left">
+                  <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                    <h4 className="font-bold mb-2 text-sm md:text-base">Daily Predictions</h4>
+                    <p className="text-xs md:text-sm text-gray-600">Make correct predictions each day to stay alive</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
+                    <h4 className="font-bold mb-2 text-sm md:text-base">Get Eliminated?</h4>
+                    <p className="text-xs md:text-sm text-gray-600">Re-enter by paying today's entry fee</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-3 md:p-4 rounded-lg sm:col-span-2 md:col-span-1">
+                    <h4 className="font-bold mb-2 text-sm md:text-base">Win Big</h4>
+                    <p className="text-xs md:text-sm text-gray-600">Survivors split the pot on Saturday</p>
+                  </div>
                 </div>
               </div>
-            )}
-            
-            {/* Mobile: Show message if no active markets */}
-            {showActiveMarkets && isConnected && userPots.length === 0 && (
-              <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600 mb-3">You haven't entered any pots yet.</p>
-                <button 
-                  onClick={() => setActiveSection('bitcoinPot')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Enter a Pot →
-                </button>
-              </div>
-            )}
-            
-            {/* Mobile: Show connect wallet message */}
-            {showActiveMarkets && !isConnected && (
-              <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600">Connect your wallet to see your active pots.</p>
-              </div>
-            )}
-            
-            <button 
-              onClick={() => setActiveSection('createPot')}
-              className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
-            >
-              <h4 className="font-semibold mb-1">Create Private Pot</h4>
-              <p className="text-sm text-gray-600">Deploy your own prediction pot</p>
-            </button>
-            
-            <button 
-              onClick={() => setActiveSection('AI')}
-              className="w-full text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
-            >
-              <h4 className="font-semibold mb-1">Play Games</h4>
-              <p className="text-sm text-gray-600">AI trivia and other games</p>
-            </button>
-          </div>
-
-          {/* Desktop: Grid layout with Active Markets at bottom */}
-          <div className="hidden md:block">
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <button 
-                onClick={() => setShowActiveMarkets(!showActiveMarkets)}
-                className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
-              >
-                <h4 className="font-semibold mb-1">Make Predictions</h4>
-                <p className="text-sm text-gray-600">Predict on pots you've already entered</p>
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection('createPot')}
-                className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
-              >
-                <h4 className="font-semibold mb-1">Create Private Pot</h4>
-                <p className="text-sm text-gray-600">Deploy your own prediction pot</p>
-              </button>
-              
-              <button 
-                onClick={() => setActiveSection('AI')}
-                className="text-left p-4 border border-gray-200 rounded-lg hover:border-gray-400 transition-colors"
-              >
-                <h4 className="font-semibold mb-1">Play Games</h4>
-                <p className="text-sm text-gray-600">AI trivia and other games</p>
-              </button>
             </div>
-
-            {/* User's Active Markets - Desktop: Show below all buttons */}
-            {showActiveMarkets && isConnected && userPots.length > 0 && (
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold">Your Active Pots</h3>
-                  <Trophy className="w-5 h-5 text-black" />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {userPots.map((contractAddress) => {
-                    const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
-                    const marketName = marketType === 'featured' ? 'Trending' : 'Crypto';
-                    
-                    const handleMarketClick = () => {
-                      Cookies.set('selectedMarket', contractAddress);
-                      setActiveSection('bitcoinPot');
-                    };
-                    
-                    return (
-                      <button 
-                        key={contractAddress}
-                        onClick={handleMarketClick}
-                        className="p-3 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors text-left"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-semibold text-green-800 text-sm">{marketName}</h4>
-                            <p className="text-xs text-green-600">You're participating</p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-green-500 text-xs">✓</div>
-                            <ArrowRight className="w-4 h-4 text-green-600" />
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            
-            {/* Desktop: Show message if no active markets */}
-            {showActiveMarkets && isConnected && userPots.length === 0 && (
-              <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600 mb-3">You haven't entered any pots yet.</p>
-                <button 
-                  onClick={() => setActiveSection('bitcoinPot')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Enter a pot →
-                </button>
-              </div>
-            )}
-            
-            {/* Desktop: Show connect wallet message */}
-            {showActiveMarkets && !isConnected && (
-              <div className="p-4 bg-gray-50 rounded-lg text-center">
-                <p className="text-gray-600">Connect your wallet to see your active pots.</p>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Back to Home */}

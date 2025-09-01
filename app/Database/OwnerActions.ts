@@ -292,10 +292,9 @@ export async function setDailyOutcome(
       if (wrongAddresses.length > 0) {
         await db
           .delete(betsTable)
-          .where(and(
-            inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)),
-            eq(betsTable.betDate, finalTargetDate)
-          ));
+          .where(
+            inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress))
+          );
       }
     } else {
       console.log(`✅ No wrong predictions found for ${finalTargetDate}`);
