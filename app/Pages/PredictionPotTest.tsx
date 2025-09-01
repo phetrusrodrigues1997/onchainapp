@@ -1353,23 +1353,36 @@ useEffect(() => {
       </p>
       <input
         type="text"
-        placeholder="positive or negative"
+        placeholder="positive 2025-09-01 (outcome and date)"
         value={outcomeInput}
         onChange={(e) => setOutcomeInput(e.target.value.toLowerCase())}
         className="w-full px-3 py-2 bg-black/50 border border-[#d3c81a] rounded-md text-[#F5F5F5] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d3c81a] mb-3"
       />
       <button
         onClick={async () => {
-          if (outcomeInput !== "positive" && outcomeInput !== "negative") {
-            showMessage("Please enter 'positive' or 'negative'", true);
+          // Parse input format: "positive 2025-09-01" or just "positive"
+          const inputParts = outcomeInput.trim().split(' ');
+          const outcome = inputParts[0];
+          const dateParam = inputParts[1] || undefined; // Use undefined if no date provided
+          
+          // Validate outcome
+          if (outcome !== "positive" && outcome !== "negative") {
+            showMessage("Please enter format: 'positive 2025-09-01' or just 'positive'", true);
             return;
           }
+          
+          // Validate date format if provided (YYYY-MM-DD)
+          if (dateParam && !/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+            showMessage("Date must be in YYYY-MM-DD format (e.g., 2025-09-01)", true);
+            return;
+          }
+          
           setIsLoading(true);
           try {
-            
+            console.log('🔴 Setting daily outcome:', { outcome, dateParam, tableType: selectedTableType });
             
             // Set daily outcome (this will add new wrong predictions to the table)
-            await setDailyOutcome(outcomeInput as "positive" | "negative", selectedTableType, participants || []);
+            await setDailyOutcome(outcome as "positive" | "negative", selectedTableType, participants || [], dateParam);
             
             // 🔔 Send notifications after successful outcome setting
             try {
@@ -1378,7 +1391,7 @@ useEffect(() => {
               // Notify market outcome
               await notifyMarketOutcome(
                 contractAddress, 
-                outcomeInput as "positive" | "negative", 
+                outcome as "positive" | "negative", 
                 selectedTableType
               );
               

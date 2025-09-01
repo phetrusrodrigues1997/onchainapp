@@ -211,7 +211,8 @@ export async function getProvisionalOutcome(tableType: string, outcomeDate?: str
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
   tableType: string,
-  contractParticipants: string[] = []
+  contractParticipants: string[] = [],
+  targetDate?: string // Optional: YYYY-MM-DD format. If not provided, uses today's date
 ) {
   const opposite = outcome === "positive" ? "negative" : "positive";
   const betsTable = getTableFromType(tableType);
@@ -221,16 +222,16 @@ export async function setDailyOutcome(
     // First, update the MarketOutcomes table to mark this as the final outcome
     const now = Date.now();
     const today = new Date(now);
-    const targetDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const finalTargetDate = targetDate || today.toISOString().split('T')[0]; // Use provided date or default to today
     
-    console.log(`🔴 Setting final outcome for ${tableType}: ${outcome} on ${targetDate}`);
+    console.log(`🔴 Setting final outcome for ${tableType}: ${outcome} on ${finalTargetDate}`);
     
     // Check if there's an existing outcome for this market and date
     const existingOutcome = await db.select()
       .from(MarketOutcomes)
       .where(and(
         eq(MarketOutcomes.marketType, tableType),
-        eq(MarketOutcomes.outcomeDate, targetDate)
+        eq(MarketOutcomes.outcomeDate, finalTargetDate)
       ));
 
     if (existingOutcome.length > 0) {
@@ -242,13 +243,13 @@ export async function setDailyOutcome(
         })
         .where(eq(MarketOutcomes.id, existingOutcome[0].id));
       
-      console.log(`✅ Updated existing outcome to final for ${tableType} on ${targetDate}`);
+      console.log(`✅ Updated existing outcome to final for ${tableType} on ${finalTargetDate}`);
     } else {
       // Create new outcome record (shouldn't happen in normal flow, but just in case)
       console.warn(`⚠️ No existing provisional outcome found, creating final outcome directly`);
       await db.insert(MarketOutcomes).values({
         marketType: tableType,
-        outcomeDate: targetDate,
+        outcomeDate: finalTargetDate,
         provisionalOutcome: outcome,
         finalOutcome: outcome,
         finalOutcomeSetAt: today,
@@ -256,16 +257,20 @@ export async function setDailyOutcome(
         isDisputed: false
       });
     }
-    // Get all users who made predictions
+    // Get all users who made predictions for the target date
     const allPredictors = await db
       .select({ walletAddress: betsTable.walletAddress })
-      .from(betsTable);
+      .from(betsTable)
+      .where(eq(betsTable.betDate, finalTargetDate));
 
-    // Get all wrong predictions
+    // Get all wrong predictions for the target date
     const allWrongBets = await db
       .select()
       .from(betsTable)
-      .where(eq(betsTable.prediction, opposite));
+      .where(and(
+        eq(betsTable.prediction, opposite),
+        eq(betsTable.betDate, finalTargetDate)
+      ));
 
     // Filter to only include wrong predictions from current pot participants
     let wrongBets = allWrongBets;
@@ -284,7 +289,7 @@ export async function setDailyOutcome(
       // Add non-predictors to wrong predictions table so they must pay re-entry fee
       if (nonPredictors.length > 0) {
         
-        const todayDateString = targetDate; // Use the same date string we calculated above
+        const todayDateString = finalTargetDate; // Use the same date string we calculated above
         
         const nonPredictorRecords = nonPredictors.map(participant => ({
           walletAddress: participant,
@@ -302,7 +307,7 @@ export async function setDailyOutcome(
     }
 
     if (wrongBets.length > 0) {
-      const wrongPredictionDate = targetDate; // Use the same date string we calculated above
+      const wrongPredictionDate = finalTargetDate; // Use the same date string we calculated above
       
       const wrongAddresses = wrongBets.map(bet => ({
         walletAddress: bet.walletAddress,
@@ -314,9 +319,14 @@ export async function setDailyOutcome(
         .values(wrongAddresses)
         .onConflictDoNothing();
 
-      await db
-        .delete(betsTable)
-        .where(inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)));
+      if (wrongAddresses.length > 0) {
+        await db
+          .delete(betsTable)
+          .where(and(
+            inArray(betsTable.walletAddress, wrongAddresses.map(w => w.walletAddress)),
+            eq(betsTable.betDate, finalTargetDate)
+          ));
+      }
     }
     
     // Only clear ALL predictions on non-Saturday days
@@ -325,12 +335,21 @@ export async function setDailyOutcome(
     const dayOfWeek = currentDay.getUTCDay(); // 0 = Sunday, 6 = Saturday
     
     if (dayOfWeek !== 6) {
-      // Clear ALL processed predictions (both right and wrong have been handled)
-      await db
-        .delete(betsTable)
-        .where(inArray(betsTable.walletAddress, allPredictors.map(p => p.walletAddress)));
+      // Clear ALL processed predictions for the target date (both right and wrong have been handled)
+      if (allPredictors.length > 0) {
+        await db
+          .delete(betsTable)
+          .where(and(
+            inArray(betsTable.walletAddress, allPredictors.map(p => p.walletAddress)),
+            eq(betsTable.betDate, finalTargetDate)
+          ));
+      } else {
+        console.log(`No predictions found for target date ${finalTargetDate} - nothing to clear`);
+      }
     } else {
+      // Saturday: Keep correct predictions, but wrong predictions were already deleted above
       console.log("Saturday detected - keeping correct predictions in table for winner determination");
+      console.log(`Wrong predictions for ${finalTargetDate} have been cleared, correct predictions remain`);
     }
       
   } catch (error) {
