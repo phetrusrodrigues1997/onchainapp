@@ -541,11 +541,15 @@ export default function App() {
                         {/* Show balance on mobile, colorful circle on desktop */}
                         {isMobile ? (
                           <button
-                            onClick={() => setActiveSection('buy')}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setActiveSection('buy');
+                            }}
                             className="flex flex-col items-center bg-transparent text-gray-700 font-medium text-xs hover:bg-gray-100 cursor-pointer px-2 py-1 rounded-md transition-colors duration-200"
                           >
-                            <div className="text-[10px] text-gray-500 whitespace-nowrap">Balance</div>
-                            <div className="text-xs font-semibold text-purple-700 whitespace-nowrap">
+                            <div className="text-xs text-gray-500 whitespace-nowrap">Balance</div>
+                            <div className="text-sm font-semibold text-purple-700 whitespace-nowrap">
                               {ethBalance.data ? formatBalance(ethBalance.data.value) : '$0.00'}
                             </div>
                           </button>
