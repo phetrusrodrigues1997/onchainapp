@@ -286,10 +286,10 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
       const basePrices = {
         0: 10000, // Sunday: 0.01 USDC
         1: 20000, // Monday: 0.02 USDC  
-        2: 30000, // Tuesday: 0.03 USDC
-        3: 40000, // Wednesday: 0.04 USDC
-        4: 50000, // Thursday: 0.05 USDC
-        5: 60000, // Friday: 0.06 USDC
+        2: 40000, // Tuesday: 0.03 USDC
+        3: 80000, // Wednesday: 0.04 USDC
+        4: 160000, // Thursday: 0.05 USDC
+        5: 320000, // Friday: 0.06 USDC
         6: 10000, // Saturday: Fallback to Sunday price
       };
       

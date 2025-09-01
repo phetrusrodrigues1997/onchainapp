@@ -182,7 +182,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
       
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const fees = ['0.01', '0.02', '0.03', '0.04', '0.05', '0.06', '0.00'];
+      const fees = ['0.01', '0.02', '0.04', '0.08', '0.16', '0.32', '0.01'];
       
       setCurrentDay(days[dayOfWeek]);
       setCurrentEntryFee(fees[dayOfWeek]);
