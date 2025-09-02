@@ -44,10 +44,9 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle, onTrigg
   const mobileMenuItems = [
     { id: 'home', label: 'Home' },
     { id: 'discord', label: 'How it works' },
-    { id: 'createPot', label: 'Private Markets' },
     { id: 'receive', label: 'Fund Account' },
-    { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
+    { id: 'AI', label: 'Games' },
     { id: 'ideas', label: 'Ideas' },
   ];
 
