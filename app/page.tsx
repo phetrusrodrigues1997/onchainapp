@@ -13,7 +13,7 @@ import ProfilePage from './Pages/ProfilePage';
 import TutorialBridge from './Pages/TutorialBridge';
 import ReferralProgram from './Pages/ReferralProgram';
 // import { cryptoTokens, stablecoinTokens, ETHToken, USDCToken, CbBTCToken, BRZToken, CADCToken, EURCToken } from './Token Lists/coins';
-import BuySection from "./Pages/BuyPage";
+import ReceiveSection from "./Pages/ReceivePage";
 // import CurrencyDisplay from './Pages/Charts';
 import Activity from './Pages/TransactionsPage';
 import NavigationMenu from "./Sections/NavigationMenu";
@@ -506,7 +506,7 @@ export default function App() {
                 {/* Balance display */}
                 {isConnected && (
                   <button
-                    onClick={() => setActiveSection('buy')}
+                    onClick={() => setActiveSection('receive')}
                     className={`hidden md:flex flex-col items-center bg-transparent text-gray-700 font-medium text-sm transition-colors duration-200 z-10 relative px-4 py-1 rounded-md min-w-fit translate-x-16 hover:bg-gray-100 cursor-pointer`}
                   >
                     <div className="text-xs text-gray-500 whitespace-nowrap">Your balance</div>
@@ -551,7 +551,7 @@ export default function App() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setActiveSection('buy');
+                              setActiveSection('receive');
                             }}
                             className="flex flex-col items-center bg-transparent text-gray-700 font-medium text-xs hover:bg-gray-100 cursor-pointer px-2 py-1 rounded-md transition-colors duration-200"
                           >
@@ -857,7 +857,7 @@ export default function App() {
 
 
         {/* {activeSection === "usernamePage" && <UsernameSetup />} */}
-        {activeSection === "buy" && <BuySection activeSection={activeSection} setActiveSection={setActiveSection} />}
+        {activeSection === "receive" && <ReceiveSection activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "profile" && <ProfilePage activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "messagesPage" && <MessagingPage activeSection={activeSection} setActiveSection={setActiveSection} />}
         {activeSection === "discord" && <HowItWorksSection />}

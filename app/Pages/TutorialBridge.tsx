@@ -347,7 +347,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </span>
               </p>
               <button
-                onClick={() => setActiveSection('buy')}
+                onClick={() => setActiveSection('receive')}
                 className="w-full bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
               >
                 Let's fund your account →
