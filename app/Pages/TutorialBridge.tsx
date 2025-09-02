@@ -488,13 +488,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     >
                       {/* Purple circle with "i" */}
                       <circle 
-                        cx={isMobile ? "385" : "475"} 
+                        cx={isMobile ? "360" : "475"} 
                         cy="20" 
                         r={isMobile ? "8" : "6"} 
                         fill="#3b82f6" 
                       />
                       <text 
-                        x={isMobile ? "385" : "475"} 
+                        x={isMobile ? "360" : "475"} 
                         y="24" 
                         fontSize={isMobile ? "12" : "10"} 
                         fill="white" 
@@ -505,7 +505,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       </text>
                       {/* How it works text */}
                       <text 
-                        x={isMobile ? "400" : "490"} 
+                        x={isMobile ? "375" : "490"} 
                         y="24" 
                         fontSize={isMobile ? "18" : "13"} 
                         fill="#3b82f6" 
