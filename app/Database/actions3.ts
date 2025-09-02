@@ -439,12 +439,30 @@ const getTableFromType = (tableType: string) => {
 
 export async function getHourlyPredictionData(marketId: string, tableType: string) {
   try {
-    // Use the SAME date calculation functions that store predictions for consistency
-    const tomorrowDateStr = getTomorrowUKDateString(); // Tomorrow's UK date
+    // Get current time in UK timezone using Intl.DateTimeFormat (more reliable)
+    const now = new Date();
+    const ukFormatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/London',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
     
-    // Get current UK time to determine which time periods to show
-    const currentUKTime = getUKTime();
-    const currentHour = currentUKTime.getHours();
+    const ukParts = ukFormatter.formatToParts(now);
+    const ukDateStr = `${ukParts.find(p => p.type === 'year')?.value}-${ukParts.find(p => p.type === 'month')?.value}-${ukParts.find(p => p.type === 'day')?.value}`;
+    const currentHour = parseInt(ukParts.find(p => p.type === 'hour')?.value || '0');
+    
+    // Calculate tomorrow's date in UK timezone (simple string manipulation)
+    const [year, month, day] = ukDateStr.split('-').map(Number);
+    const ukTomorrow = new Date(year, month - 1, day + 1); // month is 0-indexed
+    const tomorrowDateStr = `${ukTomorrow.getFullYear()}-${String(ukTomorrow.getMonth() + 1).padStart(2, '0')}-${String(ukTomorrow.getDate()).padStart(2, '0')}`;
+    
+    console.log('🔍 Current UK time - Date:', ukDateStr, 'Hour:', currentHour);
+    console.log('🔍 Looking for predictions for date:', tomorrowDateStr, 'Market:', marketId, 'Table:', tableType);
     
     // All possible time slots (every 2 hours) with AM/PM format
     const allTimeSlots = [
@@ -484,6 +502,8 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
       })
       .from(betsTable)
       .where(eq(betsTable.betDate, tomorrowDateStr));
+      
+    console.log('🔍 Found', bets.length, 'predictions for date:', tomorrowDateStr);
 
     // Process each bet and assign to appropriate time slot
     bets.forEach(bet => {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar, DollarSign, TrendingUp, Trophy, Users, Clock, ArrowRight, Wallet } from 'lucide-react';
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Cookies from 'js-cookie';
@@ -77,6 +77,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   }>>([
     { time: '12am', positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 },
   ]);
+  const [hoveredPoint, setHoveredPoint] = useState<{
+    x: number;
+    y: number;
+    percentage: number;
+    type: 'yes' | 'no';
+    time: string;
+  } | null>(null);
   
   const { address, isConnected } = useAccount();
 
@@ -204,7 +211,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     query: { enabled: isConnected && !!address }
   });
 
-  const participantsData = [participants1, participants2];
+  const participantsData = useMemo(() => [participants1, participants2], [participants1, participants2]);
 
   // Set up the selected market address and question from cookies
   useEffect(() => {
@@ -277,7 +284,14 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       }
     };
 
-    // Get selected market from cookie
+    updateDashboard();
+    const interval = setInterval(updateDashboard, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Get selected market from cookie - separate useEffect to avoid infinite loops
+  useEffect(() => {
     const getSelectedMarket = () => {
       const selectedMarketAddress = Cookies.get('selectedMarket');
       console.log('Selected pot address from cookie:', selectedMarketAddress);
@@ -301,12 +315,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       }
     };
 
-    updateDashboard();
     getSelectedMarket();
-    const interval = setInterval(updateDashboard, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // Only run once on mount
 
 
   // Show loading screen while background processes complete
@@ -531,6 +541,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         y2={baseY - (y * scale)}
                         stroke="#f0f0f0"
                         strokeWidth="1"
+                        strokeDasharray="2 2"
                       />
                     );
                   })}
@@ -572,66 +583,252 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   
                   {/* Yes (Positive) Line - Green */}
                   {hourlyData.length > 1 && (
-                    <path
-                      d={hourlyData.map((point, index) => {
-                        // Map time to x-axis position (2-hour intervals)
+                    <>
+                      <path
+                        d={hourlyData.map((point, index) => {
+                          // Map time to x-axis position (2-hour intervals)
+                          const timeMap: Record<string, number> = {
+                            '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
+                          };
+                          const xIndex = timeMap[point.time] || 0;
+                          const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
+                          // Add slight upward offset (+2 pixels) to Yes line
+                          const baseY = isMobile ? 320 : 240;
+                          const scale = isMobile ? 2.6 : 1.8;
+                          const y = baseY - (point.positivePercentage * scale) - 2;
+                          
+                          if (index === 0) {
+                            return `M ${x} ${y}`;
+                          } else {
+                            const prevPoint = hourlyData[index - 1];
+                            const prevY = baseY - (prevPoint.positivePercentage * scale) - 2;
+                            // Step-based movement: horizontal first, then vertical
+                            return `L ${x} ${prevY} L ${x} ${y}`;
+                          }
+                        }).join(' ')}
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      
+                      {/* Large invisible hover areas for Yes line */}
+                      {hourlyData.map((point, index) => {
                         const timeMap: Record<string, number> = {
                           '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                         };
                         const xIndex = timeMap[point.time] || 0;
                         const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                        // Add slight upward offset (+2 pixels) to Yes line
                         const baseY = isMobile ? 320 : 240;
                         const scale = isMobile ? 2.6 : 1.8;
                         const y = baseY - (point.positivePercentage * scale) - 2;
                         
-                        if (index === 0) {
-                          return `M ${x} ${y}`;
-                        } else {
-                          const prevPoint = hourlyData[index - 1];
-                          const prevY = baseY - (prevPoint.positivePercentage * scale) - 2;
-                          // Step-based movement: horizontal first, then vertical
-                          return `L ${x} ${prevY} L ${x} ${y}`;
-                        }
-                      }).join(' ')}
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  )}
-                  
-                  {/* No (Negative) Line - Blue */}
-                  {hourlyData.length > 1 && (
-                    <path
-                      d={hourlyData.map((point, index) => {
-                        // Map time to x-axis position (2-hour intervals)
+                        return (
+                          <circle
+                            key={`yes-hover-${index}`}
+                            cx={x}
+                            cy={y}
+                            r="15" // Increased from 8 to 15 for better sensitivity
+                            fill="transparent"
+                            className="cursor-pointer"
+                            onMouseEnter={() => setHoveredPoint({
+                              x,
+                              y: y - 15,
+                              percentage: point.positivePercentage,
+                              type: 'yes',
+                              time: point.time
+                            })}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                          />
+                        );
+                      })}
+                      
+                      {/* Hover zones along Yes line segments for better sensitivity */}
+                      {hourlyData.map((point, index) => {
+                        if (index === 0) return null;
+                        
                         const timeMap: Record<string, number> = {
                           '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                         };
                         const xIndex = timeMap[point.time] || 0;
                         const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                        // Add slight downward offset (+2 pixels) to No line  
+                        const baseY = isMobile ? 320 : 240;
+                        const scale = isMobile ? 2.6 : 1.8;
+                        const y = baseY - (point.positivePercentage * scale) - 2;
+                        
+                        const prevPoint = hourlyData[index - 1];
+                        const prevXIndex = timeMap[prevPoint.time] || 0;
+                        const prevX = isMobile ? 60 + (prevXIndex * 32) : 70 + (prevXIndex * 40);
+                        const prevY = baseY - (prevPoint.positivePercentage * scale) - 2;
+                        
+                        return (
+                          <g key={`yes-segment-${index}`}>
+                            {/* Horizontal segment */}
+                            <line
+                              x1={prevX}
+                              y1={prevY}
+                              x2={x}
+                              y2={prevY}
+                              stroke="transparent"
+                              strokeWidth="12"
+                              className="cursor-pointer"
+                              onMouseEnter={() => setHoveredPoint({
+                                x: (prevX + x) / 2,
+                                y: prevY - 15,
+                                percentage: prevPoint.positivePercentage,
+                                type: 'yes',
+                                time: prevPoint.time
+                              })}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                            {/* Vertical segment */}
+                            <line
+                              x1={x}
+                              y1={prevY}
+                              x2={x}
+                              y2={y}
+                              stroke="transparent"
+                              strokeWidth="12"
+                              className="cursor-pointer"
+                              onMouseEnter={() => setHoveredPoint({
+                                x,
+                                y: Math.min(prevY, y) - 15,
+                                percentage: point.positivePercentage,
+                                type: 'yes',
+                                time: point.time
+                              })}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                          </g>
+                        );
+                      })}
+                    </>
+                  )}
+                  
+                  {/* No (Negative) Line - Blue */}
+                  {hourlyData.length > 1 && (
+                    <>
+                      <path
+                        d={hourlyData.map((point, index) => {
+                          // Map time to x-axis position (2-hour intervals)
+                          const timeMap: Record<string, number> = {
+                            '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
+                          };
+                          const xIndex = timeMap[point.time] || 0;
+                          const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
+                          // Add slight downward offset (+2 pixels) to No line  
+                          const baseY = isMobile ? 320 : 240;
+                          const scale = isMobile ? 2.6 : 1.8;
+                          const y = baseY - (point.negativePercentage * scale) + 2;
+                          
+                          if (index === 0) {
+                            return `M ${x} ${y}`;
+                          } else {
+                            const prevPoint = hourlyData[index - 1];
+                            const prevY = baseY - (prevPoint.negativePercentage * scale) + 2;
+                            // Step-based movement: horizontal first, then vertical
+                            return `L ${x} ${prevY} L ${x} ${y}`;
+                          }
+                        }).join(' ')}
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      
+                      {/* Large invisible hover areas for No line */}
+                      {hourlyData.map((point, index) => {
+                        const timeMap: Record<string, number> = {
+                          '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
+                        };
+                        const xIndex = timeMap[point.time] || 0;
+                        const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
                         const baseY = isMobile ? 320 : 240;
                         const scale = isMobile ? 2.6 : 1.8;
                         const y = baseY - (point.negativePercentage * scale) + 2;
                         
-                        if (index === 0) {
-                          return `M ${x} ${y}`;
-                        } else {
-                          const prevPoint = hourlyData[index - 1];
-                          const prevY = baseY - (prevPoint.negativePercentage * scale) + 2;
-                          // Step-based movement: horizontal first, then vertical
-                          return `L ${x} ${prevY} L ${x} ${y}`;
-                        }
-                      }).join(' ')}
-                      fill="none"
-                      stroke="#3b82f6"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                        return (
+                          <circle
+                            key={`no-hover-${index}`}
+                            cx={x}
+                            cy={y}
+                            r="15" // Increased from 8 to 15 for better sensitivity
+                            fill="transparent"
+                            className="cursor-pointer"
+                            onMouseEnter={() => setHoveredPoint({
+                              x,
+                              y: y - 15,
+                              percentage: point.negativePercentage,
+                              type: 'no',
+                              time: point.time
+                            })}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                          />
+                        );
+                      })}
+                      
+                      {/* Hover zones along No line segments for better sensitivity */}
+                      {hourlyData.map((point, index) => {
+                        if (index === 0) return null;
+                        
+                        const timeMap: Record<string, number> = {
+                          '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
+                        };
+                        const xIndex = timeMap[point.time] || 0;
+                        const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
+                        const baseY = isMobile ? 320 : 240;
+                        const scale = isMobile ? 2.6 : 1.8;
+                        const y = baseY - (point.negativePercentage * scale) + 2;
+                        
+                        const prevPoint = hourlyData[index - 1];
+                        const prevXIndex = timeMap[prevPoint.time] || 0;
+                        const prevX = isMobile ? 60 + (prevXIndex * 32) : 70 + (prevXIndex * 40);
+                        const prevY = baseY - (prevPoint.negativePercentage * scale) + 2;
+                        
+                        return (
+                          <g key={`no-segment-${index}`}>
+                            {/* Horizontal segment */}
+                            <line
+                              x1={prevX}
+                              y1={prevY}
+                              x2={x}
+                              y2={prevY}
+                              stroke="transparent"
+                              strokeWidth="12"
+                              className="cursor-pointer"
+                              onMouseEnter={() => setHoveredPoint({
+                                x: (prevX + x) / 2,
+                                y: prevY - 15,
+                                percentage: prevPoint.negativePercentage,
+                                type: 'no',
+                                time: prevPoint.time
+                              })}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                            {/* Vertical segment */}
+                            <line
+                              x1={x}
+                              y1={prevY}
+                              x2={x}
+                              y2={y}
+                              stroke="transparent"
+                              strokeWidth="12"
+                              className="cursor-pointer"
+                              onMouseEnter={() => setHoveredPoint({
+                                x,
+                                y: Math.min(prevY, y) - 15,
+                                percentage: point.negativePercentage,
+                                type: 'no',
+                                time: point.time
+                              })}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                            />
+                          </g>
+                        );
+                      })}
+                    </>
                   )}
                   
                   {/* Tip circle - Green (Yes) - Only at the end of the line with pulse animation */}
@@ -719,6 +916,42 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       </circle>
                     );
                   })()}
+                  
+                  {/* Sleek hover tooltip */}
+                  {hoveredPoint && (
+                    <g>
+                      {/* Tooltip background */}
+                      <rect
+                        x={hoveredPoint.x - 25}
+                        y={hoveredPoint.y - 12}
+                        width="50"
+                        height="24"
+                        fill="rgba(0, 0, 0, 0.8)"
+                        stroke="rgba(255, 255, 255, 0.2)"
+                        strokeWidth="1"
+                        rx="6"
+                        ry="6"
+                      />
+                      {/* Tooltip text */}
+                      <text
+                        x={hoveredPoint.x}
+                        y={hoveredPoint.y + 2}
+                        fill="white"
+                        fontSize="11"
+                        fontWeight="600"
+                        textAnchor="middle"
+                      >
+                        {hoveredPoint.percentage}%
+                      </text>
+                      {/* Small indicator dot */}
+                      <circle
+                        cx={hoveredPoint.x}
+                        cy={hoveredPoint.y + 15}
+                        r="2"
+                        fill={hoveredPoint.type === 'yes' ? '#10b981' : '#3b82f6'}
+                      />
+                    </g>
+                  )}
                 </svg>
                 
                 {/* Mobile Enter Button - Inside chart container */}
