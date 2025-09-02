@@ -543,6 +543,7 @@ const handleMarketClick = (marketId: string) => {
     }
     
     const marketQuestion = market?.question || '';
+    const marketIcon = market?.icon || '';
     
     // Set the cookies with proper options
     Cookies.set('selectedMarket', contractAddress, { 
@@ -551,6 +552,11 @@ const handleMarketClick = (marketId: string) => {
     });
     
     Cookies.set('selectedMarketQuestion', marketQuestion, { 
+      sameSite: 'lax',
+      expires: 7 // Cookie expires in 7 days
+    });
+    
+    Cookies.set('selectedMarketIcon', marketIcon, { 
       sameSite: 'lax',
       expires: 7 // Cookie expires in 7 days
     });

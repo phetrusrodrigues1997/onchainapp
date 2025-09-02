@@ -63,6 +63,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<string>('Tomorrow\'s Predictions');
+  const [selectedIcon, setSelectedIcon] = useState<string>('');
   const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [isMobile, setIsMobile] = useState<boolean>(false);
@@ -214,6 +215,11 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     if (savedQuestion) {
       setSelectedQuestion(savedQuestion);
     }
+    
+    const savedIcon = Cookies.get('selectedMarketIcon');
+    if (savedIcon) {
+      setSelectedIcon(savedIcon);
+    }
   }, []);
 
   // Check if user has the specific wallet address
@@ -360,9 +366,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="px-6 md:px-6">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white text-black p-6">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         {/* <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Select Your Market</h1>
@@ -389,11 +394,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           </div>
         </div> */}
 
-        </div> {/* Close max-w-4xl container */}
-      </div> {/* Close px-6 container */}
-      
-        {/* Elimination Market Explanation - Full width on mobile */}
-        <div className="border-0 md:border md:border-gray-200 md:rounded-lg p-0 md:p-8 mb-8 relative md:max-w-4xl md:mx-auto md:px-6">
+        {/* Elimination Market Explanation - Full width on mobile only */}
+        <div className="border-0 rounded-none md:rounded-lg p-0 md:p-8 mb-8 relative -mx-6 md:mx-0">
           {/* Enter Market Button - Desktop only, positioned absolutely in top right */}
           <button
   onClick={() => setActiveSection(marketInfo.section)}
@@ -418,20 +420,42 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             }
           `}</style>
           
-          {/* Left-aligned Question Header */}
-          <div className="text-left mb-8 px-6 md:px-0">
-            <h2 className="text-lg md:text-xl font-bold mb-6 pr-4 md:pr-32 leading-relaxed">
-              {selectedQuestion}
-            </h2>
+          {/* Question Header with Image */}
+          <div className="text-left mb-8 px-6 md:px-0 transform translate-y-4 md:translate-y-0">
+            <div className="flex items-start gap-3 mb-6">
+              {/* Small Square Image */}
+              <div className="flex-shrink-0">
+                <div className="rounded-lg w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden relative">
+                  {selectedIcon?.slice(0, 4) === 'http' ? (
+                    <img 
+                      src={selectedIcon} 
+                      alt="Market Icon" 
+                      className="absolute inset-0 w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-sm md:text-lg text-gray-600">{selectedIcon || '📊'}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Question Text */}
+              <div className="flex-1">
+                <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-32 leading-relaxed">
+                  {selectedQuestion}
+                </h2>
+              </div>
+            </div>
             
             {/* Timeline Chart */}
-            <div className="w-full md:max-w-6xl md:mx-auto px-0 md:px-3">
+            <div className="w-full px-0 md:px-3 transform -translate-y-4 md:translate-y-0">
               {/* SVG Line Chart */}
-              <div className="bg-white rounded-none md:rounded-lg p-1 md:p-6 mb-4 relative">
+              <div className="bg-white rounded-lg p-1 md:p-6 mb-4 relative">
                 <svg
-                  viewBox="0 0 400 300"
-                  className="w-full h-96 md:h-72 lg:h-80"
-                  style={{ minHeight: '350px' }}
+                  viewBox="0 0 600 350"
+                  className="w-full h-[28rem] md:h-72 lg:h-80"
+                  style={{ minHeight: '400px' }}
                 >
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
@@ -452,10 +476,10 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {[0, 25, 50, 75, 100].map((y) => (
                     <line
                       key={y}
-                      x1="40"
-                      y1={240 - (y * 1.8)}
-                      x2="380"
-                      y2={240 - (y * 1.8)}
+                      x1="50"
+                      y1={280 - (y * 2.2)}
+                      x2="550"
+                      y2={280 - (y * 2.2)}
                       stroke="#f0f0f0"
                       strokeWidth="1"
                     />
@@ -465,8 +489,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {[0, 25, 50, 75, 100].map((y) => (
                     <text
                       key={y}
-                      x="395"
-                      y={245 - (y * 1.8)}
+                      x="570"
+                      y={285 - (y * 2.2)}
                       fontSize="13"
                       fill="#666"
                       textAnchor="end"
@@ -480,8 +504,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'].map((timeLabel, index) => (
                     <text
                       key={timeLabel}
-                      x={50 + (index * 47.14)} // 330 / 7 spaces = ~47.14 units apart
-                      y="275"
+                      x={70 + (index * 65.71)} // 460 / 7 spaces = ~65.71 units apart for wider chart
+                      y="320"
                       fontSize="13"
                       fill="#666"
                       textAnchor="middle"
@@ -500,9 +524,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = 50 + (xIndex * 47.14);
+                        const x = 70 + (xIndex * 65.71);
                         // Add slight upward offset (+2 pixels) to Yes line
-                        const y = 240 - (point.positivePercentage * 1.8) - 2;
+                        const y = 280 - (point.positivePercentage * 2.2) - 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
@@ -522,9 +546,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = 50 + (xIndex * 47.14);
+                        const x = 70 + (xIndex * 65.71);
                         // Add slight downward offset (+2 pixels) to No line  
-                        const y = 240 - (point.negativePercentage * 1.8) + 2;
+                        const y = 280 - (point.negativePercentage * 2.2) + 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
@@ -542,8 +566,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = 50 + (xIndex * 47.14);
-                    const y = 240 - (lastPoint.positivePercentage * 1.8) - 2;
+                    const x = 70 + (xIndex * 65.71);
+                    const y = 280 - (lastPoint.positivePercentage * 2.2) - 2;
                     
                     // Responsive circle sizing
                     const baseRadius = isMobile ? 4.5 : 3.5;
@@ -583,8 +607,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = 50 + (xIndex * 47.14);
-                    const y = 240 - (lastPoint.negativePercentage * 1.8) + 2;
+                    const x = 70 + (xIndex * 65.71);
+                    const y = 280 - (lastPoint.negativePercentage * 2.2) + 2;
                     
                     // Responsive circle sizing
                     const baseRadius = isMobile ? 4.5 : 3.5;
@@ -621,7 +645,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               
               
               {/* Mobile Enter Button - Below chart */}
-              <div className="block md:hidden text-center mb-8">
+              <div className="block md:hidden text-center mb-16 transform -translate-y-4">
                 <button
                   onClick={() => setActiveSection(marketInfo.section)}
                   className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
@@ -636,10 +660,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           </div>
         </div>
 
-      <div className="px-6 md:px-6">
-        <div className="max-w-4xl mx-auto">
         {/* Rules Summary Dropdown */}
-        <div className="border border-gray-300 rounded-lg overflow-hidden mb-8">
+        <div className="border border-gray-300 rounded-lg overflow-hidden mb-8 mt-8 md:mt-0">
           <button
             onClick={() => setIsRulesOpen(!isRulesOpen)}
             className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
@@ -689,8 +711,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             ← Back to Home
           </button>
         </div>
-        </div> {/* Close max-w-4xl container */}
-      </div> {/* Close px-6 container */}
+      </div>
     </div>
   );
 };
