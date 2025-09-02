@@ -458,7 +458,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 <svg
                   viewBox={isMobile ? "0 0 500 420" : "0 0 600 350"}
                   className="w-full h-[32rem] md:h-80 lg:h-88"
-                  style={{ minHeight: '450px' }}
+                  style={{ minHeight: '450px', transform: window.innerWidth < 768 ? 'translateY(-2rem)' : 'none' }}
                 >
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
@@ -664,7 +664,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </svg>
                 
                 {/* Mobile Enter Button - Inside chart container */}
-                <div className="block md:hidden text-center mt-4">
+                <div className="block md:hidden text-center mt-4" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
                   <button
                     onClick={() => setActiveSection(marketInfo.section)}
                     className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
@@ -681,7 +681,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         </div>
 
         {/* Rules Summary Dropdown */}
-        <div className="border border-gray-300 rounded-lg overflow-hidden mb-8 mt-8 md:mt-0">
+        <div className="border border-gray-300 rounded-lg overflow-hidden mb-8 mt-8 md:mt-0" style={{ transform: window.innerWidth < 768 ? 'translateY(-10rem)' : 'translateY(-8rem)' }}>
           <button
             onClick={() => setIsRulesOpen(!isRulesOpen)}
             className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
