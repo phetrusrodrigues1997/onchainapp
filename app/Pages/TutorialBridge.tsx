@@ -60,7 +60,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [userPots, setUserPots] = useState<string[]>([]);
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
-  const [isRulesOpen, setIsRulesOpen] = useState(true);
+  const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const [weeklyScheduleOpen, setWeeklyScheduleOpen] = useState(false);
+  const [entryFeesOpen, setEntryFeesOpen] = useState(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<string>('Tomorrow\'s Predictions');
   const [selectedIcon, setSelectedIcon] = useState<string>('');
@@ -760,6 +762,51 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               </div>
             </div>
           )}
+        </div>
+
+        {/* Additional FAQ Questions - Public Pots */}
+        <div className="space-y-4 mb-4" style={{ transform: window.innerWidth < 768 ? 'translateY(-11rem)' : 'translateY(-9rem)' }}>
+          {/* Question 1: Weekly Schedule */}
+          <div className="border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setWeeklyScheduleOpen(!weeklyScheduleOpen)}
+              className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+            >
+              <span className="text-black font-semibold pr-4">What is the weekly schedule for Public pots?</span>
+              {weeklyScheduleOpen ? (
+                <FaChevronUp className="text-gray-600 flex-shrink-0" />
+              ) : (
+                <FaChevronDown className="text-gray-600 flex-shrink-0" />
+              )}
+            </button>
+            
+            {weeklyScheduleOpen && (
+              <div className="px-6 py-4 bg-white border-t border-gray-300">
+                <p className="text-gray-800 leading-relaxed">Sunday-Friday: pot entry and predictions are open. Entry fees increase daily from $0.01 (Sunday) to $0.06 (Friday). Saturday: Results day - pots are closed and winners are determined at midnight UTC with pot distribution. Private pots have no schedule - you control when they open and close.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Question 2: Entry Fees */}
+          <div className="border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setEntryFeesOpen(!entryFeesOpen)}
+              className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+            >
+              <span className="text-black font-semibold pr-4">How are entry fees calculated in Public pots?</span>
+              {entryFeesOpen ? (
+                <FaChevronUp className="text-gray-600 flex-shrink-0" />
+              ) : (
+                <FaChevronDown className="text-gray-600 flex-shrink-0" />
+              )}
+            </button>
+            
+            {entryFeesOpen && (
+              <div className="px-6 py-4 bg-white border-t border-gray-300">
+                <p className="text-gray-800 leading-relaxed">Public pots follow a dynamic pricing model to encourage early participation: Sunday ($0.01), Monday ($0.02), Tuesday ($0.03), Wednesday ($0.04), Thursday ($0.05), Friday ($0.06). Saturday is closed for results. Private pots let you set any entry fee you want.</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Back to Home */}
