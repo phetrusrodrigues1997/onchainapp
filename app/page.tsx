@@ -413,6 +413,12 @@ export default function App() {
     setIsLandingPageLoading(isLoading);
   };
 
+  // Function to navigate to wallet management
+  const navigateToWallet = () => {
+    // Open Coinbase wallet management in a new tab, same as WalletDropdownLink
+    window.open('https://keys.coinbase.com', '_blank', 'noopener,noreferrer');
+  };
+
   // Set loading state when navigating to home section
   useEffect(() => {
     if (activeSection === 'home') {
@@ -444,6 +450,7 @@ export default function App() {
                   activeSection={activeSection} 
                   setActiveSection={setActiveSection} 
                   onMenuToggle={setIsNavigationMenuOpen}
+                  onTriggerWallet={navigateToWallet}
                 />
               </div>
 

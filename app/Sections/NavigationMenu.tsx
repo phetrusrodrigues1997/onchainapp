@@ -8,9 +8,10 @@ interface NavigationMenuProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   onMenuToggle?: (isOpen: boolean) => void;
+  onTriggerWallet?: () => void;
 }
 
-const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: NavigationMenuProps) => {
+const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle, onTriggerWallet }: NavigationMenuProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { address, isConnected } = useAccount();
@@ -48,7 +49,6 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
     { id: 'AI', label: 'Games' },
     { id: 'profile', label: 'Stats & Rankings' },
     { id: 'ideas', label: 'Ideas' },
-    { id: 'liveMarkets', label: 'Live Markets' },
   ];
 
   const desktopMenuItems = [
@@ -79,13 +79,18 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
         <>
           {isMobile ? (
             <>
-              {/* Invisible backdrop to prevent clicks on background elements */}
+              {/* Backdrop to prevent clicks on background elements */}
               <div 
-                className="fixed inset-0 z-40"
+                className="fixed inset-0 bg-black bg-opacity-50 z-40"
                 onClick={() => setIsMenuOpen(false)}
+                style={{ touchAction: 'none' }}
               />
-              {/* Mobile overlay with peek-through background */}
-              <div id="mobile-menu-overlay" className="fixed top-0 left-0 w-4/5 h-full bg-white z-50 flex flex-col shadow-lg">
+              {/* Mobile overlay */}
+              <div 
+                id="mobile-menu-overlay" 
+                className="fixed top-0 left-0 w-4/5 h-full bg-white z-50 flex flex-col shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
               {/* Header with close button */}
               <div className="flex justify-end p-4">
                 <button
@@ -115,6 +120,21 @@ const NavigationMenu = ({ activeSection, setActiveSection, onMenuToggle }: Navig
                     {item.label}
                   </button>
                 ))}
+                
+                {/* Wallet option - only show on mobile when wallet is connected */}
+                {isConnected && (
+                  <button
+                    onClick={() => {
+                      if (onTriggerWallet) {
+                        onTriggerWallet();
+                      }
+                      setIsMenuOpen(false);
+                    }}
+                    className="block w-full text-left py-4 text-lg text-blue-600 hover:text-blue-700 border-t border-gray-100 mt-2"
+                  >
+                    Wallet
+                  </button>
+                )}
                 
                 {/* Log out option - only show on mobile when wallet is connected */}
                 {isConnected && (
