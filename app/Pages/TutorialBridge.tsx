@@ -555,13 +555,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     );
                   })}
                   
-                  {/* X-axis labels - Always show full timeline every 3 hours */}
-                  {['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'].map((timeLabel, index) => (
+                  {/* X-axis labels - 2-hour intervals with smaller text */}
+                  {['12am', '2am', '4am', '6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm', '8pm', '10pm'].map((timeLabel, index) => (
                     <text
                       key={timeLabel}
-                      x={isMobile ? 60 + (index * 54) : 70 + (index * 65.71)} // Adjusted spacing for mobile
+                      x={isMobile ? 60 + (index * 32) : 70 + (index * 40)} // Tighter spacing for 2-hour intervals
                       y={isMobile ? "360" : "275"}
-                      fontSize="13"
+                      fontSize={isMobile ? "9" : "10"} // Smaller font size
                       fill="#666"
                       textAnchor="middle"
                       fontWeight="500"
@@ -574,12 +574,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {hourlyData.length > 1 && (
                     <path
                       d={hourlyData.map((point, index) => {
-                        // Map time to x-axis position
+                        // Map time to x-axis position (2-hour intervals)
                         const timeMap: Record<string, number> = {
-                          '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
+                          '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
+                        const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
                         // Add slight upward offset (+2 pixels) to Yes line
                         const baseY = isMobile ? 320 : 240;
                         const scale = isMobile ? 2.6 : 1.8;
@@ -606,12 +606,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {hourlyData.length > 1 && (
                     <path
                       d={hourlyData.map((point, index) => {
-                        // Map time to x-axis position
+                        // Map time to x-axis position (2-hour intervals)
                         const timeMap: Record<string, number> = {
-                          '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
+                          '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
+                        const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
                         // Add slight downward offset (+2 pixels) to No line  
                         const baseY = isMobile ? 320 : 240;
                         const scale = isMobile ? 2.6 : 1.8;
@@ -638,10 +638,10 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {hourlyData.length > 0 && (() => {
                     const lastPoint = hourlyData[hourlyData.length - 1];
                     const timeMap: Record<string, number> = {
-                      '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
+                      '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
+                    const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
                     const baseY = isMobile ? 320 : 240;
                     const scale = isMobile ? 2.6 : 1.8;
                     const y = baseY - (lastPoint.positivePercentage * scale) - 2;
@@ -681,10 +681,10 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {hourlyData.length > 0 && (() => {
                     const lastPoint = hourlyData[hourlyData.length - 1];
                     const timeMap: Record<string, number> = {
-                      '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
+                      '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
+                    const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
                     const baseY = isMobile ? 320 : 240;
                     const scale = isMobile ? 2.6 : 1.8;
                     const y = baseY - (lastPoint.negativePercentage * scale) + 2;

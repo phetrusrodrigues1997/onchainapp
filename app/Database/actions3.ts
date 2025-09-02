@@ -446,16 +446,20 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
     const currentUKTime = getUKTime();
     const currentHour = currentUKTime.getHours();
     
-    // All possible time slots (every 3 hours) with AM/PM format
+    // All possible time slots (every 2 hours) with AM/PM format
     const allTimeSlots = [
-      { hour: '12am', startHour: 0, endHour: 2, positive: 0, negative: 0 },
-      { hour: '3am', startHour: 3, endHour: 5, positive: 0, negative: 0 },
-      { hour: '6am', startHour: 6, endHour: 8, positive: 0, negative: 0 },
-      { hour: '9am', startHour: 9, endHour: 11, positive: 0, negative: 0 },
-      { hour: '12pm', startHour: 12, endHour: 14, positive: 0, negative: 0 },
-      { hour: '3pm', startHour: 15, endHour: 17, positive: 0, negative: 0 },
-      { hour: '6pm', startHour: 18, endHour: 20, positive: 0, negative: 0 },
-      { hour: '9pm', startHour: 21, endHour: 23, positive: 0, negative: 0 },
+      { hour: '12am', startHour: 0, endHour: 1, positive: 0, negative: 0 },
+      { hour: '2am', startHour: 2, endHour: 3, positive: 0, negative: 0 },
+      { hour: '4am', startHour: 4, endHour: 5, positive: 0, negative: 0 },
+      { hour: '6am', startHour: 6, endHour: 7, positive: 0, negative: 0 },
+      { hour: '8am', startHour: 8, endHour: 9, positive: 0, negative: 0 },
+      { hour: '10am', startHour: 10, endHour: 11, positive: 0, negative: 0 },
+      { hour: '12pm', startHour: 12, endHour: 13, positive: 0, negative: 0 },
+      { hour: '2pm', startHour: 14, endHour: 15, positive: 0, negative: 0 },
+      { hour: '4pm', startHour: 16, endHour: 17, positive: 0, negative: 0 },
+      { hour: '6pm', startHour: 18, endHour: 19, positive: 0, negative: 0 },
+      { hour: '8pm', startHour: 20, endHour: 21, positive: 0, negative: 0 },
+      { hour: '10pm', startHour: 22, endHour: 23, positive: 0, negative: 0 },
     ];
     
     // Determine which time slots to include based on current time
@@ -536,15 +540,19 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
     const currentUKTime = getUKTime();
     const currentHour = currentUKTime.getHours();
     
-    // Determine current time slot (every 3 hours) in AM/PM format
+    // Determine current time slot (every 2 hours) in AM/PM format
     let currentTimeSlot = '12am';
-    if (currentHour >= 21) currentTimeSlot = '9pm';
+    if (currentHour >= 22) currentTimeSlot = '10pm';
+    else if (currentHour >= 20) currentTimeSlot = '8pm';
     else if (currentHour >= 18) currentTimeSlot = '6pm';
-    else if (currentHour >= 15) currentTimeSlot = '3pm';
+    else if (currentHour >= 16) currentTimeSlot = '4pm';
+    else if (currentHour >= 14) currentTimeSlot = '2pm';
     else if (currentHour >= 12) currentTimeSlot = '12pm';
-    else if (currentHour >= 9) currentTimeSlot = '9am';
+    else if (currentHour >= 10) currentTimeSlot = '10am';
+    else if (currentHour >= 8) currentTimeSlot = '8am';
     else if (currentHour >= 6) currentTimeSlot = '6am';
-    else if (currentHour >= 3) currentTimeSlot = '3am';
+    else if (currentHour >= 4) currentTimeSlot = '4am';
+    else if (currentHour >= 2) currentTimeSlot = '2am';
     
     return [
       { time: currentTimeSlot, positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 }
