@@ -396,16 +396,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
         {/* Elimination Market Explanation - Full width on mobile only */}
         <div className="border-0 rounded-none md:rounded-lg p-0 md:p-8 mb-8 relative -mx-6 md:mx-0">
-          {/* Enter Market Button - Desktop only, positioned absolutely in top right */}
-          <button
-  onClick={() => setActiveSection(marketInfo.section)}
-  className="hidden md:block absolute top-6 right-6 bg-purple-700 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
-  style={{
-    animation: 'subtlePulse 2s infinite'
-  }}
->
-  Enter Pot →
-</button>
 
           
           {/* Custom CSS for subtle pulse */}
@@ -420,92 +410,113 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             }
           `}</style>
           
-          {/* Question Header with Image */}
-          <div className="text-left mb-8 px-6 md:px-0 transform translate-y-4 md:translate-y-0">
-            <div className="flex items-start gap-3 mb-6">
-              {/* Small Square Image */}
-              <div className="flex-shrink-0">
-                <div className="rounded-lg w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden relative">
-                  {selectedIcon?.slice(0, 4) === 'http' ? (
-                    <img 
-                      src={selectedIcon} 
-                      alt="Market Icon" 
-                      className="absolute inset-0 w-full h-full object-cover" 
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm md:text-lg text-gray-600">{selectedIcon || '📊'}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Question Text */}
-              <div className="flex-1">
-                <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-32 leading-relaxed">
-                  {selectedQuestion}
-                </h2>
-              </div>
-            </div>
-            
-            {/* Timeline Chart */}
-            <div className="w-full px-0 md:px-3 transform -translate-y-4 md:translate-y-0">
+            {/* Timeline Chart with Question Header Inside */}
+            <div className="w-full px-0 md:px-3" style={{ transform: window.innerWidth < 768 ? 'translateY(-3rem)' : 'translateY(-2.5rem)' }}>
               {/* SVG Line Chart */}
               <div className="bg-white rounded-lg p-1 md:p-6 mb-4 relative">
+                
+                {/* Desktop Enter Button - Positioned absolutely in top right of chart container */}
+                <button
+                  onClick={() => setActiveSection(marketInfo.section)}
+                  className="hidden md:block absolute top-4 right-4 bg-purple-700 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl z-10"
+                  style={{
+                    animation: 'subtlePulse 2s infinite'
+                  }}
+                >
+                  Enter Pot →
+                </button>
+                
+                {/* Question Header with Image - Now Inside Chart */}
+                <div className="text-left mb-6 px-6 md:px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(2.25rem)' : 'none' }}>
+                  <div className="flex items-start gap-3 mb-6">
+                    {/* Small Square Image */}
+                    <div className="flex-shrink-0">
+                      <div className="rounded-lg w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden relative">
+                        {selectedIcon?.slice(0, 4) === 'http' ? (
+                          <img 
+                            src={selectedIcon} 
+                            alt="Market Icon" 
+                            className="absolute inset-0 w-full h-full object-cover" 
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-sm md:text-lg text-gray-600">{selectedIcon || '📊'}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Question Text */}
+                    <div className="flex-1">
+                      <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-32 leading-relaxed">
+                        {selectedQuestion}
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+                
                 <svg
-                  viewBox="0 0 600 350"
-                  className="w-full h-[28rem] md:h-72 lg:h-80"
-                  style={{ minHeight: '400px' }}
+                  viewBox={isMobile ? "0 0 600 500" : "0 0 600 350"}
+                  className="w-full h-[32rem] md:h-80 lg:h-88"
+                  style={{ minHeight: '450px' }}
                 >
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
                     {/* Yes percentage with green dot */}
-                    <circle cx="15" cy="20" r="5" fill="#10b981" />
-                    <text x="28" y="24" fontSize="14" fill="#666" fontWeight="600">
+                    <circle cx="15" cy="20" r={isMobile ? "5" : "4"} fill="#10b981" />
+                    <text x="28" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
                       Yes {hourlyData[hourlyData.length - 1]?.positivePercentage || 50}%
                     </text>
                     
                     {/* No percentage with blue dot - positioned horizontally */}
-                    <circle cx="110" cy="20" r="5" fill="#3b82f6" />
-                    <text x="123" y="24" fontSize="14" fill="#666" fontWeight="600">
+                    <circle cx="110" cy="20" r={isMobile ? "5" : "4"} fill="#3b82f6" />
+                    <text x="123" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
                       No {hourlyData[hourlyData.length - 1]?.negativePercentage || 50}%
                     </text>
                   </g>
 
                   {/* Grid lines */}
-                  {[0, 25, 50, 75, 100].map((y) => (
-                    <line
-                      key={y}
-                      x1="50"
-                      y1={280 - (y * 2.2)}
-                      x2="550"
-                      y2={280 - (y * 2.2)}
-                      stroke="#f0f0f0"
-                      strokeWidth="1"
-                    />
-                  ))}
+                  {[0, 25, 50, 75, 100].map((y) => {
+                    const baseY = isMobile ? 380 : 240;
+                    const scale = isMobile ? 3.2 : 1.8;
+                    return (
+                      <line
+                        key={y}
+                        x1="50"
+                        y1={baseY - (y * scale)}
+                        x2="550"
+                        y2={baseY - (y * scale)}
+                        stroke="#f0f0f0"
+                        strokeWidth="1"
+                      />
+                    );
+                  })}
                   
                   {/* Y-axis labels - Positioned within viewBox */}
-                  {[0, 25, 50, 75, 100].map((y) => (
-                    <text
-                      key={y}
-                      x="570"
-                      y={285 - (y * 2.2)}
-                      fontSize="13"
-                      fill="#666"
-                      textAnchor="end"
-                      fontWeight="500"
-                    >
-                      {y}%
-                    </text>
-                  ))}
+                  {[0, 25, 50, 75, 100].map((y) => {
+                    const baseY = isMobile ? 385 : 245;
+                    const scale = isMobile ? 3.2 : 1.8;
+                    return (
+                      <text
+                        key={y}
+                        x="570"
+                        y={baseY - (y * scale)}
+                        fontSize="13"
+                        fill="#666"
+                        textAnchor="end"
+                        fontWeight="500"
+                      >
+                        {y}%
+                      </text>
+                    );
+                  })}
                   
                   {/* X-axis labels - Always show full timeline every 3 hours */}
                   {['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'].map((timeLabel, index) => (
                     <text
                       key={timeLabel}
                       x={70 + (index * 65.71)} // 460 / 7 spaces = ~65.71 units apart for wider chart
-                      y="320"
+                      y={isMobile ? "420" : "275"}
                       fontSize="13"
                       fill="#666"
                       textAnchor="middle"
@@ -526,7 +537,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         const xIndex = timeMap[point.time] || 0;
                         const x = 70 + (xIndex * 65.71);
                         // Add slight upward offset (+2 pixels) to Yes line
-                        const y = 280 - (point.positivePercentage * 2.2) - 2;
+                        const baseY = isMobile ? 380 : 240;
+                        const scale = isMobile ? 3.2 : 1.8;
+                        const y = baseY - (point.positivePercentage * scale) - 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
@@ -548,7 +561,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         const xIndex = timeMap[point.time] || 0;
                         const x = 70 + (xIndex * 65.71);
                         // Add slight downward offset (+2 pixels) to No line  
-                        const y = 280 - (point.negativePercentage * 2.2) + 2;
+                        const baseY = isMobile ? 380 : 240;
+                        const scale = isMobile ? 3.2 : 1.8;
+                        const y = baseY - (point.negativePercentage * scale) + 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
@@ -567,7 +582,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
                     const x = 70 + (xIndex * 65.71);
-                    const y = 280 - (lastPoint.positivePercentage * 2.2) - 2;
+                    const baseY = isMobile ? 380 : 240;
+                    const scale = isMobile ? 3.2 : 1.8;
+                    const y = baseY - (lastPoint.positivePercentage * scale) - 2;
                     
                     // Responsive circle sizing
                     const baseRadius = isMobile ? 4.5 : 3.5;
@@ -608,7 +625,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
                     const x = 70 + (xIndex * 65.71);
-                    const y = 280 - (lastPoint.negativePercentage * 2.2) + 2;
+                    const baseY = isMobile ? 380 : 240;
+                    const scale = isMobile ? 3.2 : 1.8;
+                    const y = baseY - (lastPoint.negativePercentage * scale) + 2;
                     
                     // Responsive circle sizing
                     const baseRadius = isMobile ? 4.5 : 3.5;
@@ -641,20 +660,19 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     );
                   })()}
                 </svg>
-              </div>
-              
-              
-              {/* Mobile Enter Button - Below chart */}
-              <div className="block md:hidden text-center mb-16 transform -translate-y-4">
-                <button
-                  onClick={() => setActiveSection(marketInfo.section)}
-                  className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
-                  style={{
-                    animation: 'subtlePulse 2s infinite'
-                  }}
-                >
-                  Enter Pot →
-                </button>
+                
+                {/* Mobile Enter Button - Inside chart container */}
+                <div className="block md:hidden text-center mt-4">
+                  <button
+                    onClick={() => setActiveSection(marketInfo.section)}
+                    className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
+                    style={{
+                      animation: 'subtlePulse 2s infinite'
+                    }}
+                  >
+                    Enter Pot →
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -712,7 +730,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           </button>
         </div>
       </div>
-    </div>
+    
   );
 };
 
