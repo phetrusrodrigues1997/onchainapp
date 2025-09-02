@@ -65,6 +65,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [selectedQuestion, setSelectedQuestion] = useState<string>('Tomorrow\'s Predictions');
   const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [hourlyData, setHourlyData] = useState<Array<{
     time: string;
     positivePercentage: number;
@@ -75,6 +76,18 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   ]);
   
   const { address, isConnected } = useAccount();
+
+  // Detect screen size for responsive circle sizing
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // Get ETH balance
   const ethBalance = useBalance({
@@ -377,16 +390,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
         {/* Elimination Market Explanation */}
         <div className="border border-gray-200 rounded-lg p-6 md:p-8 mb-8 relative">
-          {/* Enter Market Button - Positioned absolutely in top right, responsive */}
+          {/* Enter Market Button - Desktop only, positioned absolutely in top right */}
           <button
   onClick={() => setActiveSection(marketInfo.section)}
-  className="absolute top-4 right-4 md:top-6 md:right-6 bg-purple-700 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-sm md:text-base font-medium shadow-lg hover:shadow-xl"
+  className="hidden md:block absolute top-6 right-6 bg-purple-700 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
   style={{
     animation: 'subtlePulse 2s infinite'
   }}
 >
-  <span className="md:hidden">Enter →</span>
-  <span className="hidden md:inline">Enter Pot →</span>
+  Enter Pot →
 </button>
 
           
@@ -396,11 +408,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               0%, 100% { transform: scale(1); opacity: 1; }
               50% { transform: scale(1.04); opacity: 0.85; }
             }
+            @keyframes staticPulse {
+              0%, 100% { opacity: 1; transform: scale(1); }
+              50% { opacity: 0.7; transform: scale(1.1); }
+            }
           `}</style>
           
           {/* Left-aligned Question Header */}
           <div className="text-left mb-8">
-            <h2 className="text-lg md:text-xl font-bold mb-6 pr-24 md:pr-32 leading-relaxed">
+            <h2 className="text-lg md:text-xl font-bold mb-6 pr-4 md:pr-32 leading-relaxed">
               {selectedQuestion}
             </h2>
             
@@ -409,9 +425,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               {/* SVG Line Chart */}
               <div className="bg-white rounded-lg p-1 md:p-6 mb-4 relative">
                 <svg
-                  viewBox="0 0 400 200"
-                  className="w-full h-64 md:h-72 lg:h-80"
-                  style={{ minHeight: '250px' }}
+                  viewBox="0 0 400 250"
+                  className="w-full h-80 md:h-72 lg:h-80"
+                  style={{ minHeight: '300px' }}
                 >
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
@@ -433,9 +449,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <line
                       key={y}
                       x1="40"
-                      y1={160 - (y * 1.1)}
+                      y1={200 - (y * 1.5)}
                       x2="380"
-                      y2={160 - (y * 1.1)}
+                      y2={200 - (y * 1.5)}
                       stroke="#f0f0f0"
                       strokeWidth="1"
                     />
@@ -446,7 +462,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <text
                       key={y}
                       x="395"
-                      y={165 - (y * 1.1)}
+                      y={205 - (y * 1.5)}
                       fontSize="13"
                       fill="#666"
                       textAnchor="end"
@@ -461,7 +477,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <text
                       key={timeLabel}
                       x={50 + (index * 47.14)} // 330 / 7 spaces = ~47.14 units apart
-                      y="185"
+                      y="225"
                       fontSize="13"
                       fill="#666"
                       textAnchor="middle"
@@ -481,13 +497,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         };
                         const xIndex = timeMap[point.time] || 0;
                         const x = 50 + (xIndex * 47.14);
-                        // Add slight upward offset (+1.5 pixels) to Yes line
-                        const y = 160 - (point.positivePercentage * 1.1) - 1.5;
+                        // Add slight upward offset (+2 pixels) to Yes line
+                        const y = 200 - (point.positivePercentage * 1.5) - 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
                       stroke="#10b981"
-                      strokeWidth="2"
+                      strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -503,70 +519,115 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         };
                         const xIndex = timeMap[point.time] || 0;
                         const x = 50 + (xIndex * 47.14);
-                        // Add slight downward offset (+1.5 pixels) to No line  
-                        const y = 160 - (point.negativePercentage * 1.1) + 1.5;
+                        // Add slight downward offset (+2 pixels) to No line  
+                        const y = 200 - (point.negativePercentage * 1.5) + 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
                       stroke="#3b82f6"
-                      strokeWidth="2"
+                      strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   )}
                   
-                  {/* Data points - Green (Yes) */}
-                  {hourlyData.map((point, index) => {
-                    // Map time to x-axis position - corrected to use proper 3-hour intervals
+                  {/* Tip circle - Green (Yes) - Only at the end of the line with pulse animation */}
+                  {hourlyData.length > 0 && (() => {
+                    const lastPoint = hourlyData[hourlyData.length - 1];
                     const timeMap: Record<string, number> = {
                       '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
-                    const xIndex = timeMap[point.time] || 0;
+                    const xIndex = timeMap[lastPoint.time] || 0;
                     const x = 50 + (xIndex * 47.14);
-                    // Add slight upward offset to match Yes line
-                    const y = 160 - (point.positivePercentage * 1.1) - 1.5;
+                    const y = 200 - (lastPoint.positivePercentage * 1.5) - 2;
+                    
+                    // Responsive circle sizing
+                    const baseRadius = isMobile ? 4.5 : 3.5;
+                    const maxRadius = isMobile ? 6 : 5;
+                    const strokeWidth = isMobile ? 2 : 1.5;
+                    
                     return (
                       <circle
-                        key={`pos-${index}`}
                         cx={x}
                         cy={y}
-                        r="4"
+                        r={baseRadius}
                         fill="#10b981"
                         stroke="white"
-                        strokeWidth="2"
-                      />
+                        strokeWidth={strokeWidth}
+                        className="tip-circle"
+                      >
+                        <animate
+                          attributeName="opacity"
+                          values="1;0.6;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="r"
+                          values={`${baseRadius};${maxRadius};${baseRadius}`}
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
                     );
-                  })}
+                  })()}
                   
-                  {/* Data points - Blue (No) */}
-                  {hourlyData.map((point, index) => {
-                    // Map time to x-axis position - corrected to use proper 3-hour intervals
+                  {/* Tip circle - Blue (No) - Only at the end of the line with pulse animation */}
+                  {hourlyData.length > 0 && (() => {
+                    const lastPoint = hourlyData[hourlyData.length - 1];
                     const timeMap: Record<string, number> = {
                       '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
-                    const xIndex = timeMap[point.time] || 0;
+                    const xIndex = timeMap[lastPoint.time] || 0;
                     const x = 50 + (xIndex * 47.14);
-                    // Add slight downward offset to match No line
-                    const y = 160 - (point.negativePercentage * 1.1) + 1.5;
+                    const y = 200 - (lastPoint.negativePercentage * 1.5) + 2;
+                    
+                    // Responsive circle sizing
+                    const baseRadius = isMobile ? 4.5 : 3.5;
+                    const maxRadius = isMobile ? 6 : 5;
+                    const strokeWidth = isMobile ? 2 : 1.5;
+                    
                     return (
                       <circle
-                        key={`neg-${index}`}
                         cx={x}
                         cy={y}
-                        r="4"
+                        r={baseRadius}
                         fill="#3b82f6"
                         stroke="white"
-                        strokeWidth="2"
-                      />
+                        strokeWidth={strokeWidth}
+                        className="tip-circle"
+                      >
+                        <animate
+                          attributeName="opacity"
+                          values="1;0.6;1"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="r"
+                          values={`${baseRadius};${maxRadius};${baseRadius}`}
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
                     );
-                  })}
+                  })()}
                 </svg>
               </div>
               
-              {/* Total Predictions Count */}
-              <p className="text-sm text-gray-500 text-center">
-                {hourlyData[hourlyData.length - 1]?.totalPredictions || 0} total predictions made today
-              </p>
+              
+              {/* Mobile Enter Button - Below chart */}
+              <div className="block md:hidden text-center">
+                <button
+                  onClick={() => setActiveSection(marketInfo.section)}
+                  className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
+                  style={{
+                    animation: 'subtlePulse 2s infinite'
+                  }}
+                >
+                  Enter Pot →
+                </button>
+              </div>
             </div>
           </div>
         </div>
