@@ -540,7 +540,7 @@ export default function App() {
                       <div className="flex items-center gap-2 translate-x-6 md:translate-x-0">
                         {/* Show balance on mobile, colorful circle on desktop */}
                         {isMobile ? (
-                          <button
+                          <div
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -552,7 +552,7 @@ export default function App() {
                             <div className="text-sm font-semibold text-purple-700 whitespace-nowrap">
                               {ethBalance.data ? formatBalance(ethBalance.data.value) : '$0.00'}
                             </div>
-                          </button>
+                          </div>
                         ) : (
                           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-700 via-purple-900 to-black hover:from-indigo-300 hover:via-violet-400 hover:via-fuchsia-400 hover:via-rose-400 hover:via-amber-300 hover:to-teal-400 transition-all duration-200 hover:shadow-xl hover:scale-105"></div>
                         )}

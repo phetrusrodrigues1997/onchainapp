@@ -60,7 +60,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [userPots, setUserPots] = useState<string[]>([]);
   const [showActiveMarkets, setShowActiveMarkets] = useState(false);
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
-  const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const [isRulesOpen, setIsRulesOpen] = useState(true);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<string>('Tomorrow\'s Predictions');
   const [selectedIcon, setSelectedIcon] = useState<string>('');
@@ -473,6 +473,46 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <text x="123" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
                       No {hourlyData[hourlyData.length - 1]?.negativePercentage || 50}%
                     </text>
+                    
+                    {/* How it works link with purple circle - positioned at top right */}
+                    <g 
+                      className="cursor-pointer hover:opacity-80"
+                      onClick={() => {
+                        const rulesElement = document.querySelector('#rules-summary');
+                        if (rulesElement) {
+                          rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                    >
+                      {/* Purple circle with "i" */}
+                      <circle 
+                        cx={isMobile ? "385" : "475"} 
+                        cy="20" 
+                        r={isMobile ? "6" : "5"} 
+                        fill="#3b82f6" 
+                      />
+                      <text 
+                        x={isMobile ? "385" : "475"} 
+                        y="24" 
+                        fontSize={isMobile ? "10" : "9"} 
+                        fill="white" 
+                        textAnchor="middle" 
+                        fontWeight="bold"
+                      >
+                        i
+                      </text>
+                      {/* How it works text */}
+                      <text 
+                        x={isMobile ? "400" : "490"} 
+                        y="24" 
+                        fontSize={isMobile ? "14" : "11"} 
+                        fill="#3b82f6" 
+                        textAnchor="start" 
+                        fontWeight="600"
+                      >
+                        How it works
+                      </text>
+                    </g>
                   </g>
 
                   {/* Grid lines */}
@@ -681,7 +721,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         </div>
 
         {/* Rules Summary Dropdown */}
-        <div className="border border-gray-300 rounded-lg overflow-hidden mb-8 mt-8 md:mt-0" style={{ transform: window.innerWidth < 768 ? 'translateY(-10rem)' : 'translateY(-8rem)' }}>
+        <div id="rules-summary" className="border border-gray-300 rounded-lg overflow-hidden mb-8 mt-8 md:mt-0" style={{ transform: window.innerWidth < 768 ? 'translateY(-10rem)' : 'translateY(-8rem)' }}>
           <button
             onClick={() => setIsRulesOpen(!isRulesOpen)}
             className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
