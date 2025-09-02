@@ -427,8 +427,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </button>
                 
                 {/* Question Header with Image - Now Inside Chart */}
-                <div className="text-left mb-6 px-6 md:px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(2.25rem)' : 'none' }}>
-                  <div className="flex items-start gap-3 mb-6">
+                <div className="text-left mb-6 px-0 md:px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(2.25rem)' : 'none' }}>
+                  <div className="flex items-start gap-3 mb-6 px-0 md:px-0">
                     {/* Small Square Image */}
                     <div className="flex-shrink-0">
                       <div className="rounded-lg w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden relative">
@@ -447,7 +447,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     </div>
                     
                     {/* Question Text */}
-                    <div className="flex-1">
+                    <div className="flex-1 mr-6 md:mr-0">
                       <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-32 leading-relaxed">
                         {selectedQuestion}
                       </h2>
@@ -456,7 +456,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </div>
                 
                 <svg
-                  viewBox={isMobile ? "0 0 600 500" : "0 0 600 350"}
+                  viewBox={isMobile ? "0 0 500 420" : "0 0 600 350"}
                   className="w-full h-[32rem] md:h-80 lg:h-88"
                   style={{ minHeight: '450px' }}
                 >
@@ -477,14 +477,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
                   {/* Grid lines */}
                   {[0, 25, 50, 75, 100].map((y) => {
-                    const baseY = isMobile ? 380 : 240;
-                    const scale = isMobile ? 3.2 : 1.8;
+                    const baseY = isMobile ? 320 : 240;
+                    const scale = isMobile ? 2.6 : 1.8;
+                    const x2 = isMobile ? 450 : 550;
                     return (
                       <line
                         key={y}
-                        x1="50"
+                        x1="40"
                         y1={baseY - (y * scale)}
-                        x2="550"
+                        x2={x2}
                         y2={baseY - (y * scale)}
                         stroke="#f0f0f0"
                         strokeWidth="1"
@@ -494,12 +495,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   
                   {/* Y-axis labels - Positioned within viewBox */}
                   {[0, 25, 50, 75, 100].map((y) => {
-                    const baseY = isMobile ? 385 : 245;
-                    const scale = isMobile ? 3.2 : 1.8;
+                    const baseY = isMobile ? 325 : 245;
+                    const scale = isMobile ? 2.6 : 1.8;
+                    const x = isMobile ? 470 : 570;
                     return (
                       <text
                         key={y}
-                        x="570"
+                        x={x}
                         y={baseY - (y * scale)}
                         fontSize="13"
                         fill="#666"
@@ -515,8 +517,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'].map((timeLabel, index) => (
                     <text
                       key={timeLabel}
-                      x={70 + (index * 65.71)} // 460 / 7 spaces = ~65.71 units apart for wider chart
-                      y={isMobile ? "420" : "275"}
+                      x={isMobile ? 60 + (index * 54) : 70 + (index * 65.71)} // Adjusted spacing for mobile
+                      y={isMobile ? "360" : "275"}
                       fontSize="13"
                       fill="#666"
                       textAnchor="middle"
@@ -535,10 +537,10 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = 70 + (xIndex * 65.71);
+                        const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
                         // Add slight upward offset (+2 pixels) to Yes line
-                        const baseY = isMobile ? 380 : 240;
-                        const scale = isMobile ? 3.2 : 1.8;
+                        const baseY = isMobile ? 320 : 240;
+                        const scale = isMobile ? 2.6 : 1.8;
                         const y = baseY - (point.positivePercentage * scale) - 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
@@ -559,10 +561,10 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = 70 + (xIndex * 65.71);
+                        const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
                         // Add slight downward offset (+2 pixels) to No line  
-                        const baseY = isMobile ? 380 : 240;
-                        const scale = isMobile ? 3.2 : 1.8;
+                        const baseY = isMobile ? 320 : 240;
+                        const scale = isMobile ? 2.6 : 1.8;
                         const y = baseY - (point.negativePercentage * scale) + 2;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
@@ -581,9 +583,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = 70 + (xIndex * 65.71);
-                    const baseY = isMobile ? 380 : 240;
-                    const scale = isMobile ? 3.2 : 1.8;
+                    const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
+                    const baseY = isMobile ? 320 : 240;
+                    const scale = isMobile ? 2.6 : 1.8;
                     const y = baseY - (lastPoint.positivePercentage * scale) - 2;
                     
                     // Responsive circle sizing
@@ -624,9 +626,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = 70 + (xIndex * 65.71);
-                    const baseY = isMobile ? 380 : 240;
-                    const scale = isMobile ? 3.2 : 1.8;
+                    const x = isMobile ? 60 + (xIndex * 54) : 70 + (xIndex * 65.71);
+                    const baseY = isMobile ? 320 : 240;
+                    const scale = isMobile ? 2.6 : 1.8;
                     const y = baseY - (lastPoint.negativePercentage * scale) + 2;
                     
                     // Responsive circle sizing
