@@ -539,9 +539,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         y1={baseY - (y * scale)}
                         x2={x2}
                         y2={baseY - (y * scale)}
-                        stroke="#f0f0f0"
+                        stroke="#d8d8d8"
                         strokeWidth="1"
-                        strokeDasharray="2 2"
+                        strokeDasharray="2 4"
                       />
                     );
                   })}
