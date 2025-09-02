@@ -451,7 +451,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     {/* Question Text */}
                     <div className="flex-1 mr-6 md:mr-0">
                       <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-32 leading-relaxed">
-                        {selectedQuestion.replace(/\?$/, '')} <span className="text-purple-400">tomorrow?</span>
+                        {selectedQuestion.replace(/\?$/, '')} <span className="text-purple-600">tomorrow?</span>
                       </h2>
                     </div>
                   </div>

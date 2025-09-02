@@ -1264,7 +1264,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 {marketQuestion && (
                   <div className="bg-black text-white rounded-2xl p-3 mb-4 mx-auto max-w-md">
                     <p className="text-white font-semibold text-sm leading-relaxed">
-                      {marketQuestion.replace(/\?$/, '')} <span className="text-purple-300">tomorrow?</span>
+                      {marketQuestion.replace(/\?$/, '')} <span className="text-purple-400">tomorrow?</span>
                     </p>
                   </div>
                 )}
