@@ -584,7 +584,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         const baseY = isMobile ? 320 : 240;
                         const scale = isMobile ? 2.6 : 1.8;
                         const y = baseY - (point.positivePercentage * scale) - 2;
-                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                        
+                        if (index === 0) {
+                          return `M ${x} ${y}`;
+                        } else {
+                          const prevPoint = hourlyData[index - 1];
+                          const prevY = baseY - (prevPoint.positivePercentage * scale) - 2;
+                          // Step-based movement: horizontal first, then vertical
+                          return `L ${x} ${prevY} L ${x} ${y}`;
+                        }
                       }).join(' ')}
                       fill="none"
                       stroke="#10b981"
@@ -608,7 +616,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         const baseY = isMobile ? 320 : 240;
                         const scale = isMobile ? 2.6 : 1.8;
                         const y = baseY - (point.negativePercentage * scale) + 2;
-                        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+                        
+                        if (index === 0) {
+                          return `M ${x} ${y}`;
+                        } else {
+                          const prevPoint = hourlyData[index - 1];
+                          const prevY = baseY - (prevPoint.negativePercentage * scale) + 2;
+                          // Step-based movement: horizontal first, then vertical
+                          return `L ${x} ${prevY} L ${x} ${y}`;
+                        }
                       }).join(' ')}
                       fill="none"
                       stroke="#3b82f6"
