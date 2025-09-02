@@ -62,6 +62,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   const [selectedMarketAddress, setSelectedMarketAddress] = useState<string>('');
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<string>('Tomorrow\'s Predictions');
   const [isLoadingPrice, setIsLoadingPrice] = useState<boolean>(true);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [hourlyData, setHourlyData] = useState<Array<{
@@ -189,11 +190,16 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
   const participantsData = [participants1, participants2];
 
-  // Set up the selected market address from cookie
+  // Set up the selected market address and question from cookies
   useEffect(() => {
     const savedMarket = Cookies.get('selectedMarket');
     if (savedMarket) {
       setSelectedMarketAddress(savedMarket);
+    }
+    
+    const savedQuestion = Cookies.get('selectedMarketQuestion');
+    if (savedQuestion) {
+      setSelectedQuestion(savedQuestion);
     }
   }, []);
 
@@ -392,32 +398,32 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             }
           `}</style>
           
-          {/* Centered Headers - Always perfectly centered */}
-          <div className="text-center mb-8">
-            <h2 className="text-xl md:text-2xl font-bold mb-6 max-w-[calc(100%-140px)] md:max-w-none mx-auto">
-              Tomorrow's Predictions
+          {/* Left-aligned Question Header */}
+          <div className="text-left mb-8">
+            <h2 className="text-lg md:text-xl font-bold mb-6 pr-24 md:pr-32 leading-relaxed">
+              {selectedQuestion}
             </h2>
             
             {/* Timeline Chart */}
-            <div className="max-w-4xl mx-auto px-4">
+            <div className="max-w-6xl mx-auto px-0.5 md:px-3">
               {/* SVG Line Chart */}
-              <div className="bg-white rounded-lg border-2 border-gray-200 p-6 mb-4 relative">
+              <div className="bg-white rounded-lg p-1 md:p-6 mb-4 relative">
                 <svg
                   viewBox="0 0 400 200"
-                  className="w-full h-48 md:h-64"
-                  style={{ minHeight: '200px' }}
+                  className="w-full h-64 md:h-72 lg:h-80"
+                  style={{ minHeight: '250px' }}
                 >
-                  {/* Top-left Legend */}
+                  {/* Top-left Legend - Horizontal Layout */}
                   <g>
                     {/* Yes percentage with green dot */}
-                    <circle cx="15" cy="15" r="4" fill="#10b981" />
-                    <text x="25" y="18" fontSize="12" fill="#666" fontWeight="500">
+                    <circle cx="15" cy="20" r="5" fill="#10b981" />
+                    <text x="28" y="24" fontSize="14" fill="#666" fontWeight="600">
                       Yes {hourlyData[hourlyData.length - 1]?.positivePercentage || 50}%
                     </text>
                     
-                    {/* No percentage with blue dot */}
-                    <circle cx="15" cy="35" r="4" fill="#3b82f6" />
-                    <text x="25" y="38" fontSize="12" fill="#666" fontWeight="500">
+                    {/* No percentage with blue dot - positioned horizontally */}
+                    <circle cx="110" cy="20" r="5" fill="#3b82f6" />
+                    <text x="123" y="24" fontSize="14" fill="#666" fontWeight="600">
                       No {hourlyData[hourlyData.length - 1]?.negativePercentage || 50}%
                     </text>
                   </g>
@@ -427,23 +433,24 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <line
                       key={y}
                       x1="40"
-                      y1={170 - (y * 1.1)}
+                      y1={160 - (y * 1.1)}
                       x2="380"
-                      y2={170 - (y * 1.1)}
+                      y2={160 - (y * 1.1)}
                       stroke="#f0f0f0"
                       strokeWidth="1"
                     />
                   ))}
                   
-                  {/* Y-axis labels - Moved to right side */}
+                  {/* Y-axis labels - Positioned within viewBox */}
                   {[0, 25, 50, 75, 100].map((y) => (
                     <text
                       key={y}
-                      x="390"
-                      y={175 - (y * 1.1)}
-                      fontSize="12"
-                      fill="#888"
-                      textAnchor="start"
+                      x="395"
+                      y={165 - (y * 1.1)}
+                      fontSize="13"
+                      fill="#666"
+                      textAnchor="end"
+                      fontWeight="500"
                     >
                       {y}%
                     </text>
@@ -454,10 +461,11 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <text
                       key={timeLabel}
                       x={50 + (index * 47.14)} // 330 / 7 spaces = ~47.14 units apart
-                      y="190"
-                      fontSize="12"
-                      fill="#888"
+                      y="185"
+                      fontSize="13"
+                      fill="#666"
                       textAnchor="middle"
+                      fontWeight="500"
                     >
                       {timeLabel}
                     </text>
@@ -474,7 +482,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         const xIndex = timeMap[point.time] || 0;
                         const x = 50 + (xIndex * 47.14);
                         // Add slight upward offset (+1.5 pixels) to Yes line
-                        const y = 170 - (point.positivePercentage * 1.1) - 1.5;
+                        const y = 160 - (point.positivePercentage * 1.1) - 1.5;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
@@ -496,7 +504,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         const xIndex = timeMap[point.time] || 0;
                         const x = 50 + (xIndex * 47.14);
                         // Add slight downward offset (+1.5 pixels) to No line  
-                        const y = 170 - (point.negativePercentage * 1.1) + 1.5;
+                        const y = 160 - (point.negativePercentage * 1.1) + 1.5;
                         return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                       }).join(' ')}
                       fill="none"
@@ -509,48 +517,46 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   
                   {/* Data points - Green (Yes) */}
                   {hourlyData.map((point, index) => {
-                    // Map time to x-axis position
+                    // Map time to x-axis position - corrected to use proper 3-hour intervals
                     const timeMap: Record<string, number> = {
-                      '00:00': 0, '02:00': 1, '04:00': 2, '06:00': 3, '08:00': 4, '10:00': 5,
-                      '12:00': 6, '14:00': 7, '16:00': 8, '18:00': 9, '20:00': 10, '22:00': 11
+                      '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
                     const xIndex = timeMap[point.time] || 0;
-                    const x = 50 + (xIndex * 28.33);
+                    const x = 50 + (xIndex * 47.14);
                     // Add slight upward offset to match Yes line
-                    const y = 170 - (point.positivePercentage * 1.1) - 1.5;
+                    const y = 160 - (point.positivePercentage * 1.1) - 1.5;
                     return (
                       <circle
                         key={`pos-${index}`}
                         cx={x}
                         cy={y}
-                        r="3"
+                        r="4"
                         fill="#10b981"
                         stroke="white"
-                        strokeWidth="1.5"
+                        strokeWidth="2"
                       />
                     );
                   })}
                   
                   {/* Data points - Blue (No) */}
                   {hourlyData.map((point, index) => {
-                    // Map time to x-axis position
+                    // Map time to x-axis position - corrected to use proper 3-hour intervals
                     const timeMap: Record<string, number> = {
-                      '00:00': 0, '02:00': 1, '04:00': 2, '06:00': 3, '08:00': 4, '10:00': 5,
-                      '12:00': 6, '14:00': 7, '16:00': 8, '18:00': 9, '20:00': 10, '22:00': 11
+                      '12am': 0, '3am': 1, '6am': 2, '9am': 3, '12pm': 4, '3pm': 5, '6pm': 6, '9pm': 7
                     };
                     const xIndex = timeMap[point.time] || 0;
-                    const x = 50 + (xIndex * 28.33);
+                    const x = 50 + (xIndex * 47.14);
                     // Add slight downward offset to match No line
-                    const y = 170 - (point.negativePercentage * 1.1) + 1.5;
+                    const y = 160 - (point.negativePercentage * 1.1) + 1.5;
                     return (
                       <circle
                         key={`neg-${index}`}
                         cx={x}
                         cy={y}
-                        r="3"
+                        r="4"
                         fill="#3b82f6"
                         stroke="white"
-                        strokeWidth="1.5"
+                        strokeWidth="2"
                       />
                     );
                   })}
