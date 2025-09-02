@@ -2461,8 +2461,8 @@ export async function notifyEliminatedUsers(
     console.log(`📉 Sending elimination notification for ${contractAddress} to ${eliminatedCount} users`);
     
     const message = eliminatedCount === 1
-      ? `📉 Your prediction was incorrect this time. Pay today's entry fee to re-enter the ${marketType}!`
-      : `📉 ${eliminatedCount} users were eliminated. If you were eliminated, pay today's entry fee to re-enter!`;
+      ? `📉 Your prediction was incorrect this time. Pay today's entry fee to re-enter the ${marketType} pot!`
+      : ` 😱 Were you one of the unlucky ones? If you were eliminated, pay today's entry fee to re-enter!`;
     
     await createContractAnnouncement(message, contractAddress);
     
