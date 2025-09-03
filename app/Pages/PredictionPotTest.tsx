@@ -16,9 +16,10 @@ import {
   getReEntryFee,
   processReEntry,
   debugWrongPredictions,
+  removeBookmark,
 } from '../Database/actions';
 import { recordPotEntry } from '../Database/actions3';
-import { ENFORCE_SATURDAY_RESTRICTIONS, CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { ENFORCE_SATURDAY_RESTRICTIONS, CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 import { updateWinnerStats } from '../Database/OwnerActions';
 import { clear } from 'console';
 import LoadingScreen from '../Components/LoadingScreen';
@@ -704,6 +705,10 @@ useEffect(() => {
           // Silently handle pot entry recording errors
           console.warn('Failed to record pot entry in participation history');
         });
+        
+        // Remove bookmark for this market since user has now entered the pot
+        const marketId = getMarketDisplayName(selectedTableType);
+        removeBookmark(address, marketId).catch(() => {});
       }
       
       // Now consume the free entry after successful transaction
@@ -758,6 +763,10 @@ useEffect(() => {
               // Silently handle pot entry recording errors
               console.warn('Failed to record re-entry in participation history');
             });
+            
+            // Remove bookmark for this market since user has re-entered the pot
+            const marketId = getMarketDisplayName(selectedTableType);
+            removeBookmark(address!, marketId).catch(() => {});
             
             setIsLoading(false);
             showMessage('Re-entry successful! You can now predict again.');

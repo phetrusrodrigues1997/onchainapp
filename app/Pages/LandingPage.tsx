@@ -482,8 +482,6 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         const result = await addBookmark(
           address,
           market.id,
-          market.name,
-          market.question,
           selectedMarket, // market category
           contractAddress || undefined
         );
@@ -762,8 +760,6 @@ const handleMarketClick = (marketId: string) => {
   const contractAddress = getContractAddress(marketId);
   
   if (contractAddress) {
-    console.log('Selected market:', marketId, 'Contract address:', contractAddress);
-    
     // Find the market question from the correct category
     let market: Market | undefined = undefined;
     
@@ -802,7 +798,6 @@ const handleMarketClick = (marketId: string) => {
     
     // Always route to TutorialBridge (dashboard) so users can see the chart and choose their action
     setTimeout(() => {
-      console.log('Routing to TutorialBridge dashboard');
       setActiveSection('dashboard');
     }, 200);
     

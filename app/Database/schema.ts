@@ -166,10 +166,9 @@ export const Bookmarks = pgTable("bookmarks", {
   id: serial("id").primaryKey(),
   walletAddress: text("wallet_address").notNull(), // User who bookmarked
   marketId: text("market_id").notNull(), // Market ID being bookmarked
-  marketName: text("market_name").notNull(), // Market name for display
-  marketQuestion: text("market_question").notNull(), // Market question for display
   marketCategory: text("market_category").notNull(), // Category (Featured, Crypto, etc.)
   contractAddress: text("contract_address"), // Contract address if available
+  // Note: marketName and marketQuestion columns removed - we get live data from markets.ts
 });
 
 // Pot participation history - tracks entry/exit events for fair prediction requirements

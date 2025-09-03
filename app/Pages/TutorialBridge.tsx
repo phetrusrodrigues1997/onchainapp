@@ -148,19 +148,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           const marketId = getMarketDisplayName(marketType);
           
           if (marketId) {
-            console.log('📊 Loading hourly prediction data for market:', marketId, 'tableType:', marketType);
             const data = await getHourlyPredictionData(marketId, marketType);
             setHourlyData(data);
-            console.log('📊 Loaded hourly prediction data:', data);
-            
-            // Debug: Log the last data point that's used for the legend
-            if (data && data.length > 0) {
-              const lastPoint = data[data.length - 1];
-              console.log('🔍 LEGEND DEBUG - Last data point:', lastPoint);
-              console.log('🔍 LEGEND DEBUG - positivePercentage (Yes):', lastPoint.positivePercentage);
-              console.log('🔍 LEGEND DEBUG - negativePercentage (No):', lastPoint.negativePercentage);
-              console.log('🔍 LEGEND DEBUG - Sum check:', lastPoint.positivePercentage + lastPoint.negativePercentage);
-            }
           }
         }
       } catch (error) {
@@ -475,19 +464,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 >
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
-                    {(() => {
-                      // Debug: Log what's being displayed in the legend
-                      const lastPoint = hourlyData.length > 0 ? hourlyData[hourlyData.length - 1] : null;
-                      const yesPercentage = lastPoint?.positivePercentage ?? 50;
-                      const noPercentage = lastPoint?.negativePercentage ?? 50;
-                      console.log('🎨 LEGEND RENDER DEBUG - Yes percentage displayed:', yesPercentage);
-                      console.log('🎨 LEGEND RENDER DEBUG - No percentage displayed:', noPercentage);
-                      console.log('🎨 LEGEND RENDER DEBUG - hourlyData length:', hourlyData.length);
-                      console.log('🎨 LEGEND RENDER DEBUG - Last point object:', lastPoint);
-                      console.log('🎨 LEGEND RENDER DEBUG - Raw hourlyData:', hourlyData);
-                      return null;
-                    })()}
-                    
+                      
                     {/* Yes percentage with green dot */}
                     <circle cx="15" cy="20" r={isMobile ? "5" : "4"} fill="#10b981" />
                     <text x="28" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">

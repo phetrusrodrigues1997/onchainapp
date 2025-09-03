@@ -461,8 +461,7 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
     const ukTomorrow = new Date(year, month - 1, day + 1); // month is 0-indexed
     const tomorrowDateStr = `${ukTomorrow.getFullYear()}-${String(ukTomorrow.getMonth() + 1).padStart(2, '0')}-${String(ukTomorrow.getDate()).padStart(2, '0')}`;
     
-    console.log('🔍 Current UK time - Date:', ukDateStr, 'Hour:', currentHour);
-    console.log('🔍 Looking for predictions for date:', tomorrowDateStr, 'Market:', marketId, 'Table:', tableType);
+    // Debug logging removed - function working correctly
     
     // All possible time slots (every 2 hours) with AM/PM format
     const allTimeSlots = [
@@ -480,13 +479,12 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
       { hour: '10pm', startHour: 22, endHour: 23, positive: 0, negative: 0 },
     ];
     
-    // Determine which time slots to include based on current time
-    const timeSlots = allTimeSlots.filter(slot => {
-      return currentHour >= slot.startHour;
-    });
+    // Include all time slots - we'll show data for any slot that has predictions
+    // regardless of current time, as this gives a complete view of prediction sentiment
+    const timeSlots = [...allTimeSlots]; // Include all slots initially
     
     // If no complete periods yet (e.g., it's 1 AM, we're still in the first period), 
-    // include at least the current period
+    // include at least the current period  
     if (timeSlots.length === 0) {
       timeSlots.push(allTimeSlots[0]);
     }
@@ -503,10 +501,8 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
       .from(betsTable)
       .where(eq(betsTable.betDate, tomorrowDateStr));
       
-    console.log('🔍 Found', bets.length, 'predictions for date:', tomorrowDateStr);
-
     // Process each bet and assign to appropriate time slot
-    bets.forEach(bet => {
+    bets.forEach((bet) => {
       const betDate = new Date(bet.createdAt);
       const hour = betDate.getHours(); // Get hour in 24-hour format
       

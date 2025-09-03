@@ -1862,7 +1862,7 @@ export async function getUserProfiles(walletAddresses: string[]) {
 }
 
 // Bookmark functions
-export async function addBookmark(walletAddress: string, marketId: string, marketName: string, marketQuestion: string, marketCategory: string, contractAddress?: string) {
+export async function addBookmark(walletAddress: string, marketId: string, marketCategory: string, contractAddress?: string) {
   try {
     // Check if bookmark already exists
     const existingBookmark = await db
@@ -1879,12 +1879,10 @@ export async function addBookmark(walletAddress: string, marketId: string, marke
       return { success: false, message: 'Market already bookmarked' };
     }
 
-    // Add new bookmark
+    // Add new bookmark - marketName and marketQuestion removed (we get live data from markets.ts)
     await db.insert(Bookmarks).values({
       walletAddress,
       marketId,
-      marketName,
-      marketQuestion,
       marketCategory,
       contractAddress,
     });
@@ -1928,7 +1926,14 @@ export async function getUserBookmarks(walletAddress: string) {
     const startTime = Date.now();
     
     const bookmarks = await db
-      .select()
+      .select({
+        id: Bookmarks.id,
+        walletAddress: Bookmarks.walletAddress,
+        marketId: Bookmarks.marketId,
+        marketCategory: Bookmarks.marketCategory,
+        contractAddress: Bookmarks.contractAddress,
+        // Note: marketName and marketQuestion are intentionally excluded - we get live data from markets.ts
+      })
       .from(Bookmarks)
       .where(eq(Bookmarks.walletAddress, walletAddress))
       .orderBy(desc(Bookmarks.id))

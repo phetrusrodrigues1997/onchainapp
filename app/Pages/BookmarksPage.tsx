@@ -6,6 +6,8 @@ import Cookies from 'js-cookie';
 import { Bookmark, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { getMarkets } from '../Constants/markets';
+import { getTranslation } from '../Languages/languages';
 import { useContractData } from '../hooks/useContractData';
 import { useCountdownTimer } from '../hooks/useCountdownTimer';
 import LoadingScreen from '../Components/LoadingScreen';
@@ -19,10 +21,9 @@ interface BookmarkItem {
   id: number;
   walletAddress: string;
   marketId: string;
-  marketName: string;
-  marketQuestion: string;
   marketCategory: string;
   contractAddress?: string | null;
+  // Note: marketName and marketQuestion are no longer fetched from database - we use live data from markets.ts
 }
 
 const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) => {
@@ -42,6 +43,28 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   const [ethPrice, setEthPrice] = useState<number | null>(null);
   const [potBalances, setPotBalances] = useState<Record<string, string>>({});
   const balanceCalculatedRef = useRef<boolean>(false);
+
+  // Get translation instance for market data
+  const t = getTranslation('en');
+
+  // Function to get current market data from markets.ts
+  const getCurrentMarketData = (marketId: string, marketCategory: string) => {
+    try {
+      const markets = getMarkets(t, marketCategory);
+      const market = markets.find(m => m.id === marketId);
+      
+      if (market) {
+        return {
+          name: market.name,
+          question: market.question
+        };
+      }
+    } catch (error) {
+      console.log('Could not find live market data for:', marketId, marketCategory);
+    }
+    
+    return null;
+  };
 
   // Update userPots when participant data changes
   useEffect(() => {
@@ -180,7 +203,11 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
         expires: 7 
       });
       
-      Cookies.set('selectedMarketQuestion', bookmark.marketQuestion, { 
+      // Get live market question for cookie
+      const liveData = getCurrentMarketData(bookmark.marketId, bookmark.marketCategory);
+      const marketQuestion = liveData?.question || 'Market question not available';
+      
+      Cookies.set('selectedMarketQuestion', marketQuestion, { 
         sameSite: 'lax',
         expires: 7 
       });
@@ -302,12 +329,18 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
 
                       {/* Market Question */}
                       <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                        {bookmark.marketQuestion}
+                        {(() => {
+                          const liveData = getCurrentMarketData(bookmark.marketId, bookmark.marketCategory);
+                          return liveData?.question || 'Market question not available';
+                        })()}
                       </h3>
 
                       {/* Market Name */}
                       <p className="text-gray-600 text-sm">
-                        {bookmark.marketName}
+                        {(() => {
+                          const liveData = getCurrentMarketData(bookmark.marketId, bookmark.marketCategory);
+                          return liveData?.name || bookmark.marketId;
+                        })()}
                       </p>
                     </div>
 
