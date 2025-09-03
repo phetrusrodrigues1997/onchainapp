@@ -10,6 +10,7 @@ import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/con
 import { getPrice } from '../Constants/getPrice';
 import { getPredictionPercentages } from '../Database/actions';
 import { getHourlyPredictionData } from '../Database/actions3';
+import ResponsiveLogo from '../Sections/ResponsiveLogo';
 
 interface DashboardProps {
   activeSection: string;
@@ -423,12 +424,25 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               <div className="bg-white rounded-lg p-1 md:p-6 mb-4 relative">
                 
                 {/* Desktop Enter Button - Positioned absolutely in top right of chart container */}
-                <button
-                  onClick={() => setActiveSection(marketInfo.section)}
-                  className="hidden md:block absolute top-4 right-4 bg-purple-700 text-white px-6 py-3 rounded-xl hover:bg-purple-800 hover:scale-105 transition-all duration-300 text-base font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500 z-10"
-                >
-                  View Pot
-                </button>
+                <div className="hidden md:block absolute top-4 right-4 z-10 w-32">
+                  <button
+                    onClick={() => setActiveSection(marketInfo.section)}
+                    className="bg-purple-700 text-white px-4 py-2 rounded-xl hover:bg-purple-800 hover:scale-105 transition-all duration-300 text-sm font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500 w-full mb-2"
+                  >
+                    View Pot
+                  </button>
+                  <button
+                    onClick={() => {
+                      const rulesElement = document.querySelector('#rules-summary');
+                      if (rulesElement) {
+                        rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                    className="bg-black text-white px-4 py-2 rounded-xl hover:bg-purple-50 transition-all duration-300 text-sm font-semibold hover:shadow-xl w-full"
+                  >
+                    How it works
+                  </button>
+                </div>
                 
                 {/* Question Header with Image - Now Inside Chart */}
                 <div className="text-left mb-6 px-0 md:px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(2.25rem)' : 'none' }}>
@@ -487,45 +501,22 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       </>
                     )}
                     
-                    {/* How it works link with purple circle - positioned at top right */}
-                    <g 
-                      className="cursor-pointer hover:opacity-80"
-                      onClick={() => {
-                        const rulesElement = document.querySelector('#rules-summary');
-                        if (rulesElement) {
-                          rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                      }}
+                    {/* Logo positioned at top right */}
+                    <foreignObject 
+                      x={isMobile ? "419" : "480"} 
+                      y="5" 
+                      width={isMobile ? "120" : "150"} 
+                      height="30"
                     >
-                      {/* Blue circle with "i" */}
-                      <circle 
-                        cx={isMobile ? "360" : "475"} 
-                        cy="20" 
-                        r={isMobile ? "8" : "6"} 
-                        fill="#3b82f6" 
-                      />
-                      <text 
-                        x={isMobile ? "360" : "475"} 
-                        y="24" 
-                        fontSize={isMobile ? "12" : "10"} 
-                        fill="white" 
-                        textAnchor="middle" 
-                        fontWeight="bold"
-                      >
-                        i
-                      </text>
-                      {/* How it works text */}
-                      <text 
-                        x={isMobile ? "375" : "490"} 
-                        y="24" 
-                        fontSize={isMobile ? "18" : "13"} 
-                        fill="#3b82f6" 
-                        textAnchor="start" 
-                        fontWeight="600"
-                      >
-                        How it works
-                      </text>
-                    </g>
+                      <div className="flex justify-end">
+                        <div className="scale-50">
+                          <span className="flex items-center whitespace-nowrap text-2xl font-extrabold tracking-wide">
+                            <span className="text-purple-700">PrediWin</span>
+                            <img src="/ghostie.png" alt="Icon" width="38" height="26" className="flex-shrink-0" />
+                          </span>
+                        </div>
+                      </div>
+                    </foreignObject>
                   </g>
 
                   {/* Grid lines */}
@@ -956,12 +947,23 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </svg>
                 
                 {/* Mobile Enter Button - Inside chart container */}
-                <div className="block md:hidden mt-4 px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
+                <div className="block md:hidden mt-4 px-0 space-y-3" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
                   <button
                     onClick={() => setActiveSection(marketInfo.section)}
                     className="w-full bg-purple-700 text-white px-6 py-4 rounded-xl hover:bg-purple-800 hover:scale-[1.02] transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500"
                   >
                     View Pot
+                  </button>
+                  <button
+                    onClick={() => {
+                      const rulesElement = document.querySelector('#rules-summary');
+                      if (rulesElement) {
+                        rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                    className="w-full bg-white text-purple-700 border-2 border-purple-700 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 text-base font-semibold shadow-lg hover:shadow-xl"
+                  >
+                    How it works
                   </button>
                 </div>
               </div>
