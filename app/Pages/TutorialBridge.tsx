@@ -74,9 +74,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     positivePercentage: number;
     negativePercentage: number;
     totalPredictions: number;
-  }>>([
-    { time: '12am', positivePercentage: 50, negativePercentage: 50, totalPredictions: 0 },
-  ]);
+  }>>([]);
   const [hoveredPoint, setHoveredPoint] = useState<{
     x: number;
     y: number;
@@ -160,6 +158,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             const data = await getHourlyPredictionData(marketId, marketType);
             setHourlyData(data);
             console.log('📊 Loaded hourly prediction data:', data);
+            
+            // Debug: Log the last data point that's used for the legend
+            if (data && data.length > 0) {
+              const lastPoint = data[data.length - 1];
+              console.log('🔍 LEGEND DEBUG - Last data point:', lastPoint);
+              console.log('🔍 LEGEND DEBUG - positivePercentage (Yes):', lastPoint.positivePercentage);
+              console.log('🔍 LEGEND DEBUG - negativePercentage (No):', lastPoint.negativePercentage);
+              console.log('🔍 LEGEND DEBUG - Sum check:', lastPoint.positivePercentage + lastPoint.negativePercentage);
+            }
           }
         }
       } catch (error) {
@@ -474,16 +481,29 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 >
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
+                    {(() => {
+                      // Debug: Log what's being displayed in the legend
+                      const lastPoint = hourlyData.length > 0 ? hourlyData[hourlyData.length - 1] : null;
+                      const yesPercentage = lastPoint?.positivePercentage ?? 50;
+                      const noPercentage = lastPoint?.negativePercentage ?? 50;
+                      console.log('🎨 LEGEND RENDER DEBUG - Yes percentage displayed:', yesPercentage);
+                      console.log('🎨 LEGEND RENDER DEBUG - No percentage displayed:', noPercentage);
+                      console.log('🎨 LEGEND RENDER DEBUG - hourlyData length:', hourlyData.length);
+                      console.log('🎨 LEGEND RENDER DEBUG - Last point object:', lastPoint);
+                      console.log('🎨 LEGEND RENDER DEBUG - Raw hourlyData:', hourlyData);
+                      return null;
+                    })()}
+                    
                     {/* Yes percentage with green dot */}
                     <circle cx="15" cy="20" r={isMobile ? "5" : "4"} fill="#10b981" />
                     <text x="28" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
-                      Yes {hourlyData[hourlyData.length - 1]?.positivePercentage || 50}%
+                      Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
                     </text>
                     
                     {/* No percentage with blue dot - positioned horizontally */}
                     <circle cx="110" cy="20" r={isMobile ? "5" : "4"} fill="#3b82f6" />
                     <text x="123" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
-                      No {hourlyData[hourlyData.length - 1]?.negativePercentage || 50}%
+                      No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
                     </text>
                     
                     {/* How it works link with purple circle - positioned at top right */}
