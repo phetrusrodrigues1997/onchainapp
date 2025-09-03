@@ -415,7 +415,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     {/* Question Text */}
                     <div className="flex-1 mr-6 md:mr-0">
                       <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-36 leading-relaxed">
-                        {selectedQuestion.replace(/\?$/, '')} <span className="text-purple-600">tomorrow?</span>
+                        {selectedQuestion.replace(/\?$/, '')} <span>tomorrow?</span>
                       </h2>
                     </div>
                   </div>
@@ -879,7 +879,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </svg>
                 
                 {/* Logo positioned absolutely in chart container */}
-                <div className="absolute top-28 translate-y-2 md:top-36 md:translate-y-0 right-2 z-20">
+                <div className="absolute top-36 md:translate-y-0 right-2 z-20">
                   <div className={isMobile ? "scale-75" : "scale-50"}>
                     <span className="flex items-center whitespace-nowrap text-lg md:text-3xl font-extrabold tracking-wide">
                       <span className="text-purple-700">PrediWin</span>
