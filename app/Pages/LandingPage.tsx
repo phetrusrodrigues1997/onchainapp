@@ -390,24 +390,10 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     
   }, []); // Load percentages once on component mount
 
-  // Fetch ETH price and calculate pot balances
+  // Use fallback ETH price to avoid CORS issues
   useEffect(() => {
-    const fetchEthPrice = async () => {
-      try {
-        const price = await getPrice('ETH');
-        setEthPrice(price);
-        console.log('💰 ETH price fetched:', price);
-      } catch (error) {
-        console.error('Error fetching ETH price:', error);
-        setEthPrice(4700); // Fallback price
-      }
-    };
-
-    fetchEthPrice();
-    
-    // Fetch price once on component mount only
-    // Removed automatic refresh to prevent continuous re-renders
-    
+    setEthPrice(4700); // Fallback ETH price
+    console.log('💰 Using fallback ETH price: 4700');
   }, []);
 
   // Helper function to convert ETH to USD (same as in PredictionPotTest)
