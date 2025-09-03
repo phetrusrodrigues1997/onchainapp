@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
@@ -11,6 +10,7 @@ import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
+import { useContractData } from '../hooks/useContractData';
 
 interface LandingPageProps {
   activeSection: string;
@@ -29,23 +29,8 @@ const getContractAddress = (marketId: string): string | null => {
   return market?.contractAddress || null;
 };
 
-// Use centralized contract mapping from config
-const CONTRACT_ADDRESSES = CONTRACT_TO_TABLE_MAPPING;
-
-// Prediction Pot ABI for participant checking and balance reading
-const PREDICTION_POT_ABI = [
-  {
-    "inputs": [],
-    "name": "getParticipants",
-    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
-
-
 const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = false, searchQuery = '', selectedMarket: propSelectedMarket = 'Trending', setSelectedMarket, onLoadingChange }: LandingPageProps) => {
-  const { address, isConnected } = useAccount();
+  const { contractAddresses, participantsData, balancesData, isConnected, address } = useContractData();
   const [isVisible, setIsVisible] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const selectedMarket = propSelectedMarket;
@@ -97,26 +82,6 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     isAnimating: boolean;
   } | null>(null);
 
-  // Get contract addresses array for participant checking
-  const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
-
-  // Dynamically create hooks for all contract addresses
-  const contractReadResults = contractAddresses.map((address) => ({
-    address,
-    participants: useReadContract({
-      address: address as `0x${string}`,
-      abi: PREDICTION_POT_ABI,
-      functionName: 'getParticipants',
-      query: { enabled: isConnected && !!address }
-    }),
-    balance: useBalance({
-      address: address as `0x${string}`,
-      chainId: 8453
-    })
-  }));
-
-  const participantsData = contractReadResults.map(result => result.participants.data);
-  const balancesData = contractReadResults.map(result => result.balance.data);
 
 
   // Load more markets function
@@ -469,7 +434,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       if (balance?.value) {
         const usdAmount = ethToUsd(balance.value);
         const contractAddress = contractAddresses[index];
-        const marketType = CONTRACT_ADDRESSES[contractAddress];
+        const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
         
         // Map contract to market name
         let marketName = '';

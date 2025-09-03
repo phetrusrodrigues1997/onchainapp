@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Bookmark, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
+import { useContractData } from '../hooks/useContractData';
 import LoadingScreen from '../Components/LoadingScreen';
 
 interface BookmarksPageProps {
@@ -25,22 +25,8 @@ interface BookmarkItem {
   contractAddress?: string | null;
 }
 
-// Use centralized contract mapping from config
-const CONTRACT_ADDRESSES = CONTRACT_TO_TABLE_MAPPING;
-
-// Prediction Pot ABI (same as TutorialBridge)
-const PREDICTION_POT_ABI = [
-  {
-    "inputs": [],
-    "name": "getParticipants",
-    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
 const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) => {
-  const { address, isConnected } = useAccount();
+  const { contractAddresses, participantsData, balancesData, isConnected, address } = useContractData();
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -52,30 +38,6 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   // Pot balances state
   const [potBalances, setPotBalances] = useState<Record<string, string>>({});
   const [ethPrice, setEthPrice] = useState<number | null>(null);
-
-  // Get contract addresses array - memoized to prevent re-creation
-  const contractAddresses = useMemo(() => 
-    Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>,
-    []
-  );
-
-  // Dynamically create hooks for all contract addresses
-  const contractReadResults = contractAddresses.map((address) => ({
-    address,
-    participants: useReadContract({
-      address: address as `0x${string}`,
-      abi: PREDICTION_POT_ABI,
-      functionName: 'getParticipants',
-      query: { enabled: isConnected && !!address }
-    }),
-    balance: useBalance({
-      address: address as `0x${string}`,
-      chainId: 8453
-    })
-  }));
-
-  const participantsData = contractReadResults.map(result => result.participants.data);
-  const balancesData = contractReadResults.map(result => result.balance.data);
 
   // Update userPots when participant data changes
   useEffect(() => {
@@ -175,7 +137,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
       if (balance?.value) {
         const usdAmount = ethToUsd(balance.value);
         const contractAddress = contractAddresses[index];
-        const marketType = CONTRACT_ADDRESSES[contractAddress];
+        const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
         
         // Map contract to market name
         let marketName = '';
@@ -423,7 +385,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {userPots.map((contractAddress) => {
-                  const marketType = CONTRACT_ADDRESSES[contractAddress as keyof typeof CONTRACT_ADDRESSES];
+                  const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress as keyof typeof CONTRACT_TO_TABLE_MAPPING];
                   const marketName = marketType === 'featured' ? 'Trending' : 'Crypto';
                   
                   return (
