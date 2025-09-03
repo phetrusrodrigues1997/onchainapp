@@ -473,7 +473,7 @@ export default function App() {
                     placeholder="Search pots..."
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="w-[530px] pl-10 pr-10 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
+                    className="w-[530px] pl-10 pr-10 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-white focus:border-2 focus:border-purple-700 transition-colors duration-200"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <span className="text-gray-400 text-sm font-mono">/</span>
@@ -708,7 +708,7 @@ export default function App() {
             placeholder="Search pots..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-transparent border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors duration-200"
+            className="w-full pl-10 pr-4 py-2.5 bg-transparent border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-white focus:border-purple-700 transition-colors duration-200"
           />
         </div>
 
@@ -755,7 +755,7 @@ export default function App() {
                     placeholder="Search"
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-gray-200 transition-colors duration-200"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:bg-white focus:border-2 focus:border-purple-700 transition-colors duration-200"
                   />
                 </div>
 
