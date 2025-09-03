@@ -7,6 +7,7 @@ import { Bookmark, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 import { useContractData } from '../hooks/useContractData';
+import { useCountdownTimer } from '../hooks/useCountdownTimer';
 import LoadingScreen from '../Components/LoadingScreen';
 
 interface BookmarksPageProps {
@@ -29,6 +30,9 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<string | null>(null);
+  
+  // 24-hour countdown timer using custom hook
+  const timeUntilMidnight = useCountdownTimer();
   
   // Markets you've entered functionality
   const [userPots, setUserPots] = useState<string[]>([]);
@@ -395,8 +399,8 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                             {marketName}
                           </h3>
                           <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Active Participant
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                              {timeUntilMidnight}
                             </span>
                           </div>
                         </div>

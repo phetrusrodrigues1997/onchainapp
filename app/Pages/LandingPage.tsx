@@ -3,14 +3,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { formatUnits } from 'viem';
-import { ArrowRight, Bookmark } from 'lucide-react';
+import { ArrowRight, Bookmark, Check } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets, Market } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
-import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages } from '../Database/actions';
-import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages, getTomorrowsBet, placeBitcoinBet } from '../Database/actions';
+import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
 import { useContractData } from '../hooks/useContractData';
+import { useCountdownTimer } from '../hooks/useCountdownTimer';
+
+// Types for prediction data
+interface TodaysBet {
+  id: number;
+  walletAddress: string;
+  prediction: string;
+  betDate: string;
+  createdAt: Date;
+}
+
+type TableType = typeof CONTRACT_TO_TABLE_MAPPING[keyof typeof CONTRACT_TO_TABLE_MAPPING];
 
 interface LandingPageProps {
   activeSection: string;
@@ -69,6 +81,15 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   // Pot balances state
   const [potBalances, setPotBalances] = useState<Record<string, string>>({});
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+  
+  // User prediction state for each market
+  const [userPredictions, setUserPredictions] = useState<Record<string, TodaysBet | null>>({});
+  
+  // Vote change loading states
+  const [voteChangeLoading, setVoteChangeLoading] = useState<Record<string, boolean>>({});
+  
+  // 24-hour countdown timer using custom hook
+  const timeUntilMidnight = useCountdownTimer();
   
   // Pagination state
   const [displayedMarketsCount, setDisplayedMarketsCount] = useState(12);
@@ -349,6 +370,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     // Add debouncing to prevent rapid successive calls
     const timeoutId = setTimeout(() => {
       loadBookmarkStatus();
+      loadUserPredictions();
     }, 200);
 
     return () => {
@@ -417,15 +439,8 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         const contractAddress = contractAddresses[index];
         const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
         
-        // Map contract to market name
-        let marketName = '';
-        if (marketType === 'featured') {
-          marketName = 'Trending';
-        } else if (marketType === 'crypto') {
-          marketName = 'Crypto';
-        } else if (marketType === 'stocks') {
-          marketName = 'stocks';
-        }
+        // Map contract to market name using utility function
+        const marketName = getMarketDisplayName(marketType);
         
         // Show 2 decimal places if under $10, otherwise round to nearest dollar
         const formattedAmount = usdAmount < 10 ? usdAmount.toFixed(2) : usdAmount.toFixed(0);
@@ -511,6 +526,204 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     
     // Fallback to $0 if no data
     return '$0';
+  };
+
+  // Function to load user predictions for all markets
+  const loadUserPredictions = async () => {
+    if (!isConnected || !address) {
+      setUserPredictions({});
+      return;
+    }
+
+    try {
+      console.log('📊 Loading user predictions for wallet:', address);
+      
+      // Load predictions for each table type
+      const predictionPromises = Object.values(CONTRACT_TO_TABLE_MAPPING).map(async (tableType) => {
+        try {
+          const prediction = await getTomorrowsBet(address, tableType);
+          return { tableType, prediction };
+        } catch (error) {
+          console.error(`Error loading prediction for ${tableType}:`, error);
+          return { tableType, prediction: null };
+        }
+      });
+
+      const results = await Promise.all(predictionPromises);
+      
+      // Convert results to Record<string, TodaysBet | null> keyed by market name
+      const predictionsMap: Record<string, TodaysBet | null> = {};
+      results.forEach(({ tableType, prediction }) => {
+        // Map table types to market names using utility function
+        const marketName = getMarketDisplayName(tableType);
+        
+        predictionsMap[marketName] = prediction;
+        if (prediction) {
+          console.log(`✅ User has ${prediction.prediction} prediction for ${marketName}`);
+        }
+      });
+      
+      setUserPredictions(predictionsMap);
+    } catch (error) {
+      console.error('Error loading user predictions:', error);
+    }
+  };
+
+  // Helper function to get button content based on user's prediction
+  const getButtonContent = (marketId: string, buttonType: 'positive' | 'negative') => {
+    const prediction = userPredictions[marketId];
+    const contractAddress = getContractAddress(marketId);
+    const isParticipant = contractAddress && isUserParticipant(contractAddress);
+    const isLoading = voteChangeLoading[marketId];
+    
+    // Show loading spinner if vote is being changed
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center">
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+    
+    if (prediction && prediction.prediction === buttonType) {
+      // User has voted for this option
+      if (isParticipant) {
+        // Show confirmed tick for participants (they can't click to change from same option)
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <Check className="w-4 h-4" />
+            {/* <span>✓</span> */}
+          </div>
+        );
+      }
+    }
+    
+    // For participants who haven't voted or want to change: show clickable option
+    // For non-participants: show default option (will navigate to pot entry)
+    return buttonType === 'positive' ? 'Yes' : 'No';
+  };
+
+  // Helper function to get button styling based on user's prediction
+  const getButtonStyles = (marketId: string, buttonType: 'positive' | 'negative', baseClasses: string) => {
+    const prediction = userPredictions[marketId];
+    const contractAddress = getContractAddress(marketId);
+    const isParticipant = contractAddress && isUserParticipant(contractAddress);
+    const isLoading = voteChangeLoading[marketId];
+    
+    // Loading state
+    if (isLoading) {
+      return baseClasses.replace(/hover:bg-\w+-\d+/, 'cursor-wait opacity-50');
+    }
+    
+    if (prediction && prediction.prediction === buttonType) {
+      // User has voted for this option - show confirmed styling
+      if (buttonType === 'positive') {
+        return baseClasses.replace('bg-green-50 hover:bg-blue-200 text-green-700', 'bg-green-600 text-white cursor-default');
+      } else {
+        return baseClasses.replace('bg-red-50 hover:bg-purple-200 text-red-700', 'bg-red-600 text-white cursor-default');
+      }
+    }
+    
+    // If user is participant and has voted for the opposite option, make this button more prominent (change vote)
+    if (isParticipant && prediction && prediction.prediction !== buttonType) {
+      if (buttonType === 'positive') {
+        return baseClasses.replace('bg-green-50 hover:bg-blue-200 text-green-700', 'bg-green-100 hover:bg-green-200 text-green-800');
+      } else {
+        return baseClasses.replace('bg-red-50 hover:bg-purple-200 text-red-700', 'bg-red-100 hover:bg-red-200 text-red-800');
+      }
+    }
+    
+    // Default button styling
+    return baseClasses;
+  };
+
+  // Function to handle vote changes for participants
+  const handleVoteChange = async (marketId: string, newVote: 'positive' | 'negative') => {
+    if (!isConnected || !address) {
+      showAlert('Please connect your wallet to vote', 'info', 'Connect Wallet');
+      return;
+    }
+
+    // Check if user is a participant in this market
+    const contractAddress = getContractAddress(marketId);
+    if (!contractAddress || !isUserParticipant(contractAddress)) {
+      showAlert('You must be a pot participant to vote', 'info', 'Join Pot');
+      return;
+    }
+
+    // Get the table type for this market
+    const tableType = Object.entries(CONTRACT_TO_TABLE_MAPPING).find(
+      ([addr]) => addr === contractAddress
+    )?.[1];
+
+    if (!tableType) {
+      showAlert('Unable to determine market type', 'error', 'Error');
+      return;
+    }
+
+    try {
+      // Set loading state for this market
+      setVoteChangeLoading(prev => ({ ...prev, [marketId]: true }));
+
+      // Place/update the prediction
+      await placeBitcoinBet(address, newVote, tableType);
+      
+      // Update local state immediately for better UX
+      const updatedPrediction: TodaysBet = {
+        id: Date.now(), // temporary ID
+        walletAddress: address,
+        prediction: newVote,
+        betDate: new Date().toISOString().split('T')[0],
+        createdAt: new Date()
+      };
+      
+      setUserPredictions(prev => ({
+        ...prev,
+        [marketId]: updatedPrediction
+      }));
+
+      // Show success message
+      // showAlert(`Vote changed to ${newVote === 'positive' ? 'Yes' : 'No'} for ${marketId}`, 'success', 'Vote Updated');
+      
+    } catch (error) {
+      console.error('Error changing vote:', error);
+      showAlert(error instanceof Error ? error.message : 'Failed to change vote', 'error', 'Error');
+    } finally {
+      // Clear loading state
+      setVoteChangeLoading(prev => ({ ...prev, [marketId]: false }));
+    }
+  };
+
+  // Helper function to handle button clicks - support vote changing for participants
+  const handleButtonClick = (marketId: string, buttonType: 'positive' | 'negative', originalClickHandler: (e: React.MouseEvent) => void) => {
+    return async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      const prediction = userPredictions[marketId];
+      const contractAddress = getContractAddress(marketId);
+      const isParticipant = contractAddress && isUserParticipant(contractAddress);
+      
+      // If user is a participant and has already voted for this option, do nothing
+      if (prediction && prediction.prediction === buttonType && isParticipant) {
+        return;
+      }
+      
+      // If user is a participant and wants to change their vote
+      if (prediction && prediction.prediction !== buttonType && isParticipant) {
+        await handleVoteChange(marketId, buttonType);
+        return;
+      }
+      
+      // If user is a participant but hasn't voted yet
+      if (isParticipant && !prediction) {
+        await handleVoteChange(marketId, buttonType);
+        return;
+      }
+      
+      // For non-participants, execute original click handler (navigate to pot entry)
+      originalClickHandler(e);
+    };
   };
 
   // Function to handle market selection with position swap animation
@@ -937,42 +1150,42 @@ const handleMarketClick = (marketId: string) => {
             {/* Yes/No Buttons - Side by Side in Center */}
             <div className="flex justify-center gap-2 mb-3">
               <button 
-                onClick={(e) => {
+                onClick={handleButtonClick(market.id, 'positive', (e) => {
                   e.stopPropagation();
                   e.preventDefault();
                   console.log('Yes button clicked for market:', market.id);
                   Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
                   Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
                   // Visual feedback
-                  e.currentTarget.style.backgroundColor = '#10b981';
-                  e.currentTarget.style.color = 'white';
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
                   // Navigate to market after brief visual feedback
                   setTimeout(() => {
                     handleMarketClick(market.id);
                   }, 300);
-                }}
-                className="bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
+                })}
+                className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
               >
-                Yes
+                {getButtonContent(market.id, 'positive')}
               </button>
               <button 
-                onClick={(e) => {
+                onClick={handleButtonClick(market.id, 'negative', (e) => {
                   e.stopPropagation();
                   e.preventDefault();
                   console.log('No button clicked for market:', market.id);
                   Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
                   Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
                   // Visual feedback
-                  e.currentTarget.style.backgroundColor = '#ef4444';
-                  e.currentTarget.style.color = 'white';
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
                   // Navigate to market after brief visual feedback
                   setTimeout(() => {
                     handleMarketClick(market.id);
                   }, 300);
-                }}
-                className="bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
+                })}
+                className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
               >
-                No
+                {getButtonContent(market.id, 'negative')}
               </button>
             </div>
 
@@ -986,8 +1199,8 @@ const handleMarketClick = (marketId: string) => {
                 
                 if (userIsParticipant) {
                   return (
-                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium flex items-center gap-1">
-                      Entered ✓
+                    <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                      {timeUntilMidnight}
                     </div>
                   );
                 } else {
@@ -1221,42 +1434,42 @@ const handleMarketClick = (marketId: string) => {
                         {/* Yes/No Buttons - Side by Side in Center */}
                         <div className="flex justify-center gap-2 mb-3">
                           <button 
-                            onClick={(e) => {
+                            onClick={handleButtonClick(market.id, 'positive', (e) => {
                               e.stopPropagation();
                               e.preventDefault();
                               console.log('Yes button clicked for market:', market.id);
                               Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
                               Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
                               // Visual feedback
-                              e.currentTarget.style.backgroundColor = '#10b981';
-                              e.currentTarget.style.color = 'white';
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
                               // Navigate to market after brief visual feedback
                               setTimeout(() => {
                                 handleMarketClick(market.id);
                               }, 300);
-                            }}
-                            className="bg-green-50 hover:bg-blue-200 text-green-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
+                            })}
+                            className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
                           >
-                            Yes
+                            {getButtonContent(market.id, 'positive')}
                           </button>
                           <button 
-                            onClick={(e) => {
+                            onClick={handleButtonClick(market.id, 'negative', (e) => {
                               e.stopPropagation();
                               e.preventDefault();
                               console.log('No button clicked for market:', market.id);
                               Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
                               Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
                               // Visual feedback
-                              e.currentTarget.style.backgroundColor = '#ef4444';
-                              e.currentTarget.style.color = 'white';
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
                               // Navigate to market after brief visual feedback
                               setTimeout(() => {
                                 handleMarketClick(market.id);
                               }, 300);
-                            }}
-                            className="bg-red-50 hover:bg-purple-200 text-red-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
+                            })}
+                            className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
                           >
-                            No
+                            {getButtonContent(market.id, 'negative')}
                           </button>
                         </div>
 
@@ -1270,8 +1483,8 @@ const handleMarketClick = (marketId: string) => {
                             
                             if (userIsParticipant) {
                               return (
-                                <div className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium flex items-center gap-1">
-                                  Entered ✓
+                                <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                                  {timeUntilMidnight}
                                 </div>
                               );
                             } else {

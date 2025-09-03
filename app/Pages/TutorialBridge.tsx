@@ -6,7 +6,7 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Cookies from 'js-cookie';
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
-import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
 import { getPredictionPercentages } from '../Database/actions';
 import { getHourlyPredictionData } from '../Database/actions3';
@@ -145,13 +145,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         if (marketInfo.address) {
           // Determine market type based on contract address (same logic as LandingPage)
           const marketType = CONTRACT_TO_TABLE_MAPPING[marketInfo.address as keyof typeof CONTRACT_TO_TABLE_MAPPING];
-          let marketId = '';
-          
-          if (marketType === 'featured') {
-            marketId = 'Trending';
-          } else if (marketType === 'crypto') {
-            marketId = 'Crypto';
-          }
+          const marketId = getMarketDisplayName(marketType);
           
           if (marketId) {
             console.log('📊 Loading hourly prediction data for market:', marketId, 'tableType:', marketType);
@@ -307,7 +301,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
       if (selectedMarketAddress && selectedMarketAddress in CONTRACT_ADDRESSES) {
         const marketType = CONTRACT_ADDRESSES[selectedMarketAddress as keyof typeof CONTRACT_ADDRESSES];
         setMarketInfo({ 
-          name: marketType === 'featured' ? 'Trending' : 'Crypto', 
+          name: getMarketDisplayName(marketType), 
           section: 'bitcoinPot',  // Both markets use the same section, PredictionPotTest handles the difference
           address: selectedMarketAddress 
         });

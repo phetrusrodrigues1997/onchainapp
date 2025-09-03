@@ -10,7 +10,7 @@ import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
 import { getPrice } from '../Constants/getPrice';
 import { useQueryClient } from '@tanstack/react-query';
-import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 
 // UK timezone helper function (simplified and more reliable)
 const getUKTime = (date: Date = new Date()): Date => {
@@ -894,7 +894,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
               
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Re-entry Required</h2>
               <p className="text-gray-600 text-sm mb-6">
-                Wrong prediction in {selectedTableType === 'featured' ? 'Trending' : 'Crypto'}. Pay today&apos;s entry fee to continue.
+                Wrong prediction in {getMarketDisplayName(selectedTableType)}. Pay today&apos;s entry fee to continue.
               </p>
               
               <button
