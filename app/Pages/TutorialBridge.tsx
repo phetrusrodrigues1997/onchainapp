@@ -501,7 +501,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     </text>
                     
                     {/* No percentage with blue dot - positioned horizontally */}
-                    <circle cx="110" cy="20" r={isMobile ? "5" : "4"} fill="#3b82f6" />
+                    <circle cx="110" cy="20" r={isMobile ? "5" : "4"} fill="#cc0000" />
                     <text x="123" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
                       No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
                     </text>
@@ -516,7 +516,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         }
                       }}
                     >
-                      {/* Purple circle with "i" */}
+                      {/* Blue circle with "i" */}
                       <circle 
                         cx={isMobile ? "360" : "475"} 
                         cy="20" 
@@ -752,7 +752,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           }
                         }).join(' ')}
                         fill="none"
-                        stroke="#3b82f6"
+                        stroke="#cc0000"
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -916,7 +916,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         cx={x}
                         cy={y}
                         r={baseRadius}
-                        fill="#3b82f6"
+                        fill="#cc0000"
                         stroke="white"
                         strokeWidth={strokeWidth}
                         className="tip-circle"
@@ -968,7 +968,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         cx={hoveredPoint.x}
                         cy={hoveredPoint.y + 15}
                         r="2"
-                        fill={hoveredPoint.type === 'yes' ? '#10b981' : '#3b82f6'}
+                        fill={hoveredPoint.type === 'yes' ? '#10b981' : '#cc0000'}
                       />
                     </g>
                   )}

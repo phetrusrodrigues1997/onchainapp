@@ -951,7 +951,7 @@ const handleMarketClick = (marketId: string) => {
                     handleMarketClick(market.id);
                   }, 300);
                 }}
-                className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
+                className="bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
               >
                 Yes
               </button>
@@ -970,7 +970,7 @@ const handleMarketClick = (marketId: string) => {
                     handleMarketClick(market.id);
                   }, 300);
                 }}
-                className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
+                className="bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
               >
                 No
               </button>
@@ -1235,7 +1235,7 @@ const handleMarketClick = (marketId: string) => {
                                 handleMarketClick(market.id);
                               }, 300);
                             }}
-                            className="bg-blue-50 hover:bg-blue-200 text-blue-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
+                            className="bg-green-50 hover:bg-blue-200 text-green-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
                           >
                             Yes
                           </button>
@@ -1254,7 +1254,7 @@ const handleMarketClick = (marketId: string) => {
                                 handleMarketClick(market.id);
                               }, 300);
                             }}
-                            className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
+                            className="bg-red-50 hover:bg-purple-200 text-red-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]"
                           >
                             No
                           </button>
