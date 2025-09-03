@@ -466,7 +466,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     
                     {/* Question Text */}
                     <div className="flex-1 mr-6 md:mr-0">
-                      <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-32 leading-relaxed">
+                      <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-36 leading-relaxed">
                         {selectedQuestion.replace(/\?$/, '')} <span className="text-purple-600">tomorrow?</span>
                       </h2>
                     </div>
@@ -501,22 +501,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       </>
                     )}
                     
-                    {/* Logo positioned at top right */}
-                    <foreignObject 
-                      x={isMobile ? "419" : "480"} 
-                      y="5" 
-                      width={isMobile ? "120" : "150"} 
-                      height="30"
-                    >
-                      <div className="flex justify-end">
-                        <div className="scale-50">
-                          <span className="flex items-center whitespace-nowrap text-2xl font-extrabold tracking-wide">
-                            <span className="text-purple-700">PrediWin</span>
-                            <img src="/ghostie.png" alt="Icon" width="38" height="26" className="flex-shrink-0" />
-                          </span>
-                        </div>
-                      </div>
-                    </foreignObject>
                   </g>
 
                   {/* Grid lines */}
@@ -946,6 +930,16 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   )}
                 </svg>
                 
+                {/* Logo positioned absolutely in chart container */}
+                <div className="absolute top-28 translate-y-2 md:top-36 md:translate-y-0 right-2 z-20">
+                  <div className={isMobile ? "scale-75" : "scale-50"}>
+                    <span className="flex items-center whitespace-nowrap text-lg md:text-3xl font-extrabold tracking-wide">
+                      <span className="text-purple-700">PrediWin</span>
+                      <img src="/ghostie.png" alt="Icon" width={isMobile ? "28" : "38"} height={isMobile ? "19" : "26"} className="flex-shrink-0" />
+                    </span>
+                  </div>
+                </div>
+                
                 {/* Mobile Enter Button - Inside chart container */}
                 <div className="block md:hidden mt-4 px-0 space-y-3" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
                   <button
@@ -961,7 +955,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }
                     }}
-                    className="w-full bg-white text-purple-700 border-2 border-purple-700 px-6 py-3 rounded-xl hover:bg-purple-50 transition-all duration-300 text-base font-semibold shadow-lg hover:shadow-xl"
+                    className="w-full bg-black text-white px-6 py-4 rounded-xl hover:bg-purple-50 transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-xl"
                   >
                     How it works
                   </button>
