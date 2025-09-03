@@ -437,12 +437,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 {/* Desktop Enter Button - Positioned absolutely in top right of chart container */}
                 <button
                   onClick={() => setActiveSection(marketInfo.section)}
-                  className="hidden md:block absolute top-4 right-4 bg-purple-700 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl z-10"
+                  className="hidden md:block absolute top-4 right-4 bg-purple-700 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-base font-bold shadow-lg hover:shadow-xl z-10"
                   style={{
                     animation: 'subtlePulse 2s infinite'
                   }}
                 >
-                  Enter Pot →
+                  View
                 </button>
                 
                 {/* Question Header with Image - Now Inside Chart */}
@@ -628,7 +628,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         }).join(' ')}
                         fill="none"
                         stroke="#10b981"
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -753,7 +753,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         }).join(' ')}
                         fill="none"
                         stroke="#3b82f6"
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -975,15 +975,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </svg>
                 
                 {/* Mobile Enter Button - Inside chart container */}
-                <div className="block md:hidden text-center mt-4" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
+                <div className="block md:hidden mt-4 px-8" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
                   <button
                     onClick={() => setActiveSection(marketInfo.section)}
-                    className="bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-medium shadow-lg hover:shadow-xl"
+                    className="w-full bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-bold shadow-lg hover:shadow-xl"
                     style={{
                       animation: 'subtlePulse 2s infinite'
                     }}
                   >
-                    Enter Pot →
+                    View
                   </button>
                 </div>
               </div>
