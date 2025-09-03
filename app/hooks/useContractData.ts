@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useAccount, useReadContract, useBalance } from 'wagmi';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
 
@@ -15,8 +16,11 @@ const PREDICTION_POT_ABI = [
 export const useContractData = () => {
   const { address, isConnected } = useAccount();
   
-  // Get contract addresses from config
-  const contractAddresses = Object.keys(CONTRACT_TO_TABLE_MAPPING) as Array<keyof typeof CONTRACT_TO_TABLE_MAPPING>;
+  // Get contract addresses from config - memoized to prevent re-creation
+  const contractAddresses = useMemo(() => 
+    Object.keys(CONTRACT_TO_TABLE_MAPPING) as Array<keyof typeof CONTRACT_TO_TABLE_MAPPING>,
+    []
+  );
 
   // Individual hook calls for each contract (required due to React hooks rules)
   // We need to handle the case where there might be fewer than 3 contracts

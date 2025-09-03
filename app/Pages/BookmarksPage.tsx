@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Bookmark, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
-import { getPrice } from '../Constants/getPrice';
 import { useContractData } from '../hooks/useContractData';
 import LoadingScreen from '../Components/LoadingScreen';
 
@@ -35,9 +34,10 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   const [userPots, setUserPots] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'bookmarks' | 'entered'>('entered');
   
-  // Pot balances state
-  const [potBalances, setPotBalances] = useState<Record<string, string>>({});
+  // ETH price and pot balances state
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+  const [potBalances, setPotBalances] = useState<Record<string, string>>({});
+  const balanceCalculatedRef = useRef<boolean>(false);
 
   // Update userPots when participant data changes
   useEffect(() => {
@@ -60,7 +60,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     });
 
     setUserPots(participatingPots);
-  }, [participantsData, address, isConnected, contractAddresses]);
+  }, [address, isConnected]); // Remove unstable array dependencies
 
   // Load bookmarks when component mounts or address changes
   useEffect(() => {
@@ -97,25 +97,9 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     loadBookmarks();
   }, [address, isConnected]);
 
-  // Fetch ETH price and calculate pot balances
+  // Set fallback ETH price to avoid CORS issues (use same as other components)
   useEffect(() => {
-    const fetchEthPrice = async () => {
-      try {
-        const price = await getPrice('ETH');
-        setEthPrice(price);
-        console.log('💰 ETH price fetched:', price);
-      } catch (error) {
-        console.error('Error fetching ETH price:', error);
-        setEthPrice(4700); // Fallback price
-      }
-    };
-
-    fetchEthPrice();
-    
-    // Refresh price every 5 minutes
-    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
-    
-    return () => clearInterval(interval);
+    setEthPrice(4700); // Use fallback price consistently
   }, []);
 
   // Helper function to convert ETH to USD (same as in other components)
@@ -126,38 +110,42 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     return ethValue * currentEthPrice;
   };
 
-  // Update pot balances when contract balances or ETH price changes
+  // Calculate balances once when data is available
   useEffect(() => {
-    if (!ethPrice) return;
+    // Only calculate once when we have eth price and haven't calculated yet
+    if (!ethPrice || balanceCalculatedRef.current) return;
+    
+    // Check if we have balance data
+    if (!balancesData || balancesData.length === 0 || !contractAddresses || contractAddresses.length === 0) {
+      return;
+    }
+
+    console.log('💰 BookmarksPage - Calculating balances once...');
+    balanceCalculatedRef.current = true;
 
     const newPotBalances: Record<string, string> = {};
     
     // Calculate balances for each contract
     balancesData.forEach((balance, index) => {
+      const contractAddress = contractAddresses[index];
+      
       if (balance?.value) {
         const usdAmount = ethToUsd(balance.value);
-        const contractAddress = contractAddresses[index];
-        const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
-        
-        // Map contract to market name
-        let marketName = '';
-        if (marketType === 'featured') {
-          marketName = 'Trending';
-        } else if (marketType === 'crypto') {
-          marketName = 'Crypto';
-        } else if (marketType === 'stocks') {
-          marketName = 'stocks';
-        }
         
         // Show 2 decimal places if under $10, otherwise round to nearest dollar
         const formattedAmount = usdAmount < 10 ? usdAmount.toFixed(2) : usdAmount.toFixed(0);
         newPotBalances[contractAddress] = `$${formattedAmount}`;
-        console.log(`💰 ${marketName} pot balance: ${formatUnits(balance.value, 18)} ETH = ${newPotBalances[contractAddress]}`);
+        console.log(`💰 BookmarksPage - Contract ${contractAddress}: ${formatUnits(balance.value, 18)} ETH = $${formattedAmount}`);
+      } else if (balance !== undefined) {
+        // Balance loaded but is 0
+        newPotBalances[contractAddress] = '$0';
+        console.log(`💰 BookmarksPage - Contract ${contractAddress}: $0`);
       }
     });
 
     setPotBalances(newPotBalances);
-  }, [balancesData, ethPrice, contractAddresses]);
+    console.log('💰 BookmarksPage - Updated pot balances:', newPotBalances);
+  }, [ethPrice]); // Only depend on ethPrice
 
   const handleRemoveBookmark = async (marketId: string) => {
     if (!address) return;
@@ -344,12 +332,16 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                     </button>
                     {bookmark.contractAddress && (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full self-center">
-                          Contract Available
-                        </span>
-                        {potBalances[bookmark.contractAddress] && (
-                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full self-center">
+                       
+                        
+                        {/* Show balance if available, otherwise show loading */}
+                        {potBalances[bookmark.contractAddress] !== undefined ? (
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full self-center">
                             {potBalances[bookmark.contractAddress]} in pot
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full self-center">
+                            $0
                           </span>
                         )}
                       </div>

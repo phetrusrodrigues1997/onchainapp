@@ -385,14 +385,10 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 
     loadPredictionPercentages();
 
-    // Set up periodic refresh every 30 seconds to get latest predictions
-    const interval = setInterval(() => {
-      console.log('📊 Refreshing prediction percentages...');
-      loadPredictionPercentages();
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, []); // Load percentages once on component mount and set up refresh interval
+    // Load percentages once on component mount only
+    // Removed automatic refresh to prevent continuous re-renders
+    
+  }, []); // Load percentages once on component mount
 
   // Fetch ETH price and calculate pot balances
   useEffect(() => {
@@ -409,10 +405,9 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 
     fetchEthPrice();
     
-    // Refresh price every 5 minutes
-    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    // Fetch price once on component mount only
+    // Removed automatic refresh to prevent continuous re-renders
     
-    return () => clearInterval(interval);
   }, []);
 
   // Helper function to convert ETH to USD (same as in PredictionPotTest)
@@ -454,7 +449,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     });
 
     setPotBalances(newPotBalances);
-  }, [balancesData, ethPrice, contractAddresses]);
+  }, [ethPrice, balancesData.length, ...balancesData.map(b => b?.value)]);
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
