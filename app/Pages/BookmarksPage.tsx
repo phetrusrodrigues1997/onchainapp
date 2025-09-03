@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAccount, useReadContract } from 'wagmi';
+import { useAccount, useReadContract, useBalance } from 'wagmi';
+import { formatUnits } from 'viem';
 import Cookies from 'js-cookie';
 import { Bookmark, X, Trophy, Users, TrendingUp } from 'lucide-react';
 import { getUserBookmarks, removeBookmark } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { getPrice } from '../Constants/getPrice';
 import LoadingScreen from '../Components/LoadingScreen';
 
 interface BookmarksPageProps {
@@ -46,6 +48,10 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
   // Markets you've entered functionality
   const [userPots, setUserPots] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'bookmarks' | 'entered'>('entered');
+  
+  // Pot balances state
+  const [potBalances, setPotBalances] = useState<Record<string, string>>({});
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
 
   // Get contract addresses array - memoized to prevent re-creation
   const contractAddresses = useMemo(() => 
@@ -53,20 +59,23 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     []
   );
 
-  // Read participants from all contracts
-  const { data: participants1 } = useReadContract({
-    address: contractAddresses[0] as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'getParticipants',
-    query: { enabled: isConnected && !!address }
-  });
+  // Dynamically create hooks for all contract addresses
+  const contractReadResults = contractAddresses.map((address) => ({
+    address,
+    participants: useReadContract({
+      address: address as `0x${string}`,
+      abi: PREDICTION_POT_ABI,
+      functionName: 'getParticipants',
+      query: { enabled: isConnected && !!address }
+    }),
+    balance: useBalance({
+      address: address as `0x${string}`,
+      chainId: 8453
+    })
+  }));
 
-  const { data: participants2 } = useReadContract({
-    address: contractAddresses[1] as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'getParticipants',
-    query: { enabled: isConnected && !!address }
-  });
+  const participantsData = contractReadResults.map(result => result.participants.data);
+  const balancesData = contractReadResults.map(result => result.balance.data);
 
   // Update userPots when participant data changes
   useEffect(() => {
@@ -76,7 +85,6 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     }
 
     const participatingPots: string[] = [];
-    const participantsData = [participants1, participants2];
     
     participantsData.forEach((participants, index) => {
       if (participants && Array.isArray(participants)) {
@@ -90,7 +98,7 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
     });
 
     setUserPots(participatingPots);
-  }, [participants1, participants2, address, isConnected, contractAddresses]);
+  }, [participantsData, address, isConnected, contractAddresses]);
 
   // Load bookmarks when component mounts or address changes
   useEffect(() => {
@@ -126,6 +134,68 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
 
     loadBookmarks();
   }, [address, isConnected]);
+
+  // Fetch ETH price and calculate pot balances
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+        console.log('💰 ETH price fetched:', price);
+      } catch (error) {
+        console.error('Error fetching ETH price:', error);
+        setEthPrice(4700); // Fallback price
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Helper function to convert ETH to USD (same as in other components)
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
+
+  // Update pot balances when contract balances or ETH price changes
+  useEffect(() => {
+    if (!ethPrice) return;
+
+    const newPotBalances: Record<string, string> = {};
+    
+    // Calculate balances for each contract
+    balancesData.forEach((balance, index) => {
+      if (balance?.value) {
+        const usdAmount = ethToUsd(balance.value);
+        const contractAddress = contractAddresses[index];
+        const marketType = CONTRACT_ADDRESSES[contractAddress];
+        
+        // Map contract to market name
+        let marketName = '';
+        if (marketType === 'featured') {
+          marketName = 'Trending';
+        } else if (marketType === 'crypto') {
+          marketName = 'Crypto';
+        } else if (marketType === 'stocks') {
+          marketName = 'stocks';
+        }
+        
+        // Show 2 decimal places if under $10, otherwise round to nearest dollar
+        const formattedAmount = usdAmount < 10 ? usdAmount.toFixed(2) : usdAmount.toFixed(0);
+        newPotBalances[contractAddress] = `$${formattedAmount}`;
+        console.log(`💰 ${marketName} pot balance: ${formatUnits(balance.value, 18)} ETH = ${newPotBalances[contractAddress]}`);
+      }
+    });
+
+    setPotBalances(newPotBalances);
+  }, [balancesData, ethPrice, contractAddresses]);
 
   const handleRemoveBookmark = async (marketId: string) => {
     if (!address) return;
@@ -311,9 +381,16 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                       {bookmark.contractAddress ? 'View Pot' : 'Go to Category'}
                     </button>
                     {bookmark.contractAddress && (
-                      <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full self-center">
-                        Contract Available
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full self-center">
+                          Contract Available
+                        </span>
+                        {potBalances[bookmark.contractAddress] && (
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full self-center">
+                            {potBalances[bookmark.contractAddress]} in pot
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -376,8 +453,15 @@ const BookmarksPage = ({ activeSection, setActiveSection }: BookmarksPageProps) 
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-green-600 font-medium">
-                          Enter →
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm text-green-600 font-medium">
+                            Enter →
+                          </div>
+                          {potBalances[contractAddress] && (
+                            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                              {potBalances[contractAddress]} in pot
+                            </div>
+                          )}
                         </div>
                         {/* <div className="text-xs text-gray-500 font-mono">
                           {contractAddress.slice(0, 8)}...{contractAddress.slice(-6)}

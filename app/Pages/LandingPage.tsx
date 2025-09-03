@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { useAccount, useReadContract } from 'wagmi';
+import { useAccount, useReadContract, useBalance } from 'wagmi';
+import { formatUnits } from 'viem';
 import { ArrowRight, Bookmark } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets, Market } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
 import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { getPrice } from '../Constants/getPrice';
 
 interface LandingPageProps {
   activeSection: string;
@@ -30,7 +32,7 @@ const getContractAddress = (marketId: string): string | null => {
 // Use centralized contract mapping from config
 const CONTRACT_ADDRESSES = CONTRACT_TO_TABLE_MAPPING;
 
-// Prediction Pot ABI for participant checking
+// Prediction Pot ABI for participant checking and balance reading
 const PREDICTION_POT_ABI = [
   {
     "inputs": [],
@@ -79,6 +81,10 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     totalPredictions: number;
   }>>({});
   
+  // Pot balances state
+  const [potBalances, setPotBalances] = useState<Record<string, string>>({});
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
+  
   // Pagination state
   const [displayedMarketsCount, setDisplayedMarketsCount] = useState(12);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -94,22 +100,23 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   // Get contract addresses array for participant checking
   const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
 
-  // Read participants from all contracts
-  const { data: participants1 } = useReadContract({
-    address: contractAddresses[0] as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'getParticipants',
-    query: { enabled: isConnected && !!address }
-  });
+  // Dynamically create hooks for all contract addresses
+  const contractReadResults = contractAddresses.map((address) => ({
+    address,
+    participants: useReadContract({
+      address: address as `0x${string}`,
+      abi: PREDICTION_POT_ABI,
+      functionName: 'getParticipants',
+      query: { enabled: isConnected && !!address }
+    }),
+    balance: useBalance({
+      address: address as `0x${string}`,
+      chainId: 8453
+    })
+  }));
 
-  const { data: participants2 } = useReadContract({
-    address: contractAddresses[1] as `0x${string}`,
-    abi: PREDICTION_POT_ABI,
-    functionName: 'getParticipants',
-    query: { enabled: isConnected && !!address }
-  });
-
-  const participantsData = [participants1, participants2];
+  const participantsData = contractReadResults.map(result => result.participants.data);
+  const balancesData = contractReadResults.map(result => result.balance.data);
 
 
   // Load more markets function
@@ -422,6 +429,68 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     return () => clearInterval(interval);
   }, []); // Load percentages once on component mount and set up refresh interval
 
+  // Fetch ETH price and calculate pot balances
+  useEffect(() => {
+    const fetchEthPrice = async () => {
+      try {
+        const price = await getPrice('ETH');
+        setEthPrice(price);
+        console.log('💰 ETH price fetched:', price);
+      } catch (error) {
+        console.error('Error fetching ETH price:', error);
+        setEthPrice(4700); // Fallback price
+      }
+    };
+
+    fetchEthPrice();
+    
+    // Refresh price every 5 minutes
+    const interval = setInterval(fetchEthPrice, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Helper function to convert ETH to USD (same as in PredictionPotTest)
+  const ethToUsd = (ethAmount: bigint): number => {
+    const fallbackEthPrice = 4700;
+    const currentEthPrice = ethPrice || fallbackEthPrice;
+    const ethValue = Number(formatUnits(ethAmount, 18));
+    return ethValue * currentEthPrice;
+  };
+
+  // Update pot balances when contract balances or ETH price changes
+  useEffect(() => {
+    if (!ethPrice) return;
+
+    const newPotBalances: Record<string, string> = {};
+    
+    // Calculate balances for each contract
+    balancesData.forEach((balance, index) => {
+      if (balance?.value) {
+        const usdAmount = ethToUsd(balance.value);
+        const contractAddress = contractAddresses[index];
+        const marketType = CONTRACT_ADDRESSES[contractAddress];
+        
+        // Map contract to market name
+        let marketName = '';
+        if (marketType === 'featured') {
+          marketName = 'Trending';
+        } else if (marketType === 'crypto') {
+          marketName = 'Crypto';
+        } else if (marketType === 'stocks') {
+          marketName = 'stocks';
+        }
+        
+        // Show 2 decimal places if under $10, otherwise round to nearest dollar
+        const formattedAmount = usdAmount < 10 ? usdAmount.toFixed(2) : usdAmount.toFixed(0);
+        newPotBalances[marketName] = `$${formattedAmount}`;
+        console.log(`💰 ${marketName} pot balance: ${formatUnits(balance.value, 18)} ETH = ${newPotBalances[marketName]}`);
+      }
+    });
+
+    setPotBalances(newPotBalances);
+  }, [balancesData, ethPrice, contractAddresses]);
+
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent triggering market click
@@ -485,6 +554,17 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     return participants.some(
       (participant: string) => participant.toLowerCase() === address.toLowerCase()
     );
+  };
+
+  // Helper function to get real pot balance for a market
+  const getRealPotBalance = (marketId: string): string => {
+    // Check if we have real balance data
+    if (potBalances[marketId]) {
+      return potBalances[marketId];
+    }
+    
+    // Fallback to $0 if no data
+    return '$0';
   };
 
   // Function to handle market selection with position swap animation
@@ -729,6 +809,8 @@ const handleMarketClick = (marketId: string) => {
       if (market) {
         // Store the tab option ID so we can match it later
         market.tabId = option.id;
+        // Update pot size with real balance
+        market.potSize = getRealPotBalance(option.id);
         return market;
       } else {
         // Create a fallback market for categories without data
@@ -741,7 +823,7 @@ const handleMarketClick = (marketId: string) => {
           icon: option.icon || '🔮',
           currentPrice: '-',
           participants: 0,
-          potSize: '$0',
+          potSize: getRealPotBalance(option.id),
           tabId: option.id
         };
       }
@@ -1037,6 +1119,8 @@ const handleMarketClick = (marketId: string) => {
                     if (market) {
                       // Store the tab option ID so we can match it later
                       market.tabId = option.id;
+                      // Update pot size with real balance
+                      market.potSize = getRealPotBalance(option.id);
                       return market;
                     } else {
                       // Create a fallback market for categories without data
@@ -1049,7 +1133,7 @@ const handleMarketClick = (marketId: string) => {
                         icon: option.icon || '🔮',
                         currentPrice: '-',
                         participants: 0,
-                        potSize: '$0',
+                        potSize: getRealPotBalance(option.id),
                         tabId: option.id
                       };
                     }
