@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar, DollarSign, TrendingUp, Trophy, Users, Clock, ArrowRight, Wallet } from 'lucide-react';
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import Cookies from 'js-cookie';
-import { useAccount, useReadContract, useBalance } from 'wagmi';
+import { useAccount, useReadContract } from 'wagmi';
 import { formatUnits } from 'viem';
 import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
@@ -114,11 +114,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Get ETH balance
-  const ethBalance = useBalance({
-    address,
-    chainId: 8453
-  });
 
   // Fetch ETH price
   useEffect(() => {
@@ -146,14 +141,14 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   // Handle initial loading completion
   useEffect(() => {
     // Wait for price to load and wallet connection to be established
-    if (!isLoadingPrice && (isConnected === false || (isConnected && ethBalance.isSuccess))) {
+    if (!isLoadingPrice) {
       const timer = setTimeout(() => {
         setIsInitialLoad(false);
       }, 500); // Small delay to ensure smooth transition
       
       return () => clearTimeout(timer);
     }
-  }, [isLoadingPrice, isConnected, ethBalance.isSuccess]);
+  }, [isLoadingPrice, isConnected]);
 
   // Load hourly prediction data for the selected market
   useEffect(() => {
@@ -189,16 +184,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     }
   }, [address, isConnected]);
 
-  // Helper function to convert ETH to USD
-  const ethToUsd = (ethAmount: bigint): number => {
-    const fallbackEthPrice = 4700;
-    const currentEthPrice = ethPrice || fallbackEthPrice;
-    const ethValue = Number(formatUnits(ethAmount, 18));
-    return ethValue * currentEthPrice;
-  };
-
-  // Check if user has sufficient balance (at least $0.01 USD worth of ETH)
-  const hasInsufficientBalance = isConnected && ethBalance.data && ethToUsd(ethBalance.data.value) < 0.01;
 
   // Get contract addresses array
   const contractAddresses = Object.keys(CONTRACT_ADDRESSES) as Array<keyof typeof CONTRACT_ADDRESSES>;
@@ -346,43 +331,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     );
   }
 
-  // If user has insufficient ETH balance, show funding message
-  if (hasInsufficientBalance) {
-    return (
-      <div className="min-h-screen bg-white text-black p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="bg-white rounded-xl border-2 border-gray-200 p-8 text-center shadow-lg max-w-md">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Wallet className="w-8 h-8 text-orange-500" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Fund Your Account</h2>
-              <p className="text-gray-600 mb-6">
-                You need at least $0.01 worth of ETH to participate in prediction pots. 
-                Current balance: <span className="font-semibold text-red-500">
-                  ${ethBalance.data ? ethToUsd(ethBalance.data.value).toFixed(4) : '$0.00'}
-                </span>
-              </p>
-              <button
-                onClick={() => setActiveSection('receive')}
-                className="w-full bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
-              >
-                Let's fund your account →
-              </button>
-              <div className="mt-4">
-                <button 
-                  onClick={() => setActiveSection('home')}
-                  className="text-sm text-gray-500 hover:text-black transition-colors"
-                >
-                  ← Back to Home
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white text-black p-6">
