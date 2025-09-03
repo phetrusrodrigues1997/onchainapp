@@ -83,7 +83,23 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     time: string;
   } | null>(null);
   
+  // Random line display state - generate on component mount
+  const [lineDisplay, setLineDisplay] = useState<'yes' | 'no' | 'both'>('both');
+  
   const { address, isConnected } = useAccount();
+
+  // Generate random line display on component mount
+  useEffect(() => {
+    const randomNum = Math.floor(Math.random() * 9); // 0-8 (9 numbers for equal 3-way split)
+    
+    if (randomNum >= 0 && randomNum <= 2) {
+      setLineDisplay('yes'); // 33.3% chance (0, 1, 2)
+    } else if (randomNum >= 3 && randomNum <= 5) {
+      setLineDisplay('no');  // 33.3% chance (3, 4, 5)
+    } else {
+      setLineDisplay('both'); // 33.3% chance (6, 7, 8)
+    }
+  }, []);
 
   // Detect screen size for responsive circle sizing
   useEffect(() => {
@@ -400,17 +416,6 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         <div className="border-0 rounded-none md:rounded-lg p-0 md:p-8 mb-8 relative -mx-6 md:mx-0">
 
           
-          {/* Custom CSS for subtle pulse */}
-          <style>{`
-            @keyframes subtlePulse {
-              0%, 100% { transform: scale(1); opacity: 1; }
-              50% { transform: scale(1.04); opacity: 0.85; }
-            }
-            @keyframes staticPulse {
-              0%, 100% { opacity: 1; transform: scale(1); }
-              50% { opacity: 0.7; transform: scale(1.1); }
-            }
-          `}</style>
           
             {/* Timeline Chart with Question Header Inside */}
             <div className="w-full px-0 md:px-3" style={{ transform: window.innerWidth < 768 ? 'translateY(-3rem)' : 'translateY(-2.5rem)' }}>
@@ -420,12 +425,9 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 {/* Desktop Enter Button - Positioned absolutely in top right of chart container */}
                 <button
                   onClick={() => setActiveSection(marketInfo.section)}
-                  className="hidden md:block absolute top-4 right-4 bg-purple-700 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all duration-200 text-base font-bold shadow-lg hover:shadow-xl z-10"
-                  style={{
-                    animation: 'subtlePulse 2s infinite'
-                  }}
+                  className="hidden md:block absolute top-4 right-4 bg-purple-700 text-white px-6 py-3 rounded-xl hover:bg-purple-800 hover:scale-105 transition-all duration-300 text-base font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500 z-10"
                 >
-                  View
+                  View Pot
                 </button>
                 
                 {/* Question Header with Image - Now Inside Chart */}
@@ -465,17 +467,25 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   {/* Top-left Legend - Horizontal Layout */}
                   <g>
                       
-                    {/* Yes percentage with green dot */}
-                    <circle cx="15" cy="20" r={isMobile ? "5" : "4"} fill="#10b981" />
-                    <text x="28" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
-                      Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
-                    </text>
+                    {/* Yes percentage with green dot - only show if yes line is displayed */}
+                    {(lineDisplay === 'yes' || lineDisplay === 'both') && (
+                      <>
+                        <circle cx="15" cy="20" r={isMobile ? "5" : "4"} fill="#10b981" />
+                        <text x="28" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
+                          Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
+                        </text>
+                      </>
+                    )}
                     
-                    {/* No percentage with blue dot - positioned horizontally */}
-                    <circle cx="110" cy="20" r={isMobile ? "5" : "4"} fill="#cc0000" />
-                    <text x="123" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
-                      No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
-                    </text>
+                    {/* No percentage with blue dot - positioned horizontally, only show if no line is displayed */}
+                    {(lineDisplay === 'no' || lineDisplay === 'both') && (
+                      <>
+                        <circle cx={lineDisplay === 'both' ? "110" : "15"} cy="20" r={isMobile ? "5" : "4"} fill="#cc0000" />
+                        <text x={lineDisplay === 'both' ? "123" : "28"} y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
+                          No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
+                        </text>
+                      </>
+                    )}
                     
                     {/* How it works link with purple circle - positioned at top right */}
                     <g 
@@ -519,7 +529,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   </g>
 
                   {/* Grid lines */}
-                  {[0, 25, 50, 75, 100].map((y) => {
+                  {[0, 20, 40, 60, 80, 100].map((y) => {
                     const baseY = isMobile ? 320 : 240;
                     const scale = isMobile ? 2.6 : 1.8;
                     const x2 = isMobile ? 450 : 550;
@@ -530,7 +540,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         y1={baseY - (y * scale)}
                         x2={x2}
                         y2={baseY - (y * scale)}
-                        stroke="#d8d8d8"
+                        stroke="#e8e8e8"
                         strokeWidth="1"
                         strokeDasharray="2 4"
                       />
@@ -538,7 +548,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   })}
                   
                   {/* Y-axis labels - Positioned within viewBox */}
-                  {[0, 25, 50, 75, 100].map((y) => {
+                  {[0, 20, 40, 60, 80, 100].map((y) => {
                     const baseY = isMobile ? 325 : 245;
                     const scale = isMobile ? 2.6 : 1.8;
                     const x = isMobile ? 470 : 570;
@@ -573,7 +583,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   ))}
                   
                   {/* Yes (Positive) Line - Green */}
-                  {hourlyData.length > 1 && (
+                  {hourlyData.length > 1 && (lineDisplay === 'yes' || lineDisplay === 'both') && (
                     <>
                       <path
                         d={hourlyData.map((point, index) => {
@@ -698,7 +708,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   )}
                   
                   {/* No (Negative) Line - Blue */}
-                  {hourlyData.length > 1 && (
+                  {hourlyData.length > 1 && (lineDisplay === 'no' || lineDisplay === 'both') && (
                     <>
                       <path
                         d={hourlyData.map((point, index) => {
@@ -823,7 +833,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   )}
                   
                   {/* Tip circle - Green (Yes) - Only at the end of the line with pulse animation */}
-                  {hourlyData.length > 0 && (() => {
+                  {hourlyData.length > 0 && (lineDisplay === 'yes' || lineDisplay === 'both') && (() => {
                     const lastPoint = hourlyData[hourlyData.length - 1];
                     const timeMap: Record<string, number> = {
                       '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
@@ -866,7 +876,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                   })()}
                   
                   {/* Tip circle - Blue (No) - Only at the end of the line with pulse animation */}
-                  {hourlyData.length > 0 && (() => {
+                  {hourlyData.length > 0 && (lineDisplay === 'no' || lineDisplay === 'both') && (() => {
                     const lastPoint = hourlyData[hourlyData.length - 1];
                     const timeMap: Record<string, number> = {
                       '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
@@ -946,15 +956,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </svg>
                 
                 {/* Mobile Enter Button - Inside chart container */}
-                <div className="block md:hidden mt-4 px-8" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
+                <div className="block md:hidden mt-4 px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
                   <button
                     onClick={() => setActiveSection(marketInfo.section)}
-                    className="w-full bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-black transition-all duration-200 text-base font-bold shadow-lg hover:shadow-xl"
-                    style={{
-                      animation: 'subtlePulse 2s infinite'
-                    }}
+                    className="w-full bg-purple-700 text-white px-6 py-4 rounded-xl hover:bg-purple-800 hover:scale-[1.02] transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500"
                   >
-                    View
+                    View Pot
                   </button>
                 </div>
               </div>

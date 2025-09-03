@@ -1134,9 +1134,18 @@ const handleMarketClick = (marketId: string) => {
                       </svg>
                     </div>
                     <div className="text-lg font-bold text-gray-900">
-                      {predictionPercentages[market.tabId || market.id].positivePercentage}%
-                    </div>
-                    <div className="text-xs text-gray-500">chance</div>
+                                  {(() => {
+                                    const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
+                                    console.log('totalVotes for', market.id, totalVotes);
+                                    const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
+                                    console.log('positive votes for', market.id, positive);
+                                    const negative = totalVotes - positive;
+                                    console.log('negative votes for', market.id, negative);
+                                    const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
+                                    return smoothedPercentage;
+                                  })()}%
+                                </div>
+                                <div className="text-xs text-gray-500">chance</div>
                   </div>
                 </div>
               )}
@@ -1418,7 +1427,16 @@ const handleMarketClick = (marketId: string) => {
                                   </svg>
                                 </div>
                                 <div className="text-lg font-bold text-gray-900">
-                                  {predictionPercentages[market.tabId || market.id].positivePercentage}%
+                                  {(() => {
+                                    const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
+                                    console.log('totalVotes for', market.id, totalVotes);
+                                    const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
+                                    console.log('positive votes for', market.id, positive);
+                                    const negative = totalVotes - positive;
+                                    console.log('negative votes for', market.id, negative);
+                                    const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
+                                    return smoothedPercentage;
+                                  })()}%
                                 </div>
                                 <div className="text-xs text-gray-500">chance</div>
                               </div>
