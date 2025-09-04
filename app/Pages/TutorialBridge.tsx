@@ -333,206 +333,137 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
 
   return (
-    <div className="min-h-screen bg-white text-black p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        {/* <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Select Your Market</h1>
-          <p className="text-gray-600">Choose a prediction market to enter</p>
-        </div> */}
-
-        {/* Current Status Banner */}
-        {/* <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Calendar className="w-6 h-6 text-black" />
-              <div>
-                <h3 className="font-bold">{currentDay}</h3>
-                <p className="text-sm text-gray-600">${currentEntryFee} USDC entry fee today</p>
+    <div className="min-h-screen bg-white text-black w-full overflow-x-hidden mt-8">
+      <div className="w-full sm:max-w-5xl sm:mx-auto p-0 sm:p-6">
+    
+        {/* Market Overview Card - Full width on mobile */}
+        <div className="bg-white rounded-none sm:rounded-xl">
+          <div className="p-0 sm:p-4 md:p-6">
+            {/* Question Header - Compact on mobile */}
+            <div className="flex items-start gap-3 mb-2 sm:mb-3 pl-2 pr-4 sm:px-0">
+              {/* Market Icon - Smaller on mobile */}
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  {selectedIcon?.slice(0, 4) === 'http' ? (
+                    <img 
+                      src={selectedIcon} 
+                      alt="Market Icon" 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-lg sm:text-xl md:text-2xl">{selectedIcon || '📊'}</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Question Text and Actions */}
+              <div className="flex-1 min-w-0 md:mr-0">
+                <h1 className=" text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
+                  {selectedQuestion.replace(/\?$/, '')} <span>tomorrow?</span>
+                </h1>
+                
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Clock className="w-6 h-6 text-black" />
-              <div className="text-right">
-                <h3 className="font-bold">Weekly Cycle</h3>
-                <p className="text-sm text-gray-600">{timeUntilClose}</p>
+            
+            {/* Chart Container - Full width on mobile */}
+            <div className="bg-white rounded-none sm:rounded-lg p-0 sm:p-4 relative w-full">
+              {/* Chart Legend - Minimal padding on mobile for readability */}
+              <div className="flex items-center justify-between mb-2 sm:mb-4 px-2 sm:px-0">
+                <div className="flex items-center gap-3 sm:gap-6">
+                  {(lineDisplay === 'yes' || lineDisplay === 'both') && (
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-purple-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-700">
+                        Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
+                      </span>
+                    </div>
+                  )}
+                  {(lineDisplay === 'no' || lineDisplay === 'both') && (
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-700">
+                        No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="text-xs text-gray-500 font-medium hidden sm:block"><span className="flex items-center whitespace-nowrap font-extrabold tracking-wide">
+                            <span className="text-purple-700">PrediWin</span>
+                            <span className="text-black">.com</span>
+                           <img
+                  src="/ghostie.png"
+                  alt="Icon"
+                  width={24}
+                  height={22}
+                  className="flex-shrink-0"
+                />
+                            
+                          </span></div>
+                <div className="text-xs text-gray-500 font-medium sm:hidden"><span className="flex items-center whitespace-nowrap font-extrabold tracking-wide">
+                            <span className="text-purple-700">PrediWin</span>
+                            <span className="text-black">.com</span>
+                           <img
+                  src="/ghostie.png"
+                  alt="Icon"
+                  width={24}
+                  height={22}
+                  className="flex-shrink-0"
+                />
+                            
+                          </span></div>
               </div>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Elimination Market Explanation - Full width on mobile only */}
-        <div className="border-0 rounded-none md:rounded-lg p-0 md:p-8 mb-8 relative -mx-6 md:mx-0">
-
-          
-          
-            {/* Timeline Chart with Question Header Inside */}
-            <div className="w-full px-0 md:px-3" style={{ transform: window.innerWidth < 768 ? 'translateY(-3rem)' : 'translateY(-2.5rem)' }}>
-              {/* SVG Line Chart */}
-              <div className="bg-white rounded-lg p-1 md:p-6 mb-4 relative">
                 
-                {/* Desktop Enter Button - Positioned absolutely in top right of chart container */}
-                <div className="hidden md:block absolute top-4 right-4 z-10 w-32">
-                  <button
-                    onClick={() => setActiveSection(marketInfo.section)}
-                    className="bg-purple-700 text-white px-4 py-2 rounded-xl hover:bg-purple-800 hover:scale-105 transition-all duration-300 text-sm font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500 w-full mb-2"
-                  >
-                    View Pot
-                  </button>
-                  <button
-                    onClick={() => {
-                      const rulesElement = document.querySelector('#rules-summary');
-                      if (rulesElement) {
-                        rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
-                    }}
-                    className="bg-black text-white px-4 py-2 rounded-xl hover:bg-purple-50 transition-all duration-300 text-sm font-semibold hover:shadow-xl w-full"
-                  >
-                    How it works
-                  </button>
-                </div>
-                
-                {/* Question Header with Image - Now Inside Chart */}
-                <div className="text-left mb-6 px-0 md:px-0" style={{ transform: window.innerWidth < 768 ? 'translateY(2.25rem)' : 'none' }}>
-                  <div className="flex items-start gap-3 mb-6 px-0 md:px-0">
-                    {/* Small Square Image */}
-                    <div className="flex-shrink-0">
-                      <div className="rounded-lg w-16 h-16 md:w-20 md:h-20 bg-white overflow-hidden relative">
-                        {selectedIcon?.slice(0, 4) === 'http' ? (
-                          <img 
-                            src={selectedIcon} 
-                            alt="Market Icon" 
-                            className="absolute inset-0 w-full h-full object-cover" 
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-sm md:text-lg text-gray-600">{selectedIcon || '📊'}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Question Text */}
-                    <div className="flex-1 mr-6 md:mr-0">
-                      <h2 className="text-lg md:text-xl font-bold pr-4 md:pr-36 leading-relaxed">
-                        {selectedQuestion.replace(/\?$/, '')} <span>tomorrow?</span>
-                      </h2>
-                    </div>
-                  </div>
-                </div>
-                
-                <svg
-                  viewBox={isMobile ? "0 0 500 420" : "0 0 600 350"}
-                  className="w-full h-[32rem] md:h-80 lg:h-88"
-                  style={{ minHeight: '450px', transform: window.innerWidth < 768 ? 'translateY(-2rem)' : 'none' }}
+              <div className="relative">
+              <svg
+                viewBox="0 0 100 50"
+                className="w-full h-48 md:h-64"
+                preserveAspectRatio="none"
                 >
-                  {/* Top-left Legend - Horizontal Layout */}
-                  <g>
-                      
-                    {/* Yes percentage with green dot - only show if yes line is displayed */}
-                    {(lineDisplay === 'yes' || lineDisplay === 'both') && (
-                      <>
-                        <circle cx="15" cy="20" r={isMobile ? "5" : "4"} fill="#10b981" />
-                        <text x="28" y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
-                          Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
-                        </text>
-                      </>
-                    )}
-                    
-                    {/* No percentage with blue dot - positioned horizontally, only show if no line is displayed */}
-                    {(lineDisplay === 'no' || lineDisplay === 'both') && (
-                      <>
-                        <circle cx={lineDisplay === 'both' ? "110" : "15"} cy="20" r={isMobile ? "5" : "4"} fill="#cc0000" />
-                        <text x={lineDisplay === 'both' ? "123" : "28"} y="24" fontSize={isMobile ? "14" : "11"} fill="#666" fontWeight="600">
-                          No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
-                        </text>
-                      </>
-                    )}
-                    
-                  </g>
 
-                  {/* Grid lines */}
+                  {/* Grid lines - Percentage based */}
                   {[0, 20, 40, 60, 80, 100].map((y) => {
-                    const baseY = isMobile ? 320 : 240;
-                    const scale = isMobile ? 2.6 : 1.8;
-                    const x2 = isMobile ? 450 : 550;
+                    const yPos = 45 - (y * 0.4); // Scale from 0-100% to 45-5 (inverted)
                     return (
                       <line
                         key={y}
-                        x1="40"
-                        y1={baseY - (y * scale)}
-                        x2={x2}
-                        y2={baseY - (y * scale)}
+                        x1="5"
+                        y1={yPos}
+                        x2="95"
+                        y2={yPos}
                         stroke="#e8e8e8"
-                        strokeWidth="1"
-                        strokeDasharray="2 4"
+                        strokeWidth="0.1"
+                        strokeDasharray="0.5 1"
                       />
                     );
                   })}
                   
-                  {/* Y-axis labels - Positioned within viewBox */}
-                  {[0, 20, 40, 60, 80, 100].map((y) => {
-                    const baseY = isMobile ? 325 : 245;
-                    const scale = isMobile ? 2.6 : 1.8;
-                    const x = isMobile ? 470 : 570;
-                    return (
-                      <text
-                        key={y}
-                        x={x}
-                        y={baseY - (y * scale)}
-                        fontSize="13"
-                        fill="#666"
-                        textAnchor="end"
-                        fontWeight="500"
-                      >
-                        {y}%
-                      </text>
-                    );
-                  })}
-                  
-                  {/* X-axis labels - 2-hour intervals with smaller text */}
-                  {['12am', '2am', '4am', '6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm', '8pm', '10pm'].map((timeLabel, index) => (
-                    <text
-                      key={timeLabel}
-                      x={isMobile ? 60 + (index * 32) : 70 + (index * 40)} // Tighter spacing for 2-hour intervals
-                      y={isMobile ? "360" : "275"}
-                      fontSize={isMobile ? "9" : "10"} // Smaller font size
-                      fill="#666"
-                      textAnchor="middle"
-                      fontWeight="500"
-                    >
-                      {timeLabel}
-                    </text>
-                  ))}
                   
                   {/* Yes (Positive) Line - Green */}
                   {hourlyData.length > 1 && (lineDisplay === 'yes' || lineDisplay === 'both') && (
                     <>
                       <path
                         d={hourlyData.map((point, index) => {
-                          // Map time to x-axis position (2-hour intervals)
+                          // Map time to x-axis position using percentage coordinates
                           const timeMap: Record<string, number> = {
                             '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                           };
                           const xIndex = timeMap[point.time] || 0;
-                          const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                          // Add slight upward offset (+2 pixels) to Yes line
-                          const baseY = isMobile ? 320 : 240;
-                          const scale = isMobile ? 2.6 : 1.8;
-                          const y = baseY - (point.positivePercentage * scale) - 2;
+                          const x = 5 + (xIndex * 7.5); // Same spacing as x-axis labels
+                          // Convert percentage to y position (inverted: 45 = 0%, 5 = 100%)
+                          const y = 45 - (point.positivePercentage * 0.4) - 0.2; // Slight offset up
                           
                           if (index === 0) {
                             return `M ${x} ${y}`;
                           } else {
                             const prevPoint = hourlyData[index - 1];
-                            const prevY = baseY - (prevPoint.positivePercentage * scale) - 2;
+                            const prevY = 45 - (prevPoint.positivePercentage * 0.4) - 0.2;
                             // Step-based movement: horizontal first, then vertical
                             return `L ${x} ${prevY} L ${x} ${y}`;
                           }
                         }).join(' ')}
                         fill="none"
-                        stroke="#10b981"
-                        strokeWidth="2"
+                        stroke="#a855f7"
+                        strokeWidth="0.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -553,12 +484,12 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                             key={`yes-hover-${index}`}
                             cx={x}
                             cy={y}
-                            r="15" // Increased from 8 to 15 for better sensitivity
+                            r="1.5" // Scaled for percentage coordinates
                             fill="transparent"
                             className="cursor-pointer"
                             onMouseEnter={() => setHoveredPoint({
                               x,
-                              y: y - 15,
+                              y: y - 1.5,
                               percentage: point.positivePercentage,
                               type: 'yes',
                               time: point.time
@@ -595,11 +526,11 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                               x2={x}
                               y2={prevY}
                               stroke="transparent"
-                              strokeWidth="12"
+                              strokeWidth="1.2"
                               className="cursor-pointer"
                               onMouseEnter={() => setHoveredPoint({
                                 x: (prevX + x) / 2,
-                                y: prevY - 15,
+                                y: prevY - 1.5,
                                 percentage: prevPoint.positivePercentage,
                                 type: 'yes',
                                 time: prevPoint.time
@@ -613,11 +544,11 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                               x2={x}
                               y2={y}
                               stroke="transparent"
-                              strokeWidth="12"
+                              strokeWidth="1.2"
                               className="cursor-pointer"
                               onMouseEnter={() => setHoveredPoint({
                                 x,
-                                y: Math.min(prevY, y) - 15,
+                                y: Math.min(prevY, y) - 1.5,
                                 percentage: point.positivePercentage,
                                 type: 'yes',
                                 time: point.time
@@ -640,24 +571,22 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                             '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                           };
                           const xIndex = timeMap[point.time] || 0;
-                          const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                          // Add slight downward offset (+2 pixels) to No line  
-                          const baseY = isMobile ? 320 : 240;
-                          const scale = isMobile ? 2.6 : 1.8;
-                          const y = baseY - (point.negativePercentage * scale) + 2;
+                          const x = 5 + (xIndex * 7.5); // Same spacing as x-axis labels
+                          // Add slight downward offset to No line
+                          const y = 45 - (point.negativePercentage * 0.4) + 0.2; // Slight offset down
                           
                           if (index === 0) {
                             return `M ${x} ${y}`;
                           } else {
                             const prevPoint = hourlyData[index - 1];
-                            const prevY = baseY - (prevPoint.negativePercentage * scale) + 2;
+                            const prevY = 45 - (prevPoint.negativePercentage * 0.4) + 0.2;
                             // Step-based movement: horizontal first, then vertical
                             return `L ${x} ${prevY} L ${x} ${y}`;
                           }
                         }).join(' ')}
                         fill="none"
-                        stroke="#cc0000"
-                        strokeWidth="2"
+                        stroke="#3b82f6"
+                        strokeWidth="0.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
@@ -668,22 +597,20 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                        const baseY = isMobile ? 320 : 240;
-                        const scale = isMobile ? 2.6 : 1.8;
-                        const y = baseY - (point.negativePercentage * scale) + 2;
+                        const x = 5 + (xIndex * 7.5); // Same spacing as x-axis labels
+                        const y = 45 - (point.negativePercentage * 0.4) + 0.2; // Slight offset down
                         
                         return (
                           <circle
                             key={`no-hover-${index}`}
                             cx={x}
                             cy={y}
-                            r="15" // Increased from 8 to 15 for better sensitivity
+                            r="1.5" // Scaled for percentage coordinates
                             fill="transparent"
                             className="cursor-pointer"
                             onMouseEnter={() => setHoveredPoint({
                               x,
-                              y: y - 15,
+                              y: y - 1.5,
                               percentage: point.negativePercentage,
                               type: 'no',
                               time: point.time
@@ -701,15 +628,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                         };
                         const xIndex = timeMap[point.time] || 0;
-                        const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                        const baseY = isMobile ? 320 : 240;
-                        const scale = isMobile ? 2.6 : 1.8;
-                        const y = baseY - (point.negativePercentage * scale) + 2;
+                        const x = 5 + (xIndex * 7.5); // Same spacing as x-axis labels
+                        const y = 45 - (point.negativePercentage * 0.4) + 0.2; // Slight offset down
                         
                         const prevPoint = hourlyData[index - 1];
                         const prevXIndex = timeMap[prevPoint.time] || 0;
-                        const prevX = isMobile ? 60 + (prevXIndex * 32) : 70 + (prevXIndex * 40);
-                        const prevY = baseY - (prevPoint.negativePercentage * scale) + 2;
+                        const prevX = 5 + (prevXIndex * 7.5);
+                        const prevY = 45 - (prevPoint.negativePercentage * 0.4) + 0.2;
                         
                         return (
                           <g key={`no-segment-${index}`}>
@@ -720,11 +645,11 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                               x2={x}
                               y2={prevY}
                               stroke="transparent"
-                              strokeWidth="12"
+                              strokeWidth="1.2"
                               className="cursor-pointer"
                               onMouseEnter={() => setHoveredPoint({
                                 x: (prevX + x) / 2,
-                                y: prevY - 15,
+                                y: prevY - 1.5,
                                 percentage: prevPoint.negativePercentage,
                                 type: 'no',
                                 time: prevPoint.time
@@ -738,11 +663,11 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                               x2={x}
                               y2={y}
                               stroke="transparent"
-                              strokeWidth="12"
+                              strokeWidth="1.2"
                               className="cursor-pointer"
                               onMouseEnter={() => setHoveredPoint({
                                 x,
-                                y: Math.min(prevY, y) - 15,
+                                y: Math.min(prevY, y) - 1.5,
                                 percentage: point.negativePercentage,
                                 type: 'no',
                                 time: point.time
@@ -762,22 +687,20 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                    const baseY = isMobile ? 320 : 240;
-                    const scale = isMobile ? 2.6 : 1.8;
-                    const y = baseY - (lastPoint.positivePercentage * scale) - 2;
+                    const x = 5 + (xIndex * 7.5); // Same spacing as x-axis labels
+                    const y = 45 - (lastPoint.positivePercentage * 0.4) - 0.2; // Slight offset up
                     
-                    // Responsive circle sizing
-                    const baseRadius = isMobile ? 4.5 : 3.5;
-                    const maxRadius = isMobile ? 6 : 5;
-                    const strokeWidth = isMobile ? 2 : 1.5;
+                    // Circle sizing for percentage coordinates
+                    const baseRadius = 0.5;
+                    const maxRadius = 0.7;
+                    const strokeWidth = 0.08;
                     
                     return (
                       <circle
                         cx={x}
                         cy={y}
                         r={baseRadius}
-                        fill="#10b981"
+                        fill="#a855f7"
                         stroke="white"
                         strokeWidth={strokeWidth}
                         className="tip-circle"
@@ -805,22 +728,20 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       '12am': 0, '2am': 1, '4am': 2, '6am': 3, '8am': 4, '10am': 5, '12pm': 6, '2pm': 7, '4pm': 8, '6pm': 9, '8pm': 10, '10pm': 11
                     };
                     const xIndex = timeMap[lastPoint.time] || 0;
-                    const x = isMobile ? 60 + (xIndex * 32) : 70 + (xIndex * 40);
-                    const baseY = isMobile ? 320 : 240;
-                    const scale = isMobile ? 2.6 : 1.8;
-                    const y = baseY - (lastPoint.negativePercentage * scale) + 2;
+                    const x = 5 + (xIndex * 7.5); // Same spacing as x-axis labels
+                    const y = 45 - (lastPoint.negativePercentage * 0.4) + 0.2; // Slight offset down
                     
-                    // Responsive circle sizing
-                    const baseRadius = isMobile ? 4.5 : 3.5;
-                    const maxRadius = isMobile ? 6 : 5;
-                    const strokeWidth = isMobile ? 2 : 1.5;
+                    // Circle sizing for percentage coordinates
+                    const baseRadius = 0.5;
+                    const maxRadius = 0.7;
+                    const strokeWidth = 0.08;
                     
                     return (
                       <circle
                         cx={x}
                         cy={y}
                         r={baseRadius}
-                        fill="#cc0000"
+                        fill="#3b82f6"
                         stroke="white"
                         strokeWidth={strokeWidth}
                         className="tip-circle"
@@ -846,22 +767,22 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                     <g>
                       {/* Tooltip background */}
                       <rect
-                        x={hoveredPoint.x - 25}
-                        y={hoveredPoint.y - 12}
-                        width="50"
-                        height="24"
+                        x={hoveredPoint.x - 2.5}
+                        y={hoveredPoint.y - 1.2}
+                        width="5"
+                        height="2.4"
                         fill="rgba(0, 0, 0, 0.8)"
                         stroke="rgba(255, 255, 255, 0.2)"
-                        strokeWidth="1"
-                        rx="6"
-                        ry="6"
+                        strokeWidth="0.1"
+                        rx="0.6"
+                        ry="0.6"
                       />
                       {/* Tooltip text */}
                       <text
                         x={hoveredPoint.x}
                         y={hoveredPoint.y + 2}
                         fill="white"
-                        fontSize="11"
+                        fontSize="1.1"
                         fontWeight="600"
                         textAnchor="middle"
                       >
@@ -870,54 +791,66 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       {/* Small indicator dot */}
                       <circle
                         cx={hoveredPoint.x}
-                        cy={hoveredPoint.y + 15}
-                        r="2"
-                        fill={hoveredPoint.type === 'yes' ? '#10b981' : '#cc0000'}
+                        cy={hoveredPoint.y + 1.5}
+                        r="0.2"
+                        fill={hoveredPoint.type === 'yes' ? '#a855f7' : '#3b82f6'}
                       />
                     </g>
                   )}
-                </svg>
-                
-                {/* Logo positioned absolutely in chart container */}
-                <div className="absolute top-36 md:translate-y-0 right-2 z-20">
-                  <div className={isMobile ? "scale-75" : "scale-50"}>
-                    <span className="flex items-center whitespace-nowrap text-lg md:text-3xl font-extrabold tracking-wide">
-                      <span className="text-purple-700">PrediWin</span>
-                      <img src="/ghostie.png" alt="Icon" width={isMobile ? "28" : "38"} height={isMobile ? "19" : "26"} className="flex-shrink-0" />
-                    </span>
-                  </div>
-                </div>
-                
-                {/* Mobile Enter Button - Inside chart container */}
-                <div className="block md:hidden mt-4 px-0 space-y-3" style={{ transform: window.innerWidth < 768 ? 'translateY(-9.5rem)' : 'none' }}>
-                  <button
-                    onClick={() => setActiveSection(marketInfo.section)}
-                    className="w-full bg-purple-700 text-white px-6 py-4 rounded-xl hover:bg-purple-800 hover:scale-[1.02] transition-all duration-300 text-lg font-semibold shadow-xl hover:shadow-2xl hover:border-purple-500"
-                  >
-                    View Pot
-                  </button>
-                  <button
-                    onClick={() => {
-                      const rulesElement = document.querySelector('#rules-summary');
-                      if (rulesElement) {
-                        rulesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
+              </svg>
+              
+              {/* Y-axis labels - HTML overlay */}
+              {[0, 20, 40, 60, 80, 100].map((y) => {
+                const percentage = (100 - y) / 100; // Convert to position from top
+                const topPosition = `${percentage * 100}%`;
+                return (
+                  <div
+                    key={y}
+                    className={`absolute right-1 text-xs font-medium text-gray-600 ${y === 0 || y === 100 ? 'invisible' : ''}`}
+                    style={{ 
+                      top: topPosition,
+                      transform: 'translateY(-50%)'
                     }}
-                    className="w-full bg-black text-white px-6 py-4 rounded-xl hover:bg-purple-50 transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-xl"
                   >
-                    How it works
-                  </button>
-                </div>
+                    {y}%
+                  </div>
+                );
+              })}
+              
+              {/* X-axis labels - HTML overlay */}
+              <div className="flex justify-between px-2 mt-1">
+                {['12am', '2am', '4am', '6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm', '8pm', '10pm'].map((timeLabel) => (
+                  <span 
+                    key={timeLabel} 
+                    className={`text-xs font-medium text-gray-600 ${timeLabel === '12am' || timeLabel === '10pm' ? 'invisible' : ''}`}
+                  >
+                    {timeLabel}
+                  </span>
+                ))}
+              </div>
+              
+              
               </div>
             </div>
           </div>
         </div>
 
+        {/* View Pot Button - Below Chart */}
+        <div className="mb-6 px-4 sm:px-0">
+          <button
+            onClick={() => setActiveSection(marketInfo.section)}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-base"
+          >
+            <Wallet className="w-4 h-4" />
+            View Pot
+          </button>
+        </div>
+
         {/* Rules Summary Dropdown */}
-        <div id="rules-summary" className="border border-gray-300 rounded-lg overflow-hidden mb-8 mt-8 md:mt-0" style={{ transform: window.innerWidth < 768 ? 'translateY(-10rem)' : 'translateY(-8rem)' }}>
+        <div id="rules-summary" className="bg-white rounded-none sm:rounded-xl shadow-sm border-0 sm:border border-gray-200 overflow-hidden mb-4 sm:mb-8">
           <button
             onClick={() => setIsRulesOpen(!isRulesOpen)}
-            className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+            className="w-full px-4 sm:px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
           >
             <span className="text-black font-semibold pr-4">Rules Summary - How it works</span>
             {isRulesOpen ? (
@@ -928,8 +861,8 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           </button>
           
           {isRulesOpen && (
-            <div className="px-6 py-4 bg-white border-t border-gray-300">
-              <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-lg">
+            <div className="px-6 py-4 bg-white border-t border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-gray-600 mb-6 text-sm md:text-base">
                   Can you predict what's going to happen tomorrow and survive until Saturday?
                 </p>
@@ -955,13 +888,13 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           )}
         </div>
 
-        {/* Additional FAQ Questions - Public Pots */}
-        <div className="space-y-4 mb-4" style={{ transform: window.innerWidth < 768 ? 'translateY(-11rem)' : 'translateY(-9rem)' }}>
+        {/* Additional FAQ Questions */}
+        <div className="space-y-4 mb-8">
           {/* Question 1: Weekly Schedule */}
-          <div className="border border-gray-300 rounded-lg overflow-hidden">
+          <div className="bg-white rounded-none sm:rounded-xl shadow-sm border-0 sm:border border-gray-200 overflow-hidden">
             <button
               onClick={() => setWeeklyScheduleOpen(!weeklyScheduleOpen)}
-              className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+              className="w-full px-4 sm:px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
             >
               <span className="text-black font-semibold pr-4">What is the weekly schedule for Public pots?</span>
               {weeklyScheduleOpen ? (
@@ -972,17 +905,17 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             </button>
             
             {weeklyScheduleOpen && (
-              <div className="px-6 py-4 bg-white border-t border-gray-300">
+              <div className="px-4 sm:px-6 py-4 bg-white border-t border-gray-200">
                 <p className="text-gray-800 leading-relaxed">Sunday-Friday: pot entry and predictions are open. Entry fees increase daily from $0.01 (Sunday) to $0.06 (Friday). Saturday: Results day - pots are closed and winners are determined at midnight UTC with pot distribution. Private pots have no schedule - you control when they open and close.</p>
               </div>
             )}
           </div>
 
           {/* Question 2: Entry Fees */}
-          <div className="border border-gray-300 rounded-lg overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <button
               onClick={() => setEntryFeesOpen(!entryFeesOpen)}
-              className="w-full px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+              className="w-full px-4 sm:px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
             >
               <span className="text-black font-semibold pr-4">How are entry fees calculated in Public pots?</span>
               {entryFeesOpen ? (
@@ -993,7 +926,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             </button>
             
             {entryFeesOpen && (
-              <div className="px-6 py-4 bg-white border-t border-gray-300">
+              <div className="px-4 sm:px-6 py-4 bg-white border-t border-gray-200">
                 <p className="text-gray-800 leading-relaxed">Public pots follow a dynamic pricing model to encourage early participation: Sunday ($0.01), Monday ($0.02), Tuesday ($0.03), Wednesday ($0.04), Thursday ($0.05), Friday ($0.06). Saturday is closed for results. Private pots let you set any entry fee you want.</p>
               </div>
             )}
@@ -1010,7 +943,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           </button>
         </div>
       </div>
-    
+    </div>
   );
 };
 

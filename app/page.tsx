@@ -437,7 +437,7 @@ export default function App() {
       {!isLandingPageLoading && (
         <header
   className={`z-50 bg-white px-4 md:py-2 sticky top-0 ${
-    (activeSection === "home" || activeSection === "dashboard") ? "border-b border-gray-200" : ""
+    (activeSection === "home") ? "border-b border-gray-200" : ""
   }`}
 >
         <div className="max-w-7xl mx-auto flex flex-col">
@@ -590,7 +590,7 @@ export default function App() {
           </div>
 
           {/* Market Carousel - only show on home and dashboard sections, on its own line */}
-          {(activeSection === 'home' || activeSection === 'dashboard') && (
+          {(activeSection === 'home') && (
             <div className="mt-3 md:translate-y-2 pt-2 md:pt-0 ">
               {/* Markets Container - Show first 13 on desktop, all on mobile */}
               <div className="flex overflow-x-auto md:overflow-visible scrollbar-hide pb-1"
