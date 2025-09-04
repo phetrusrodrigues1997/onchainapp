@@ -14,6 +14,36 @@ export const CONTRACT_TO_TABLE_MAPPING = {
 export type ContractAddress = keyof typeof CONTRACT_TO_TABLE_MAPPING;
 export type TableType = typeof CONTRACT_TO_TABLE_MAPPING[ContractAddress];
 
+// Centralized table name mappings for database operations
+export const TABLE_MAPPINGS = {
+  // Bets tables (predictions/votes)
+  BETS: {
+    featured: 'featured_bets',
+    crypto: 'crypto_bets', 
+    stocks: 'stocks_bets'
+  } as const,
+  
+  // Wrong predictions tables (penalties/eliminations)
+  WRONG_PREDICTIONS: {
+    featured: 'wrong_Predictions', // Note: Capital P for legacy reasons
+    crypto: 'wrong_predictions_crypto',
+    stocks: 'wrong_predictions_stocks'
+  } as const
+} as const;
+
+// Utility functions for getting table names (for raw SQL queries)
+export const getBetsTableName = (tableType: TableType): string => {
+  return TABLE_MAPPINGS.BETS[tableType] || TABLE_MAPPINGS.BETS.featured;
+};
+
+export const getWrongPredictionsTableName = (tableType: TableType): string => {
+  return TABLE_MAPPINGS.WRONG_PREDICTIONS[tableType] || TABLE_MAPPINGS.WRONG_PREDICTIONS.featured;
+};
+
+// Re-export for backwards compatibility and consistency
+export { getBetsTableName as getBetsTable };
+export { getWrongPredictionsTableName as getWrongPredictionsTable };
+
 // Utility function to convert table type to display name
 export const getMarketDisplayName = (tableType: TableType): string => {
   switch (tableType) {

@@ -8,7 +8,7 @@ import { ArrowRight, Bookmark, Check } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets, Market } from '../Constants/markets';
 import { CustomAlert, useCustomAlert } from '../Components/CustomAlert';
-import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages, getTomorrowsBet, placeBitcoinBet } from '../Database/actions';
+import { addBookmark, removeBookmark, isMarketBookmarked, getPredictionPercentages, getTomorrowsBet, placeBitcoinBet, getReEntryFee } from '../Database/actions';
 import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 import { getPrice } from '../Constants/getPrice';
 import { useContractData } from '../hooks/useContractData';
@@ -85,6 +85,9 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   
   // User prediction state for each market
   const [userPredictions, setUserPredictions] = useState<Record<string, TodaysBet | null>>({});
+  
+  // Elimination status for each market (contract address -> boolean)
+  const [eliminationStatus, setEliminationStatus] = useState<Record<string, boolean>>({});
   
   // Vote change loading states
   const [voteChangeLoading, setVoteChangeLoading] = useState<Record<string, boolean>>({});
@@ -463,17 +466,29 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
 
       console.log('🔍 Running penalty checks for all markets...');
 
-      // Check each contract for missed predictions
+      // Check each contract for missed predictions and elimination status
+      const newEliminationStatus: Record<string, boolean> = {};
+      
       for (const contractAddress of contractAddresses) {
         try {
           const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
           console.log(`🔍 Starting penalty check for ${marketType} (${contractAddress}) with wallet ${address}`);
           await checkMissedPredictionPenalty(address, contractAddress, marketType);
+          
+          // Check if user is eliminated (has re-entry fee)
+          const reEntryFee = await getReEntryFee(address, marketType);
+          newEliminationStatus[contractAddress] = reEntryFee !== null && reEntryFee > 0;
+          console.log(`🔍 Elimination status for ${marketType}: ${newEliminationStatus[contractAddress]}`);
+          
           console.log(`✅ Penalty check completed for ${marketType}`);
         } catch (error) {
           console.error(`❌ Error checking penalties for ${contractAddress}:`, error);
+          newEliminationStatus[contractAddress] = false; // Default to not eliminated on error
         }
       }
+      
+      // Update elimination status state
+      setEliminationStatus(newEliminationStatus);
     };
 
     runPenaltyChecks();
@@ -749,6 +764,22 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       // For non-participants, execute original click handler (navigate to pot entry)
       originalClickHandler(e);
     };
+  };
+
+  // Function to handle re-enter button clicks - navigates to MakePredictionsPage with correct contract
+  const handleReEnter = (marketId: string) => {
+    const contractAddress = getContractAddress(marketId);
+    if (!contractAddress) {
+      console.error(`No contract address found for market: ${marketId}`);
+      return;
+    }
+
+    // Set the contract address cookie for the MakePredictionsPage
+    Cookies.set('selectedContractAddress', contractAddress, { sameSite: 'lax', expires: 7 });
+    
+    // Navigate to predictions page  
+    setActiveSection('predictions');
+    console.log(`🔄 Navigating to predictions page for re-entry: ${marketId} (${contractAddress})`);
   };
 
   // Function to handle market selection with position swap animation
@@ -1169,47 +1200,74 @@ const handleMarketClick = (marketId: string) => {
               )}
             </div>
 
-            {/* Yes/No Buttons - Side by Side in Center */}
-            <div className="flex justify-center gap-2 mb-3">
-              <button 
-                onClick={handleButtonClick(market.id, 'positive', (e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  console.log('Yes button clicked for market:', market.id);
-                  Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
-                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                  // Visual feedback
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
-                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                  // Navigate to market after brief visual feedback
-                  setTimeout(() => {
-                    handleMarketClick(market.id);
-                  }, 300);
-                })}
-                className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
-              >
-                {getButtonContent(market.id, 'positive')}
-              </button>
-              <button 
-                onClick={handleButtonClick(market.id, 'negative', (e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  console.log('No button clicked for market:', market.id);
-                  Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
-                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                  // Visual feedback
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
-                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                  // Navigate to market after brief visual feedback
-                  setTimeout(() => {
-                    handleMarketClick(market.id);
-                  }, 300);
-                })}
-                className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
-              >
-                {getButtonContent(market.id, 'negative')}
-              </button>
-            </div>
+            {/* Check if user is eliminated for this market */}
+            {(() => {
+              const contractAddress = getContractAddress(market.id);
+              const isEliminated = contractAddress && eliminationStatus[contractAddress];
+              
+              if (isEliminated) {
+                return (
+                  /* Elimination UI - Replace Yes/No buttons */
+                  <div className="flex flex-col items-center gap-2 mb-3">
+                    <div className="text-orange-600 font-bold text-sm">Eliminated</div>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleReEnter(market.id);
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200"
+                    >
+                      Re-enter
+                    </button>
+                  </div>
+                );
+              } else {
+                return (
+                  /* Normal Yes/No Buttons */
+                  <div className="flex justify-center gap-2 mb-3">
+                    <button 
+                      onClick={handleButtonClick(market.id, 'positive', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log('Yes button clicked for market:', market.id);
+                        Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                        // Visual feedback
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                        // Navigate to market after brief visual feedback
+                        setTimeout(() => {
+                          handleMarketClick(market.id);
+                        }, 300);
+                      })}
+                      className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
+                    >
+                      {getButtonContent(market.id, 'positive')}
+                    </button>
+                    <button 
+                      onClick={handleButtonClick(market.id, 'negative', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log('No button clicked for market:', market.id);
+                        Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                        // Visual feedback
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                        // Navigate to market after brief visual feedback
+                        setTimeout(() => {
+                          handleMarketClick(market.id);
+                        }, 300);
+                      })}
+                      className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
+                    >
+                      {getButtonContent(market.id, 'negative')}
+                    </button>
+                  </div>
+                );
+              }
+            })()}
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
@@ -1462,47 +1520,74 @@ const handleMarketClick = (marketId: string) => {
                           )}
                         </div>
 
-                        {/* Yes/No Buttons - Side by Side in Center */}
-                        <div className="flex justify-center gap-2 mb-3">
-                          <button 
-                            onClick={handleButtonClick(market.id, 'positive', (e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              console.log('Yes button clicked for market:', market.id);
-                              Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
-                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                              // Visual feedback
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
-                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                              // Navigate to market after brief visual feedback
-                              setTimeout(() => {
-                                handleMarketClick(market.id);
-                              }, 300);
-                            })}
-                            className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
-                          >
-                            {getButtonContent(market.id, 'positive')}
-                          </button>
-                          <button 
-                            onClick={handleButtonClick(market.id, 'negative', (e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              console.log('No button clicked for market:', market.id);
-                              Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
-                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                              // Visual feedback
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
-                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                              // Navigate to market after brief visual feedback
-                              setTimeout(() => {
-                                handleMarketClick(market.id);
-                              }, 300);
-                            })}
-                            className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
-                          >
-                            {getButtonContent(market.id, 'negative')}
-                          </button>
-                        </div>
+                        {/* Check if user is eliminated for this market */}
+                        {(() => {
+                          const contractAddress = getContractAddress(market.id);
+                          const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                          
+                          if (isEliminated) {
+                            return (
+                              /* Elimination UI - Replace Yes/No buttons */
+                              <div className="flex flex-col items-center gap-2 mb-3">
+                                <div className="text-orange-600 font-bold text-sm">Eliminated</div>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    handleReEnter(market.id);
+                                  }}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200"
+                                >
+                                  Re-enter
+                                </button>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              /* Normal Yes/No Buttons */
+                              <div className="flex justify-center gap-2 mb-3">
+                                <button 
+                                  onClick={handleButtonClick(market.id, 'positive', (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    console.log('Yes button clicked for market:', market.id);
+                                    Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                                    Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                    // Visual feedback
+                                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                                    // Navigate to market after brief visual feedback
+                                    setTimeout(() => {
+                                      handleMarketClick(market.id);
+                                    }, 300);
+                                  })}
+                                  className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
+                                >
+                                  {getButtonContent(market.id, 'positive')}
+                                </button>
+                                <button 
+                                  onClick={handleButtonClick(market.id, 'negative', (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    console.log('No button clicked for market:', market.id);
+                                    Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                                    Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                    // Visual feedback
+                                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                                    // Navigate to market after brief visual feedback
+                                    setTimeout(() => {
+                                      handleMarketClick(market.id);
+                                    }, 300);
+                                  })}
+                                  className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
+                                >
+                                  {getButtonContent(market.id, 'negative')}
+                                </button>
+                              </div>
+                            );
+                          }
+                        })()}
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">

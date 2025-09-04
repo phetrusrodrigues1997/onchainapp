@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import {  Messages, FeaturedBets, CryptoBets, StocksBets, LivePredictions, Bookmarks, UserAnnouncementReads } from "./schema"; // Import the schema
 import { eq, sql, and, inArray, notInArray } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto, WrongPredictionsStocks } from "./schema";
-import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
+import { ENFORCE_SATURDAY_RESTRICTIONS, getBetsTableName, getWrongPredictionsTableName, TableType } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes, PredictionIdeas } from "./schema";
 import { recordPotReEntry } from './actions3';

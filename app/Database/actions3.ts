@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { PotParticipationHistory, FeaturedBets, CryptoBets, StocksBets } from './schema';
+import { getBetsTableName, getWrongPredictionsTableName, TableType } from './config';
 
 // Initialize database connection only when needed (server-side)
 function getDb() {
@@ -277,7 +278,7 @@ export async function getUserParticipationHistory(
 export async function checkMissedPredictionPenalty(
   walletAddress: string,
   contractAddress: string,
-  tableType: string
+  tableType: TableType
 ): Promise<void> {
   try {
     console.log(`🔍 === STARTING PENALTY CHECK ===`);
@@ -372,16 +373,7 @@ export async function checkMissedPredictionPenalty(
     // STEP 2: Check if user is already in wrong predictions table (don't double-penalize)
     console.log(`🔍 STEP 2: Checking if already penalized for table type: ${tableType}`);
     
-    const getWrongPredictionsTable = (type: string) => {
-      switch (type) {
-        case 'featured': return 'wrong_Predictions';
-        case 'crypto': return 'wrong_predictions_crypto';
-        case 'stocks': return 'wrong_predictions_stocks';
-        default: return 'wrong_Predictions';
-      }
-    };
-
-    const wrongTable = getWrongPredictionsTable(tableType);
+    const wrongTable = getWrongPredictionsTableName(tableType);
     console.log(`🔍 Using wrong predictions table: ${wrongTable}`);
     
     // Use template string for table name since sql.identifier doesn't exist in Neon
@@ -405,15 +397,6 @@ export async function checkMissedPredictionPenalty(
     console.log(`🔍 User ${walletAddress} is participant and not yet penalized - checking today's prediction...`);
 
     // STEP 3: Get the bets table for this market type
-    const getBetsTableName = (type: string) => {
-      switch (type) {
-        case 'featured': return 'featured_bets';
-        case 'crypto': return 'crypto_bets'; 
-        case 'stocks': return 'stocks_bets';
-        default: return 'featured_bets';
-      }
-    };
-
     const tableName = getBetsTableName(tableType);
 
     // Check if they entered or re-entered the pot today (if so, no penalty for missing today's prediction)
@@ -478,7 +461,7 @@ export async function checkMissedPredictionPenalty(
  */
 async function addMissedPredictionPenalty(
   walletAddress: string,
-  tableType: string,
+  tableType: TableType,
   missedDate: string
 ): Promise<{ success: boolean; message: string }> {
   try {
@@ -488,16 +471,7 @@ async function addMissedPredictionPenalty(
     // For now, use direct SQL to avoid circular imports
     const sql = neon(process.env.DATABASE_URL!);
     
-    const getWrongTableName = (type: string) => {
-      switch (type) {
-        case 'featured': return 'wrong_Predictions'; // Fixed to match the table name used in checks
-        case 'crypto': return 'wrong_predictions_crypto'; 
-        case 'stocks': return 'wrong_predictions_stocks';
-        default: return 'wrong_Predictions'; // Fixed to match the table name used in checks
-      }
-    };
-
-    const wrongTableName = getWrongTableName(tableType);
+    const wrongTableName = getWrongPredictionsTableName(tableType);
     console.log(`🔍 Using wrong table name: ${wrongTableName} for table type: ${tableType}`);
     console.log(`🔍 About to insert:`, {
       wallet_address: walletAddress.toLowerCase(),
