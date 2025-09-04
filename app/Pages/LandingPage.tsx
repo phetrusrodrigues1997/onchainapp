@@ -1062,15 +1062,6 @@ const handleMarketClick = (marketId: string) => {
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
-            {/* Countdown Timer - Above image (only for selected market) */}
-            {market.tabId === selectedMarket && (
-              <div className="flex justify-end mb-2">
-                <div className="text-xs text-gray-600 font-medium whitespace-nowrap">
-                 
-                </div>
-              </div>
-            )}
-            
             {/* Header with Icon, Question, and Percentage */}
             <div className="flex items-start gap-3 mb-3 relative">
               {/* Small Square Image */}
@@ -1204,7 +1195,7 @@ const handleMarketClick = (marketId: string) => {
                 
                 if (userIsParticipant) {
                   return (
-                    <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                    <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
                       {timeUntilMidnight}
                     </div>
                   );
