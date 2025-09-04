@@ -365,10 +365,10 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               </div>
             )} */}
             
-            <div className="flex items-start gap-3 mb-4 sm:mb-3 pl-2 pr-4 sm:px-0">
+            <div className="flex items-center gap-3 mb-6 sm:mb-3 pl-2 pr-4 sm:px-0">
               {/* Market Icon - Smaller on mobile */}
               <div className="flex-shrink-0">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   {selectedIcon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={selectedIcon} 
@@ -393,7 +393,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             {/* Chart Container - Full width on mobile */}
             <div className="bg-white rounded-none sm:rounded-lg p-0 sm:p-4 relative w-full">
               {/* Chart Legend - Minimal padding on mobile for readability */}
-              <div className="flex items-center justify-between mb-2 sm:mb-4 px-2 sm:px-0">
+              <div className="flex items-center justify-between mb-4 sm:mb-4 px-2 sm:px-0">
                 <div className="flex items-center gap-3 sm:gap-6">
                   {(lineDisplay === 'yes' || lineDisplay === 'both') && (
                     <div className="flex items-center gap-1 sm:gap-2">

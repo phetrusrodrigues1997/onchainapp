@@ -267,7 +267,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
   symbol: 'Trending',
   contractAddress: '0xd1547F5bC0390F5020B2A80F262e28ccfeF2bf9c',
   color: '#1DB954',
-  question: 'Will Brazil impose new tariffs on goods coming from the US?',
+  question: 'Will Brazil impose tariffs on goods from the US?',
   icon: 'https://www.planetware.com/photos-large/BRA/brazil-rio-cristo-redentor.jpg',
   currentPrice: '$150',
   participants: 42,
