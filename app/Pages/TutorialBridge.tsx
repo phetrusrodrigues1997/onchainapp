@@ -368,7 +368,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
             <div className="flex items-center gap-3 mb-6 sm:mb-3 pl-2 pr-4 sm:px-0">
               {/* Market Icon - Smaller on mobile */}
               <div className="flex-shrink-0">
-                <div className="w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   {selectedIcon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={selectedIcon} 
