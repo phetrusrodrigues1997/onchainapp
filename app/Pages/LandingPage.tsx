@@ -766,52 +766,37 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     };
   };
 
-  // Function to handle re-enter button clicks - navigates to MakePredictionsPage with correct contract
-  const handleReEnter = (marketId: string) => {
-    const contractAddress = getContractAddress(marketId);
-    if (!contractAddress) {
-      console.error(`No contract address found for market: ${marketId}`);
-      return;
-    }
-
-    // Set the contract address cookie for the MakePredictionsPage
-    Cookies.set('selectedContractAddress', contractAddress, { sameSite: 'lax', expires: 7 });
-    
-    // Navigate to predictions page  
-    setActiveSection('predictions');
-    console.log(`🔄 Navigating to predictions page for re-entry: ${marketId} (${contractAddress})`);
-  };
 
   // Function to handle market selection with position swap animation
-  const handleMarketSelection = (newMarketId: string, currentMarketsList: any[]) => {
-    // If it's the same market, don't do anything
-    if (newMarketId === selectedMarket) return;
+  // const handleMarketSelection = (newMarketId: string, currentMarketsList: any[]) => {
+  //   // If it's the same market, don't do anything
+  //   if (newMarketId === selectedMarket) return;
     
-    // Find indices of current selected and new selected markets
-    const currentSelectedIndex = currentMarketsList.findIndex(market => market.tabId === selectedMarket);
-    const newSelectedIndex = currentMarketsList.findIndex(market => market.tabId === newMarketId);
+  //   // Find indices of current selected and new selected markets
+  //   const currentSelectedIndex = currentMarketsList.findIndex(market => market.tabId === selectedMarket);
+  //   const newSelectedIndex = currentMarketsList.findIndex(market => market.tabId === newMarketId);
     
-    if (currentSelectedIndex === -1 || newSelectedIndex === -1) return;
+  //   if (currentSelectedIndex === -1 || newSelectedIndex === -1) return;
     
-    // If new selected is already first, no need to animate
-    if (newSelectedIndex === 0) {
-      setSelectedMarket?.(newMarketId);
-      return;
-    }
+  //   // If new selected is already first, no need to animate
+  //   if (newSelectedIndex === 0) {
+  //     setSelectedMarket?.(newMarketId);
+  //     return;
+  //   }
     
-    // Start swap animation
-    setSwapAnimation({
-      fromIndex: currentSelectedIndex,
-      toIndex: newSelectedIndex,
-      isAnimating: true
-    });
+  //   // Start swap animation
+  //   setSwapAnimation({
+  //     fromIndex: currentSelectedIndex,
+  //     toIndex: newSelectedIndex,
+  //     isAnimating: true
+  //   });
     
-    // After animation completes, update the selected market
-    setTimeout(() => {
-      setSelectedMarket?.(newMarketId);
-      setSwapAnimation(null);
-    }, 600); // Match CSS animation duration
-  };
+  //   // After animation completes, update the selected market
+  //   setTimeout(() => {
+  //     setSelectedMarket?.(newMarketId);
+  //     setSwapAnimation(null);
+  //   }, 600); // Match CSS animation duration
+  // };
 
   
 const handleMarketClick = (marketId: string) => {
@@ -1214,9 +1199,9 @@ const handleMarketClick = (marketId: string) => {
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleReEnter(market.id);
+                        handleMarketClick(market.id);
                       }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200"
+                      className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300"
                     >
                       Re-enter
                     </button>
@@ -1534,9 +1519,9 @@ const handleMarketClick = (marketId: string) => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    handleReEnter(market.id);
+                                    handleMarketClick(market.id);
                                   }}
-                                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200"
+                                  className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300"
                                 >
                                   Re-enter
                                 </button>
