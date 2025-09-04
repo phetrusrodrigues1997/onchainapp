@@ -600,47 +600,56 @@ export default function App() {
                 }}
               >
                 {/* Show first 13 items on desktop, all on mobile */}
-                {(isMobile ? marketOptions : marketOptions.slice(0, 13)).map((market) => (
+                {(isMobile ? marketOptions : marketOptions.slice(0, 14)).map((market) => (
                   <button
   key={market.id}
   onClick={() => setSelectedMarket(market.id)}
-  className={`group flex-shrink-0 text-xl flex items-center gap-2 px-2 py-2 transition-all duration-300
+  className={`
+    flex-shrink-0 flex items-center px-1.5 py-0.5 cursor-pointer whitespace-nowrap
+    transition-opacity duration-200
     ${selectedMarket === market.id
-      ? 'text-black font-semibold'
-      : 'text-black font-medium opacity-60 hover:opacity-100'
-    }`}
+      ? 'text-[rgba(0,0,0,0.9)] font-semibold opacity-100'
+      : 'text-[rgba(0,0,0,0.9)] font-medium opacity-50 hover:opacity-100'
+    }
+  `}
   style={{
+    fontSize: '15px',
+    lineHeight: '24px',
+    letterSpacing: '0.15px',
+    fontFeatureSettings: '"cv09", "cv01", "cv08", "case"',
     minWidth: 'fit-content',
-    height: 'auto',
-    fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
   }}
 >
-                    <span className="whitespace-nowrap tracking-tight" style={{fontSize: '15px'}}>
-                      {market.name}
-                    </span>
-                  </button>
+  {market.name}
+</button>
+
                 ))}
                 <div className="relative inline-block text-left mt-1" ref={moreDropdownRef}>
-  <button 
-    onClick={() => setIsMoreDropdownOpen(!isMoreDropdownOpen)} 
-    className="flex items-center text-[#5D636F] hover:text-gray-700 px-2 py-2"
+ <button
+  onClick={() => setIsMoreDropdownOpen(!isMoreDropdownOpen)}
+  className="flex items-center px-1.5 py-0.5 cursor-pointer whitespace-nowrap 
+             text-[rgba(0,0,0,0.9)] font-medium opacity-50 hover:opacity-100 
+             transition-opacity duration-200"
+  style={{
+    fontSize: "15px",
+    lineHeight: "24px",
+    letterSpacing: "0.15px",
+    fontFeatureSettings: '"cv09", "cv01", "cv08", "case"',
+    minWidth: "fit-content",
+  }}
+>
+  <span className="whitespace-nowrap">More</span>
+  <svg
+    className={`w-4 h-4 ml-1 transition-transform duration-200 ${isMoreDropdownOpen ? "rotate-180" : ""}`}
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
   >
-    <span
-      className="whitespace-nowrap tracking-tight"
-      style={{ fontSize: "15px" }}
-    >
-      More
-    </span>
-    <svg
-      className={`w-4 h-4 ml-1 transition-transform duration-200 ${isMoreDropdownOpen ? 'rotate-180' : ''}`}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
+</button>
+
 
   {/* Dropdown menu */}
   {isMoreDropdownOpen && (
@@ -713,15 +722,15 @@ export default function App() {
         </div>
 
         {/* Filter Symbol */}
-        <div className="flex items-center justify-center w-10 h-10 bg-transparent border border-gray-300 rounded-lg">
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center justify-center w-10 h-10 bg-transparent rounded-lg">
+          <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
         </div>
 
         {/* Bookmark/Save Symbol */}
         <button 
-          className="flex items-center justify-center w-10 h-10 bg-transparent border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+          className="flex items-center justify-center w-10 h-10 bg-transparent rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -730,7 +739,7 @@ export default function App() {
           }}
           type="button"
         >
-          <svg className="w-5 h-5 text-gray-600 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-black pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
           </svg>
         </button>
@@ -761,7 +770,7 @@ export default function App() {
 
                 {/* Filter Symbol */}
                 <div className="flex items-center justify-center w-9 h-9 bg-white rounded-lg">
-                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
                 </div>
@@ -778,7 +787,7 @@ export default function App() {
                   type="button"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-600 pointer-events-none"
+                    className="w-5 h-5 text-black pointer-events-none"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -829,7 +838,7 @@ export default function App() {
                   <button
                     key={`personalized-${market.id}`}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 flex items-center gap-1 px-4 py-2 transition-all duration-300 ${selectedMarket === market.id
+                    className={`group flex-shrink-0 flex items-center gap-1 px-4 py-1.5 transition-all duration-300 ${selectedMarket === market.id
                         ? 'text-purple-700 bg-purple-100 border border-purple-200 rounded-full'
                         : 'text-black border border-gray-300 rounded-full hover:text-gray-600'
                       }`}

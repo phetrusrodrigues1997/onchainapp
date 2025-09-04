@@ -191,7 +191,7 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
   },
   {
     id: 'space',
-    name: 'Space & Astronomy',
+    name: 'Astronomy',
     symbol: '',
     color: '#7B68EE',
     question: '',
@@ -388,7 +388,7 @@ else if (category === 'technews') {
   return [  
     {
     id: 'space',
-    name: 'Space & Astronomy',
+    name: 'Astronomy',
     symbol: '🚀',
     color: '#7B68EE',
     question: 'Will NASA find evidence of life on Europa?',
