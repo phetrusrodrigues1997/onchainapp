@@ -430,7 +430,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                         y1={yPos}
                         x2="95"
                         y2={yPos}
-                        stroke="#e8e8e8"
+                        stroke="#e0e0e0"
                         strokeWidth="0.1"
                         strokeDasharray="0.5 1"
                       />
