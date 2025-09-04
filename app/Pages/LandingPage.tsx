@@ -450,6 +450,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     });
 
     setPotBalances(newPotBalances);
+    Cookies.set('potBalances', JSON.stringify(newPotBalances), { expires: 1/24 }); // 1 hour expiry
   }, [ethPrice, balancesData.length, ...balancesData.map(b => b?.value)]);
 
   // Handle bookmark toggle

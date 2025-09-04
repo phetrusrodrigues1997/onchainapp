@@ -83,6 +83,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     type: 'yes' | 'no';
     time: string;
   } | null>(null);
+  const [potBalance, setPotBalance] = useState<string>('');
   
   // Random line display state - generate on component mount
   const [lineDisplay, setLineDisplay] = useState<'yes' | 'no' | 'both'>('both');
@@ -221,6 +222,21 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     if (savedIcon) {
       setSelectedIcon(savedIcon);
     }
+    
+    // Load pot balance from cookies
+    const savedPotBalances = Cookies.get('potBalances');
+    if (savedPotBalances) {
+      try {
+        const potBalances = JSON.parse(savedPotBalances);
+        const marketType = CONTRACT_TO_TABLE_MAPPING[savedMarket as keyof typeof CONTRACT_TO_TABLE_MAPPING];
+        const marketName = getMarketDisplayName(marketType);
+        if (potBalances[marketName]) {
+          setPotBalance(potBalances[marketName]);
+        }
+      } catch (error) {
+        console.error('Error parsing pot balances from cookies:', error);
+      }
+    }
   }, []);
 
   // Check if user has the specific wallet address
@@ -340,10 +356,19 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
         <div className="bg-white rounded-none sm:rounded-xl">
           <div className="p-0 sm:p-4 md:p-6">
             {/* Question Header - Compact on mobile */}
-            <div className="flex items-start gap-3 mb-2 sm:mb-3 pl-2 pr-4 sm:px-0">
+            {/* Pot Balance - Above image on mobile only */}
+            {/* {potBalance && (
+              <div className="block sm:hidden px-2 mb-2">
+                <div className="text-xs text-gray-600 font-medium">
+                  Total Pot: <span className="font-semibold text-green-600">{potBalance}</span>
+                </div>
+              </div>
+            )} */}
+            
+            <div className="flex items-start gap-3 mb-4 sm:mb-3 pl-2 pr-4 sm:px-0">
               {/* Market Icon - Smaller on mobile */}
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   {selectedIcon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={selectedIcon} 
@@ -389,7 +414,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 </div>
                 <div className="text-xs text-gray-500 font-medium hidden sm:block"><span className="flex items-center whitespace-nowrap font-extrabold tracking-wide">
                             <span className="text-purple-700">PrediWin</span>
-                            <span className="text-black">.com</span>
+                            {/* <span className="text-black">.com</span> */}
                            <img
                   src="/ghostie.png"
                   alt="Icon"
@@ -401,7 +426,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           </span></div>
                 <div className="text-xs text-gray-500 font-medium sm:hidden"><span className="flex items-center whitespace-nowrap font-extrabold tracking-wide">
                             <span className="text-purple-700">PrediWin</span>
-                            <span className="text-black">.com</span>
+                            {/* <span className="text-black">.com</span> */}
                            <img
                   src="/ghostie.png"
                   alt="Icon"
@@ -806,7 +831,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 return (
                   <div
                     key={y}
-                    className={`absolute right-1 text-xs font-medium text-gray-600 ${y === 0 || y === 100 ? 'invisible' : ''}`}
+                    className={`absolute right-1 text-xs font-medium text-gray-600 opacity-60 ${y === 0 || y === 100 ? 'invisible' : ''}`}
                     style={{ 
                       top: topPosition,
                       transform: 'translateY(-50%)'
@@ -822,7 +847,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                 {['12am', '2am', '4am', '6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm', '8pm', '10pm'].map((timeLabel) => (
                   <span 
                     key={timeLabel} 
-                    className={`text-xs font-medium text-gray-600 ${timeLabel === '12am' || timeLabel === '10pm' ? 'invisible' : ''}`}
+                    className={`text-xs font-medium text-gray-600 opacity-60 ${timeLabel === '12am' || timeLabel === '10pm' ? 'invisible' : ''}`}
                   >
                     {timeLabel}
                   </span>
@@ -835,8 +860,17 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
           </div>
         </div>
 
+        {/* Pot Balance - Below chart on desktop only */}
+        {potBalance && (
+          <div className="mt-2 translate-y-6 md:translate-y-0 md:mb-4 px-4 sm:px-0">
+            <div className="text-sm text-gray-600 text-left opacity-60">
+            <span className="text-gray-700 text-base">{potBalance}</span> in pot 
+            </div>
+          </div>
+        )}
+
         {/* View Pot Button - Below Chart */}
-        <div className="mb-6 px-4 sm:px-0">
+        <div className="mb-6 px-4 sm:px-0 mt-8 sm:mt-0">
           <button
             onClick={() => setActiveSection(marketInfo.section)}
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-base"
