@@ -1488,7 +1488,7 @@ const handleMarketClick = (marketId: string) => {
                             
                             if (userIsParticipant) {
                               return (
-                                <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                                <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
                                   {timeUntilMidnight}
                                 </div>
                               );
