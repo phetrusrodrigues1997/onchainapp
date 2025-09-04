@@ -1201,19 +1201,12 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               
               if (isEliminated) {
                 return (
-                  /* Elimination UI - Replace Yes/No buttons */
-                  <div className="flex flex-col items-center gap-2 mb-3">
-                    <div className="text-orange-600 font-bold text-sm">Eliminated</div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleMarketClick(market.id,true);
-                      }}
-                      className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300"
-                    >
-                      Re-enter
-                    </button>
+                  /* Elimination UI - Fun elimination message with same height as buttons */
+                  <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
+                    <div className="text-orange-600 font-bold text-sm flex items-center gap-1">
+                      <span>😵</span>
+                      <span>You got eliminated too!?</span>
+                    </div>
                   </div>
                 );
               } else {
@@ -1272,11 +1265,36 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
                 
                 if (userIsParticipant) {
-                  return (
-                    <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
-                      {timeUntilMidnight}
-                    </div>
-                  );
+                  // Check if user is eliminated for this specific market
+                  const contractAddress = getContractAddress(market.id);
+                  const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                  
+                  if (isEliminated) {
+                    return (
+                      /* Re-enter button in timer position - compact size */
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleMarketClick(market.id, true);
+                        }}
+                        className="group relative overflow-hidden bg-black hover:bg-gray-900 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                      >
+                        <span className="relative z-10 flex items-center gap-1">
+                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                          </svg>
+                          Re-enter
+                        </span>
+                      </button>
+                    );
+                  } else {
+                    return (
+                      <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                        {timeUntilMidnight}
+                      </div>
+                    );
+                  }
                 } else {
                   return (
                     <button
@@ -1521,19 +1539,12 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           
                           if (isEliminated) {
                             return (
-                              /* Elimination UI - Replace Yes/No buttons */
-                              <div className="flex flex-col items-center gap-2 mb-3">
-                                <div className="text-orange-600 font-bold text-sm">Eliminated</div>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    handleMarketClick(market.id,true);
-                                  }}
-                                  className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300"
-                                >
-                                  Re-enter
-                                </button>
+                              /* Elimination UI - Fun elimination message with same height as buttons */
+                              <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
+                                <div className="text-orange-600 font-bold text-base flex items-center gap-2">
+                                  <span>😵</span>
+                                  <span>You got eliminated too!?</span>
+                                </div>
                               </div>
                             );
                           } else {
@@ -1592,11 +1603,36 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
                             
                             if (userIsParticipant) {
-                              return (
-                                <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
-                                  {timeUntilMidnight}
-                                </div>
-                              );
+                              // Check if user is eliminated for this specific market
+                              const contractAddress = getContractAddress(market.id);
+                              const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                              
+                              if (isEliminated) {
+                                return (
+                                  /* Re-enter button in timer position - Mobile compact */
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleMarketClick(market.id, true);
+                                    }}
+                                    className="group relative overflow-hidden bg-black hover:bg-gray-900 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                                  >
+                                    <span className="relative z-10 flex items-center gap-1">
+                                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                                      </svg>
+                                      Re-enter
+                                    </span>
+                                  </button>
+                                );
+                              } else {
+                                return (
+                                  <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                                    {timeUntilMidnight}
+                                  </div>
+                                );
+                              }
                             } else {
                               return (
                                 <button

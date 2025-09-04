@@ -380,7 +380,7 @@ export async function checkMissedPredictionPenalty(
     // Note: wrong predictions tables use "walletAddress" column (camelCase)
     const alreadyPenalized = await sql(
       `SELECT COUNT(*) as penalty_count
-       FROM ${wrongTable}
+       FROM "${wrongTable}"
        WHERE "walletAddress" = $1`,
       [walletAddress.toLowerCase()]
     );
@@ -482,7 +482,7 @@ async function addMissedPredictionPenalty(
     // Use template string for table name
     // Note: wrong predictions tables use "walletAddress" and "wrong_prediction_date" columns
     const insertResult = await sql(
-      `INSERT INTO ${wrongTableName} ("walletAddress", wrong_prediction_date, created_at)
+      `INSERT INTO "${wrongTableName}" ("walletAddress", wrong_prediction_date, created_at)
        VALUES ($1, $2, NOW())
        RETURNING "walletAddress", wrong_prediction_date`,
       [walletAddress.toLowerCase(), missedDate]
@@ -706,3 +706,11 @@ export async function getHourlyPredictionData(marketId: string, tableType: strin
     ];
   }
 }
+
+export async function clearPotParticipationHistory(contract: string) {
+  await getDb()
+    .delete(PotParticipationHistory)
+    .where(eq(PotParticipationHistory.contractAddress, contract.toLowerCase()));
+    console.log(`🧹 Clearing pot participation history for contract: ${contract.toLowerCase()}`);
+}
+

@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import {  Messages, FeaturedBets, CryptoBets, StocksBets, LivePredictions, Bookmarks, UserAnnouncementReads } from "./schema"; // Import the schema
 import { eq, sql, and, inArray, notInArray } from "drizzle-orm";
 import { WrongPredictions, WrongPredictionsCrypto, WrongPredictionsStocks } from "./schema";
-import { ENFORCE_SATURDAY_RESTRICTIONS, getBetsTableName, getWrongPredictionsTableName, TableType } from "./config";
+import { ENFORCE_SATURDAY_RESTRICTIONS, getBetsTableName, getWrongPredictionsTableName, TableType, CONTRACT_TO_TABLE_MAPPING } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes, PredictionIdeas } from "./schema";
 import { recordPotReEntry } from './actions3';
@@ -103,6 +103,7 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
     case 'featured':
       return WrongPredictions;
     case 'crypto':
+      console.log("Using crypto wrong predictions table");
       return WrongPredictionsCrypto;
     case 'stocks':
       return WrongPredictionsStocks;
@@ -315,12 +316,14 @@ export async function getReEntryFee(walletAddress: string, typeTable: string): P
  */
 export async function debugWrongPredictions(walletAddress: string): Promise<void> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
     
     // Check featured market (WrongPredictions table)
     const featuredResult = await db
       .select()
       .from(WrongPredictions)
-      .where(eq(WrongPredictions.walletAddress, walletAddress));
+      .where(eq(WrongPredictions.walletAddress, normalizedWalletAddress));
     
     
     
@@ -367,12 +370,50 @@ export async function hasWrongPredictions(walletAddress: string, tableType: stri
 export async function processReEntry(walletAddress: string, typeTable: string): Promise<boolean> {
   try {
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
+    const normalizedWalletAddress = walletAddress.toLowerCase(); // Normalize for consistency
+    console.log(`Processing re-entry for ${normalizedWalletAddress} in table ${typeTable}`);
+    
     const result = await db
       .delete(wrongPredictionTable)
-      .where(eq(wrongPredictionTable.walletAddress, walletAddress))
+      .where(eq(wrongPredictionTable.walletAddress, normalizedWalletAddress))
       .returning();
     
-    return result.length > 0;
+    // If successfully removed from wrong predictions, record the pot re-entry
+    if (result.length > 0) {
+      // Get contract address for the table type by finding it in the mapping
+      let contractAddress: string | null = null;
+      for (const [address, tableType] of Object.entries(CONTRACT_TO_TABLE_MAPPING)) {
+        if (tableType === typeTable) {
+          contractAddress = address;
+          break;
+        }
+      }
+      
+      if (contractAddress) {
+        const today = getUKDateString(); // Use UK timezone for consistency
+        
+        // Record the pot re-entry in participation history
+        const historyResult = await recordPotReEntry(
+          normalizedWalletAddress,
+          contractAddress,
+          typeTable,
+          today
+        );
+        
+        if (historyResult.success) {
+          console.log(`✅ Successfully recorded pot re-entry for ${normalizedWalletAddress}`);
+        } else {
+          console.warn(`⚠️ Failed to record pot re-entry history: ${historyResult.message}`);
+          // Continue anyway - removing from wrong predictions is the critical part
+        }
+      } else {
+        console.warn(`⚠️ Could not determine contract address for table type: ${typeTable}`);
+      }
+      
+      return true;
+    }
+    
+    return false;
   } catch (error) {
     console.error("Error processing re-entry:", error);
     return false;
@@ -381,6 +422,9 @@ export async function processReEntry(walletAddress: string, typeTable: string): 
 
 export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Server-side schedule validation - betting only allowed Sunday-Friday (unless testing toggle is disabled)
     if (ENFORCE_SATURDAY_RESTRICTIONS) {
       const now = new Date();
@@ -402,7 +446,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     const wrongPrediction = await db
       .select()
       .from(wrongPredictionTable)
-      .where(eq(wrongPredictionTable.walletAddress, walletAddress))
+      .where(eq(wrongPredictionTable.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (wrongPrediction.length > 0) {
@@ -414,7 +458,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
       .select()
       .from(betsTable)
       .where(and(
-        eq(betsTable.walletAddress, walletAddress),
+        eq(betsTable.walletAddress, normalizedWalletAddress),
         eq(betsTable.betDate, predictionDate)
       ))
       .limit(1);
@@ -431,7 +475,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
           createdAt: ukUpdatedAt // Update timestamp to UK time when prediction changes
         })
         .where(and(
-          eq(betsTable.walletAddress, walletAddress),
+          eq(betsTable.walletAddress, normalizedWalletAddress),
           eq(betsTable.betDate, predictionDate)
         ));
       return { updated: true, predictionDate };
@@ -454,7 +498,7 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
     const result = await db
       .insert(betsTable)
       .values({
-        walletAddress,
+        walletAddress: normalizedWalletAddress,
         prediction,
         betDate: predictionDate,
         createdAt: ukCreatedAt, // Override default with UK timezone
@@ -475,6 +519,8 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
  */
 export async function getTomorrowsBet(walletAddress: string, tableType: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
     const predictionDate = getTomorrowUKDateString();
     
     const betsTable = getTableFromType(tableType);
@@ -482,7 +528,7 @@ export async function getTomorrowsBet(walletAddress: string, tableType: string) 
       .select()
       .from(betsTable)
       .where(and(
-        eq(betsTable.walletAddress, walletAddress),
+        eq(betsTable.walletAddress, normalizedWalletAddress),
         eq(betsTable.betDate, predictionDate)
       ))
       .limit(1);
@@ -499,13 +545,15 @@ export async function getTomorrowsBet(walletAddress: string, tableType: string) 
  */
 export async function getTodaysBet(walletAddress: string, tableType: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
     const today = getUKDateString();
     const betsTable = getTableFromType(tableType);
     const result = await db
       .select()
       .from(betsTable)
       .where(and(
-        eq(betsTable.walletAddress, walletAddress),
+        eq(betsTable.walletAddress, normalizedWalletAddress),
         eq(betsTable.betDate, today)
       ))
       .limit(1);
@@ -561,11 +609,14 @@ export async function getLatestImageUrl(walletAddress: string): Promise<string |
  */
 export async function generateReferralCode(walletAddress: string): Promise<string> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Check if user already has a referral code
     const existingCode = await db
       .select({ referralCode: ReferralCodes.referralCode })
       .from(ReferralCodes)
-      .where(eq(ReferralCodes.walletAddress, walletAddress))
+      .where(eq(ReferralCodes.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (existingCode.length > 0) {
@@ -600,7 +651,7 @@ export async function generateReferralCode(walletAddress: string): Promise<strin
     await db
       .insert(ReferralCodes)
       .values({
-        walletAddress,
+        walletAddress: normalizedWalletAddress,
         referralCode,
       });
 
@@ -616,6 +667,9 @@ export async function generateReferralCode(walletAddress: string): Promise<strin
  */
 export async function recordReferral(referralCode: string, referredWallet: string): Promise<boolean> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedReferredWallet = referredWallet.toLowerCase();
+    
     // Input validation
     if (!referralCode || typeof referralCode !== 'string') {
       throw new Error("Invalid referral code format");
@@ -638,7 +692,7 @@ export async function recordReferral(referralCode: string, referredWallet: strin
       throw new Error("Invalid referral code");
     }
 
-    const referrerWallet = referrer[0].walletAddress;
+    const referrerWallet = referrer[0].walletAddress; // This is already normalized from ReferralCodes table
 
     // Check if this person was already referred by this referrer
     const existingReferral = await db
@@ -646,7 +700,7 @@ export async function recordReferral(referralCode: string, referredWallet: strin
       .from(Referrals)
       .where(and(
         eq(Referrals.referrerWallet, referrerWallet),
-        eq(Referrals.referredWallet, referredWallet)
+        eq(Referrals.referredWallet, normalizedReferredWallet)
       ))
       .limit(1);
 
@@ -659,7 +713,7 @@ export async function recordReferral(referralCode: string, referredWallet: strin
       .insert(Referrals)
       .values({
         referrerWallet,
-        referredWallet,
+        referredWallet: normalizedReferredWallet,
         referralCode: sanitizedCode,
         potEntryConfirmed: false,
       });
@@ -676,6 +730,9 @@ export async function recordReferral(referralCode: string, referredWallet: strin
  */
 export async function confirmReferralPotEntry(referredWallet: string): Promise<void> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedReferredWallet = referredWallet.toLowerCase();
+    
     // Update all referrals for this wallet to confirmed
     const updatedReferrals = await db
       .update(Referrals)
@@ -684,7 +741,7 @@ export async function confirmReferralPotEntry(referredWallet: string): Promise<v
         confirmedAt: new Date()
       })
       .where(and(
-        eq(Referrals.referredWallet, referredWallet),
+        eq(Referrals.referredWallet, normalizedReferredWallet),
         eq(Referrals.potEntryConfirmed, false)
       ))
       .returning();
@@ -705,12 +762,15 @@ export async function confirmReferralPotEntry(referredWallet: string): Promise<v
  */
 async function checkAndUpdateFreeEntries(referrerWallet: string): Promise<void> {
   try {
+    // Normalize wallet address for complete consistency (already normalized but ensuring consistency)
+    const normalizedReferrerWallet = referrerWallet.toLowerCase();
+    
     // Count confirmed referrals
     const confirmedReferrals = await db
       .select()
       .from(Referrals)
       .where(and(
-        eq(Referrals.referrerWallet, referrerWallet),
+        eq(Referrals.referrerWallet, normalizedReferrerWallet),
         eq(Referrals.potEntryConfirmed, true)
       ));
 
@@ -722,7 +782,7 @@ async function checkAndUpdateFreeEntries(referrerWallet: string): Promise<void> 
       const existingRecord = await db
         .select()
         .from(FreeEntries)
-        .where(eq(FreeEntries.walletAddress, referrerWallet))
+        .where(eq(FreeEntries.walletAddress, normalizedReferrerWallet))
         .limit(1);
 
       if (existingRecord.length === 0) {
@@ -730,7 +790,7 @@ async function checkAndUpdateFreeEntries(referrerWallet: string): Promise<void> 
         await db
           .insert(FreeEntries)
           .values({
-            walletAddress: referrerWallet,
+            walletAddress: normalizedReferrerWallet,
             earnedFromReferrals: freeEntriesEarned,
             usedEntries: 0,
           });
@@ -742,7 +802,7 @@ async function checkAndUpdateFreeEntries(referrerWallet: string): Promise<void> 
             earnedFromReferrals: freeEntriesEarned,
             updatedAt: new Date(),
           })
-          .where(eq(FreeEntries.walletAddress, referrerWallet));
+          .where(eq(FreeEntries.walletAddress, normalizedReferrerWallet));
       }
     }
   } catch (error) {
@@ -762,6 +822,9 @@ export async function getFreeEntriesBreakdown(walletAddress: string): Promise<{
   used: number;
 }> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const result = await db
       .select({
         earnedFromReferrals: FreeEntries.earnedFromReferrals,
@@ -770,7 +833,7 @@ export async function getFreeEntriesBreakdown(walletAddress: string): Promise<{
         used: FreeEntries.usedEntries,
       })
       .from(FreeEntries)
-      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .where(eq(FreeEntries.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (result.length === 0) {
@@ -810,6 +873,9 @@ export async function getFreeEntriesBreakdown(walletAddress: string): Promise<{
  */
 export async function getAvailableFreeEntries(walletAddress: string): Promise<number> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const result = await db
       .select({
         earnedFromReferrals: FreeEntries.earnedFromReferrals,
@@ -818,7 +884,7 @@ export async function getAvailableFreeEntries(walletAddress: string): Promise<nu
         used: FreeEntries.usedEntries,
       })
       .from(FreeEntries)
-      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .where(eq(FreeEntries.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (result.length === 0) {
@@ -839,10 +905,13 @@ export async function getAvailableFreeEntries(walletAddress: string): Promise<nu
  */
 export async function awardTriviaFreeEntry(walletAddress: string): Promise<boolean> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const existingRecord = await db
       .select()
       .from(FreeEntries)
-      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .where(eq(FreeEntries.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (existingRecord.length === 0) {
@@ -850,7 +919,7 @@ export async function awardTriviaFreeEntry(walletAddress: string): Promise<boole
       await db
         .insert(FreeEntries)
         .values({
-          walletAddress,
+          walletAddress: normalizedWalletAddress,
           earnedFromReferrals: 0,
           earnedFromTrivia: 1,
           earnedFromWordle: 0,
@@ -864,7 +933,7 @@ export async function awardTriviaFreeEntry(walletAddress: string): Promise<boole
           earnedFromTrivia: sql`${FreeEntries.earnedFromTrivia} + 1`,
           updatedAt: new Date(),
         })
-        .where(eq(FreeEntries.walletAddress, walletAddress));
+        .where(eq(FreeEntries.walletAddress, normalizedWalletAddress));
     }
 
     return true;
@@ -879,10 +948,13 @@ export async function awardTriviaFreeEntry(walletAddress: string): Promise<boole
  */
 export async function awardWordleFreeEntry(walletAddress: string): Promise<boolean> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const existingRecord = await db
       .select()
       .from(FreeEntries)
-      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .where(eq(FreeEntries.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (existingRecord.length === 0) {
@@ -890,7 +962,7 @@ export async function awardWordleFreeEntry(walletAddress: string): Promise<boole
       await db
         .insert(FreeEntries)
         .values({
-          walletAddress,
+          walletAddress: normalizedWalletAddress,
           earnedFromReferrals: 0,
           earnedFromTrivia: 0,
           earnedFromWordle: 1,
@@ -904,7 +976,7 @@ export async function awardWordleFreeEntry(walletAddress: string): Promise<boole
           earnedFromWordle: sql`${FreeEntries.earnedFromWordle} + 1`,
           updatedAt: new Date(),
         })
-        .where(eq(FreeEntries.walletAddress, walletAddress));
+        .where(eq(FreeEntries.walletAddress, normalizedWalletAddress));
     }
 
     return true;
@@ -919,7 +991,10 @@ export async function awardWordleFreeEntry(walletAddress: string): Promise<boole
  */
 export async function consumeFreeEntry(walletAddress: string): Promise<boolean> {
   try {
-    const availableEntries = await getAvailableFreeEntries(walletAddress);
+    // Normalize wallet address for consistency (also used in getAvailableFreeEntries)
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
+    const availableEntries = await getAvailableFreeEntries(normalizedWalletAddress);
     
     if (availableEntries <= 0) {
       return false;
@@ -932,7 +1007,7 @@ export async function consumeFreeEntry(walletAddress: string): Promise<boolean> 
         usedEntries: sql`${FreeEntries.usedEntries} + 1`,
         updatedAt: new Date(),
       })
-      .where(eq(FreeEntries.walletAddress, walletAddress));
+      .where(eq(FreeEntries.walletAddress, normalizedWalletAddress));
 
     return true;
   } catch (error) {
@@ -946,11 +1021,14 @@ export async function consumeFreeEntry(walletAddress: string): Promise<boolean> 
  */
 export async function getReferralStats(walletAddress: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Get referral code
     const codeResult = await db
       .select({ referralCode: ReferralCodes.referralCode })
       .from(ReferralCodes)
-      .where(eq(ReferralCodes.walletAddress, walletAddress))
+      .where(eq(ReferralCodes.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     // Count total and confirmed referrals
@@ -959,7 +1037,7 @@ export async function getReferralStats(walletAddress: string) {
         confirmed: Referrals.potEntryConfirmed,
       })
       .from(Referrals)
-      .where(eq(Referrals.referrerWallet, walletAddress));
+      .where(eq(Referrals.referrerWallet, normalizedWalletAddress));
 
     const totalReferrals = referrals.length;
     const confirmedReferrals = referrals.filter(r => r.confirmed).length;
@@ -973,7 +1051,7 @@ export async function getReferralStats(walletAddress: string) {
         used: FreeEntries.usedEntries,
       })
       .from(FreeEntries)
-      .where(eq(FreeEntries.walletAddress, walletAddress))
+      .where(eq(FreeEntries.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     const freeEntries = freeEntriesResult.length > 0 ? freeEntriesResult[0] : { 
@@ -1017,18 +1095,20 @@ export async function getReferralStats(walletAddress: string) {
  */
 export async function placeLivePrediction(walletAddress: string, prediction: 'positive' | 'negative') {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
     const today = getUKDateString();
     
     // SECURITY: Server-side pot participation validation would require contract query here
     // Currently relying on client-side validation with triple-layer security:
     // 1. UI blocks non-participants 2. handlePrediction validates 3. Real-time contract check
-    console.log(`🔒 Processing live prediction for: ${walletAddress}`);
+    console.log(`🔒 Processing live prediction for: ${normalizedWalletAddress}`);
     
     // Check if user already made a prediction (no date filtering)
     const existingPrediction = await db
       .select()
       .from(LivePredictions)
-      .where(eq(LivePredictions.walletAddress, walletAddress))
+      .where(eq(LivePredictions.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (existingPrediction.length > 0) {
@@ -1036,7 +1116,7 @@ export async function placeLivePrediction(walletAddress: string, prediction: 'po
       const result = await db
         .update(LivePredictions)
         .set({ prediction })
-        .where(eq(LivePredictions.walletAddress, walletAddress))
+        .where(eq(LivePredictions.walletAddress, normalizedWalletAddress))
         .returning();
       
       return { updated: true, alreadyExists: true, ...result[0] };
@@ -1045,7 +1125,7 @@ export async function placeLivePrediction(walletAddress: string, prediction: 'po
       const result = await db
         .insert(LivePredictions)
         .values({
-          walletAddress,
+          walletAddress: normalizedWalletAddress,
           prediction,
           betDate: today,
         })
@@ -1061,11 +1141,14 @@ export async function placeLivePrediction(walletAddress: string, prediction: 'po
 
 export async function getUserLivePrediction(walletAddress: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Remove date filtering to match other live prediction functions
     const result = await db
       .select()
       .from(LivePredictions)
-      .where(eq(LivePredictions.walletAddress, walletAddress))
+      .where(eq(LivePredictions.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     return result.length > 0 ? result[0] : null;
@@ -1078,10 +1161,13 @@ export async function getUserLivePrediction(walletAddress: string) {
 // Wordle 24-hour cooldown functions
 export async function canPlayWordle(walletAddress: string): Promise<boolean> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const user = await db
       .select()
       .from(UsersTable)
-      .where(eq(UsersTable.walletAddress, walletAddress))
+      .where(eq(UsersTable.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     if (user.length === 0) {
@@ -1108,13 +1194,15 @@ export async function canPlayWordle(walletAddress: string): Promise<boolean> {
 
 export async function recordWordlePlay(walletAddress: string): Promise<void> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
     const now = new Date();
     
     // Try to insert new user, or update existing user's last play time
     await db
       .insert(UsersTable)
       .values({
-        walletAddress,
+        walletAddress: normalizedWalletAddress,
         lastWordlePlay: now,
         wordlePlaysToday: 1,
       })
@@ -1133,12 +1221,15 @@ export async function recordWordlePlay(walletAddress: string): Promise<void> {
 
 export async function getLastWordlePlay(walletAddress: string): Promise<Date | null> {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     const user = await db
       .select({
         lastWordlePlay: UsersTable.lastWordlePlay
       })
       .from(UsersTable)
-      .where(eq(UsersTable.walletAddress, walletAddress))
+      .where(eq(UsersTable.walletAddress, normalizedWalletAddress))
       .limit(1);
 
     return user.length > 0 ? user[0].lastWordlePlay : null;
@@ -1870,12 +1961,15 @@ export async function getUserProfiles(walletAddresses: string[]) {
 // Bookmark functions
 export async function addBookmark(walletAddress: string, marketId: string, marketCategory: string, contractAddress?: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Check if bookmark already exists
     const existingBookmark = await db
       .select()
       .from(Bookmarks)
       .where(and(
-        eq(Bookmarks.walletAddress, walletAddress),
+        eq(Bookmarks.walletAddress, normalizedWalletAddress),
         eq(Bookmarks.marketId, marketId)
       ))
       .limit(1);
@@ -1887,7 +1981,7 @@ export async function addBookmark(walletAddress: string, marketId: string, marke
 
     // Add new bookmark - marketName and marketQuestion removed (we get live data from markets.ts)
     await db.insert(Bookmarks).values({
-      walletAddress,
+      walletAddress: normalizedWalletAddress,
       marketId,
       marketCategory,
       contractAddress,
@@ -1904,6 +1998,9 @@ export async function addBookmark(walletAddress: string, marketId: string, marke
 
 export async function removeBookmark(walletAddress: string, marketId: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Handle legacy 'Featured' -> 'Trending' transition for removal
     const searchIds = [marketId];
     if (marketId === 'Trending') {
@@ -1913,7 +2010,7 @@ export async function removeBookmark(walletAddress: string, marketId: string) {
     await db
       .delete(Bookmarks)
       .where(and(
-        eq(Bookmarks.walletAddress, walletAddress),
+        eq(Bookmarks.walletAddress, normalizedWalletAddress),
         inArray(Bookmarks.marketId, searchIds)
       ));
 
@@ -1930,6 +2027,8 @@ export async function getUserBookmarks(walletAddress: string) {
   try {
     console.log('📑 Starting database query for bookmarks:', walletAddress);
     const startTime = Date.now();
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
     
     const bookmarks = await db
       .select({
@@ -1941,7 +2040,7 @@ export async function getUserBookmarks(walletAddress: string) {
         // Note: marketName and marketQuestion are intentionally excluded - we get live data from markets.ts
       })
       .from(Bookmarks)
-      .where(eq(Bookmarks.walletAddress, walletAddress))
+      .where(eq(Bookmarks.walletAddress, normalizedWalletAddress))
       .orderBy(desc(Bookmarks.id))
       .limit(100); // Reasonable limit to prevent huge queries
 
@@ -1957,13 +2056,16 @@ export async function getUserBookmarks(walletAddress: string) {
 
 export async function isMarketBookmarked(walletAddress: string, marketId: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    
     // Handle legacy 'Featured' -> 'Trending' transition
     const searchIds = [marketId];
     if (marketId === 'Trending') {
       searchIds.push('Featured'); // Also check for legacy 'Featured' bookmarks
     }
 
-    // console.log(`📑 Checking bookmark for wallet: ${walletAddress}, marketIds: ${searchIds.join(', ')}`);
+    // console.log(`📑 Checking bookmark for wallet: ${normalizedWalletAddress}, marketIds: ${searchIds.join(', ')}`);
 
     // Select only essential columns to avoid issues with missing contract_address column
     const bookmark = await db
@@ -1974,7 +2076,7 @@ export async function isMarketBookmarked(walletAddress: string, marketId: string
       })
       .from(Bookmarks)
       .where(and(
-        eq(Bookmarks.walletAddress, walletAddress),
+        eq(Bookmarks.walletAddress, normalizedWalletAddress),
         inArray(Bookmarks.marketId, searchIds)
       ))
       .limit(1);
@@ -2153,8 +2255,11 @@ export async function getAllAnnouncements() {
  */
 export async function getUserContractAnnouncements(userAddress: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedUserAddress = userAddress.toLowerCase();
+    
     // 1. Get user's participating contracts (cached/optimized)
-    const userContracts = await getUserParticipatingContracts(userAddress);
+    const userContracts = await getUserParticipatingContracts(normalizedUserAddress);
     const contractAddresses = userContracts.map(c => c.contractAddress);
     
     // 2. Date filtering - only get recent announcements (last 30 days)
@@ -2215,6 +2320,8 @@ export async function getUserContractAnnouncements(userAddress: string) {
  */
 export async function getUserParticipatingContracts(userAddress: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedUserAddress = userAddress.toLowerCase();
     const contracts: { contractAddress: string; marketType: string }[] = [];
     
     // Import config dynamically
@@ -2231,21 +2338,21 @@ export async function getUserParticipatingContracts(userAddress: string) {
           const predictions = await db
             .select()
             .from(FeaturedBets)
-            .where(eq(FeaturedBets.walletAddress, userAddress))
+            .where(eq(FeaturedBets.walletAddress, normalizedUserAddress))
             .limit(1);
           userParticipates = predictions.length > 0;
         } else if (tableType === 'crypto') {
           const predictions = await db
             .select()
             .from(CryptoBets)
-            .where(eq(CryptoBets.walletAddress, userAddress))
+            .where(eq(CryptoBets.walletAddress, normalizedUserAddress))
             .limit(1);
           userParticipates = predictions.length > 0;
         } else if (tableType === 'stocks') {
           const predictions = await db
             .select()
             .from(StocksBets)
-            .where(eq(StocksBets.walletAddress, userAddress))
+            .where(eq(StocksBets.walletAddress, normalizedUserAddress))
             .limit(1);
           userParticipates = predictions.length > 0;
         }
@@ -2272,15 +2379,18 @@ export async function getUserParticipatingContracts(userAddress: string) {
  */
 export async function getUnreadAnnouncements(userAddress: string) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedUserAddress = userAddress.toLowerCase();
+    
     // Get user's contracts for filtering
-    const userContracts = await getUserParticipatingContracts(userAddress);
+    const userContracts = await getUserParticipatingContracts(normalizedUserAddress);
     const contractAddresses = userContracts.map(c => c.contractAddress);
     
     // Get all announcements that this user has read
     const userReadAnnouncements = await db
       .select({ announcementId: UserAnnouncementReads.announcementId })
       .from(UserAnnouncementReads)
-      .where(eq(UserAnnouncementReads.walletAddress, userAddress));
+      .where(eq(UserAnnouncementReads.walletAddress, normalizedUserAddress));
     
     const readAnnouncementIds = userReadAnnouncements.map(r => r.announcementId);
     
@@ -2357,6 +2467,9 @@ export async function getUnreadAnnouncements(userAddress: string) {
  */
 export async function markAnnouncementsAsRead(userAddress: string, announcementIds: number[]) {
   try {
+    // Normalize wallet address for consistency
+    const normalizedUserAddress = userAddress.toLowerCase();
+    
     if (announcementIds.length === 0) {
       return { success: true };
     }
@@ -2367,7 +2480,7 @@ export async function markAnnouncementsAsRead(userAddress: string, announcementI
       .from(UserAnnouncementReads)
       .where(
         and(
-          eq(UserAnnouncementReads.walletAddress, userAddress),
+          eq(UserAnnouncementReads.walletAddress, normalizedUserAddress),
           inArray(UserAnnouncementReads.announcementId, announcementIds)
         )
       );
@@ -2378,7 +2491,7 @@ export async function markAnnouncementsAsRead(userAddress: string, announcementI
     // Insert read records for announcements not yet read by this user
     if (unreadIds.length > 0) {
       const readRecords = unreadIds.map(announcementId => ({
-        walletAddress: userAddress,
+        walletAddress: normalizedUserAddress,
         announcementId: announcementId
       }));
 

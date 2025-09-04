@@ -19,7 +19,7 @@ import {
   debugWrongPredictions,
   removeBookmark,
 } from '../Database/actions';
-import { recordPotEntry } from '../Database/actions3';
+import { recordPotEntry,clearPotParticipationHistory } from '../Database/actions3';
 import { ENFORCE_SATURDAY_RESTRICTIONS, CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 import { updateWinnerStats } from '../Database/OwnerActions';
 import { clear } from 'console';
@@ -645,36 +645,6 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
     }
   };
 
-  // const handleDistributePot = async () => {
-  //   if (!contractAddress || !winnerAddresses.trim()) return;
-
-  //   const winners = winnerAddresses
-  //     .split(',')
-  //     .map(addr => addr.trim())
-  //     .filter(addr => addr.length > 0);
-    
-  //   if (winners.length === 0) {
-  //     showMessage('Please enter at least one winner address.', true);
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-  //   setLastAction('distributePot');
-  //   try {
-  //     await writeContract({
-  //       address: contractAddress as `0x${string}`,
-  //       abi: PREDICTION_POT_ABI,
-  //       functionName: 'distributePot',
-  //       args: [winners],
-  //     });
-  //     showMessage('Distribute pot transaction submitted! Waiting for confirmation...');
-  //   } catch (error) {
-  //     console.error('Distribute pot failed:', error);
-  //     showMessage('Distribute pot failed. Check console for details.', true);
-  //     setLastAction('');
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const isActuallyLoading = isLoading || isPending || isConfirming;
   
@@ -800,9 +770,7 @@ useEffect(() => {
       setLastAction('');
       return; // Don't execute common cleanup below
     } else if (lastAction === 'distributePot') {
-      console.log("🎯 =========================");
-      console.log("🎯 DISTRIBUTION CONFIRMED!");
-      console.log("🎯 =========================");
+      
       console.log("📊 Transaction confirmation details:", {
         txHash,
         isConfirmed,
@@ -954,6 +922,7 @@ useEffect(() => {
       };
       
       finishDistribution();
+      clearPotParticipationHistory(contractAddress)
       return;
     }
     

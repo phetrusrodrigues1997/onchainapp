@@ -280,7 +280,7 @@ export async function setDailyOutcome(
       const wrongPredictionDate = finalTargetDate;
       
       const wrongAddresses = allWrongBets.map(bet => ({
-        walletAddress: bet.walletAddress,
+        walletAddress: bet.walletAddress.toLowerCase(), // Normalize wallet address for consistency
         wrongPredictionDate: wrongPredictionDate,
       }));
 
@@ -338,11 +338,14 @@ export async function canUserBet(
   address: string,
   typeTable: string
 ): Promise<boolean> {
+  // Normalize wallet address for consistency
+  const normalizedAddress = address.toLowerCase();
+  
   const betsTable = getTableFromType(typeTable);
   const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
   const [alreadyBet, isWrong] = await Promise.all([
-    db.select().from(betsTable).where(eq(betsTable.walletAddress, address)),
-    db.select().from(wrongPredictionTable).where(eq(wrongPredictionTable.walletAddress, address)),
+    db.select().from(betsTable).where(eq(betsTable.walletAddress, normalizedAddress)),
+    db.select().from(wrongPredictionTable).where(eq(wrongPredictionTable.walletAddress, normalizedAddress)),
   ]);
 
   return alreadyBet.length === 0 && isWrong.length === 0;

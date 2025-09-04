@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       .select()
       .from(LivePredictions)
       .where(and(
-        eq(LivePredictions.walletAddress, walletAddress),
+        eq(LivePredictions.walletAddress, walletAddress.toLowerCase()),
         eq(LivePredictions.betDate, today)
       ))
       .limit(1);
