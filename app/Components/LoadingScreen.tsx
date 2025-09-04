@@ -19,11 +19,13 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     if (!showProgress) return;
 
     const loadingSteps = [
-      { progress: 15, delay: 400 },
-      { progress: 30, delay: 600 },
-      { progress: 50, delay: 700 },
-      { progress: 75, delay: 800 },
-      { progress: 100, delay: 600 }
+      { progress: 20, delay: 50, label: 'Loading markets...' },
+       { progress: 40, delay: 300, label: 'Fetching data...' },
+       { progress: 55, delay: 400, label: 'Setting up interface...' },
+       { progress: 70, delay: 500, label: 'Processing data...' },
+       { progress: 85, delay: 600, label: 'Finalizing...' },
+       { progress: 95, delay: 700, label: 'Almost ready...' },
+       { progress: 100, delay: 400, label: 'Ready!' }
     ];
     
     const runProgressSteps = async () => {

@@ -13,6 +13,7 @@ import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/con
 import { getPrice } from '../Constants/getPrice';
 import { useContractData } from '../hooks/useContractData';
 import { useCountdownTimer } from '../hooks/useCountdownTimer';
+import { set } from 'lodash';
 
 // Types for prediction data
 interface TodaysBet {
@@ -223,11 +224,13 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     const initializeApp = async () => {
       // Simulate progressive loading - 4 second total duration
       const loadingSteps = [
-        { progress: 15, delay: 100, label: 'Loading markets...' },
-        { progress: 30, delay: 300, label: 'Fetching data...' },
-        { progress: 50, delay: 400, label: 'Setting up interface...' },
-        { progress: 75, delay: 500, label: 'Finalizing...' },
-        { progress: 100, delay: 300, label: 'Ready!' }
+        { progress: 20, delay: 50, label: 'Loading markets...' },
+       { progress: 40, delay: 300, label: 'Fetching data...' },
+       { progress: 55, delay: 400, label: 'Setting up interface...' },
+       { progress: 70, delay: 500, label: 'Processing data...' },
+       { progress: 85, delay: 600, label: 'Finalizing...' },
+       { progress: 95, delay: 700, label: 'Almost ready...' },
+       { progress: 100, delay: 400, label: 'Ready!' }
       ];
       
       for (const step of loadingSteps) {
@@ -799,7 +802,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   // };
 
   
-const handleMarketClick = (marketId: string) => {
+const handleMarketClick = (marketId: string, reentry: boolean = false) => {
   const contractAddress = getContractAddress(marketId);
   
   if (contractAddress) {
@@ -841,7 +844,13 @@ const handleMarketClick = (marketId: string) => {
     
     // Always route to TutorialBridge (dashboard) so users can see the chart and choose their action
     setTimeout(() => {
+      if(reentry) {
+        console.log(reentry)
+        setActiveSection('makePrediction');
+      } else {
+        console.log("Still call this")
       setActiveSection('dashboard');
+      }
     }, 200);
     
   } else {
@@ -1199,7 +1208,7 @@ const handleMarketClick = (marketId: string) => {
                       onClick={(e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        handleMarketClick(market.id);
+                        handleMarketClick(market.id,true);
                       }}
                       className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300"
                     >
@@ -1519,7 +1528,7 @@ const handleMarketClick = (marketId: string) => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
-                                    handleMarketClick(market.id);
+                                    handleMarketClick(market.id,true);
                                   }}
                                   className="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-xl hover:shadow-2xl hover:scale-105 transform duration-300"
                                 >
