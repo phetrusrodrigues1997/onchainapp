@@ -3,7 +3,6 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { formatUnits, parseEther } from 'viem';
 import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions, processReEntry } from '../Database/actions';
 import { getProvisionalOutcome, } from '../Database/OwnerActions';
-import { clearWrongPredictionsForUser } from '../Database/OwnerActions2';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { getMarkets } from '../Constants/markets';
