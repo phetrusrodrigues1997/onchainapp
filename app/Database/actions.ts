@@ -8,6 +8,7 @@ import { WrongPredictions, WrongPredictionsCrypto, WrongPredictionsStocks } from
 import { ENFORCE_SATURDAY_RESTRICTIONS } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes, PredictionIdeas } from "./schema";
+import { recordPotReEntry } from './actions3';
 import { desc } from "drizzle-orm";
 import { getPrice } from '../Constants/getPrice';
 

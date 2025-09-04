@@ -48,6 +48,39 @@ export async function recordPotEntry(
 }
 
 /**
+ * Records when a user re-enters a pot after paying penalty
+ */
+export async function recordPotReEntry(
+  walletAddress: string,
+  contractAddress: string,
+  tableType: string, // 'featured', 'crypto', etc.
+  eventDate: string // YYYY-MM-DD format
+): Promise<{ success: boolean; message: string }> {
+  try {
+    console.log(`🔄 Recording pot re-entry for ${walletAddress} in ${tableType} pot on ${eventDate}`);
+    
+    await getDb().insert(PotParticipationHistory).values({
+      walletAddress: walletAddress.toLowerCase(),
+      contractAddress: contractAddress.toLowerCase(),
+      tableType,
+      eventType: 're-entry',
+      eventDate,
+    });
+
+    return { 
+      success: true, 
+      message: 'Pot re-entry recorded successfully' 
+    };
+  } catch (error) {
+    console.error('Error recording pot re-entry:', error);
+    return { 
+      success: false, 
+      message: 'Failed to record pot re-entry' 
+    };
+  }
+}
+
+/**
  * Records when a user exits a pot
  */
 export async function recordPotExit(
@@ -326,20 +359,20 @@ export async function checkMissedPredictionPenalty(
 
     const tableName = getBetsTableName(tableType);
 
-    // Check if they entered the pot today (if so, no penalty for missing today's prediction)
+    // Check if they entered or re-entered the pot today (if so, no penalty for missing today's prediction)
     const entryToday = await sql`
       SELECT COUNT(*) as entry_count 
       FROM pot_participation_history
       WHERE wallet_address = ${walletAddress.toLowerCase()} 
       AND contract_address = ${contractAddress}
-      AND event_type = 'entry'
+      AND event_type IN ('entry', 're-entry')
       AND event_date = ${todayString}
     `;
 
     const enteredToday = parseInt(entryToday[0].entry_count) > 0;
     
     if (enteredToday) {
-      console.log(`✅ User ${walletAddress} entered today - no prediction penalty required`);
+      console.log(`✅ User ${walletAddress} entered or re-entered today - no prediction penalty required`);
       return;
     }
 
