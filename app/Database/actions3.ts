@@ -472,9 +472,9 @@ async function addMissedPredictionPenalty(
   } catch (error) {
     console.error('❌ Error adding missed prediction penalty:', error);
     console.error('❌ Error details:', {
-      name: error?.name,
-      message: error?.message,
-      stack: error?.stack
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : 'No stack trace'
     });
     return { success: false, message: 'Failed to add penalty' };
   }
