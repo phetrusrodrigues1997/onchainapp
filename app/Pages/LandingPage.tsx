@@ -334,7 +334,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
           new Map(allPossibleMarkets.map(market => [market.id, market])).values()
         );
 
-        console.log('📑 Checking bookmarks for', uniqueMarkets.length, 'markets');
+        // console.log('📑 Checking bookmarks for', uniqueMarkets.length, 'markets');
 
         // Batch the bookmark checks to prevent overwhelming the database
         const BATCH_SIZE = 10;
@@ -467,10 +467,11 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       for (const contractAddress of contractAddresses) {
         try {
           const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
+          console.log(`🔍 Starting penalty check for ${marketType} (${contractAddress}) with wallet ${address}`);
           await checkMissedPredictionPenalty(address, contractAddress, marketType);
           console.log(`✅ Penalty check completed for ${marketType}`);
         } catch (error) {
-          console.error(`Error checking penalties for ${contractAddress}:`, error);
+          console.error(`❌ Error checking penalties for ${contractAddress}:`, error);
         }
       }
     };
@@ -1025,8 +1026,8 @@ const handleMarketClick = (marketId: string) => {
     let orderedMarkets: typeof filteredMarkets = [];
     if (selectedMarketData) {
       // Debug logging
-      console.log('selectedMarket:', selectedMarket);
-      console.log('previousSelectedMarket:', previousSelectedMarket);
+      // console.log('selectedMarket:', selectedMarket);
+      // console.log('previousSelectedMarket:', previousSelectedMarket);
       
       orderedMarkets = [selectedMarketData];
       
@@ -1045,7 +1046,7 @@ const handleMarketClick = (marketId: string) => {
       // Add any remaining markets
       orderedMarkets = [...orderedMarkets, ...otherMarketsFiltered.slice(15)];
       
-      console.log('orderedMarkets first 5:', orderedMarkets.slice(0, 5).map(m => m.tabId));
+      // console.log('orderedMarkets first 5:', orderedMarkets.slice(0, 5).map(m => m.tabId));
     } else {
       orderedMarkets = filteredMarkets;
     }
@@ -1153,11 +1154,11 @@ const handleMarketClick = (marketId: string) => {
                     <div className="text-lg font-bold text-gray-900">
                                   {(() => {
                                     const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
-                                    console.log('totalVotes for', market.id, totalVotes);
+                                    // console.log('totalVotes for', market.id, totalVotes);
                                     const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
-                                    console.log('positive votes for', market.id, positive);
+                                    // console.log('positive votes for', market.id, positive);
                                     const negative = totalVotes - positive;
-                                    console.log('negative votes for', market.id, negative);
+                                    // console.log('negative votes for', market.id, negative);
                                     const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
                                     return smoothedPercentage;
                                   })()}%
@@ -1446,11 +1447,11 @@ const handleMarketClick = (marketId: string) => {
                                 <div className="text-lg font-bold text-gray-900">
                                   {(() => {
                                     const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
-                                    console.log('totalVotes for', market.id, totalVotes);
+                                    // console.log('totalVotes for', market.id, totalVotes);
                                     const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
-                                    console.log('positive votes for', market.id, positive);
+                                    // console.log('positive votes for', market.id, positive);
                                     const negative = totalVotes - positive;
-                                    console.log('negative votes for', market.id, negative);
+                                    // console.log('negative votes for', market.id, negative);
                                     const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
                                     return smoothedPercentage;
                                   })()}%

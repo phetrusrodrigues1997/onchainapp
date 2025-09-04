@@ -498,12 +498,16 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
     setIsBetLoading(true);
     try {
+      console.log(`🔍 MakePredictionsPage: Loading bets for wallet ${address}, table type: ${selectedTableType}`);
+      
       // Load both tomorrow's bet (for betting interface) and today's bet (for results display)
       const [tomorrowBet, todayBet, reEntryAmount] = await Promise.all([
         getTomorrowsBet(address, selectedTableType),
         getTodaysBet(address, selectedTableType),
         getReEntryFee(address, selectedTableType)
       ]);
+      
+      console.log(`🔍 MakePredictionsPage: Re-entry fee result: ${reEntryAmount} for table type: ${selectedTableType}`);
       
       setTomorrowsBet(tomorrowBet);
       setTodaysBet(todayBet);

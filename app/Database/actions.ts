@@ -269,14 +269,19 @@ export async function getAllMessages(address: string) {
  */
 export async function getReEntryFee(walletAddress: string, typeTable: string): Promise<number | null> {
   try {
+    console.log(`🔍 getReEntryFee: Checking wallet ${walletAddress} for table type: ${typeTable}`);
+    const normalizedWalletAddress = walletAddress.toLowerCase(); // Fix case sensitivity!
+    console.log(`🔍 getReEntryFee: Normalized wallet address: ${normalizedWalletAddress}`);
     const wrongPredictionTable = getWrongPredictionsTableFromType(typeTable);
+    console.log(`🔍 getReEntryFee: Using wrong predictions table for query`);
     
     const result = await db
       .select({ walletAddress: wrongPredictionTable.walletAddress })
       .from(wrongPredictionTable)
-      .where(eq(wrongPredictionTable.walletAddress, walletAddress))
+      .where(eq(wrongPredictionTable.walletAddress, normalizedWalletAddress))
       .limit(1);
     
+    console.log(`🔍 getReEntryFee: Query result length: ${result.length}`);
     
     // If user has wrong prediction, return today's dynamic entry fee
     if (result.length > 0) {
@@ -1958,7 +1963,7 @@ export async function isMarketBookmarked(walletAddress: string, marketId: string
       searchIds.push('Featured'); // Also check for legacy 'Featured' bookmarks
     }
 
-    console.log(`📑 Checking bookmark for wallet: ${walletAddress}, marketIds: ${searchIds.join(', ')}`);
+    // console.log(`📑 Checking bookmark for wallet: ${walletAddress}, marketIds: ${searchIds.join(', ')}`);
 
     // Select only essential columns to avoid issues with missing contract_address column
     const bookmark = await db
@@ -1975,7 +1980,7 @@ export async function isMarketBookmarked(walletAddress: string, marketId: string
       .limit(1);
 
     const isBookmarked = bookmark.length > 0;
-    console.log(`📑 Result: ${isBookmarked} for ${marketId}`);
+    // console.log(`📑 Result: ${isBookmarked} for ${marketId}`);
     return isBookmarked;
 
   } catch (error) {

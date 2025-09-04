@@ -280,19 +280,26 @@ export async function checkMissedPredictionPenalty(
   tableType: string
 ): Promise<void> {
   try {
-    console.log(`🔍 Checking missed prediction penalty for ${walletAddress} in ${tableType} market`);
+    console.log(`🔍 === STARTING PENALTY CHECK ===`);
+    console.log(`🔍 Wallet: ${walletAddress}`);
+    console.log(`🔍 Contract: ${contractAddress}`);
+    console.log(`🔍 Market Type: ${tableType}`);
 
     // Get today's date and day of week
     const today = new Date();
     const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD
     const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
+    console.log(`🔍 Today: ${todayString}, Day of week: ${dayOfWeek} (0=Sunday, 1=Monday, etc.)`);
+
     // Only Sunday has no predictions required (fresh start of the week)
     // Monday-Saturday all require predictions
     if (dayOfWeek === 0) {
-      console.log(`✅ It's Sunday - no predictions required yet`);
+      console.log(`✅ It's Sunday - no predictions required yet, EXITING`);
       return;
     }
+
+    console.log(`🔍 Not Sunday - continuing penalty check...`);
 
     console.log(`🗓️ Checking if ${walletAddress} made prediction for TODAY: ${todayString} (day ${dayOfWeek})`);
 
@@ -301,16 +308,50 @@ export async function checkMissedPredictionPenalty(
     // STEP 1: Check if user is currently a participant in this pot
     console.log(`🔍 STEP 1: Checking participation for wallet: ${walletAddress.toLowerCase()}, contract: ${contractAddress}`);
     
+    // First, let's see ALL entries for this user/contract combo for debugging
+    const allEntries = await sql`
+      SELECT event_type, event_date, event_timestamp, wallet_address, contract_address
+      FROM pot_participation_history
+      WHERE wallet_address = ${walletAddress.toLowerCase()} 
+      AND contract_address = ${contractAddress.toLowerCase()}
+      ORDER BY event_timestamp DESC
+    `;
+    
+    console.log(`🔍 All participation history for this user/contract:`, allEntries);
+    
+    // Let's also check what entries exist for just this wallet (any contract)
+    const walletEntries = await sql`
+      SELECT event_type, event_date, event_timestamp, wallet_address, contract_address
+      FROM pot_participation_history
+      WHERE wallet_address = ${walletAddress.toLowerCase()}
+      ORDER BY event_timestamp DESC
+      LIMIT 5
+    `;
+    
+    console.log(`🔍 Recent entries for this wallet (any contract):`, walletEntries);
+    
+    // And let's check what entries exist for just this contract (any wallet)
+    const contractEntries = await sql`
+      SELECT event_type, event_date, event_timestamp, wallet_address, contract_address
+      FROM pot_participation_history
+      WHERE contract_address = ${contractAddress}
+      ORDER BY event_timestamp DESC
+      LIMIT 5
+    `;
+    
+    console.log(`🔍 Recent entries for this contract (any wallet):`, contractEntries);
+    
+    // Simplified participation check - just check if they have any entry without a later exit
     const participantCheck = await sql`
       SELECT COUNT(*) as participant_count
       FROM pot_participation_history
       WHERE wallet_address = ${walletAddress.toLowerCase()} 
-      AND contract_address = ${contractAddress}
+      AND contract_address = ${contractAddress.toLowerCase()}
       AND event_type = 'entry'
       AND NOT EXISTS (
         SELECT 1 FROM pot_participation_history ph2
         WHERE ph2.wallet_address = ${walletAddress.toLowerCase()}
-        AND ph2.contract_address = ${contractAddress}
+        AND ph2.contract_address = ${contractAddress.toLowerCase()}
         AND ph2.event_type = 'exit'
         AND ph2.event_timestamp > pot_participation_history.event_timestamp
       )
@@ -321,7 +362,8 @@ export async function checkMissedPredictionPenalty(
     console.log(`🔍 Is participant? ${isParticipant} (count: ${participantCheck[0].participant_count})`);
     
     if (!isParticipant) {
-      console.log(`✅ User ${walletAddress} is not a participant in ${contractAddress} - no penalty check needed`);
+      console.log(`❌ User ${walletAddress} is not showing as participant in ${contractAddress} - this might be incorrect!`);
+      console.log(`🔍 Debug: Check the participation history above to see if there's an issue with the query logic`);
       return;
     }
 
@@ -342,11 +384,14 @@ export async function checkMissedPredictionPenalty(
     const wrongTable = getWrongPredictionsTable(tableType);
     console.log(`🔍 Using wrong predictions table: ${wrongTable}`);
     
-    const alreadyPenalized = await sql`
-      SELECT COUNT(*) as penalty_count
-      FROM ${sql(wrongTable)}
-      WHERE wallet_address = ${walletAddress.toLowerCase()}
-    `;
+    // Use template string for table name since sql.identifier doesn't exist in Neon
+    // Note: wrong predictions tables use "walletAddress" column (camelCase)
+    const alreadyPenalized = await sql(
+      `SELECT COUNT(*) as penalty_count
+       FROM ${wrongTable}
+       WHERE "walletAddress" = $1`,
+      [walletAddress.toLowerCase()]
+    );
 
     console.log(`🔍 Already penalized query result:`, alreadyPenalized);
     const penaltyCount = parseInt(alreadyPenalized[0].penalty_count);
@@ -378,7 +423,7 @@ export async function checkMissedPredictionPenalty(
       SELECT COUNT(*) as entry_count 
       FROM pot_participation_history
       WHERE wallet_address = ${walletAddress.toLowerCase()} 
-      AND contract_address = ${contractAddress}
+      AND contract_address = ${contractAddress.toLowerCase()}
       AND event_type IN ('entry', 're-entry')
       AND event_date = ${todayString}
     `;
@@ -395,12 +440,14 @@ export async function checkMissedPredictionPenalty(
     // Check if they made a prediction for today
     console.log(`🔍 STEP 5: Checking predictions for table: ${tableName}, date: ${todayString}`);
     
-    const result = await sql`
-      SELECT COUNT(*) as prediction_count 
-      FROM ${sql(tableName)}
-      WHERE wallet_address = ${walletAddress.toLowerCase()} 
-      AND bet_date = ${todayString}
-    `;
+    // Use template string for table name
+    const result = await sql(
+      `SELECT COUNT(*) as prediction_count 
+       FROM ${tableName}
+       WHERE wallet_address = $1 
+       AND bet_date = $2`,
+      [walletAddress.toLowerCase(), todayString]
+    );
 
     console.log(`🔍 Prediction query result:`, result);
     const predictionCount = parseInt(result[0].prediction_count);
@@ -458,12 +505,14 @@ async function addMissedPredictionPenalty(
       table: wrongTableName
     });
 
-    const insertResult = await sql`
-      INSERT INTO ${sql(wrongTableName)} (wallet_address, wrong_prediction_date, created_at)
-      VALUES (${walletAddress.toLowerCase()}, ${missedDate}, NOW())
-      ON CONFLICT (wallet_address, wrong_prediction_date) DO NOTHING
-      RETURNING wallet_address, wrong_prediction_date
-    `;
+    // Use template string for table name
+    // Note: wrong predictions tables use "walletAddress" and "wrong_prediction_date" columns
+    const insertResult = await sql(
+      `INSERT INTO ${wrongTableName} ("walletAddress", wrong_prediction_date, created_at)
+       VALUES ($1, $2, NOW())
+       RETURNING "walletAddress", wrong_prediction_date`,
+      [walletAddress.toLowerCase(), missedDate]
+    );
 
     console.log(`🔍 Insert result:`, insertResult);
     console.log(`✅ Successfully added ${walletAddress} to ${wrongTableName} for ${missedDate}`);
