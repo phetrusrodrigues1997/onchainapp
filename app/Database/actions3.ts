@@ -299,6 +299,8 @@ export async function checkMissedPredictionPenalty(
     const sql = neon(process.env.DATABASE_URL!);
 
     // STEP 1: Check if user is currently a participant in this pot
+    console.log(`🔍 STEP 1: Checking participation for wallet: ${walletAddress.toLowerCase()}, contract: ${contractAddress}`);
+    
     const participantCheck = await sql`
       SELECT COUNT(*) as participant_count
       FROM pot_participation_history
@@ -314,7 +316,9 @@ export async function checkMissedPredictionPenalty(
       )
     `;
 
+    console.log(`🔍 Participation query result:`, participantCheck);
     const isParticipant = parseInt(participantCheck[0].participant_count) > 0;
+    console.log(`🔍 Is participant? ${isParticipant} (count: ${participantCheck[0].participant_count})`);
     
     if (!isParticipant) {
       console.log(`✅ User ${walletAddress} is not a participant in ${contractAddress} - no penalty check needed`);
@@ -324,6 +328,8 @@ export async function checkMissedPredictionPenalty(
     console.log(`🎯 User ${walletAddress} IS a participant - checking penalty status...`);
 
     // STEP 2: Check if user is already in wrong predictions table (don't double-penalize)
+    console.log(`🔍 STEP 2: Checking if already penalized for table type: ${tableType}`);
+    
     const getWrongPredictionsTable = (type: string) => {
       switch (type) {
         case 'featured': return 'wrong_Predictions';
@@ -334,13 +340,19 @@ export async function checkMissedPredictionPenalty(
     };
 
     const wrongTable = getWrongPredictionsTable(tableType);
+    console.log(`🔍 Using wrong predictions table: ${wrongTable}`);
+    
     const alreadyPenalized = await sql`
       SELECT COUNT(*) as penalty_count
       FROM ${sql(wrongTable)}
       WHERE wallet_address = ${walletAddress.toLowerCase()}
     `;
 
-    if (parseInt(alreadyPenalized[0].penalty_count) > 0) {
+    console.log(`🔍 Already penalized query result:`, alreadyPenalized);
+    const penaltyCount = parseInt(alreadyPenalized[0].penalty_count);
+    console.log(`🔍 Penalty count: ${penaltyCount}`);
+
+    if (penaltyCount > 0) {
       console.log(`✅ User ${walletAddress} already in wrong predictions table - no additional penalty needed`);
       return;
     }
@@ -360,6 +372,8 @@ export async function checkMissedPredictionPenalty(
     const tableName = getBetsTableName(tableType);
 
     // Check if they entered or re-entered the pot today (if so, no penalty for missing today's prediction)
+    console.log(`🔍 STEP 4: Checking if user entered/re-entered today (${todayString})`);
+    
     const entryToday = await sql`
       SELECT COUNT(*) as entry_count 
       FROM pot_participation_history
@@ -369,7 +383,9 @@ export async function checkMissedPredictionPenalty(
       AND event_date = ${todayString}
     `;
 
+    console.log(`🔍 Entry today query result:`, entryToday);
     const enteredToday = parseInt(entryToday[0].entry_count) > 0;
+    console.log(`🔍 Entered today? ${enteredToday} (count: ${entryToday[0].entry_count})`);
     
     if (enteredToday) {
       console.log(`✅ User ${walletAddress} entered or re-entered today - no prediction penalty required`);
@@ -377,6 +393,8 @@ export async function checkMissedPredictionPenalty(
     }
 
     // Check if they made a prediction for today
+    console.log(`🔍 STEP 5: Checking predictions for table: ${tableName}, date: ${todayString}`);
+    
     const result = await sql`
       SELECT COUNT(*) as prediction_count 
       FROM ${sql(tableName)}
@@ -384,16 +402,20 @@ export async function checkMissedPredictionPenalty(
       AND bet_date = ${todayString}
     `;
 
+    console.log(`🔍 Prediction query result:`, result);
     const predictionCount = parseInt(result[0].prediction_count);
-    console.log(`📊 Found ${predictionCount} predictions for ${walletAddress} on ${todayString}`);
+    console.log(`📊 Found ${predictionCount} predictions for ${walletAddress} on ${todayString} in ${tableName}`);
 
     if (predictionCount === 0) {
-      // TODO: We should also check if they're actually in the pot before penalizing
-      // For now, just add to wrong predictions - the existing reEntry logic will handle the rest
-      console.log(`❌ User ${walletAddress} missed required prediction for ${todayString} - adding to wrong predictions`);
+      console.log(`❌ PENALTY REQUIRED: User ${walletAddress} missed required prediction for ${todayString}`);
+      console.log(`🔍 Calling addMissedPredictionPenalty with params:`, {
+        walletAddress,
+        tableType,
+        todayString
+      });
       
       await addMissedPredictionPenalty(walletAddress, tableType, todayString);
-      console.log(`✅ Added ${walletAddress} to wrong predictions table for ${tableType}`);
+      console.log(`✅ Successfully added ${walletAddress} to wrong predictions table for ${tableType}`);
     } else {
       console.log(`✅ User ${walletAddress} made prediction for ${todayString} - no penalty needed`);
     }
@@ -413,7 +435,7 @@ async function addMissedPredictionPenalty(
   missedDate: string
 ): Promise<{ success: boolean; message: string }> {
   try {
-    console.log(`🚫 Adding missed prediction penalty for ${walletAddress} (${tableType}, ${missedDate})`);
+    console.log(`🚫 STARTING addMissedPredictionPenalty for ${walletAddress} (${tableType}, ${missedDate})`);
 
     // Import the wrong predictions tables (we need to add this import at the top)
     // For now, use direct SQL to avoid circular imports
@@ -421,26 +443,39 @@ async function addMissedPredictionPenalty(
     
     const getWrongTableName = (type: string) => {
       switch (type) {
-        case 'featured': return 'wrong_predictions';
+        case 'featured': return 'wrong_Predictions'; // Fixed to match the table name used in checks
         case 'crypto': return 'wrong_predictions_crypto'; 
         case 'stocks': return 'wrong_predictions_stocks';
-        default: return 'wrong_predictions';
+        default: return 'wrong_Predictions'; // Fixed to match the table name used in checks
       }
     };
 
     const wrongTableName = getWrongTableName(tableType);
+    console.log(`🔍 Using wrong table name: ${wrongTableName} for table type: ${tableType}`);
+    console.log(`🔍 About to insert:`, {
+      wallet_address: walletAddress.toLowerCase(),
+      wrong_prediction_date: missedDate,
+      table: wrongTableName
+    });
 
-    await sql`
+    const insertResult = await sql`
       INSERT INTO ${sql(wrongTableName)} (wallet_address, wrong_prediction_date, created_at)
       VALUES (${walletAddress.toLowerCase()}, ${missedDate}, NOW())
       ON CONFLICT (wallet_address, wrong_prediction_date) DO NOTHING
+      RETURNING wallet_address, wrong_prediction_date
     `;
 
+    console.log(`🔍 Insert result:`, insertResult);
     console.log(`✅ Successfully added ${walletAddress} to ${wrongTableName} for ${missedDate}`);
     return { success: true, message: 'Penalty added successfully' };
 
   } catch (error) {
-    console.error('Error adding missed prediction penalty:', error);
+    console.error('❌ Error adding missed prediction penalty:', error);
+    console.error('❌ Error details:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack
+    });
     return { success: false, message: 'Failed to add penalty' };
   }
 }
