@@ -826,12 +826,14 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               
               {/* Y-axis labels - HTML overlay */}
               {[0, 20, 40, 60, 80, 100].map((y) => {
-                const percentage = (100 - y) / 100; // Convert to position from top
+                // Match the exact grid line calculation: 45 - (y * 0.4)
+                const svgY = 45 - (y * 0.4);
+                const percentage = svgY / 50; // Convert SVG coordinate to percentage (viewBox height is 50)
                 const topPosition = `${percentage * 100}%`;
                 return (
                   <div
                     key={y}
-                    className={`absolute right-1 text-xs font-medium text-gray-600 opacity-60 ${y === 0 || y === 100 ? 'invisible' : ''}`}
+                    className={`absolute right-1 text-xs font-medium text-gray-600 opacity-60 ${y === 0 ? 'invisible' : ''}`}
                     style={{ 
                       top: topPosition,
                       transform: 'translateY(-50%)'

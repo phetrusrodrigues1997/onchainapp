@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { formatUnits } from 'viem';
+import { checkMissedPredictionPenalty } from '../Database/actions3';
 import { ArrowRight, Bookmark, Check } from 'lucide-react';
 import { Language, getTranslation, supportedLanguages } from '../Languages/languages';
 import { getMarkets, Market } from '../Constants/markets';
@@ -452,6 +453,30 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     setPotBalances(newPotBalances);
     Cookies.set('potBalances', JSON.stringify(newPotBalances), { expires: 1/24 }); // 1 hour expiry
   }, [ethPrice, balancesData.length, ...balancesData.map(b => b?.value)]);
+
+  // Check for missed prediction penalties when user connects
+  useEffect(() => {
+    const runPenaltyChecks = async () => {
+      if (!isConnected || !address) {
+        return;
+      }
+
+      console.log('🔍 Running penalty checks for all markets...');
+
+      // Check each contract for missed predictions
+      for (const contractAddress of contractAddresses) {
+        try {
+          const marketType = CONTRACT_TO_TABLE_MAPPING[contractAddress];
+          await checkMissedPredictionPenalty(address, contractAddress, marketType);
+          console.log(`✅ Penalty check completed for ${marketType}`);
+        } catch (error) {
+          console.error(`Error checking penalties for ${contractAddress}:`, error);
+        }
+      }
+    };
+
+    runPenaltyChecks();
+  }, [isConnected, address]);
 
   // Handle bookmark toggle
   const handleBookmarkToggle = async (market: any, event: React.MouseEvent) => {

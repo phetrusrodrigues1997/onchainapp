@@ -3,7 +3,6 @@ import { useAccount, useReadContract, useWriteContract, useWaitForTransactionRec
 import { formatUnits, parseEther } from 'viem';
 import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions, processReEntry } from '../Database/actions';
 import { getProvisionalOutcome } from '../Database/OwnerActions';
-import { checkMissedPredictionPenalty } from '../Database/actions3';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { getMarkets } from '../Constants/markets';
@@ -123,17 +122,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const [reEntryFee, setReEntryFee] = useState<number | null>(null);
   const [allReEntryFees, setAllReEntryFees] = useState<{market: string, fee: number}[]>([]);
   const [marketQuestion, setMarketQuestion] = useState<string>('');
-  
-  // Missed prediction penalty state
-  const [missedPredictionCheck, setMissedPredictionCheck] = useState<{
-    isChecking: boolean;
-    shouldBlock: boolean;
-    missedDate?: string;
-    message?: string;
-  }>({
-    isChecking: true,
-    shouldBlock: false
-  });
   
   // Evidence submission system state
   const [marketOutcome, setMarketOutcome] = useState<MarketOutcome | null>(null);
@@ -375,41 +363,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     }
   }, []);
 
-  // Check for missed prediction penalties when user connects and contract is set
-  useEffect(() => {
-    const checkMissedPredictions = async () => {
-      if (!address || !isConnected || !contractAddress) {
-        setMissedPredictionCheck({ isChecking: false, shouldBlock: false });
-        return;
-      }
-
-      console.log('🔍 Checking missed prediction penalties for user...');
-      setMissedPredictionCheck(prev => ({ ...prev, isChecking: true }));
-
-      try {
-        const result = await checkMissedPredictionPenalty(address, contractAddress, selectedTableType);
-        
-        setMissedPredictionCheck({
-          isChecking: false,
-          shouldBlock: result.shouldBlock,
-          missedDate: result.missedDate,
-          message: result.message
-        });
-
-        if (result.shouldBlock) {
-          console.log(`🚫 User blocked due to missed prediction: ${result.message}`);
-        } else {
-          console.log('✅ User cleared for predictions');
-        }
-      } catch (error) {
-        console.error('Error checking missed predictions:', error);
-        // On error, allow user to proceed (safer to allow than incorrectly block)
-        setMissedPredictionCheck({ isChecking: false, shouldBlock: false });
-      }
-    };
-
-    checkMissedPredictions();
-  }, [address, isConnected, contractAddress, selectedTableType]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -842,46 +795,6 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
             <div className="inline-flex items-center gap-3 text-gray-600">
               <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
               <span className="font-medium">Loading your bet...</span>
-            </div>
-          </div>
-        ) : missedPredictionCheck.isChecking ? (
-          <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-10 mb-8 shadow-2xl shadow-gray-900/10 text-center">
-            <div className="inline-flex items-center gap-3 text-gray-600">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
-              <span className="font-medium">Checking prediction requirements...</span>
-            </div>
-          </div>
-        ) : missedPredictionCheck.shouldBlock ? (
-          <div className="bg-white/70 backdrop-blur-xl border border-red-200/50 rounded-3xl p-8 mb-8 shadow-2xl shadow-gray-900/10">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-8 h-8 text-red-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">Prediction Required</h2>
-              <div className="text-gray-600 font-light mb-4 leading-relaxed">
-                {missedPredictionCheck.message}
-              </div>
-              {missedPredictionCheck.missedDate && (
-                <div className="text-sm text-gray-500 mb-6">
-                  Missed prediction date: {missedPredictionCheck.missedDate}
-                </div>
-              )}
-            </div>
-            
-            <button
-              onClick={() => setActiveSection('bitcoinPot')}
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-4 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
-            >
-              Pay Re-entry Fee
-            </button>
-            
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => setActiveSection('home')}
-                className="text-gray-500 hover:text-gray-700 text-sm underline"
-              >
-                Go to Home
-              </button>
             </div>
           </div>
         ) : reEntryFee && reEntryFee > 0 ? (

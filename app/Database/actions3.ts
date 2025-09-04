@@ -239,95 +239,135 @@ export async function getUserParticipationHistory(
  * @param walletAddress - The user's wallet address
  * @param contractAddress - The prediction pot contract address  
  * @param tableType - The table type ('featured', 'crypto', etc.)
- * @returns Object indicating if user should be blocked and why
+ * @returns void - Directly adds user to wrong predictions table if they missed today's prediction
  */
 export async function checkMissedPredictionPenalty(
   walletAddress: string,
   contractAddress: string,
   tableType: string
-): Promise<{
-  shouldBlock: boolean;
-  missedDate?: string;
-  message?: string;
-}> {
+): Promise<void> {
   try {
     console.log(`🔍 Checking missed prediction penalty for ${walletAddress} in ${tableType} market`);
 
-    // Get the corresponding bets table for this table type
-    const getBetsTableName = (type: string) => {
+    // Get today's date and day of week
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    // Only Sunday has no predictions required (fresh start of the week)
+    // Monday-Saturday all require predictions
+    if (dayOfWeek === 0) {
+      console.log(`✅ It's Sunday - no predictions required yet`);
+      return;
+    }
+
+    console.log(`🗓️ Checking if ${walletAddress} made prediction for TODAY: ${todayString} (day ${dayOfWeek})`);
+
+    const sql = neon(process.env.DATABASE_URL!);
+
+    // STEP 1: Check if user is currently a participant in this pot
+    const participantCheck = await sql`
+      SELECT COUNT(*) as participant_count
+      FROM pot_participation_history
+      WHERE wallet_address = ${walletAddress.toLowerCase()} 
+      AND contract_address = ${contractAddress}
+      AND event_type = 'entry'
+      AND NOT EXISTS (
+        SELECT 1 FROM pot_participation_history ph2
+        WHERE ph2.wallet_address = ${walletAddress.toLowerCase()}
+        AND ph2.contract_address = ${contractAddress}
+        AND ph2.event_type = 'exit'
+        AND ph2.event_timestamp > pot_participation_history.event_timestamp
+      )
+    `;
+
+    const isParticipant = parseInt(participantCheck[0].participant_count) > 0;
+    
+    if (!isParticipant) {
+      console.log(`✅ User ${walletAddress} is not a participant in ${contractAddress} - no penalty check needed`);
+      return;
+    }
+
+    console.log(`🎯 User ${walletAddress} IS a participant - checking penalty status...`);
+
+    // STEP 2: Check if user is already in wrong predictions table (don't double-penalize)
+    const getWrongPredictionsTable = (type: string) => {
       switch (type) {
-        case 'featured': return 'FeaturedBets';
-        case 'crypto': return 'CryptoBets'; 
-        case 'stocks': return 'StocksBets';
-        default: return 'FeaturedBets';
+        case 'featured': return 'wrong_Predictions';
+        case 'crypto': return 'wrong_predictions_crypto';
+        case 'stocks': return 'wrong_predictions_stocks';
+        default: return 'wrong_Predictions';
       }
     };
 
-    // Calculate yesterday's date (the day they should have made a prediction for)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayString = yesterday.toISOString().split('T')[0]; // YYYY-MM-DD
+    const wrongTable = getWrongPredictionsTable(tableType);
+    const alreadyPenalized = await sql`
+      SELECT COUNT(*) as penalty_count
+      FROM ${sql(wrongTable)}
+      WHERE wallet_address = ${walletAddress.toLowerCase()}
+    `;
 
-    console.log(`🗓️ Checking if ${walletAddress} should have predicted for ${yesterdayString}`);
-
-    // Check if user was eligible to make predictions for yesterday
-    const wasEligibleYesterday = await isUserActiveOnDate(walletAddress, contractAddress, yesterdayString);
-    
-    if (!wasEligibleYesterday) {
-      console.log(`✅ User ${walletAddress} was not eligible for ${yesterdayString} predictions - no penalty`);
-      return { shouldBlock: false };
+    if (parseInt(alreadyPenalized[0].penalty_count) > 0) {
+      console.log(`✅ User ${walletAddress} already in wrong predictions table - no additional penalty needed`);
+      return;
     }
 
-    console.log(`⚠️ User ${walletAddress} WAS eligible for ${yesterdayString} predictions - checking if they predicted...`);
+    console.log(`🔍 User ${walletAddress} is participant and not yet penalized - checking today's prediction...`);
 
-    // Check if user made a prediction for yesterday in the appropriate table
-    // Note: We need to import and use the actual table schemas here
-    // For now, we'll use a direct SQL query approach since we can't easily import the table schemas
+    // STEP 3: Get the bets table for this market type
+    const getBetsTableName = (type: string) => {
+      switch (type) {
+        case 'featured': return 'featured_bets';
+        case 'crypto': return 'crypto_bets'; 
+        case 'stocks': return 'stocks_bets';
+        default: return 'featured_bets';
+      }
+    };
+
+    const tableName = getBetsTableName(tableType);
+
+    // Check if they entered the pot today (if so, no penalty for missing today's prediction)
+    const entryToday = await sql`
+      SELECT COUNT(*) as entry_count 
+      FROM pot_participation_history
+      WHERE wallet_address = ${walletAddress.toLowerCase()} 
+      AND contract_address = ${contractAddress}
+      AND event_type = 'entry'
+      AND event_date = ${todayString}
+    `;
+
+    const enteredToday = parseInt(entryToday[0].entry_count) > 0;
     
-    const sql = neon(process.env.DATABASE_URL!);
-    const betsTableName = getBetsTableName(tableType).toLowerCase(); // Convert to snake_case for SQL
-    const actualTableName = betsTableName === 'featuredbets' ? 'featured_bets' : 
-                            betsTableName === 'cryptobets' ? 'crypto_bets' :
-                            betsTableName === 'stocksbets' ? 'stocks_bets' : 'featured_bets';
+    if (enteredToday) {
+      console.log(`✅ User ${walletAddress} entered today - no prediction penalty required`);
+      return;
+    }
 
+    // Check if they made a prediction for today
     const result = await sql`
       SELECT COUNT(*) as prediction_count 
-      FROM ${sql(actualTableName)}
+      FROM ${sql(tableName)}
       WHERE wallet_address = ${walletAddress.toLowerCase()} 
-      AND bet_date = ${yesterdayString}
+      AND bet_date = ${todayString}
     `;
 
     const predictionCount = parseInt(result[0].prediction_count);
-    console.log(`📊 Found ${predictionCount} predictions for ${walletAddress} on ${yesterdayString}`);
+    console.log(`📊 Found ${predictionCount} predictions for ${walletAddress} on ${todayString}`);
 
     if (predictionCount === 0) {
-      // User was eligible but didn't predict - they should be penalized
-      console.log(`❌ User ${walletAddress} missed required prediction for ${yesterdayString} - adding to wrong predictions`);
+      // TODO: We should also check if they're actually in the pot before penalizing
+      // For now, just add to wrong predictions - the existing reEntry logic will handle the rest
+      console.log(`❌ User ${walletAddress} missed required prediction for ${todayString} - adding to wrong predictions`);
       
-      // Add user to wrong predictions table immediately
-      const addPenaltyResult = await addMissedPredictionPenalty(walletAddress, tableType, yesterdayString);
-      
-      if (addPenaltyResult.success) {
-        return {
-          shouldBlock: true,
-          missedDate: yesterdayString,
-          message: `You missed making a prediction for ${yesterdayString}. Please pay today's entry fee to re-enter the pot.`
-        };
-      } else {
-        // If we couldn't add the penalty, don't block (safer to allow than incorrectly block)
-        console.error(`Failed to add penalty for ${walletAddress}: ${addPenaltyResult.message}`);
-        return { shouldBlock: false };
-      }
+      await addMissedPredictionPenalty(walletAddress, tableType, todayString);
+      console.log(`✅ Added ${walletAddress} to wrong predictions table for ${tableType}`);
+    } else {
+      console.log(`✅ User ${walletAddress} made prediction for ${todayString} - no penalty needed`);
     }
-
-    // User made predictions as required
-    console.log(`✅ User ${walletAddress} made predictions as required for ${yesterdayString}`);
-    return { shouldBlock: false };
 
   } catch (error) {
     console.error('Error checking missed prediction penalty:', error);
-    // On error, don't block user (safer to allow than incorrectly block)
-    return { shouldBlock: false };
+    // On error, do nothing (safer to allow than incorrectly penalize)
   }
 }
 
