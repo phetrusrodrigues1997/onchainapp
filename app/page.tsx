@@ -437,7 +437,7 @@ export default function App() {
       {!isLandingPageLoading && (
         <header
   className={`z-50 bg-white px-4 md:py-2 sticky top-0 ${
-    (activeSection === "home") ? "md:border-b border-gray-200" : ""
+    (activeSection === "home") ? "border-b border-gray-200" : ""
   }`}
 >
         <div className="max-w-7xl mx-auto flex flex-col">
