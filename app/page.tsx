@@ -437,7 +437,7 @@ export default function App() {
       {!isLandingPageLoading && (
         <header
   className={`z-50 bg-white px-4 md:py-2 sticky top-0 ${
-    (activeSection === "home") ? "border-b border-gray-200" : ""
+    (activeSection === "home") ? "md:border-b border-gray-200" : ""
   }`}
 >
         <div className="max-w-7xl mx-auto flex flex-col">
@@ -703,8 +703,8 @@ export default function App() {
         </header>
       )}
 
-      {/* Mobile Search Bar - Below Header - Only show on home page */}
-      {!isLandingPageLoading && activeSection === 'home' && (
+      {/* Mobile Search Bar - Below Header - Only show on home page when search is active */}
+      {!isLandingPageLoading && activeSection === 'home' && isMobileSearchActive && (
       <div className="md:hidden bg-white px-4 py-3 flex items-center gap-3">
         <div className="relative flex-1">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -748,7 +748,7 @@ export default function App() {
 
       {/* Second Carousel - Personalized Labels (Below mobile search bar) */}
       {!isLandingPageLoading && activeSection === 'home' && (
-        <section className="relative z-10 px-4 py-1 md:py-3 bg-white overflow-hidden">
+        <section className="relative z-10 px-4 py-4 md:py-3 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 w-full max-w-full">
               {/* Desktop Search Bar - Left side */}
@@ -838,7 +838,7 @@ export default function App() {
                   <button
                     key={`personalized-${market.id}`}
                     onClick={() => setSelectedMarket(market.id)}
-                    className={`group flex-shrink-0 flex items-center gap-1 px-4 py-1.5 transition-all duration-300 ${selectedMarket === market.id
+                    className={`group flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 transition-all duration-300 ${selectedMarket === market.id
                         ? 'text-purple-700 bg-purple-100 border border-purple-200 rounded-full'
                         : 'text-black border border-gray-300 rounded-full hover:text-gray-600'
                       }`}
@@ -909,7 +909,7 @@ export default function App() {
       {/* Mobile Bottom Navigation */}
       {!isLandingPageLoading && (
         <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white z-40">
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center justify-around py-1">
           <button
             onClick={(e) => {
               console.log('Mobile HOME button clicked');
@@ -931,19 +931,30 @@ export default function App() {
 
           <button
             onClick={(e) => {
-              console.log('Mobile CREATE button clicked');
-              setActiveSection('createPot');
+              console.log('Mobile SEARCH button clicked');
+              if (activeSection === 'home') {
+                setIsMobileSearchActive(!isMobileSearchActive);
+                if (!isMobileSearchActive) {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              } else {
+                setActiveSection('home');
+                setIsMobileSearchActive(true);
+                setTimeout(() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+              }
             }}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'createPot' ? 'text-black' : 'text-gray-500'
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${(activeSection === 'home' && isMobileSearchActive) ? 'text-black' : 'text-gray-500'
               }`}
           >
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'createPot' ? 'bg-transparent' : ''
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${(activeSection === 'home' && isMobileSearchActive) ? 'bg-transparent' : ''
               }`}>
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M12 5v14m-7-7h14"></path>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <span className="text-[13px] font-medium -translate-y-0.5">Create</span>
+            <span className="text-[13px] font-medium">Search</span>
           </button>
 
           <button
