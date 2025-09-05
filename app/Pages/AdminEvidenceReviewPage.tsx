@@ -15,8 +15,9 @@ const getMarketsWithContracts = () => {
 };
 
 // Map contract address to table type for database queries using centralized mapping
-const getTableTypeFromContract = (contractAddress: string): string => {
-  return CONTRACT_TO_TABLE_MAPPING[contractAddress as keyof typeof CONTRACT_TO_TABLE_MAPPING] || contractAddress.slice(2, 8).toLowerCase();
+const getTableTypeFromContract = (contractAddress: string): TableType => {
+  const mappedType = CONTRACT_TO_TABLE_MAPPING[contractAddress as keyof typeof CONTRACT_TO_TABLE_MAPPING];
+  return mappedType || contractAddress.slice(2, 8).toLowerCase();
 };
 
 type TableType = "featured" | "crypto" | string;
@@ -74,7 +75,7 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
     try {
       const tableType = getTableTypeFromContract(contractAddress);
       // Use display name as fallback for question name in admin context
-      const questionName = getMarketDisplayName(tableType as TableType);
+      const questionName = getMarketDisplayName(tableType);
       const provisionalOutcomeData = await getProvisionalOutcome(tableType, questionName);
       
       if (provisionalOutcomeData) {
