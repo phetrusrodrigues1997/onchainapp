@@ -1201,11 +1201,10 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               
               if (isEliminated) {
                 return (
-                  /* Elimination UI - Fun elimination message with same height as buttons */
+                  /* Sleek Professional Elimination Status */
                   <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
-                    <div className="text-black font-bold text-sm flex items-center gap-1">
-                      <span>😵</span>
-                      <span>Eliminated!</span>
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <span className="font-medium text-sm">😵 Eliminated</span>
                     </div>
                   </div>
                 );
@@ -1540,11 +1539,10 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           
                           if (isEliminated) {
                             return (
-                              /* Elimination UI - Fun elimination message with same height as buttons */
+                              /* Sleek Professional Elimination Status */
                               <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
-                                <div className="text-black font-bold text-base flex items-center gap-2">
-                                  <span>😵</span>
-                                  <span>Eliminated!</span>
+                                <div className="flex items-center gap-2 text-gray-500">
+                                  <span className="font-medium text-sm">😵 Eliminated</span>
                                 </div>
                               </div>
                             );
