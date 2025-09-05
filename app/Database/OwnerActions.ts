@@ -73,6 +73,7 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
 export async function setProvisionalOutcome(
   outcome: "positive" | "negative",
   tableType: string,
+  questionName: string, // "Bitcoin", "Ethereum", "Tesla", etc.
   outcomeDate?: string
 ) {
   // Add input validation
@@ -113,6 +114,7 @@ export async function setProvisionalOutcome(
         .from(MarketOutcomes)
         .where(and(
           eq(MarketOutcomes.marketType, tableType),
+          eq(MarketOutcomes.questionName, questionName),
           eq(MarketOutcomes.outcomeDate, targetDate)
         ));
       console.log(`✅ Successfully queried existing outcomes. Found: ${existingOutcome.length}`);
@@ -146,6 +148,7 @@ export async function setProvisionalOutcome(
       try {
         const result = await db.insert(MarketOutcomes).values({
           marketType: tableType,
+          questionName: questionName,
           outcomeDate: targetDate,
           provisionalOutcome: outcome,
           evidenceWindowExpires: evidenceWindowExpires,
@@ -173,15 +176,16 @@ export async function setProvisionalOutcome(
   }
 }
 
-export async function getProvisionalOutcome(tableType: string, outcomeDate?: string) {
+export async function getProvisionalOutcome(tableType: string, questionName: string, outcomeDate?: string) {
   const targetDate = outcomeDate || new Date().toISOString().split('T')[0]; // Today if no date provided
   
   try {
-    // Get outcome record for the specified market type and date
+    // Get outcome record for the specified market type, question, and date
     const result = await db.select()
       .from(MarketOutcomes)
       .where(and(
         eq(MarketOutcomes.marketType, tableType),
+        eq(MarketOutcomes.questionName, questionName),
         eq(MarketOutcomes.outcomeDate, targetDate)
       ))
       .limit(1);
@@ -212,6 +216,7 @@ export async function getProvisionalOutcome(tableType: string, outcomeDate?: str
 export async function setDailyOutcome(
   outcome: "positive" | "negative",
   tableType: string,
+  questionName: string, // "Bitcoin", "Ethereum", "Tesla", etc.
   targetDate?: string // Optional: YYYY-MM-DD format. If not provided, uses today's date
 ) {
   const opposite = outcome === "positive" ? "negative" : "positive";
@@ -226,11 +231,12 @@ export async function setDailyOutcome(
     
     console.log(`🔴 Setting final outcome for ${tableType}: ${outcome} on ${finalTargetDate}`);
     
-    // Check if there's an existing outcome for this market and date
+    // Check if there's an existing outcome for this market, question, and date
     const existingOutcome = await db.select()
       .from(MarketOutcomes)
       .where(and(
         eq(MarketOutcomes.marketType, tableType),
+        eq(MarketOutcomes.questionName, questionName),
         eq(MarketOutcomes.outcomeDate, finalTargetDate)
       ));
 
@@ -249,6 +255,7 @@ export async function setDailyOutcome(
       console.warn(`⚠️ No existing provisional outcome found, creating final outcome directly`);
       await db.insert(MarketOutcomes).values({
         marketType: tableType,
+        questionName: questionName,
         outcomeDate: finalTargetDate,
         provisionalOutcome: outcome,
         finalOutcome: outcome,
@@ -419,7 +426,7 @@ export async function determineWinners(typeTable: string, contractParticipants: 
  * Also rotates to the next question by removing the current one and generating a new one.
  * @param correctAnswer - Either "positive" or "negative" - the correct answer for the live question
  */
-export async function determineWinnersLive(correctAnswer: "positive" | "negative") {
+export async function determineWinnersLive(correctAnswer: "positive" | "negative", questionName: string = "Live Question") {
   try {
     // First, update the MarketOutcomes table to mark this as the final outcome
     const now = Date.now();
@@ -428,11 +435,12 @@ export async function determineWinnersLive(correctAnswer: "positive" | "negative
     
     console.log(`🔴 Setting final outcome for live: ${correctAnswer} on ${targetDate}`);
     
-    // Check if there's an existing outcome for this market and date
+    // Check if there's an existing outcome for this market, question, and date
     const existingOutcome = await db.select()
       .from(MarketOutcomes)
       .where(and(
         eq(MarketOutcomes.marketType, 'live'),
+        eq(MarketOutcomes.questionName, questionName),
         eq(MarketOutcomes.outcomeDate, targetDate)
       ));
 
@@ -451,6 +459,7 @@ export async function determineWinnersLive(correctAnswer: "positive" | "negative
       console.warn(`⚠️ No existing provisional outcome found for live, creating final outcome directly`);
       await db.insert(MarketOutcomes).values({
         marketType: 'live',
+        questionName: questionName,
         outcomeDate: targetDate,
         provisionalOutcome: correctAnswer,
         finalOutcome: correctAnswer,
@@ -549,17 +558,18 @@ export async function clearLivePredictions() {
 /**
  * Clears market outcome for live predictions after pot distribution
  */
-export async function clearLiveMarketOutcome() {
+export async function clearLiveMarketOutcome(questionName: string = "Live Question") {
   try {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     
     console.log(`🗑️ Clearing live market outcome for ${today}`);
     
-    // Clear market outcome for live table type
+    // Clear market outcome for live table type and specific question
     const result = await db
       .delete(MarketOutcomes)
       .where(and(
         eq(MarketOutcomes.marketType, 'live'),
+        eq(MarketOutcomes.questionName, questionName),
         eq(MarketOutcomes.outcomeDate, today)
       ));
     

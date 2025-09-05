@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseEther } from 'viem';
 import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions, processReEntry } from '../Database/actions';
-import { getUserPredictionsByContract } from '../Database/actions3';
+import { getUserPredictionsByContract, getUserPredictionsWithResults } from '../Database/actions3';
 import { getProvisionalOutcome, } from '../Database/OwnerActions';
-import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp, Eye, Trophy } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
@@ -148,12 +148,15 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState<boolean>(false);
   
   // New state for collapsible sections and prediction history
-  const [isMainSectionCollapsed, setIsMainSectionCollapsed] = useState<boolean>(false);
+  const [isMainSectionCollapsed, setIsMainSectionCollapsed] = useState<boolean>(true); // Start closed by default
   const [predictionHistory, setPredictionHistory] = useState<Array<{
     questionName: string;
     prediction: 'positive' | 'negative';
     predictionDate: string;
     createdAt: Date;
+    status: 'pending' | 'correct' | 'incorrect';
+    actualOutcome?: string;
+    isProvisional?: boolean;
   }>>([]);
   
   // Wait for transaction receipt
@@ -484,7 +487,8 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
     if (!contractAddress || !selectedTableType) return;
     
     try {
-      const provisionalOutcomeData = await getProvisionalOutcome(selectedTableType);
+      const questionName = marketQuestion || getMarketDisplayName(selectedTableType);
+      const provisionalOutcomeData = await getProvisionalOutcome(selectedTableType, questionName);
       
       if (provisionalOutcomeData) {
         const marketOutcomeData = {
@@ -552,13 +556,14 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
     }
   }, [address, selectedTableType]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load prediction history for the current contract and user
+  // Load prediction history for the current contract and user with results
   const loadPredictionHistory = useCallback(async () => {
     if (!address || !contractAddress) return;
     
     try {
-      const history = await getUserPredictionsByContract(address, contractAddress);
-      setPredictionHistory(history);
+      const historyWithResults = await getUserPredictionsWithResults(address, contractAddress);
+      setPredictionHistory(historyWithResults);
+      console.log('📊 Loaded prediction history with results:', historyWithResults);
     } catch (error) {
       console.error('Error loading prediction history:', error);
     }
@@ -1118,20 +1123,20 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                     </div>
                   )} */}
 
-                  {/* Status Indicators */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="bg-white border-2 border-black rounded-lg p-2 text-center">
-                      <div className="w-5 h-5 bg-purple-700 rounded-full flex items-center justify-center mx-auto mb-1">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                  {/* Tiny Timer */}
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-white border border-gray-300 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-purple-600 rounded-full flex items-center justify-center">
+                          <Clock className="w-1.5 h-1.5 text-white" />
+                        </div>
+                        <span className="text-gray-700 font-medium text-xs">Next Question</span>
+                        <span className="font-black text-gray-900 text-xs tracking-wider">
+                          {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
+                          {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
+                          {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
+                        </span>
                       </div>
-                      <div className="text-black font-bold text-xs">Ongoing</div>
-                    </div>
-                    
-                    <div className="bg-white border-2 border-black rounded-lg p-2 text-center">
-                      <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center mx-auto mb-1">
-                        <Shield className="w-2.5 h-2.5 text-white" />
-                      </div>
-                      <div className="text-black font-bold text-xs">Locked</div>
                     </div>
                   </div>
                 </div>
@@ -1210,29 +1215,22 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                   onClick={() => setIsMainSectionCollapsed(!isMainSectionCollapsed)}
                   className="flex items-center justify-between p-6 cursor-pointer hover:bg-purple-50/20 transition-all duration-200 border-b border-gray-100/50"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-black rounded-xl flex items-center justify-center shadow-lg">
-                      {tomorrowsBet ? (
-                        (tomorrowsBet as TodaysBet).prediction === 'positive' ? (
-                          <TrendingUp className="w-5 h-5 text-white" />
-                        ) : (
-                          <TrendingDown className="w-5 h-5 text-white" />
-                        )
-                      ) : (
-                        <Clock className="w-5 h-5 text-white" />
-                      )}
-                    </div>
-                    <div>
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="flex-1">
                       <h2 className="text-lg font-black text-gray-900 tracking-tight">
-                        {tomorrowsBet ? 'Active Prediction' : 'Make Prediction'}
+                        {tomorrowsBet ? 'Active Prediction' : marketQuestion || 'Make Prediction'}
                       </h2>
                       <p className="text-gray-500 text-xs font-medium">
-                        {tomorrowsBet ? 'Manage your current prediction' : 'Place your prediction for tomorrow'}
-                      </p>
+  {tomorrowsBet 
+    ? "Manage your current prediction" 
+    : <>Place your prediction for <span className="text-purple-700">tomorrow</span></>
+  }
+</p>
+
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {tomorrowsBet && (
+                    {tomorrowsBet ? (
                       <div className={`px-3 py-1 rounded-full text-xs font-black shadow-sm ${
                         (tomorrowsBet as TodaysBet).prediction === 'positive' 
                           ? 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200' 
@@ -1240,6 +1238,26 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                       }`}>
                         {(tomorrowsBet as TodaysBet).prediction === 'positive' ? 'YES' : 'NO'}
                       </div>
+                    ) : (
+                      // Show YES/NO buttons when collapsed and no active prediction
+                      isMainSectionCollapsed && isBettingAllowed() && (
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => handlePlaceBet('positive')}
+                            disabled={isLoading}
+                            className="bg-[#00bb00] hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 text-white px-4 py-2 rounded-xl font-black text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                          >
+                            YES
+                          </button>
+                          <button
+                            onClick={() => handlePlaceBet('negative')}
+                            disabled={isLoading}
+                            className="bg-[#bb0000] hover:from-gray-700 hover:to-gray-800 disabled:opacity-50 text-white px-4 py-2 rounded-xl font-black text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                          >
+                            NO
+                          </button>
+                        </div>
+                      )
                     )}
                     <div className={`p-2 rounded-lg transition-colors duration-200 ${
                       isMainSectionCollapsed ? 'bg-gray-100 hover:bg-gray-200' : 'bg-purple-100 hover:bg-purple-200'
@@ -1256,6 +1274,28 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                 {/* Collapsible Content */}
                 {!isMainSectionCollapsed && (
                   <div className="px-6 pb-6">
+                    {/* Prediction Date Information */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/50 rounded-2xl p-4 mb-6 text-center">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <h4 className="text-sm font-black text-gray-900">Predicting for Tomorrow</h4>
+                      </div>
+                      <p className="text-blue-700 font-semibold text-lg">
+                        {(() => {
+                          const tomorrow = new Date();
+                          tomorrow.setDate(tomorrow.getDate() + 1);
+                          return tomorrow.toLocaleDateString('en-US', { 
+                            weekday: 'long',
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          });
+                        })()}
+                      </p>
+                      <p className="text-gray-600 text-xs mt-1">
+                        Results will be available the following day
+                      </p>
+                    </div>
+
                     {/* Voting Interface */}
                     <div className="mb-6">
                       <div className="text-center mb-6">
@@ -1273,10 +1313,10 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                             </div>
                           </div>
                         ) : (
-                          <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Your Prediction</h3>
+                          <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight hidden">Your Prediction</h3>
                         )}
                         
-                        {marketQuestion && (
+                        {/* {marketQuestion && (
                           <div className="bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl p-4 mb-4 mx-auto max-w-md shadow-lg">
                             <p className="text-white font-semibold text-sm leading-relaxed">
                               {marketQuestion.replace(/\?$/, '')} <span className="text-purple-300">tomorrow?</span>
@@ -1286,7 +1326,7 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                         
                         <p className="text-gray-600 text-sm font-medium">
                           For {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
-                        </p>
+                        </p> */}
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
@@ -1336,7 +1376,7 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
 
                     {/* Timer Section */}
                     <div className="border-t border-gray-100 pt-6">
-                      <h4 className="text-lg font-black text-gray-900 text-center mb-6">Game Timers</h4>
+                      <h4 className="text-lg font-black text-gray-900 text-center mb-6">Important Timers</h4>
                       <div className="space-y-3">
                       
                       {/* New Question Timer */}
@@ -1406,7 +1446,7 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                               <div className={`${textClass} font-semibold text-sm`}>Results Reveal</div>
                               <div className="flex items-center gap-3">
                                 <div className={`w-6 h-6 ${iconClass} rounded-full flex items-center justify-center`}>
-                                  <AlertTriangle className="w-3 h-3 text-white" />
+                                  <Trophy className="w-3 h-3 text-white" />
                                 </div>
                                 <span className={`font-black ${timerClass} text-lg tracking-wider`}>
                                   {timeUntilNextElimination.hours.toString().padStart(2, '0')}:
@@ -1443,7 +1483,6 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
           <div className="bg-gradient-to-br from-white via-purple-50/20 to-white border border-gray-200/50 rounded-3xl p-6 mb-8 shadow-lg">
             <div className="mb-6">
               <h3 className="text-xl font-black text-gray-900 mb-2 tracking-tight">Prediction History</h3>
-              <p className="text-gray-500 text-sm font-medium">Your predictions for this market</p>
             </div>
             
             <div className="space-y-3">
@@ -1492,7 +1531,46 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                         })}
                       </p>
                     </div>
+
+                    {/* Result Status */}
+                    <div className="flex-shrink-0">
+                      {prediction.status === 'correct' && (
+                        <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                          <span>✓</span> Correct
+                          {prediction.isProvisional && (
+                            <span className="text-green-600 ml-1">*</span>
+                          )}
+                        </div>
+                      )}
+                      {prediction.status === 'incorrect' && (
+                        <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                          <span>✗</span> Wrong
+                          {prediction.isProvisional && (
+                            <span className="text-red-600 ml-1">*</span>
+                          )}
+                        </div>
+                      )}
+                      {prediction.status === 'pending' && (
+                        <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> Pending
+                        </div>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Additional Result Details */}
+                  {prediction.actualOutcome && prediction.status !== 'pending' && (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-500">
+                        Actual result: <span className="font-medium text-gray-700">
+                          {prediction.actualOutcome === 'positive' ? 'Positive' : 'Negative'}
+                        </span>
+                        {prediction.isProvisional && (
+                          <span className="text-gray-400 ml-1">(provisional)</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

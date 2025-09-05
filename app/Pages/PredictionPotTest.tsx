@@ -225,13 +225,16 @@ const PredictionPotTest =  ({ activeSection, setActiveSection }: PredictionPotPr
   // Add state for voting preference
   const [votingPreference, setVotingPreference] = useState<string | null>(null);
   const [selectedMarketForVoting, setSelectedMarketForVoting] = useState<string | null>(null);
+  const [marketQuestion, setMarketQuestion] = useState<string | null>(null);
   
   // Load voting preference from cookies
   useEffect(() => {
     const preference = Cookies.get('votingPreference');
     const marketForVoting = Cookies.get('selectedMarketForVoting');
+    const savedQuestion = Cookies.get('selectedMarketQuestion');
     setVotingPreference(preference || null);
     setSelectedMarketForVoting(marketForVoting || null);
+    setMarketQuestion(savedQuestion || null);
   }, []);
 
   // Load referral data when wallet connects or market changes
@@ -1369,7 +1372,8 @@ useEffect(() => {
           setIsLoading(true);
           try {
             console.log('🟡 Setting provisional outcome:', { outcome: provisionalOutcomeInput, tableType: selectedTableType });
-            await setProvisionalOutcome(provisionalOutcomeInput as "positive" | "negative", selectedTableType);
+            const questionName = marketQuestion || getMarketDisplayName(selectedTableType);
+            await setProvisionalOutcome(provisionalOutcomeInput as "positive" | "negative", selectedTableType, questionName);
             showMessage("Provisional outcome set! Evidence window started (1 hour)");
             setProvisionalOutcomeInput("");
             console.log('✅ Provisional outcome set successfully');
@@ -1426,7 +1430,8 @@ useEffect(() => {
             
             // Set daily outcome (this will add new wrong predictions to the table)
             // Note: Non-predictor penalties are now handled at the page level
-            await setDailyOutcome(outcome as "positive" | "negative", selectedTableType, dateParam);
+            const questionName = marketQuestion || getMarketDisplayName(selectedTableType);
+            await setDailyOutcome(outcome as "positive" | "negative", selectedTableType, questionName, dateParam);
             
             // 🔔 Send notifications after successful outcome setting
             try {

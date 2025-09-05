@@ -839,3 +839,100 @@ export async function getUserPredictionsByContract(
   }
 }
 
+/**
+ * Enhanced function to get user predictions with their results from market outcomes
+ * Matches predictions to outcomes using questionName + predictionDate
+ */
+export async function getUserPredictionsWithResults(
+  walletAddress: string,
+  contractAddress: string
+): Promise<Array<{
+  questionName: string;
+  prediction: 'positive' | 'negative';
+  predictionDate: string;
+  createdAt: Date;
+  status: 'pending' | 'correct' | 'incorrect';
+  actualOutcome?: string;
+  isProvisional?: boolean;
+}>> {
+  try {
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    const normalizedContractAddress = contractAddress.toLowerCase();
+    
+    console.log(`🔍 Getting predictions with results for wallet: ${normalizedWalletAddress}, contract: ${normalizedContractAddress}`);
+    
+    // Get user's predictions
+    const predictions = await getUserPredictionsByContract(walletAddress, contractAddress);
+    
+    // Get table type from contract address
+    const { CONTRACT_TO_TABLE_MAPPING } = await import('./config');
+    const tableType = CONTRACT_TO_TABLE_MAPPING[contractAddress as keyof typeof CONTRACT_TO_TABLE_MAPPING];
+    
+    if (!tableType) {
+      console.warn('Unknown contract address, returning predictions without results');
+      return predictions.map(p => ({ ...p, status: 'pending' as const }));
+    }
+    
+    // Get all market outcomes for this table type
+    const { MarketOutcomes } = await import('./schema');
+    const { eq, and } = await import('drizzle-orm');
+    
+    const predictionsWithResults = await Promise.all(
+      predictions.map(async (prediction) => {
+        try {
+          // Look for market outcome that matches question + date + table type
+          const outcome = await getDb()
+            .select()
+            .from(MarketOutcomes)
+            .where(and(
+              eq(MarketOutcomes.questionName, prediction.questionName),
+              eq(MarketOutcomes.outcomeDate, prediction.predictionDate),
+              eq(MarketOutcomes.marketType, tableType)
+            ))
+            .limit(1);
+          
+          const result = outcome[0];
+          let status: 'pending' | 'correct' | 'incorrect';
+          let actualOutcome: string | undefined;
+          let isProvisional = false;
+          
+          if (!result) {
+            // No outcome set yet
+            status = 'pending';
+          } else if (result.finalOutcome) {
+            // Final outcome available
+            actualOutcome = result.finalOutcome;
+            status = result.finalOutcome === prediction.prediction ? 'correct' : 'incorrect';
+          } else if (result.provisionalOutcome) {
+            // Only provisional outcome available
+            actualOutcome = result.provisionalOutcome;
+            status = result.provisionalOutcome === prediction.prediction ? 'correct' : 'incorrect';
+            isProvisional = true;
+          } else {
+            status = 'pending';
+          }
+          
+          return {
+            ...prediction,
+            status,
+            actualOutcome,
+            isProvisional
+          };
+        } catch (error) {
+          console.error(`Error getting outcome for prediction ${prediction.questionName}:`, error);
+          return { ...prediction, status: 'pending' as const };
+        }
+      })
+    );
+    
+    console.log(`✅ Retrieved ${predictionsWithResults.length} predictions with results`);
+    return predictionsWithResults;
+    
+  } catch (error) {
+    console.error('Error getting user predictions with results:', error);
+    // Fallback to basic predictions without results
+    return (await getUserPredictionsByContract(walletAddress, contractAddress))
+      .map(p => ({ ...p, status: 'pending' as const }));
+  }
+}
+

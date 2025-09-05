@@ -120,6 +120,7 @@ export const LivePredictions = pgTable("live_predictions", {
 export const MarketOutcomes = pgTable("market_outcomes", {
   id: serial("id").primaryKey(),
   marketType: text("market_type").notNull(), // "featured" or "crypto"
+  questionName: text("question_name").notNull(), // "Bitcoin", "Ethereum", "Tesla", etc.
   outcomeDate: text("outcome_date").notNull(), // Date the outcome is for (YYYY-MM-DD)
   provisionalOutcome: text("provisional_outcome").notNull(), // "positive" or "negative"
   provisionalOutcomeSetAt: timestamp("provisional_outcome_set_at").defaultNow().notNull(),

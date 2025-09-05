@@ -91,6 +91,17 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - `CryptoBets`: General crypto prediction markets
 - `WrongPredictions`/`WrongPredictionsCrypto`: Tracking incorrect predictions and re-entry fees
 
+#### Market Outcomes & Results System (NEW - 2025)
+- `MarketOutcomes`: Stores prediction results with exact question matching (marketType, questionName, outcomeDate, provisionalOutcome, finalOutcome, isDisputed)
+- **Perfect Result Matching**: Uses `questionName` + `predictionDate` + `marketType` for exact prediction-to-outcome matching
+- **Multi-Asset Support**: Same market can handle multiple questions on same day (e.g., "Bitcoin", "Ethereum", "Tesla")
+- **Question Name Integration**: Uses `selectedMarketQuestion` cookie to capture exact question names from user selections
+- **Provisional vs Final Outcomes**: Supports evidence-based dispute system with 1-hour evidence windows
+- **Enhanced Functions**: `getUserPredictionsWithResults()` provides complete prediction history with results (`'pending'`, `'correct'`, `'incorrect'`)
+- **Live Prediction History UI**: MakePredictionsPage.tsx displays real-time result status with visual badges (✓ Correct, ✗ Wrong, ⏳ Pending)
+- **Provisional Result Indicators**: Shows asterisk (*) for provisional outcomes during evidence windows, with detailed "Actual result" information
+- **Complete Result Transparency**: Users see exact outcome matching for each prediction with color-coded status badges and detailed result information
+
 #### Pot Participation History System (NEW - 2025)
 - `PotParticipationHistory`: Complete audit trail of pot entry/exit events (walletAddress, contractAddress, tableType, eventType, eventDate, eventTimestamp)
 - **Fair Eligibility System**: Tracks who was eligible for predictions on specific dates to prevent unfair penalties
@@ -168,6 +179,11 @@ The main app component (`app/page.tsx`) uses a section-based navigation system w
 - **Immediate Penalty System**: `checkMissedPredictionPenalty()` runs on page load to instantly block users with missed predictions
 - **Fair Eligibility**: Only penalizes users who were actually eligible for missed predictions (no penalties for pre-entry dates)
 - **Re-entry System**: Wrong predictors must pay today's entry fee to re-enter markets
+- **Enhanced Prediction History (2025)**: Real-time display of prediction results with visual status indicators
+  - **Color-Coded Badges**: ✓ Correct (green), ✗ Wrong (red), ⏳ Pending (gray)
+  - **Provisional Indicators**: Asterisk (*) shown during evidence windows
+  - **Detailed Results**: Shows actual outcome vs user prediction with transparency
+  - **Live Updates**: Results update automatically as market outcomes are determined
 - **Day-Based UI Logic**:
   - **Sunday-Friday**: Shows normal prediction interface (positive/negative buttons)
   - **Saturday**: Shows "Results Day" with settlement countdown
@@ -374,7 +390,7 @@ This fix ensures pot distribution will **never fail again** due to recipient add
 
 ## Development Notes
 
-- **OnchainKit Version**: Currently on `0.38.2` (upgraded from `0.37.6`). Note: 0.37.6 had mobile wallet modal black background issue, 0.38.5+ has desktop z-index issues. 0.38.2 has mobile issue but desktop works - waiting for OnchainKit team to fix mobile modal bug in future releases.
+- **OnchainKit Version**: Currently on `0.37.5` (downgraded from `0.38.19`). Reverted to stable pre-upgrade version to avoid mobile wallet modal issues and desktop z-index problems found in newer versions.
 - **SPA Architecture**: Single-page application with conditional rendering based on `activeSection`
 - **Wallet-First Design**: Most functionality requires wallet connection and Base network
 - **Database Operations**: All data persistence uses Drizzle ORM with PostgreSQL
@@ -391,3 +407,6 @@ This fix ensures pot distribution will **never fail again** due to recipient add
 - **Immediate Penalty System**: Page-level validation prevents delayed surprises and provides instant feedback
 - **Event-Based History Tracking**: Complete audit trail of all pot participation for fair penalty determination
 - **Same-Day Prediction Eligibility**: Users can predict starting from their entry day (including entry day itself)
+- **Enhanced Market Outcomes System (2025)**: All outcome-setting functions (`setDailyOutcome`, `setProvisionalOutcome`, `getProvisionalOutcome`) now require `questionName` parameter for precise result tracking
+- **Question-Based Result Matching**: Predictions matched to outcomes using exact `questionName` + `predictionDate` + `marketType` combination
+- **Prediction Results Integration**: `getUserPredictionsWithResults()` function provides complete prediction history with real-time result status
