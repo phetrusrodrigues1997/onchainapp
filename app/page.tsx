@@ -705,7 +705,7 @@ export default function App() {
 
       {/* Mobile Search Bar - Below Header - Always show on home page */}
       {!isLandingPageLoading && activeSection === 'home' && (
-      <div className="md:hidden bg-white px-4 py-1 flex items-center gap-3">
+      <div className="md:hidden bg-white px-4 py-0.1 flex items-center gap-3">
         <div className="relative flex-1">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -748,7 +748,7 @@ export default function App() {
 
       {/* Second Carousel - Personalized Labels (Below mobile search bar) */}
       {!isLandingPageLoading && activeSection === 'home' && (
-        <section className="relative z-10 px-4 py-1 md:py-3 bg-white overflow-hidden">
+        <section className="relative z-10 px-4 py-3 md:py-3 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 w-full max-w-full">
               {/* Desktop Search Bar - Left side */}
