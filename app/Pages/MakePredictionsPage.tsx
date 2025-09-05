@@ -1076,13 +1076,9 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                 {/* Header Section */}
                 <div className="bg-black text-white px-6 py-4 text-center">
                   <h2 className="text-2xl font-bold tracking-tight">You Chose</h2>
-                  <p className="text-gray-300 text-sm mt-1">
-                    For: {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </p>
+                  {/* <p className="text-gray-300 text-sm mt-1">
+                    For: <span className="text-purple-700">tomorrow</span>
+                  </p> */}
                 </div>
 
                 {/* Main Prediction Display */}
@@ -1210,76 +1206,85 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
             ) : (
               // Combined Collapsible Voting and Timer Interface
               <div className="bg-gradient-to-br from-white via-purple-50/30 to-white border border-gray-200/50 rounded-3xl mb-8 shadow-2xl shadow-gray-900/5 relative overflow-hidden">
-                {/* Header with collapse toggle */}
+                {/* Header with collapse toggle - Improved mobile layout */}
                 <div 
                   onClick={() => setIsMainSectionCollapsed(!isMainSectionCollapsed)}
-                  className="flex items-center justify-between p-6 cursor-pointer hover:bg-purple-50/20 transition-all duration-200 border-b border-gray-100/50"
+                  className="cursor-pointer hover:bg-purple-50/20 transition-all duration-200 border-b border-gray-100/50"
                 >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="flex-1">
-                      <h2 className="text-lg font-black text-gray-900 tracking-tight">
-                        {tomorrowsBet ? 'Active Prediction' : marketQuestion || 'Make Prediction'}
-                      </h2>
-                      <p className="text-gray-500 text-xs font-medium">
-  {tomorrowsBet 
-    ? "Manage your current prediction" 
-    : <>Place your prediction for <span className="text-purple-700">tomorrow</span></>
-  }
-</p>
-
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {tomorrowsBet ? (
-                      <div className={`px-3 py-1 rounded-full text-xs font-black shadow-sm ${
-                        (tomorrowsBet as TodaysBet).prediction === 'positive' 
-                          ? 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200' 
-                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200'
-                      }`}>
-                        {(tomorrowsBet as TodaysBet).prediction === 'positive' ? 'YES' : 'NO'}
+                  {/* Top section with question */}
+                  <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-base sm:text-lg font-black text-gray-900 tracking-tight leading-tight mb-1">
+                          {tomorrowsBet ? 'Active Prediction' : (marketQuestion || 'Make Prediction')}
+                        </h2>
+                        <p className="text-gray-500 text-xs sm:text-sm font-medium">
+                          {tomorrowsBet 
+                            ? "Manage your current prediction" 
+                            : <>For <span className="text-purple-700">tomorrow</span></>
+                          }
+                        </p>
                       </div>
-                    ) : (
-                      // Show YES/NO buttons when collapsed and no active prediction
-                      isMainSectionCollapsed && isBettingAllowed() && (
-                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => handlePlaceBet('positive')}
-                            disabled={isLoading}
-                            className="bg-[#00bb00] hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 text-white px-4 py-2 rounded-xl font-black text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                          >
-                            YES
-                          </button>
-                          <button
-                            onClick={() => handlePlaceBet('negative')}
-                            disabled={isLoading}
-                            className="bg-[#bb0000] hover:from-gray-700 hover:to-gray-800 disabled:opacity-50 text-white px-4 py-2 rounded-xl font-black text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                          >
-                            NO
-                          </button>
-                        </div>
-                      )
-                    )}
-                    <div className={`p-2 rounded-lg transition-colors duration-200 ${
-                      isMainSectionCollapsed ? 'bg-gray-100 hover:bg-gray-200' : 'bg-purple-100 hover:bg-purple-200'
-                    }`}>
-                      {isMainSectionCollapsed ? (
-                        <ChevronDown className="w-4 h-4 text-gray-700" />
-                      ) : (
-                        <ChevronUp className="w-4 h-4 text-purple-700" />
-                      )}
+                      <div className={`p-2 rounded-lg transition-colors duration-200 flex-shrink-0 ${
+                        isMainSectionCollapsed ? 'bg-gray-100 hover:bg-gray-200' : 'bg-purple-100 hover:bg-purple-200'
+                      }`}>
+                        {isMainSectionCollapsed ? (
+                          <ChevronDown className="w-4 h-4 text-gray-700" />
+                        ) : (
+                          <ChevronUp className="w-4 h-4 text-purple-700" />
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Bottom section with buttons - only show when collapsed */}
+                  {isMainSectionCollapsed && (
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2">
+                      <div className="flex items-center justify-center gap-3">
+                        {tomorrowsBet ? (
+                          <div className={`px-4 py-2 rounded-full text-sm font-black shadow-sm ${
+                            (tomorrowsBet as TodaysBet).prediction === 'positive' 
+                              ? 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200' 
+                              : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200'
+                          }`}>
+                            {(tomorrowsBet as TodaysBet).prediction === 'positive' ? 'YES' : 'NO'}
+                          </div>
+                        ) : (
+                          // Show YES/NO buttons when collapsed and no active prediction
+                          isBettingAllowed() && (
+                            <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => handlePlaceBet('positive')}
+                                disabled={isLoading}
+                                className="bg-[#00bb00] hover:bg-[#009900] disabled:opacity-50 text-white px-6 py-3 rounded-xl font-black text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                              >
+                                YES
+                              </button>
+                              <button
+                                onClick={() => handlePlaceBet('negative')}
+                                disabled={isLoading}
+                                className="bg-[#bb0000] hover:bg-[#990000] disabled:opacity-50 text-white px-6 py-3 rounded-xl font-black text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                              >
+                                NO
+                              </button>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Collapsible Content */}
                 {!isMainSectionCollapsed && (
-                  <div className="px-6 pb-6">
+                  <div className="px-4 sm:px-6 pb-6">
+                    
                     {/* Prediction Date Information */}
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/50 rounded-2xl p-4 mb-6 text-center">
                       <div className="flex items-center justify-center gap-2 mb-2">
                         <h4 className="text-sm font-black text-gray-900">Predicting for Tomorrow</h4>
                       </div>
-                      <p className="text-blue-700 font-semibold text-lg">
+                      <p className="text-blue-700 font-semibold text-base sm:text-lg">
                         {(() => {
                           const tomorrow = new Date();
                           tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1296,49 +1301,34 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                       </p>
                     </div>
 
-                    {/* Voting Interface */}
-                    <div className="mb-6">
-                      <div className="text-center mb-6">
-                        {votingPreference && !tomorrowsBet ? (
-                          <div className="mb-4">
-                            <h3 className="text-xl font-black text-purple-700 mb-3 tracking-tight">
-                              Auto-Submitting Your Choice
-                            </h3>
-                            <div className="bg-gradient-to-r from-purple-50/80 to-white border border-purple-200/50 rounded-2xl p-4 max-w-sm mx-auto">
-                              <p className="text-gray-700 text-sm font-medium">
-                                Submitting: <span className="font-black text-purple-700">
-                                  {votingPreference === 'positive' ? 'YES' : 'NO'}
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight hidden">Your Prediction</h3>
-                        )}
-                        
-                        {/* {marketQuestion && (
-                          <div className="bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl p-4 mb-4 mx-auto max-w-md shadow-lg">
-                            <p className="text-white font-semibold text-sm leading-relaxed">
-                              {marketQuestion.replace(/\?$/, '')} <span className="text-purple-300">tomorrow?</span>
-                            </p>
-                          </div>
-                        )}
-                        
-                        <p className="text-gray-600 text-sm font-medium">
-                          For {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
-                        </p> */}
+                    {/* Auto-submission status */}
+                    {votingPreference && !tomorrowsBet && (
+                      <div className="mb-6 text-center">
+                        <h3 className="text-xl font-black text-purple-700 mb-3 tracking-tight">
+                          Auto-Submitting Your Choice
+                        </h3>
+                        <div className="bg-gradient-to-r from-purple-50/80 to-white border border-purple-200/50 rounded-2xl p-4 max-w-sm mx-auto">
+                          <p className="text-gray-700 text-sm font-medium">
+                            Submitting: <span className="font-black text-purple-700">
+                              {votingPreference === 'positive' ? 'YES' : 'NO'}
+                            </span>
+                          </p>
+                        </div>
                       </div>
+                    )}
 
-                      <div className="grid grid-cols-2 gap-3">
+                    {/* Yes/No Buttons - Moved much higher, no padding */}
+                    <div className="mb-8">
+                      <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         {/* YES Button - Black */}
                         <button
                           onClick={() => handlePlaceBet('positive')}
                           disabled={isLoading || !isBettingAllowed()}
-                          className="group relative bg-gradient-to-br from-gray-900 to-black hover:from-purple-900 hover:to-black disabled:opacity-50 disabled:cursor-not-allowed text-white p-5 rounded-2xl font-black text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl border border-gray-800 hover:border-purple-700"
+                          className="group relative bg-gradient-to-br from-gray-900 to-black hover:from-purple-900 hover:to-black disabled:opacity-50 disabled:cursor-not-allowed text-white p-4 sm:p-5 rounded-2xl font-black text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl border border-gray-800 hover:border-purple-700"
                         >
                           <div className="flex flex-col items-center justify-center">
                             <div className="p-2 bg-white/10 rounded-lg mb-2 flex items-center justify-center">
-                              <TrendingUp className="w-6 h-6" />
+                              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div className="tracking-wide">YES</div>
                           </div>
@@ -1348,11 +1338,11 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                         <button
                           onClick={() => handlePlaceBet('negative')}
                           disabled={isLoading || !isBettingAllowed()}
-                          className="group relative bg-white hover:bg-purple-50 border-2 border-gray-900 hover:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 hover:text-purple-700 p-5 rounded-2xl font-black text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                          className="group relative bg-white hover:bg-purple-50 border-2 border-gray-900 hover:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 hover:text-purple-700 p-4 sm:p-5 rounded-2xl font-black text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
                         >
                           <div className="flex flex-col items-center justify-center">
                             <div className="p-2 bg-gray-900/10 group-hover:bg-purple-700/10 rounded-lg mb-2 flex items-center justify-center transition-colors duration-200">
-                              <TrendingDown className="w-6 h-6" />
+                              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                             <div className="tracking-wide">NO</div>
                           </div>
@@ -1604,9 +1594,9 @@ export default function MakePredictions({ activeSection, setActiveSection }: Mak
                   <div className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
                     {todaysBet.prediction === 'positive' ? 'YES' : 'NO'}
                   </div>
-                  <div className="text-gray-500 text-xs font-medium">
-                    For: {new Date(todaysBet.betDate).toLocaleDateString()}
-                  </div>
+                  {/* <div className="text-gray-500 text-xs font-medium">
+                    For: <span className="text-purple-700">tomorrow</span>
+                  </div> */}
                 </div>
               </div>
             </div> 

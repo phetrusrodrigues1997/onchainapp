@@ -634,7 +634,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         // Show confirmed tick for participants (they can't click to change from same option)
         return (
           <div className="flex items-center justify-center gap-2">
-            <Check className="w-4 h-4" />
+            <Check className={`w-4 h-4 ${buttonType === 'positive' ? 'text-green-600' : 'text-red-600'}`} />
             {/* <span>✓</span> */}
           </div>
         );
@@ -665,11 +665,11 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     }
     
     if (prediction && prediction.prediction === buttonType) {
-      // User has voted for this option - show confirmed styling
+      // User has voted for this option - show confirmed styling with white background
       if (buttonType === 'positive') {
-        return baseClasses.replace('bg-green-50 hover:bg-blue-200 text-green-700', 'bg-green-600 text-white cursor-default');
+        return baseClasses.replace('bg-green-50 hover:bg-blue-200 text-green-700', 'bg-white text-green-600 cursor-default border border-green-600');
       } else {
-        return baseClasses.replace('bg-red-50 hover:bg-purple-200 text-red-700', 'bg-red-600 text-white cursor-default');
+        return baseClasses.replace('bg-red-50 hover:bg-purple-200 text-red-700', 'bg-white text-red-600 cursor-default border border-red-600');
       }
     }
     
@@ -1305,7 +1305,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
-              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot</div>
+              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize}</div>
               
               {(() => {
                 const contractAddress = getContractAddress(market.id);
@@ -1319,13 +1319,13 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                   if (isEliminated) {
                     return (
                       /* Show timer placeholder for eliminated users - button is positioned as overlay */
-                      <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                      <div className="px-2 py-1 bg-gray-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
                         {timeUntilMidnight}
                       </div>
                     );
                   } else {
                     return (
-                      <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                      <div className="px-2 py-1 bg-gray-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
                         {timeUntilMidnight}
                       </div>
                     );
@@ -1670,7 +1670,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
-              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot</div>
+              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize}</div>
                           
                           {(() => {
                             const contractAddress = getContractAddress(market.id);
@@ -1690,7 +1690,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                 );
                               } else {
                                 return (
-                                  <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
+                                  <div className="px-2 py-1 bg-gray-100 text-purple-700 rounded-lg text-xs font-medium flex items-center gap-1">
                                     {timeUntilMidnight}
                                   </div>
                                 );
