@@ -244,7 +244,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         setIsVisible(true);
         // Notify parent that loading is complete
         onLoadingChange?.(false);
-      }, 2400);
+      }, 3000);
     };
     
     // Notify parent that loading started
@@ -1257,7 +1257,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
-              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot<span className="ml-4"style={{fontWeight: '350'}}>⇄ Weekly</span></div>
+              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot</div>
               
               {(() => {
                 const contractAddress = getContractAddress(market.id);
@@ -1595,7 +1595,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
-              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot<span className="ml-4"style={{fontWeight: '350'}}>⇄ Weekly</span></div>
+              <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize} In pot</div>
                           
                           {(() => {
                             const contractAddress = getContractAddress(market.id);
