@@ -244,7 +244,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         setIsVisible(true);
         // Notify parent that loading is complete
         onLoadingChange?.(false);
-      }, 3000);
+      }, 3500);
     };
     
     // Notify parent that loading started
@@ -1106,22 +1106,36 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
             
             return (isEliminated && userIsParticipant) ? (
-              <div className="absolute bottom-2 right-2 z-20">
+              <div className="absolute bottom-2 left-2 right-2 z-20">
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
                     handleMarketClick(market.id, true);
                   }}
-                  className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                  className="w-full group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
                 >
-                  <span className="relative z-10 flex items-center gap-1">
-                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
                     </svg>
                     Re-enter
                   </span>
                 </button>
+              </div>
+            ) : null;
+          })()}
+
+          {/* Eliminated status overlay - positioned outside opacity container */}
+          {(() => {
+            const contractAddress = getContractAddress(market.id);
+            const isEliminated = contractAddress && eliminationStatus[contractAddress];
+            
+            return isEliminated ? (
+              <div className="absolute top-2 right-2 z-20">
+                <div className="flex items-center gap-1 bg-red-500 px-2 py-1 rounded text-xs text-white">
+                  <span>Eliminated</span>
+                </div>
               </div>
             ) : null;
           })()}
@@ -1151,18 +1165,6 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
-            {/* Eliminated Status Indicator */}
-            {(() => {
-              const contractAddress = getContractAddress(market.id);
-              const isEliminated = contractAddress && eliminationStatus[contractAddress];
-              return isEliminated ? (
-                <div className="absolute top-2 right-2">
-                 <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-red-700">
-                                <span>Eliminated</span>
-                              </div>
-                </div>
-              ) : null;
-            })()}
             
             {/* Header with Icon, Question, and Percentage */}
             <div className="flex items-start gap-3 mb-3 relative">
@@ -1471,22 +1473,36 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                         const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
                         
                         return (isEliminated && userIsParticipant) ? (
-                          <div className="absolute bottom-2 right-2 z-20">
+                          <div className="absolute bottom-2 left-2 right-2 z-20">
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
                                 handleMarketClick(market.id, true);
                               }}
-                              className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                              className="w-full group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
                             >
-                              <span className="relative z-10 flex items-center gap-1">
-                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <span className="relative z-10 flex items-center justify-center gap-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
                                 </svg>
                                 Re-enter
                               </span>
                             </button>
+                          </div>
+                        ) : null;
+                      })()}
+
+                      {/* Eliminated status overlay - positioned outside opacity container */}
+                      {(() => {
+                        const contractAddress = getContractAddress(market.id);
+                        const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                        
+                        return isEliminated ? (
+                          <div className="absolute top-2 right-2 z-20">
+                            <div className="flex items-center gap-1 bg-red-500 px-2 py-1 rounded text-xs text-white">
+                              <span>Eliminated</span>
+                            </div>
                           </div>
                         ) : null;
                       })()}
@@ -1510,18 +1526,6 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                       >
                       <div className="rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white border border-gray-200 hover:border-gray-300">
                         
-                        {/* Eliminated Status Indicator */}
-                        {(() => {
-                          const contractAddress = getContractAddress(market.id);
-                          const isEliminated = contractAddress && eliminationStatus[contractAddress];
-                          return isEliminated ? (
-                            <div className="absolute top-2 right-2">
-                              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-red-700">
-                                <span>Eliminated</span>
-                              </div>
-                            </div>
-                          ) : null;
-                        })()}
                         
                         {/* Header with Icon, Question, and Percentage */}
                         <div className="flex items-start gap-3 mb-3 relative">
