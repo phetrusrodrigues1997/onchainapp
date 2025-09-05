@@ -47,7 +47,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home'); // Default section
   const [privatePotAddress, setPrivatePotAddress] = useState<string>(''); // For routing to private pots
   const [hasEnteredLivePot, setHasEnteredLivePot] = useState(false); // Track live pot entry
-  const [isMobileSearchActive, setIsMobileSearchActive] = useState(false); // Track mobile search state
+  const [isMobileSearchActive, setIsMobileSearchActive] = useState(true); // Track mobile search state
   const [searchQuery, setSearchQuery] = useState(''); // Search functionality
   const [isLandingPageLoading, setIsLandingPageLoading] = useState(activeSection === 'home'); // Track LandingPage loading state
   const [hasUnreadAnnouncementsState, setHasUnreadAnnouncementsState] = useState(false); // Track unread announcements
