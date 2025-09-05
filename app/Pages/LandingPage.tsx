@@ -651,11 +651,17 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
     const prediction = userPredictions[marketId];
     const contractAddress = getContractAddress(marketId);
     const isParticipant = contractAddress && isUserParticipant(contractAddress);
+    const isEliminated = contractAddress && eliminationStatus[contractAddress];
     const isLoading = voteChangeLoading[marketId];
     
     // Loading state
     if (isLoading) {
       return baseClasses.replace(/hover:bg-\w+-\d+/, 'cursor-wait opacity-50');
+    }
+    
+    // If user is eliminated, grey out the buttons
+    if (isEliminated) {
+      return baseClasses.replace(/bg-\w+-\d+/g, 'bg-gray-100').replace(/hover:bg-\w+-\d+/g, 'hover:bg-gray-200').replace(/text-\w+-\d+/g, 'text-gray-500');
     }
     
     if (prediction && prediction.prediction === buttonType) {
@@ -1092,19 +1098,51 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
       
       return (
       <div key={`mobile-${market.id}-${index}`}>
-        <div 
-          onClick={() => {
-            if (!isSwapping) {
-              handleMarketClick(market.id);
-            }
-          }}
-          className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
-                        isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
-                      } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''}`}
-          style={{
-            '--swap-distance': swapDistance
-          } as React.CSSProperties}
-        >
+        <div className="relative">
+          {/* Re-enter button overlay - positioned outside opacity container */}
+          {(() => {
+            const contractAddress = getContractAddress(market.id);
+            const isEliminated = contractAddress && eliminationStatus[contractAddress];
+            const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
+            
+            return (isEliminated && userIsParticipant) ? (
+              <div className="absolute bottom-2 right-2 z-20">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleMarketClick(market.id, true);
+                  }}
+                  className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                >
+                  <span className="relative z-10 flex items-center gap-1">
+                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                    </svg>
+                    Re-enter
+                  </span>
+                </button>
+              </div>
+            ) : null;
+          })()}
+
+          <div 
+            onClick={() => {
+              if (!isSwapping) {
+                handleMarketClick(market.id);
+              }
+            }}
+            className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
+                          isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
+                        } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''} ${(() => {
+              const contractAddress = getContractAddress(market.id);
+              const isEliminated = contractAddress && eliminationStatus[contractAddress];
+              return isEliminated ? 'opacity-60 grayscale-[0.3]' : '';
+            })()}`}
+            style={{
+              '--swap-distance': swapDistance
+            } as React.CSSProperties}
+          >
           <div className={`p-3 h-full transition-all duration-300 border-b border-gray-200 ${
             market.tabId === selectedMarket 
               ? 'bg-white shadow-lg shadow-purple-100/50' 
@@ -1112,6 +1150,20 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
           }`}>
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
+            
+            {/* Eliminated Status Indicator */}
+            {(() => {
+              const contractAddress = getContractAddress(market.id);
+              const isEliminated = contractAddress && eliminationStatus[contractAddress];
+              return isEliminated ? (
+                <div className="absolute top-2 right-2">
+                  <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
+                    <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                    <span>Eliminated</span>
+                  </div>
+                </div>
+              ) : null;
+            })()}
             
             {/* Header with Icon, Question, and Percentage */}
             <div className="flex items-start gap-3 mb-3 relative">
@@ -1145,8 +1197,11 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 </p>
               </div>
 
-              {/* Percentage Display - Top Right */}
-              {predictionPercentages[market.tabId || market.id] && (
+              {/* Percentage Display - Top Right - Hide if eliminated */}
+              {predictionPercentages[market.tabId || market.id] && !(() => {
+                const contractAddress = getContractAddress(market.id);
+                return contractAddress && eliminationStatus[contractAddress];
+              })() && (
                 <div className="absolute top-0 right-0">
                   <div className="text-right flex flex-col items-end">
                     {/* Thermometer Arc */}
@@ -1194,66 +1249,47 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               )}
             </div>
 
-            {/* Check if user is eliminated for this market */}
-            {(() => {
-              const contractAddress = getContractAddress(market.id);
-              const isEliminated = contractAddress && eliminationStatus[contractAddress];
-              
-              if (isEliminated) {
-                return (
-                  /* Sleek Professional Elimination Status */
-                  <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <span className="font-medium text-sm">😵 Eliminated</span>
-                    </div>
-                  </div>
-                );
-              } else {
-                return (
-                  /* Normal Yes/No Buttons */
-                  <div className="flex justify-center gap-2 mb-3">
-                    <button 
-                      onClick={handleButtonClick(market.id, 'positive', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        console.log('Yes button clicked for market:', market.id);
-                        Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
-                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                        // Visual feedback
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
-                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                        // Navigate to market after brief visual feedback
-                        setTimeout(() => {
-                          handleMarketClick(market.id);
-                        }, 300);
-                      })}
-                      className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
-                    >
-                      {getButtonContent(market.id, 'positive')}
-                    </button>
-                    <button 
-                      onClick={handleButtonClick(market.id, 'negative', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        console.log('No button clicked for market:', market.id);
-                        Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
-                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                        // Visual feedback
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
-                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                        // Navigate to market after brief visual feedback
-                        setTimeout(() => {
-                          handleMarketClick(market.id);
-                        }, 300);
-                      })}
-                      className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
-                    >
-                      {getButtonContent(market.id, 'negative')}
-                    </button>
-                  </div>
-                );
-              }
-            })()}
+            {/* Yes/No Buttons - Always show for all users */}
+            <div className="flex justify-center gap-2 mb-3">
+              <button 
+                onClick={handleButtonClick(market.id, 'positive', (e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('Yes button clicked for market:', market.id);
+                  Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                  // Visual feedback
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                  // Navigate to market after brief visual feedback
+                  setTimeout(() => {
+                    handleMarketClick(market.id);
+                  }, 300);
+                })}
+                className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
+              >
+                {getButtonContent(market.id, 'positive')}
+              </button>
+              <button 
+                onClick={handleButtonClick(market.id, 'negative', (e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  console.log('No button clicked for market:', market.id);
+                  Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                  // Visual feedback
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                  // Navigate to market after brief visual feedback
+                  setTimeout(() => {
+                    handleMarketClick(market.id);
+                  }, 300);
+                })}
+                className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
+              >
+                {getButtonContent(market.id, 'negative')}
+              </button>
+            </div>
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
@@ -1270,22 +1306,10 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                   
                   if (isEliminated) {
                     return (
-                      /* Re-enter button in timer position - compact size */
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          handleMarketClick(market.id, true);
-                        }}
-                        className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
-                      >
-                        <span className="relative z-10 flex items-center gap-1">
-                          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
-                          </svg>
-                          Re-enter
-                        </span>
-                      </button>
+                      /* Show timer placeholder for eliminated users - button is positioned as overlay */
+                      <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                        {timeUntilMidnight}
+                      </div>
                     );
                   } else {
                     return (
@@ -1317,6 +1341,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 }
               })()}
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -1439,22 +1464,66 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                       : '0px';
                     
                     return (
-                    <div
-                      key={`desktop-${market.id}-${index}`}
-                      onClick={() => {
-                        if (!isSwapping) {
-                          handleMarketClick(market.id);
-                        }
-                      }}
-                      className={`group hover:scale-[1.004] rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
-                        isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
-                      } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''}`}
-                      style={{
-                        '--swap-distance': swapDistance
-                      } as React.CSSProperties}
-                    >
+                    <div key={`desktop-${market.id}-${index}`} className="relative">
+                      {/* Re-enter button overlay - positioned outside opacity container */}
+                      {(() => {
+                        const contractAddress = getContractAddress(market.id);
+                        const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                        const userIsParticipant = contractAddress ? isUserParticipant(contractAddress) : false;
+                        
+                        return (isEliminated && userIsParticipant) ? (
+                          <div className="absolute bottom-2 right-2 z-20">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                handleMarketClick(market.id, true);
+                              }}
+                              className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                            >
+                              <span className="relative z-10 flex items-center gap-1">
+                                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                                </svg>
+                                Re-enter
+                              </span>
+                            </button>
+                          </div>
+                        ) : null;
+                      })()}
+
+                      <div
+                        onClick={() => {
+                          if (!isSwapping) {
+                            handleMarketClick(market.id);
+                          }
+                        }}
+                        className={`group hover:scale-[1.004] rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
+                          isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
+                        } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''} ${(() => {
+                          const contractAddress = getContractAddress(market.id);
+                          const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                          return isEliminated ? 'opacity-60 grayscale-[0.3]' : '';
+                        })()}`}
+                        style={{
+                          '--swap-distance': swapDistance
+                        } as React.CSSProperties}
+                      >
                       <div className="rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white border border-gray-200 hover:border-gray-300">
                         
+                        {/* Eliminated Status Indicator */}
+                        {(() => {
+                          const contractAddress = getContractAddress(market.id);
+                          const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                          return isEliminated ? (
+                            <div className="absolute top-2 right-2">
+                              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
+                                <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                                <span>Eliminated</span>
+                              </div>
+                            </div>
+                          ) : null;
+                        })()}
                         
                         {/* Header with Icon, Question, and Percentage */}
                         <div className="flex items-start gap-3 mb-3 relative">
@@ -1482,8 +1551,11 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             </p>
                           </div>
 
-                          {/* Percentage Display - Top Right */}
-                          {predictionPercentages[market.tabId || market.id] && (
+                          {/* Percentage Display - Top Right - Hide if eliminated */}
+                          {predictionPercentages[market.tabId || market.id] && !(() => {
+                            const contractAddress = getContractAddress(market.id);
+                            return contractAddress && eliminationStatus[contractAddress];
+                          })() && (
                             <div className="absolute top-0 -right-1">
                               <div className="text-right flex flex-col items-end">
                                 {/* Thermometer Arc */}
@@ -1532,66 +1604,47 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           )}
                         </div>
 
-                        {/* Check if user is eliminated for this market */}
-                        {(() => {
-                          const contractAddress = getContractAddress(market.id);
-                          const isEliminated = contractAddress && eliminationStatus[contractAddress];
-                          
-                          if (isEliminated) {
-                            return (
-                              /* Sleek Professional Elimination Status */
-                              <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
-                                <div className="flex items-center gap-2 text-gray-500">
-                                  <span className="font-medium text-sm">😵 Eliminated</span>
-                                </div>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              /* Normal Yes/No Buttons */
-                              <div className="flex justify-center gap-2 mb-3">
-                                <button 
-                                  onClick={handleButtonClick(market.id, 'positive', (e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    console.log('Yes button clicked for market:', market.id);
-                                    Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
-                                    Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                                    // Visual feedback
-                                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
-                                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                                    // Navigate to market after brief visual feedback
-                                    setTimeout(() => {
-                                      handleMarketClick(market.id);
-                                    }, 300);
-                                  })}
-                                  className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
-                                >
-                                  {getButtonContent(market.id, 'positive')}
-                                </button>
-                                <button 
-                                  onClick={handleButtonClick(market.id, 'negative', (e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    console.log('No button clicked for market:', market.id);
-                                    Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
-                                    Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                                    // Visual feedback
-                                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
-                                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                                    // Navigate to market after brief visual feedback
-                                    setTimeout(() => {
-                                      handleMarketClick(market.id);
-                                    }, 300);
-                                  })}
-                                  className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
-                                >
-                                  {getButtonContent(market.id, 'negative')}
-                                </button>
-                              </div>
-                            );
-                          }
-                        })()}
+                        {/* Yes/No Buttons - Always show for all users */}
+                        <div className="flex justify-center gap-2 mb-3">
+                          <button 
+                            onClick={handleButtonClick(market.id, 'positive', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              console.log('Yes button clicked for market:', market.id);
+                              Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                              // Visual feedback
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                              // Navigate to market after brief visual feedback
+                              setTimeout(() => {
+                                handleMarketClick(market.id);
+                              }, 300);
+                            })}
+                            className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
+                          >
+                            {getButtonContent(market.id, 'positive')}
+                          </button>
+                          <button 
+                            onClick={handleButtonClick(market.id, 'negative', (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              console.log('No button clicked for market:', market.id);
+                              Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                              // Visual feedback
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                              // Navigate to market after brief visual feedback
+                              setTimeout(() => {
+                                handleMarketClick(market.id);
+                              }, 300);
+                            })}
+                            className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
+                          >
+                            {getButtonContent(market.id, 'negative')}
+                          </button>
+                        </div>
 
                         {/* Stats Footer - Compact */}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-50">
@@ -1608,22 +1661,10 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                               
                               if (isEliminated) {
                                 return (
-                                  /* Re-enter button in timer position - Mobile compact */
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      e.preventDefault();
-                                      handleMarketClick(market.id, true);
-                                    }}
-                                    className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
-                                  >
-                                    <span className="relative z-10 flex items-center gap-1">
-                                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
-                                      </svg>
-                                      Re-enter
-                                    </span>
-                                  </button>
+                                  /* Show timer placeholder for eliminated users - button is positioned as overlay */
+                                  <div className="px-2 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-medium flex items-center gap-1">
+                                    {timeUntilMidnight}
+                                  </div>
                                 );
                               } else {
                                 return (
@@ -1655,6 +1696,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             }
                           })()}
                         </div>
+                      </div>
                       </div>
                     </div>
                     );
