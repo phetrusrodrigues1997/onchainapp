@@ -244,7 +244,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
         setIsVisible(true);
         // Notify parent that loading is complete
         onLoadingChange?.(false);
-      }, 3500);
+      }, 4000);
     };
     
     // Notify parent that loading started
