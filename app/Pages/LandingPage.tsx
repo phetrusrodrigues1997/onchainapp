@@ -1135,8 +1135,8 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               {/* Question */}
               <div className="flex-1 flex items-start pr-16">
                 <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
-                  color: '#000000', 
-                  fontWeight: '510',
+                  color: '#374151', 
+                  fontWeight: '650',
                   minHeight: '2.5rem',
                   display: 'flex',
                   alignItems: market.question.length > 50 ? 'flex-start' : 'center'
@@ -1176,7 +1176,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                         />
                       </svg>
                     </div>
-                    <div className="text-lg font-bold text-gray-900">
+                    <div className="text-lg font-bold text-gray-900 -mt-1">
                                   {(() => {
                                     const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
                                     // console.log('totalVotes for', market.id, totalVotes);
@@ -1188,7 +1188,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                     return smoothedPercentage;
                                   })()}%
                                 </div>
-                                <div className="text-xs text-gray-500">chance</div>
+                                <div className="text-xs text-gray-500 -mt-1">chance</div>
                   </div>
                 </div>
               )}
@@ -1203,9 +1203,9 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 return (
                   /* Elimination UI - Fun elimination message with same height as buttons */
                   <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
-                    <div className="text-orange-600 font-bold text-sm flex items-center gap-1">
+                    <div className="text-black font-bold text-sm flex items-center gap-1">
                       <span>😵</span>
-                      <span>You got eliminated too!?</span>
+                      <span>Eliminated!</span>
                     </div>
                   </div>
                 );
@@ -1278,7 +1278,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           e.preventDefault();
                           handleMarketClick(market.id, true);
                         }}
-                        className="group relative overflow-hidden bg-black hover:bg-gray-900 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                        className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
                       >
                         <span className="relative z-10 flex items-center gap-1">
                           <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1360,7 +1360,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
       <section className="relative z-10 px-6 -mt-24 pb-16 hidden md:block">
         <div className="max-w-7xl mx-auto">
           {/* All Markets Display - Full Width Grid */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
                 {(() => {
                   // Get all markets and deduplicate by ID
                   const allMarkets = marketOptions.map(option => {
@@ -1461,7 +1461,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                         <div className="flex items-start gap-3 mb-3 relative">
                           {/* Small Square Image */}
                           <div className="flex-shrink-0">
-                            <div className="rounded-lg w-20 h-20 bg-white overflow-hidden relative">
+                            <div className="rounded-lg w-12 h-12 bg-white overflow-hidden relative">
                               {market.icon?.slice(0, 4) === 'http' ? (
                                 <img 
                                   src={market.icon} 
@@ -1478,18 +1478,18 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           
                           {/* Question */}
                           <div className="flex-1 pr-16">
-                            <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#000000', fontWeight: '510'}}>
+                            <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#374151', fontWeight: '650'}}>
                               {market.question}
                             </p>
                           </div>
 
                           {/* Percentage Display - Top Right */}
                           {predictionPercentages[market.tabId || market.id] && (
-                            <div className="absolute top-0 right-0">
+                            <div className="absolute top-0 -right-1">
                               <div className="text-right flex flex-col items-end">
                                 {/* Thermometer Arc */}
-                                <div className="w-12 h-6 mb-1 relative">
-                                  <svg className="w-12 h-6" viewBox="0 0 100 50">
+                                <div className="w-16 h-8 mb-1 relative">
+                                  <svg className="w-16 h-8" viewBox="0 0 100 50">
                                     {/* Background arc */}
                                     <path
                                       d="M 10 45 A 40 40 0 0 1 90 45"
@@ -1513,20 +1513,21 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                       className="transition-all duration-300"
                                     />
                                   </svg>
+                                  
+                                  {/* Text overlaid inside the arc */}
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
+                                    <div className="text-base font-bold text-gray-900 leading-none">
+                                      {(() => {
+                                        const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
+                                        const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
+                                        const negative = totalVotes - positive;
+                                        const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
+                                        return smoothedPercentage;
+                                      })()}%
+                                    </div>
+                                    <div className="text-xs text-gray-500 leading-none -mt-0.5">chance</div>
+                                  </div>
                                 </div>
-                                <div className="text-lg font-bold text-gray-900">
-                                  {(() => {
-                                    const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
-                                    // console.log('totalVotes for', market.id, totalVotes);
-                                    const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
-                                    // console.log('positive votes for', market.id, positive);
-                                    const negative = totalVotes - positive;
-                                    // console.log('negative votes for', market.id, negative);
-                                    const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
-                                    return smoothedPercentage;
-                                  })()}%
-                                </div>
-                                <div className="text-xs text-gray-500">chance</div>
                               </div>
                             </div>
                           )}
@@ -1541,9 +1542,9 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             return (
                               /* Elimination UI - Fun elimination message with same height as buttons */
                               <div className="flex flex-col items-center justify-center gap-2 mb-3" style={{ minHeight: '44px' }}>
-                                <div className="text-orange-600 font-bold text-base flex items-center gap-2">
+                                <div className="text-black font-bold text-base flex items-center gap-2">
                                   <span>😵</span>
-                                  <span>You got eliminated too!?</span>
+                                  <span>Eliminated!</span>
                                 </div>
                               </div>
                             );
@@ -1566,7 +1567,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                       handleMarketClick(market.id);
                                     }, 300);
                                   })}
-                                  className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
+                                  className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
                                 >
                                   {getButtonContent(market.id, 'positive')}
                                 </button>
@@ -1585,7 +1586,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                       handleMarketClick(market.id);
                                     }, 300);
                                   })}
-                                  className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-20 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[180px]")}
+                                  className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
                                 >
                                   {getButtonContent(market.id, 'negative')}
                                 </button>
@@ -1616,7 +1617,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                       e.preventDefault();
                                       handleMarketClick(market.id, true);
                                     }}
-                                    className="group relative overflow-hidden bg-black hover:bg-gray-900 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
+                                    className="group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded-lg font-medium text-xs transition-all duration-300 hover:scale-105"
                                   >
                                     <span className="relative z-10 flex items-center gap-1">
                                       <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
