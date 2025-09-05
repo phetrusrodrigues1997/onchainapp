@@ -352,23 +352,15 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
     <div className="min-h-screen bg-white text-black w-full overflow-x-hidden mt-8">
       <div className="w-full sm:max-w-5xl sm:mx-auto p-0 sm:p-6">
     
-        {/* Market Overview Card - Full width on mobile */}
-        <div className="bg-white rounded-none sm:rounded-xl">
-          <div className="p-0 sm:p-4 md:p-6">
-            {/* Question Header - Compact on mobile */}
-            {/* Pot Balance - Above image on mobile only */}
-            {/* {potBalance && (
-              <div className="block sm:hidden px-2 mb-2">
-                <div className="text-xs text-gray-600 font-medium">
-                  Total Pot: <span className="font-semibold text-green-600">{potBalance}</span>
-                </div>
-              </div>
-            )} */}
-            
-            <div className="flex items-center gap-3 mb-6 sm:mb-3 pl-2 pr-4 sm:px-0">
-              {/* Market Icon - Smaller on mobile */}
+        {/* Desktop Two-Column Layout */}
+        <div className="hidden md:flex md:gap-8 bg-white rounded-xl">
+          {/* Left Column - Question and Chart */}
+          <div className="md:flex-1 md:p-6">
+            {/* Question Header */}
+            <div className="flex items-center gap-3 mb-6">
+              {/* Market Icon */}
               <div className="flex-shrink-0">
-                <div className="w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   {selectedIcon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={selectedIcon} 
@@ -376,74 +368,52 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                       className="w-full h-full object-cover" 
                     />
                   ) : (
-                    <span className="text-lg sm:text-xl md:text-2xl">{selectedIcon || '📊'}</span>
+                    <span className="text-2xl">{selectedIcon || '📊'}</span>
                   )}
                 </div>
               </div>
               
-              {/* Question Text and Actions */}
-              <div className="flex-1 min-w-0 md:mr-0">
-                <h1 className=" text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
+              {/* Question Text */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
                   {selectedQuestion.replace(/\?$/, '')} <span>tomorrow?</span>
                 </h1>
-                
+                {potBalance && (
+                  <div className="text-sm text-gray-600">
+                    <span className="text-gray-700 text-base">{potBalance}</span> in pot 
+                  </div>
+                )}
               </div>
             </div>
             
-            {/* Chart Container - Full width on mobile */}
-            <div className="bg-white rounded-none sm:rounded-lg p-0 sm:p-4 relative w-full">
-              {/* Chart Legend - Minimal padding on mobile for readability */}
-              <div className="flex items-center justify-between mb-4 sm:mb-4 px-2 sm:px-0">
-                <div className="flex items-center gap-3 sm:gap-6">
-                  {(lineDisplay === 'yes' || lineDisplay === 'both') && (
-                    <div className="flex items-center gap-1 sm:gap-2">
-                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-purple-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-gray-700">
-                        Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
-                      </span>
-                    </div>
-                  )}
-                  {(lineDisplay === 'no' || lineDisplay === 'both') && (
-                    <div className="flex items-center gap-1 sm:gap-2">
-                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-blue-500 rounded-full"></div>
-                      <span className="text-xs font-medium text-gray-700">
-                        No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="text-xs text-gray-500 font-medium hidden sm:block"><span className="flex items-center whitespace-nowrap font-extrabold tracking-wide">
-                            <span className="text-purple-700">PrediWin</span>
-                            {/* <span className="text-black">.com</span> */}
-                           <img
-                  src="/ghostie.png"
-                  alt="Icon"
-                  width={24}
-                  height={22}
-                  className="flex-shrink-0"
-                />
-                            
-                          </span></div>
-                <div className="text-xs text-gray-500 font-medium sm:hidden"><span className="flex items-center whitespace-nowrap font-extrabold tracking-wide">
-                            <span className="text-purple-700">PrediWin</span>
-                            {/* <span className="text-black">.com</span> */}
-                           <img
-                  src="/ghostie.png"
-                  alt="Icon"
-                  width={24}
-                  height={22}
-                  className="flex-shrink-0"
-                />
-                            
-                          </span></div>
+            {/* Chart Container */}
+            <div className="bg-white rounded-lg relative w-full">
+              {/* Chart Legend */}
+              <div className="flex items-center gap-6 mb-4 px-4">
+                {(lineDisplay === 'yes' || lineDisplay === 'both') && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 bg-purple-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-700">
+                      Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
+                    </span>
+                  </div>
+                )}
+                {(lineDisplay === 'no' || lineDisplay === 'both') && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-700">
+                      No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
+                    </span>
+                  </div>
+                )}
               </div>
-                
+              
               <div className="relative">
-              <svg
-                viewBox="0 0 100 50"
-                className="w-full h-48 md:h-64"
-                preserveAspectRatio="none"
-                >
+                <svg
+                  viewBox="0 0 100 50"
+                  className="w-full h-64"
+                  preserveAspectRatio="none"
+                  >
 
                   {/* Grid lines - Percentage based */}
                   {[0, 20, 40, 60, 80, 100].map((y) => {
@@ -858,125 +828,245 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               
               
               </div>
+              
             </div>
           </div>
-        </div>
 
-        {/* Pot Balance - Below chart on desktop only */}
-        {potBalance && (
-          <div className="mt-2 translate-y-6 md:translate-y-0 md:mb-4 px-4 sm:px-0">
-            <div className="text-sm text-gray-600 text-left opacity-60">
-            <span className="text-gray-700 text-base">{potBalance}</span> in pot 
+          {/* Right Column - Rules and Actions */}
+          <div className="md:w-80 md:p-6 md:bg-white md:rounded-r-xl md:shadow-sm md:shadow-white/50">
+            {/* View Pot Button */}
+            <div className="mb-6">
+              <button
+                onClick={() => setActiveSection(marketInfo.section)}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-base"
+              >
+                <Wallet className="w-5 h-5" />
+                View Pot
+              </button>
             </div>
-          </div>
-        )}
 
-        {/* View Pot Button - Below Chart */}
-        <div className="mb-6 px-4 sm:px-0 mt-8 sm:mt-0">
-          <button
-            onClick={() => setActiveSection(marketInfo.section)}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-base"
-          >
-            <Wallet className="w-4 h-4" />
-            View Pot
-          </button>
-        </div>
-
-        {/* Rules Summary Dropdown */}
-        <div id="rules-summary" className="bg-white rounded-none sm:rounded-xl shadow-sm border-0 sm:border border-gray-200 overflow-hidden mb-4 sm:mb-8">
-          <button
-            onClick={() => setIsRulesOpen(!isRulesOpen)}
-            className="w-full px-4 sm:px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
-          >
-            <span className="text-black font-semibold pr-4">Rules Summary - How it works</span>
-            {isRulesOpen ? (
-              <FaChevronUp className="text-gray-600 flex-shrink-0" />
-            ) : (
-              <FaChevronDown className="text-gray-600 flex-shrink-0" />
-            )}
-          </button>
-          
-          {isRulesOpen && (
-            <div className="px-6 py-4 bg-white border-t border-gray-200">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-600 mb-6 text-sm md:text-base">
+            {/* Rules Summary - Always Expanded on Desktop */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <span className="text-black font-semibold">How it works</span>
+              </div>
+              
+              <div className="px-6 py-4 bg-white">
+                <p className="text-gray-600 mb-4 text-sm">
                   Can you predict what's going to happen tomorrow and survive until Saturday?
                 </p>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 text-left">
-                  <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
-                    <h4 className="font-bold mb-2 text-sm md:text-base">Daily Predictions</h4>
-                    <p className="text-xs md:text-sm text-gray-600">Make correct predictions each day to stay alive</p>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <h4 className="font-bold mb-1 text-sm">Daily Predictions</h4>
+                    <p className="text-xs text-gray-600">Make correct predictions each day to stay alive</p>
                   </div>
                   
-                  <div className="bg-gray-50 p-3 md:p-4 rounded-lg">
-                    <h4 className="font-bold mb-2 text-sm md:text-base">Get Eliminated?</h4>
-                    <p className="text-xs md:text-sm text-gray-600">Re-enter by paying today's entry fee</p>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <h4 className="font-bold mb-1 text-sm">Get Eliminated?</h4>
+                    <p className="text-xs text-gray-600">Re-enter by paying today's entry fee</p>
                   </div>
                   
-                  <div className="bg-gray-50 p-3 md:p-4 rounded-lg sm:col-span-2 md:col-span-1">
-                    <h4 className="font-bold mb-2 text-sm md:text-base">Win Big</h4>
-                    <p className="text-xs md:text-sm text-gray-600">Survivors split the pot on Saturday</p>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <h4 className="font-bold mb-1 text-sm">Win Big</h4>
+                    <p className="text-xs text-gray-600">Survivors split the pot on Saturday</p>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Back to Home */}
+            <div className="text-center mt-6">
+              <button 
+                onClick={() => setActiveSection('home')}
+                className="text-sm text-gray-500 hover:text-black transition-colors"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout - Keep Original Design */}
+        <div className="md:hidden bg-white rounded-none sm:rounded-xl">
+          <div className="p-0 sm:p-4 md:p-6">
+            {/* Question Header - Compact on mobile */}
+            <div className="flex items-center gap-3 mb-6 sm:mb-3 pl-2 pr-4 sm:px-0">
+              {/* Market Icon - Smaller on mobile */}
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  {selectedIcon?.slice(0, 4) === 'http' ? (
+                    <img 
+                      src={selectedIcon} 
+                      alt="Market Icon" 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-lg sm:text-xl">{selectedIcon || '📊'}</span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Question Text and Actions */}
+              <div className="flex-1 min-w-0 md:mr-0">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
+                  {selectedQuestion.replace(/\?$/, '')} <span>tomorrow?</span>
+                </h1>
+              </div>
+            </div>
+            
+            {/* Chart Container - Mobile */}
+            <div className="bg-white rounded-none sm:rounded-lg p-0 sm:p-4 relative w-full">
+              {/* Chart Legend - Mobile */}
+              <div className="flex items-center gap-3 mb-4 px-2 sm:px-0">
+                {(lineDisplay === 'yes' || lineDisplay === 'both') && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-700">
+                      Yes {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.positivePercentage ?? 50) : 50}%
+                    </span>
+                  </div>
+                )}
+                {(lineDisplay === 'no' || lineDisplay === 'both') && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs font-medium text-gray-700">
+                      No {hourlyData.length > 0 ? (hourlyData[hourlyData.length - 1]?.negativePercentage ?? 50) : 50}%
+                    </span>
+                  </div>
+                )}
+              </div>
+                
+              <div className="relative">
+                <svg
+                  viewBox="0 0 100 50"
+                  className="w-full h-48"
+                  preserveAspectRatio="none"
+                  >
+                  {/* All the same SVG content as desktop - Grid lines, paths, etc. */}
+                  {[0, 20, 40, 60, 80, 100].map((y) => {
+                    const yPos = 45 - (y * 0.4);
+                    return (
+                      <line
+                        key={y}
+                        x1="5"
+                        y1={yPos}
+                        x2="95"
+                        y2={yPos}
+                        stroke="#e0e0e0"
+                        strokeWidth="0.1"
+                        strokeDasharray="0.5 1"
+                      />
+                    );
+                  })}
+                  {/* Removed - using desktop chart content */}
+                </svg>
+                
+                {/* Y-axis labels - Mobile */}
+                {[0, 20, 40, 60, 80, 100].map((y) => {
+                  const svgY = 45 - (y * 0.4);
+                  const percentage = svgY / 50;
+                  const topPosition = `${percentage * 100}%`;
+                  return (
+                    <div
+                      key={y}
+                      className={`absolute right-1 text-xs font-medium text-gray-600 opacity-60 ${y === 0 ? 'invisible' : ''}`}
+                      style={{ 
+                        top: topPosition,
+                        transform: 'translateY(-50%)'
+                      }}
+                    >
+                      {y}%
+                    </div>
+                  );
+                })}
+                
+                {/* X-axis labels - Mobile */}
+                <div className="flex justify-between px-2 mt-1">
+                  {['12am', '2am', '4am', '6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm', '8pm', '10pm'].map((timeLabel) => (
+                    <span 
+                      key={timeLabel} 
+                      className={`text-xs font-medium text-gray-600 opacity-60 ${timeLabel === '12am' || timeLabel === '10pm' ? 'invisible' : ''}`}
+                    >
+                      {timeLabel}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Mobile Pot Balance */}
+          {potBalance && (
+            <div className="mt-2 px-4">
+              <div className="text-sm text-gray-600 text-left opacity-60">
+                <span className="text-gray-700 text-base">{potBalance}</span> in pot 
+              </div>
+            </div>
           )}
-        </div>
 
-        {/* Additional FAQ Questions */}
-        <div className="space-y-4 mb-8">
-          {/* Question 1: Weekly Schedule */}
-          <div className="bg-white rounded-none sm:rounded-xl shadow-sm border-0 sm:border border-gray-200 overflow-hidden">
+          {/* Mobile View Pot Button */}
+          <div className="mb-6 px-4 mt-8">
             <button
-              onClick={() => setWeeklyScheduleOpen(!weeklyScheduleOpen)}
+              onClick={() => setActiveSection(marketInfo.section)}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-base"
+            >
+              <Wallet className="w-4 h-4" />
+              View Pot
+            </button>
+          </div>
+
+          {/* Mobile Rules Summary Dropdown */}
+          <div className="bg-white rounded-none sm:rounded-xl shadow-sm border-0 sm:border border-gray-200 overflow-hidden mb-4 sm:mb-8">
+            <button
+              onClick={() => setIsRulesOpen(!isRulesOpen)}
               className="w-full px-4 sm:px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
             >
-              <span className="text-black font-semibold pr-4">What is the weekly schedule for Public pots?</span>
-              {weeklyScheduleOpen ? (
+              <span className="text-black font-semibold pr-4">Rules Summary - How it works</span>
+              {isRulesOpen ? (
                 <FaChevronUp className="text-gray-600 flex-shrink-0" />
               ) : (
                 <FaChevronDown className="text-gray-600 flex-shrink-0" />
               )}
             </button>
             
-            {weeklyScheduleOpen && (
-              <div className="px-4 sm:px-6 py-4 bg-white border-t border-gray-200">
-                <p className="text-gray-800 leading-relaxed">Sunday-Friday: pot entry and predictions are open. Entry fees increase daily from $0.01 (Sunday) to $0.06 (Friday). Saturday: Results day - pots are closed and winners are determined at midnight UTC with pot distribution. Private pots have no schedule - you control when they open and close.</p>
+            {isRulesOpen && (
+              <div className="px-6 py-4 bg-white border-t border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-600 mb-6 text-sm">
+                    Can you predict what's going to happen tomorrow and survive until Saturday?
+                  </p>
+                  
+                  <div className="grid grid-cols-1 gap-4 text-left">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="font-bold mb-2 text-sm">Daily Predictions</h4>
+                      <p className="text-xs text-gray-600">Make correct predictions each day to stay alive</p>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="font-bold mb-2 text-sm">Get Eliminated?</h4>
+                      <p className="text-xs text-gray-600">Re-enter by paying today's entry fee</p>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <h4 className="font-bold mb-2 text-sm">Win Big</h4>
+                      <p className="text-xs text-gray-600">Survivors split the pot on Saturday</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Question 2: Entry Fees */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setEntryFeesOpen(!entryFeesOpen)}
-              className="w-full px-4 sm:px-6 py-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex justify-between items-center"
+          {/* Mobile Back to Home */}
+          <div className="text-center mb-8">
+            <button 
+              onClick={() => setActiveSection('home')}
+              className="text-sm text-gray-500 hover:text-black transition-colors"
             >
-              <span className="text-black font-semibold pr-4">How are entry fees calculated in Public pots?</span>
-              {entryFeesOpen ? (
-                <FaChevronUp className="text-gray-600 flex-shrink-0" />
-              ) : (
-                <FaChevronDown className="text-gray-600 flex-shrink-0" />
-              )}
+              ← Back to Home
             </button>
-            
-            {entryFeesOpen && (
-              <div className="px-4 sm:px-6 py-4 bg-white border-t border-gray-200">
-                <p className="text-gray-800 leading-relaxed">Public pots follow a dynamic pricing model to encourage early participation: Sunday ($0.01), Monday ($0.02), Tuesday ($0.03), Wednesday ($0.04), Thursday ($0.05), Friday ($0.06). Saturday is closed for results. Private pots let you set any entry fee you want.</p>
-              </div>
-            )}
           </div>
-        </div>
-
-        {/* Back to Home */}
-        <div className="text-center">
-          <button 
-            onClick={() => setActiveSection('home')}
-            className="text-sm text-gray-500 hover:text-black transition-colors"
-          >
-            ← Back to Home
-          </button>
         </div>
       </div>
     </div>

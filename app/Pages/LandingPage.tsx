@@ -1157,10 +1157,9 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               const isEliminated = contractAddress && eliminationStatus[contractAddress];
               return isEliminated ? (
                 <div className="absolute top-2 right-2">
-                  <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
-                    <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
-                    <span>Eliminated</span>
-                  </div>
+                 <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-red-700">
+                                <span>Eliminated</span>
+                              </div>
                 </div>
               ) : null;
             })()}
@@ -1517,8 +1516,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           const isEliminated = contractAddress && eliminationStatus[contractAddress];
                           return isEliminated ? (
                             <div className="absolute top-2 right-2">
-                              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-gray-600">
-                                <div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-red-700">
                                 <span>Eliminated</span>
                               </div>
                             </div>
