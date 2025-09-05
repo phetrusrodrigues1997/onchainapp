@@ -47,7 +47,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('home'); // Default section
   const [privatePotAddress, setPrivatePotAddress] = useState<string>(''); // For routing to private pots
   const [hasEnteredLivePot, setHasEnteredLivePot] = useState(false); // Track live pot entry
-  const [isMobileSearchActive, setIsMobileSearchActive] = useState(true); // Track mobile search state
+  const [isMobileSearchActive, setIsMobileSearchActive] = useState(false); // Track mobile search state
   const [searchQuery, setSearchQuery] = useState(''); // Search functionality
   const [isLandingPageLoading, setIsLandingPageLoading] = useState(activeSection === 'home'); // Track LandingPage loading state
   const [hasUnreadAnnouncementsState, setHasUnreadAnnouncementsState] = useState(false); // Track unread announcements
@@ -509,7 +509,7 @@ export default function App() {
                     onClick={() => setActiveSection('receive')}
                     className={`hidden md:flex flex-col items-center bg-transparent text-gray-700 font-medium text-sm transition-colors duration-200 z-10 relative px-4 py-1 rounded-md min-w-fit translate-x-16 hover:bg-gray-100 cursor-pointer`}
                   >
-                    <div className="text-xs text-gray-500 whitespace-nowrap">Your balance</div>
+                    <div className="text-xs text-gray-500 whitespace-nowrap opacity-70">Your balance</div>
                     <div className="text-sm font-semibold text-purple-700 whitespace-nowrap">
                       {ethBalance.data ? formatBalance(ethBalance.data.value) : '$0.00'}
                     </div>
@@ -555,7 +555,7 @@ export default function App() {
                             }}
                             className="flex flex-col items-center bg-transparent text-gray-700 font-medium text-xs hover:bg-gray-100 cursor-pointer px-2 py-1 rounded-md transition-colors duration-200"
                           >
-                            <div className="text-xs text-gray-500 whitespace-nowrap">Balance</div>
+                            <div className="text-xs text-gray-500 whitespace-nowrap opacity-70">Balance</div>
                             <div className="text-sm font-semibold text-purple-700 whitespace-nowrap">
                               {ethBalance.data ? formatBalance(ethBalance.data.value) : '$0.00'}
                             </div>
@@ -609,7 +609,7 @@ export default function App() {
     transition-opacity duration-200
     ${selectedMarket === market.id
       ? 'text-[rgba(0,0,0,0.9)] font-semibold opacity-100'
-      : 'text-[rgba(0,0,0,0.9)] font-medium opacity-50 hover:opacity-100'
+      : 'text-[rgba(0,0,0,0.9)] font-medium opacity-70 hover:opacity-100'
     }
   `}
   style={{
@@ -628,7 +628,7 @@ export default function App() {
  <button
   onClick={() => setIsMoreDropdownOpen(!isMoreDropdownOpen)}
   className="flex items-center px-1.5 py-0.5 cursor-pointer whitespace-nowrap 
-             text-[rgba(0,0,0,0.9)] font-medium opacity-50 hover:opacity-100 
+             text-[rgba(0,0,0,0.9)] font-medium opacity-70 hover:opacity-100 
              transition-opacity duration-200"
   style={{
     fontSize: "15px",
@@ -916,7 +916,7 @@ export default function App() {
               setActiveSection('home');
               setIsMobileSearchActive(false);
             }}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'home' ? 'text-slate-900' : 'text-gray-500'
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'home' ? 'text-slate-900 opacity-100' : 'text-gray-500 opacity-70'
               }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'home' ? 'bg-transparent' : ''
@@ -945,7 +945,7 @@ export default function App() {
                 }, 100);
               }
             }}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${(activeSection === 'home' && isMobileSearchActive) ? 'text-slate-900' : 'text-gray-500'
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${(activeSection === 'home' && isMobileSearchActive) ? 'text-slate-900 opacity-100' : 'text-gray-500 opacity-70'
               }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${(activeSection === 'home' && isMobileSearchActive) ? 'bg-transparent' : ''
@@ -959,7 +959,7 @@ export default function App() {
 
           <button
             onClick={() => setActiveSection('liveMarkets')}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'liveMarkets' ? 'text-slate-900' : 'text-gray-500'
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'liveMarkets' ? 'text-slate-900 opacity-100' : 'text-gray-500 opacity-70'
               }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'liveMarkets' ? 'bg-transparent' : ''
@@ -979,7 +979,7 @@ export default function App() {
               console.log('Mobile my markets button clicked - should navigate to bookmarks');
               setActiveSection('bookmarks');
             }}
-            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'bookmarks' ? 'text-slate-900' : 'text-gray-500'
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all duration-200 ${activeSection === 'bookmarks' ? 'text-slate-900 opacity-100' : 'text-gray-500 opacity-70'
               }`}
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center mb-0.5 transition-all duration-200 ${activeSection === 'bookmarks' ? 'bg-transparent' : ''
