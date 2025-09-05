@@ -1209,99 +1209,201 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 </p>
               </div>
 
-              {/* Percentage Display - Top Right - Hide if eliminated */}
-              {predictionPercentages[market.tabId || market.id] && !(() => {
+              {(() => {
+                // Mobile: Alternating layout system
+                const marketIndex = marketOptions.findIndex(m => m.id === market.id);
+                const useTraditionalLayout = marketIndex % 2 === 0;
                 const contractAddress = getContractAddress(market.id);
-                return contractAddress && eliminationStatus[contractAddress];
-              })() && (
-                <div className="absolute top-0 right-0">
-                  <div className="text-right flex flex-col items-end">
-                    {/* Thermometer Arc */}
-                    <div className="w-12 h-6 mb-1 relative">
-                      <svg className="w-12 h-6" viewBox="0 0 100 50">
-                        {/* Background arc */}
-                        <path
-                          d="M 10 45 A 40 40 0 0 1 90 45"
-                          stroke="#e5e7eb"
-                          strokeWidth="6"
-                          fill="none"
-                          strokeLinecap="round"
-                        />
-                        {/* Progress arc */}
-                        <path
-                          d="M 10 45 A 40 40 0 0 1 90 45"
-                          stroke={
-                            predictionPercentages[market.tabId || market.id].positivePercentage >= 80 ? '#10b981' :
-                            predictionPercentages[market.tabId || market.id].positivePercentage >= 60 ? '#f59e0b' :
-                            predictionPercentages[market.tabId || market.id].positivePercentage >= 40 ? '#f97316' : '#ef4444'
-                          }
-                          strokeWidth="6"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeDasharray={`${predictionPercentages[market.tabId || market.id].positivePercentage * 1.26} 126`}
-                          className="transition-all duration-300"
-                        />
-                      </svg>
+                const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                
+                // Only show thermometer for traditional layout (even index markets)
+                if (useTraditionalLayout && predictionPercentages[market.tabId || market.id] && !isEliminated) {
+                  return (
+                    <div className="absolute top-0 right-0">
+                      <div className="text-right flex flex-col items-end">
+                        {/* Thermometer Arc */}
+                        <div className="w-12 h-6 mb-1 relative">
+                          <svg className="w-12 h-6" viewBox="0 0 100 50">
+                            {/* Background arc */}
+                            <path
+                              d="M 10 45 A 40 40 0 0 1 90 45"
+                              stroke="#e5e7eb"
+                              strokeWidth="6"
+                              fill="none"
+                              strokeLinecap="round"
+                            />
+                            {/* Progress arc */}
+                            <path
+                              d="M 10 45 A 40 40 0 0 1 90 45"
+                              stroke={
+                                predictionPercentages[market.tabId || market.id].positivePercentage >= 80 ? '#10b981' :
+                                predictionPercentages[market.tabId || market.id].positivePercentage >= 60 ? '#f59e0b' :
+                                predictionPercentages[market.tabId || market.id].positivePercentage >= 40 ? '#f97316' : '#ef4444'
+                              }
+                              strokeWidth="6"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeDasharray={`${predictionPercentages[market.tabId || market.id].positivePercentage * 1.26} 126`}
+                              className="transition-all duration-300"
+                            />
+                          </svg>
+                        </div>
+                        <div className="text-lg font-bold text-gray-900 -mt-1">
+                                      {(() => {
+                                        const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
+                                        const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
+                                        const negative = totalVotes - positive;
+                                        const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
+                                        return smoothedPercentage;
+                                      })()}%
+                                    </div>
+                                    <div className="text-xs text-gray-500 -mt-1">chance</div>
+                      </div>
                     </div>
-                    <div className="text-lg font-bold text-gray-900 -mt-1">
-                                  {(() => {
-                                    const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
-                                    // console.log('totalVotes for', market.id, totalVotes);
-                                    const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
-                                    // console.log('positive votes for', market.id, positive);
-                                    const negative = totalVotes - positive;
-                                    // console.log('negative votes for', market.id, negative);
-                                    const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
-                                    return smoothedPercentage;
-                                  })()}%
-                                </div>
-                                <div className="text-xs text-gray-500 -mt-1">chance</div>
-                  </div>
-                </div>
-              )}
+                  );
+                }
+                return null;
+              })()}
             </div>
 
-            {/* Yes/No Buttons - Always show for all users */}
-            <div className="flex justify-center gap-2 mb-3">
-              <button 
-                onClick={handleButtonClick(market.id, 'positive', (e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  console.log('Yes button clicked for market:', market.id);
-                  Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
-                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                  // Visual feedback
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
-                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                  // Navigate to market after brief visual feedback
-                  setTimeout(() => {
-                    handleMarketClick(market.id);
-                  }, 300);
-                })}
-                className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
-              >
-                {getButtonContent(market.id, 'positive')}
-              </button>
-              <button 
-                onClick={handleButtonClick(market.id, 'negative', (e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  console.log('No button clicked for market:', market.id);
-                  Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
-                  Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                  // Visual feedback
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
-                  (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                  // Navigate to market after brief visual feedback
-                  setTimeout(() => {
-                    handleMarketClick(market.id);
-                  }, 300);
-                })}
-                className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
-              >
-                {getButtonContent(market.id, 'negative')}
-              </button>
-            </div>
+            {(() => {
+              // Mobile: Alternating button layout system
+              const marketIndex = marketOptions.findIndex(m => m.id === market.id);
+              const useTraditionalLayout = marketIndex % 2 === 0;
+              
+              if (useTraditionalLayout) {
+                // Traditional buttons (even index markets)
+                return (
+                  <div className="flex justify-center gap-2 mb-3">
+                    <button 
+                      onClick={handleButtonClick(market.id, 'positive', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log('Yes button clicked for market:', market.id);
+                        Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                        // Visual feedback
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                        // Navigate to market after brief visual feedback
+                        setTimeout(() => {
+                          handleMarketClick(market.id);
+                        }, 300);
+                      })}
+                      className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
+                    >
+                      {getButtonContent(market.id, 'positive')}
+                    </button>
+                    <button 
+                      onClick={handleButtonClick(market.id, 'negative', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log('No button clicked for market:', market.id);
+                        Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                        // Visual feedback
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                        // Navigate to market after brief visual feedback
+                        setTimeout(() => {
+                          handleMarketClick(market.id);
+                        }, 300);
+                      })}
+                      className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center")}
+                    >
+                      {getButtonContent(market.id, 'negative')}
+                    </button>
+                  </div>
+                );
+              } else {
+                // Percentage-styled buttons (odd index markets)
+                const percentages = predictionPercentages[market.tabId || market.id];
+                if (!percentages) {
+                  // Fallback to traditional if no data
+                  return (
+                    <div className="flex justify-center gap-2 mb-3">
+                      <button 
+                        onClick={handleButtonClick(market.id, 'positive', (e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleMarketClick(market.id);
+                        })}
+                        className="bg-green-50 hover:bg-blue-200 text-green-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
+                      >
+                        Yes
+                      </button>
+                      <button 
+                        onClick={handleButtonClick(market.id, 'negative', (e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          handleMarketClick(market.id);
+                        })}
+                        className="bg-red-50 hover:bg-purple-200 text-red-700 px-22 py-2 rounded-lg text-base font-bold transition-all duration-200 flex-1 max-w-[213px] flex items-center justify-center"
+                      >
+                        No
+                      </button>
+                    </div>
+                  );
+                }
+                
+                // Calculate percentages
+                const totalVotes = percentages.totalPredictions ?? 0;
+                const positive = Math.round((percentages.positivePercentage ?? 0) / 100 * totalVotes);
+                const negative = totalVotes - positive;
+                const yesPercentage = Math.round(((positive + 0.5) / (positive + negative + 1)) * 100);
+                const noPercentage = 100 - yesPercentage;
+                
+                return (
+                  <div className="flex items-center justify-between mb-3 px-2">
+                    {/* Left side: Yes/No labels stacked */}
+                    <div className="flex flex-col gap-2">
+                      <div className="text-base font-semibold text-black">Yes</div>
+                      <div className="text-base font-semibold text-black">No</div>
+                    </div>
+                    
+                    {/* Right side: Percentages and buttons */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col gap-2 text-right">
+                        <div className="text-base font-bold text-gray-900">{yesPercentage}%</div>
+                        <div className="text-base font-bold text-gray-900">{noPercentage}%</div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button 
+                          onClick={handleButtonClick(market.id, 'positive', (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            console.log('Yes button clicked for market:', market.id);
+                            Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                            Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                            setTimeout(() => {
+                              handleMarketClick(market.id);
+                            }, 300);
+                          })}
+                          className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
+                        >
+                          Yes
+                        </button>
+                        <button 
+                          onClick={handleButtonClick(market.id, 'negative', (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            console.log('No button clicked for market:', market.id);
+                            Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                            Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                            setTimeout(() => {
+                              handleMarketClick(market.id);
+                            }, 300);
+                          })}
+                          className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
+                        >
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            })()}
 
             {/* Stats Footer */}
             <div className="flex justify-between items-center pt-2">
@@ -1535,7 +1637,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           '--swap-distance': swapDistance
                         } as React.CSSProperties}
                       >
-                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white ${(() => {
+                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[180px] transition-all duration-300 bg-white ${(() => {
                         const contractAddress = getContractAddress(market.id);
                         const isEliminated = contractAddress && eliminationStatus[contractAddress];
                         
@@ -1567,109 +1669,225 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           </div>
                           
                           {/* Question */}
-                          <div className="flex-1 pr-16">
-                            <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#374151', fontWeight: '650'}}>
-                              {market.question}
-                            </p>
-                          </div>
-
-                          {/* Percentage Display - Top Right - Hide if eliminated */}
-                          {predictionPercentages[market.tabId || market.id] && !(() => {
+                          {(() => {
+                            // Determine if thermometer will be shown to adjust question width
+                            const marketIndex = marketOptions.findIndex(m => m.id === market.id);
+                            const useTraditionalLayout = marketIndex % 2 === 0;
                             const contractAddress = getContractAddress(market.id);
-                            return contractAddress && eliminationStatus[contractAddress];
-                          })() && (
-                            <div className="absolute top-0 -right-1">
-                              <div className="text-right flex flex-col items-end">
-                                {/* Thermometer Arc */}
-                                <div className="w-16 h-8 mb-1 relative">
-                                  <svg className="w-16 h-8" viewBox="0 0 100 50">
-                                    {/* Background arc */}
-                                    <path
-                                      d="M 10 45 A 40 40 0 0 1 90 45"
-                                      stroke="#e5e7eb"
-                                      strokeWidth="6"
-                                      fill="none"
-                                      strokeLinecap="round"
-                                    />
-                                    {/* Progress arc */}
-                                    <path
-                                      d="M 10 45 A 40 40 0 0 1 90 45"
-                                      stroke={
-                                        predictionPercentages[market.tabId || market.id].positivePercentage >= 80 ? '#10b981' :
-                                        predictionPercentages[market.tabId || market.id].positivePercentage >= 60 ? '#f59e0b' :
-                                        predictionPercentages[market.tabId || market.id].positivePercentage >= 40 ? '#f97316' : '#ef4444'
-                                      }
-                                      strokeWidth="6"
-                                      fill="none"
-                                      strokeLinecap="round"
-                                      strokeDasharray={`${predictionPercentages[market.tabId || market.id].positivePercentage * 1.26} 126`}
-                                      className="transition-all duration-300"
-                                    />
-                                  </svg>
-                                  
-                                  {/* Text overlaid inside the arc */}
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
-                                    <div className="text-base font-bold text-gray-900 leading-none">
-                                      {(() => {
-                                        const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
-                                        const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
-                                        const negative = totalVotes - positive;
-                                        const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
-                                        return smoothedPercentage;
-                                      })()}%
+                            const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                            const showThermometer = useTraditionalLayout && predictionPercentages[market.tabId || market.id] && !isEliminated;
+                            
+                            return (
+                              <div className={`flex-1 ${showThermometer ? 'pr-16' : 'pr-4'}`}>
+                                <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#374151', fontWeight: '650'}}>
+                                  {market.question}
+                                </p>
+                              </div>
+                            );
+                          })()}
+
+                          {(() => {
+                            // Alternating layout system
+                            const marketIndex = marketOptions.findIndex(m => m.id === market.id);
+                            const useTraditionalLayout = marketIndex % 2 === 0;
+                            const contractAddress = getContractAddress(market.id);
+                            const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                            
+                            // Only show thermometer for traditional layout (even index markets)
+                            if (useTraditionalLayout && predictionPercentages[market.tabId || market.id] && !isEliminated) {
+                              return (
+                                <div className="absolute top-0 -right-1">
+                                  <div className="text-right flex flex-col items-end">
+                                    {/* Thermometer Arc */}
+                                    <div className="w-16 h-8 mb-1 relative">
+                                      <svg className="w-16 h-8" viewBox="0 0 100 50">
+                                        {/* Background arc */}
+                                        <path
+                                          d="M 10 45 A 40 40 0 0 1 90 45"
+                                          stroke="#e5e7eb"
+                                          strokeWidth="6"
+                                          fill="none"
+                                          strokeLinecap="round"
+                                        />
+                                        {/* Progress arc */}
+                                        <path
+                                          d="M 10 45 A 40 40 0 0 1 90 45"
+                                          stroke={
+                                            predictionPercentages[market.tabId || market.id].positivePercentage >= 80 ? '#10b981' :
+                                            predictionPercentages[market.tabId || market.id].positivePercentage >= 60 ? '#f59e0b' :
+                                            predictionPercentages[market.tabId || market.id].positivePercentage >= 40 ? '#f97316' : '#ef4444'
+                                          }
+                                          strokeWidth="6"
+                                          fill="none"
+                                          strokeLinecap="round"
+                                          strokeDasharray={`${predictionPercentages[market.tabId || market.id].positivePercentage * 1.26} 126`}
+                                          className="transition-all duration-300"
+                                        />
+                                      </svg>
+                                      
+                                      {/* Text overlaid inside the arc */}
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
+                                        <div className="text-base font-bold text-gray-900 leading-none">
+                                          {(() => {
+                                            const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
+                                            const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
+                                            const negative = totalVotes - positive;
+                                            const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
+                                            return smoothedPercentage;
+                                          })()}%
+                                        </div>
+                                        <div className="text-xs text-gray-500 leading-none -mt-0.5">chance</div>
+                                      </div>
                                     </div>
-                                    <div className="text-xs text-gray-500 leading-none -mt-0.5">chance</div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
+
+                        {(() => {
+                          // Alternating button layout system
+                          const marketIndex = marketOptions.findIndex(m => m.id === market.id);
+                          const useTraditionalLayout = marketIndex % 2 === 0;
+                          
+                          if (useTraditionalLayout) {
+                            // Traditional buttons (even index markets)
+                            return (
+                              <div className="flex justify-center gap-2 mb-3">
+                                <button 
+                                  onClick={handleButtonClick(market.id, 'positive', (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    console.log('Yes button clicked for market:', market.id);
+                                    Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                                    Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                    // Visual feedback
+                                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                                    // Navigate to market after brief visual feedback
+                                    setTimeout(() => {
+                                      handleMarketClick(market.id);
+                                    }, 300);
+                                  })}
+                                  className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
+                                >
+                                  {getButtonContent(market.id, 'positive')}
+                                </button>
+                                <button 
+                                  onClick={handleButtonClick(market.id, 'negative', (e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    console.log('No button clicked for market:', market.id);
+                                    Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                                    Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                    // Visual feedback
+                                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                                    (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                                    // Navigate to market after brief visual feedback
+                                    setTimeout(() => {
+                                      handleMarketClick(market.id);
+                                    }, 300);
+                                  })}
+                                  className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
+                                >
+                                  {getButtonContent(market.id, 'negative')}
+                                </button>
+                              </div>
+                            );
+                          } else {
+                            // Percentage-styled buttons (odd index markets)
+                            const percentages = predictionPercentages[market.tabId || market.id];
+                            if (!percentages) {
+                              // Fallback to traditional if no data
+                              return (
+                                <div className="flex justify-center gap-2 mb-3">
+                                  <button 
+                                    onClick={handleButtonClick(market.id, 'positive', (e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleMarketClick(market.id);
+                                    })}
+                                    className="bg-green-50 hover:bg-blue-200 text-green-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]"
+                                  >
+                                    Yes
+                                  </button>
+                                  <button 
+                                    onClick={handleButtonClick(market.id, 'negative', (e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleMarketClick(market.id);
+                                    })}
+                                    className="bg-red-50 hover:bg-purple-200 text-red-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              );
+                            }
+                            
+                            // Calculate percentages
+                            const totalVotes = percentages.totalPredictions ?? 0;
+                            const positive = Math.round((percentages.positivePercentage ?? 0) / 100 * totalVotes);
+                            const negative = totalVotes - positive;
+                            const yesPercentage = Math.round(((positive + 0.5) / (positive + negative + 1)) * 100);
+                            const noPercentage = 100 - yesPercentage;
+                            
+                            return (
+                              <div className="flex items-center justify-between mb-3">
+                                {/* Left side: Yes/No labels stacked */}
+                                <div className="flex flex-col gap-1">
+                                  <div className="text-sm font-semibold text-black">Yes</div>
+                                  <div className="text-sm font-semibold text-black">No</div>
+                                </div>
+                                
+                                {/* Right side: Percentages and buttons */}
+                                <div className="flex items-center gap-3">
+                                  <div className="flex flex-col gap-1 text-right">
+                                    <div className="text-sm font-bold text-gray-900">{yesPercentage}%</div>
+                                    <div className="text-sm font-bold text-gray-900">{noPercentage}%</div>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <button 
+                                      onClick={handleButtonClick(market.id, 'positive', (e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        console.log('Yes button clicked for market:', market.id);
+                                        Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
+                                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                        setTimeout(() => {
+                                          handleMarketClick(market.id);
+                                        }, 300);
+                                      })}
+                                      className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
+                                    >
+                                      Yes
+                                    </button>
+                                    <button 
+                                      onClick={handleButtonClick(market.id, 'negative', (e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        console.log('No button clicked for market:', market.id);
+                                        Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
+                                        Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                        setTimeout(() => {
+                                          handleMarketClick(market.id);
+                                        }, 300);
+                                      })}
+                                      className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
+                                    >
+                                      No
+                                    </button>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Yes/No Buttons - Always show for all users */}
-                        <div className="flex justify-center gap-2 mb-3">
-                          <button 
-                            onClick={handleButtonClick(market.id, 'positive', (e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              console.log('Yes button clicked for market:', market.id);
-                              Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
-                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                              // Visual feedback
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
-                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                              // Navigate to market after brief visual feedback
-                              setTimeout(() => {
-                                handleMarketClick(market.id);
-                              }, 300);
-                            })}
-                            className={getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
-                          >
-                            {getButtonContent(market.id, 'positive')}
-                          </button>
-                          <button 
-                            onClick={handleButtonClick(market.id, 'negative', (e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              console.log('No button clicked for market:', market.id);
-                              Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
-                              Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
-                              // Visual feedback
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
-                              (e.currentTarget as HTMLButtonElement).style.color = 'white';
-                              // Navigate to market after brief visual feedback
-                              setTimeout(() => {
-                                handleMarketClick(market.id);
-                              }, 300);
-                            })}
-                            className={getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-14 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex-1 max-w-[130px]")}
-                          >
-                            {getButtonContent(market.id, 'negative')}
-                          </button>
-                        </div>
+                            );
+                          }
+                        })()}
 
                         {/* Stats Footer - Compact */}
-                        <div className="flex justify-between items-center pt-2 border-t border-gray-50">
+                        <div className="flex justify-between items-center pt-2">
               <div className="text-[13px] font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif] text-gray-500 leading-none" style={{fontWeight: '350'}}>{market.potSize}</div>
                           
                           {(() => {
