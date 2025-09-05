@@ -748,7 +748,7 @@ export default function App() {
 
       {/* Second Carousel - Personalized Labels (Below mobile search bar) */}
       {!isLandingPageLoading && activeSection === 'home' && (
-        <section className="relative z-10 px-4 py-4 md:py-3 bg-white overflow-hidden">
+        <section className="relative z-10 px-4 py-2 md:py-3 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 w-full max-w-full">
               {/* Desktop Search Bar - Left side */}
@@ -909,7 +909,7 @@ export default function App() {
       {/* Mobile Bottom Navigation */}
       {!isLandingPageLoading && (
         <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white z-40">
-        <div className="flex items-center justify-around py-1">
+        <div className="flex items-center justify-around -py-1">
           <button
             onClick={(e) => {
               console.log('Mobile HOME button clicked');
