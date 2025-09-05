@@ -1113,7 +1113,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                     e.preventDefault();
                     handleMarketClick(market.id, true);
                   }}
-                  className="w-full group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
+                  className="w-full group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1133,7 +1133,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             
             return isEliminated ? (
               <div className="absolute top-2 right-2 z-20">
-                <div className="flex items-center gap-1 bg-red-500 px-2 py-1 rounded text-xs text-white">
+                <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-[#ee0000]">
                   <span>Eliminated</span>
                 </div>
               </div>
@@ -1146,22 +1146,29 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 handleMarketClick(market.id);
               }
             }}
-            className={`group rounded-2xl cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
+            className={`group cursor-pointer relative overflow-hidden transition-all duration-500  hover:shadow-purple-200 ${
                           isSwappingToFirst ? 'swap-to-first' : isSwappingFromFirst ? 'swap-from-first' : ''
                         } ${animatingMarket === market.tabId ? 'animate-scale-once' : ''} ${(() => {
               const contractAddress = getContractAddress(market.id);
               const isEliminated = contractAddress && eliminationStatus[contractAddress];
-              return isEliminated ? 'opacity-60 grayscale-[0.3]' : '';
+              return isEliminated ? 'opacity-60 grayscale-[0.3] rounded-lg' : 'rounded-2xl';
             })()}`}
             style={{
               '--swap-distance': swapDistance
             } as React.CSSProperties}
           >
-          <div className={`p-3 h-full transition-all duration-300 border-b border-gray-200 ${
-            market.tabId === selectedMarket 
-              ? 'bg-white shadow-lg shadow-purple-100/50' 
-              : 'bg-white'
-          }`}>
+          <div className={`p-3 h-full transition-all duration-300 bg-white ${(() => {
+            const contractAddress = getContractAddress(market.id);
+            const isEliminated = contractAddress && eliminationStatus[contractAddress];
+            
+            if (isEliminated) {
+              return 'border border-gray-300 rounded-lg';
+            } else if (market.tabId === selectedMarket) {
+              return 'border-b border-gray-200 shadow-lg shadow-purple-100/50';
+            } else {
+              return 'border-b border-gray-200';
+            }
+          })()}`}>
             {/* Background Gradient Accent */}
             <div className="absolute top-0 left-0 right-0 h-1"></div>
             
@@ -1480,7 +1487,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                 e.preventDefault();
                                 handleMarketClick(market.id, true);
                               }}
-                              className="w-full group relative overflow-hidden bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
+                              className="w-full group relative overflow-hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:scale-[1.02]"
                             >
                               <span className="relative z-10 flex items-center justify-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1500,7 +1507,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                         
                         return isEliminated ? (
                           <div className="absolute top-2 right-2 z-20">
-                            <div className="flex items-center gap-1 bg-red-500 px-2 py-1 rounded text-xs text-white">
+                            <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs text-[#ee0000]">
                               <span>Eliminated</span>
                             </div>
                           </div>
@@ -1524,7 +1531,16 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           '--swap-distance': swapDistance
                         } as React.CSSProperties}
                       >
-                      <div className="rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white border border-gray-200 hover:border-gray-300">
+                      <div className={`rounded-2xl p-3 h-full flex flex-col min-h-[140px] transition-all duration-300 bg-white ${(() => {
+                        const contractAddress = getContractAddress(market.id);
+                        const isEliminated = contractAddress && eliminationStatus[contractAddress];
+                        
+                        if (isEliminated) {
+                          return 'border border-gray-400 hover:border-gray-500';
+                        } else {
+                          return 'border border-gray-200 hover:border-gray-300';
+                        }
+                      })()}`}>
                         
                         
                         {/* Header with Icon, Question, and Percentage */}
