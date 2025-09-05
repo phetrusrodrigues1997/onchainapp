@@ -8,9 +8,11 @@ import { WrongPredictions, WrongPredictionsCrypto, WrongPredictionsStocks } from
 import { ENFORCE_SATURDAY_RESTRICTIONS, getBetsTableName, getWrongPredictionsTableName, TableType, CONTRACT_TO_TABLE_MAPPING } from "./config";
 import { ReferralCodes, Referrals, FreeEntries, UsersTable } from "./schema";
 import { EvidenceSubmissions, MarketOutcomes, PredictionIdeas } from "./schema";
-import { recordPotReEntry } from './actions3';
+import { recordPotReEntry, recordUserPrediction } from './actions3';
 import { desc } from "drizzle-orm";
 import { getPrice } from '../Constants/getPrice';
+import { getMarkets } from '../Constants/markets';
+import { getTranslation } from '../Languages/languages';
 
 // Initialize database connection
 const sqlConnection = neon(process.env.DATABASE_URL!);
@@ -109,6 +111,53 @@ const getWrongPredictionsTableFromType = (tableType: string) => {
       return WrongPredictionsStocks;
     default:
       throw new Error(`Invalid table type: ${tableType}. Must be 'featured', 'crypto', or 'stocks'`);
+  }
+};
+
+// Helper function to get question from contract address using markets data
+const getQuestionFromContract = (contractAddress: string, tableType: string): string => {
+  try {
+    const t = getTranslation('en');
+    const marketOptions = getMarkets(t, 'options');
+    
+    // Try to find the market by contract address
+    const market = marketOptions.find(m => m.contractAddress === contractAddress);
+    if (market?.question) {
+      return market.question;
+    }
+    
+    // If not found by contract, try to get by table type from different market categories
+    if (tableType === 'featured') {
+      const trendingMarkets = getMarkets(t, 'Trending');
+      if (trendingMarkets.length > 0 && trendingMarkets[0].question) {
+        return trendingMarkets[0].question;
+      }
+    }
+    
+    // Fallback to generic names based on table type
+    switch (tableType) {
+      case 'featured':
+        return 'Bitcoin Price Movement';
+      case 'crypto':
+        return 'Crypto Market Movement';
+      case 'stocks':
+        return 'Stock Market Movement';
+      default:
+        return 'Market Movement Prediction';
+    }
+  } catch (error) {
+    console.error('Error getting question from market data:', error);
+    // Fallback to generic names
+    switch (tableType) {
+      case 'featured':
+        return 'Bitcoin Price Movement';
+      case 'crypto':
+        return 'Crypto Market Movement';
+      case 'stocks':
+        return 'Stock Market Movement';
+      default:
+        return 'Market Movement Prediction';
+    }
   }
 };
 
@@ -420,7 +469,7 @@ export async function processReEntry(walletAddress: string, typeTable: string): 
   }
 }
 
-export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string) {
+export async function placeBitcoinBet(walletAddress: string, prediction: 'positive' | 'negative', typeTable: string, questionText?: string, contractAddress?: string) {
   try {
     // Normalize wallet address for consistency
     const normalizedWalletAddress = walletAddress.toLowerCase();
@@ -478,6 +527,28 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
           eq(betsTable.walletAddress, normalizedWalletAddress),
           eq(betsTable.betDate, predictionDate)
         ));
+
+      // Record the updated prediction in the history table for tracking
+      // Try to get the question from the provided parameter, then fallback to contract/table lookup
+      const questionName = questionText || getQuestionFromContract(contractAddress || '', typeTable);
+      const trackingContractAddress = contractAddress || '';
+      
+      if (trackingContractAddress) {
+        try {
+          await recordUserPrediction(
+            normalizedWalletAddress,
+            questionName,
+            prediction,
+            trackingContractAddress,
+            predictionDate
+          );
+          console.log(`✅ Recorded prediction history update for ${normalizedWalletAddress}: ${prediction} on ${questionName}`);
+        } catch (historyError) {
+          // Log error but don't fail the main operation
+          console.error('Failed to record prediction history update:', historyError);
+        }
+      }
+
       return { updated: true, predictionDate };
     }
 
@@ -504,6 +575,27 @@ export async function placeBitcoinBet(walletAddress: string, prediction: 'positi
         createdAt: ukCreatedAt, // Override default with UK timezone
       })
       .returning();
+
+    // Record the prediction in the history table for tracking
+    // Try to get the question from the provided parameter, then fallback to contract/table lookup
+    const questionName = questionText || getQuestionFromContract(contractAddress || '', typeTable);
+    const trackingContractAddress = contractAddress || '';
+    
+    if (trackingContractAddress) {
+      try {
+        await recordUserPrediction(
+          normalizedWalletAddress,
+          questionName,
+          prediction,
+          trackingContractAddress,
+          predictionDate
+        );
+        console.log(`✅ Recorded prediction history for ${normalizedWalletAddress}: ${prediction} on ${questionName}`);
+      } catch (historyError) {
+        // Log error but don't fail the main operation
+        console.error('Failed to record prediction history:', historyError);
+      }
+    }
 
     return { ...result[0], predictionDate };
 

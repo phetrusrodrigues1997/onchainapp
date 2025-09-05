@@ -190,3 +190,14 @@ export const UserAnnouncementReads = pgTable("user_announcement_reads", {
   readAt: timestamp("read_at").defaultNow().notNull(), // When the user read it
 });
 
+// User prediction tracking - keeps record of all predictions made by users with question context
+export const UserPredictionHistory = pgTable("user_prediction_history", {
+  id: serial("id").primaryKey(),
+  walletAddress: text("wallet_address").notNull(), // User who made the prediction
+  questionName: text("question_name").notNull(), // The question/asset they predicted on (e.g., "Bitcoin", "Tesla", etc.)
+  prediction: text("prediction").notNull(), // "positive" or "negative"
+  contractAddress: text("contract_address").notNull(), // The prediction pot contract address
+  predictionDate: text("prediction_date").notNull(), // Date of the prediction (YYYY-MM-DD format)
+  createdAt: timestamp("created_at").defaultNow().notNull(), // When the prediction was made
+});
+

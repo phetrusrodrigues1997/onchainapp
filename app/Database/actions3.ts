@@ -3,7 +3,7 @@
 import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import { eq, and, desc, asc } from 'drizzle-orm';
-import { PotParticipationHistory, FeaturedBets, CryptoBets, StocksBets } from './schema';
+import { PotParticipationHistory, FeaturedBets, CryptoBets, StocksBets, UserPredictionHistory } from './schema';
 import { getBetsTableName, getWrongPredictionsTableName, TableType } from './config';
 
 // Initialize database connection only when needed (server-side)
@@ -712,5 +712,130 @@ export async function clearPotParticipationHistory(contract: string) {
     .delete(PotParticipationHistory)
     .where(eq(PotParticipationHistory.contractAddress, contract.toLowerCase()));
     console.log(`🧹 Clearing pot participation history for contract: ${contract.toLowerCase()}`);
+}
+
+/**
+ * Records a user's prediction in the prediction history table
+ * This provides a comprehensive log of all predictions made by users with question context
+ */
+export async function recordUserPrediction(
+  walletAddress: string,
+  questionName: string,
+  prediction: 'positive' | 'negative',
+  contractAddress: string,
+  predictionDate: string // YYYY-MM-DD format
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    const normalizedContractAddress = contractAddress.toLowerCase();
+    console.log(`📝 Recording prediction: ${normalizedWalletAddress} predicted ${prediction} for ${questionName} (${normalizedContractAddress}) on ${predictionDate}`);
+    
+    // Check if user already has a prediction for this question and date
+    const existingPrediction = await getDb()
+      .select()
+      .from(UserPredictionHistory)
+      .where(
+        and(
+          eq(UserPredictionHistory.walletAddress, normalizedWalletAddress),
+          eq(UserPredictionHistory.questionName, questionName),
+          eq(UserPredictionHistory.predictionDate, predictionDate)
+        )
+      )
+      .limit(1);
+
+    if (existingPrediction.length > 0) {
+      // Update existing prediction
+      await getDb()
+        .update(UserPredictionHistory)
+        .set({
+          prediction,
+          contractAddress: normalizedContractAddress, // Update contract address in case it changed
+          createdAt: new Date(), // Update timestamp to reflect the change
+        })
+        .where(
+          and(
+            eq(UserPredictionHistory.walletAddress, normalizedWalletAddress),
+            eq(UserPredictionHistory.questionName, questionName),
+            eq(UserPredictionHistory.predictionDate, predictionDate)
+          )
+        );
+
+      console.log(`✅ Updated existing prediction for ${normalizedWalletAddress}: ${prediction} on ${questionName}`);
+      return { 
+        success: true, 
+        message: 'Prediction updated successfully' 
+      };
+    } else {
+      // Insert new prediction
+      await getDb().insert(UserPredictionHistory).values({
+        walletAddress: normalizedWalletAddress,
+        questionName,
+        prediction,
+        contractAddress: normalizedContractAddress,
+        predictionDate,
+      });
+
+      console.log(`✅ Inserted new prediction for ${normalizedWalletAddress}: ${prediction} on ${questionName}`);
+      return { 
+        success: true, 
+        message: 'Prediction recorded successfully' 
+      };
+    }
+  } catch (error) {
+    console.error('Error recording user prediction:', error);
+    return { 
+      success: false, 
+      message: 'Failed to record prediction' 
+    };
+  }
+}
+
+/**
+ * Gets all predictions made by a specific wallet address for a specific contract
+ * Returns the question names and predictions for analysis
+ */
+export async function getUserPredictionsByContract(
+  walletAddress: string,
+  contractAddress: string
+): Promise<Array<{
+  questionName: string;
+  prediction: 'positive' | 'negative';
+  predictionDate: string;
+  createdAt: Date;
+}>> {
+  try {
+    const normalizedWalletAddress = walletAddress.toLowerCase();
+    const normalizedContractAddress = contractAddress.toLowerCase();
+    
+    console.log(`🔍 Getting predictions for wallet: ${normalizedWalletAddress}, contract: ${normalizedContractAddress}`);
+    
+    const predictions = await getDb()
+      .select({
+        questionName: UserPredictionHistory.questionName,
+        prediction: UserPredictionHistory.prediction,
+        predictionDate: UserPredictionHistory.predictionDate,
+        createdAt: UserPredictionHistory.createdAt,
+      })
+      .from(UserPredictionHistory)
+      .where(
+        and(
+          eq(UserPredictionHistory.walletAddress, normalizedWalletAddress),
+          eq(UserPredictionHistory.contractAddress, normalizedContractAddress)
+        )
+      )
+      .orderBy(desc(UserPredictionHistory.createdAt)); // Most recent first
+
+    console.log(`📊 Found ${predictions.length} predictions for ${normalizedWalletAddress} in contract ${normalizedContractAddress}`);
+    
+    // Cast prediction type since we know it's either 'positive' or 'negative'
+    return predictions.map(prediction => ({
+      ...prediction,
+      prediction: prediction.prediction as 'positive' | 'negative'
+    }));
+    
+  } catch (error) {
+    console.error('Error getting user predictions by contract:', error);
+    return [];
+  }
 }
 

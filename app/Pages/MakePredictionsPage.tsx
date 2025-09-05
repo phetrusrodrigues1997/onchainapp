@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseEther } from 'viem';
 import { placeBitcoinBet, getTomorrowsBet, getTodaysBet, getReEntryFee, submitEvidence, getUserEvidenceSubmission, getAllEvidenceSubmissions, processReEntry } from '../Database/actions';
+import { getUserPredictionsByContract } from '../Database/actions3';
 import { getProvisionalOutcome, } from '../Database/OwnerActions';
 import { TrendingUp, TrendingDown, Shield, Zap, AlertTriangle, Clock, FileText, Upload, ChevronDown, ChevronUp } from 'lucide-react';
 import Cookies from 'js-cookie';
@@ -104,7 +105,7 @@ interface MakePredictionsProps {
   setActiveSection: (section: string) => void;
 }
 
-export default function MakePredicitions({ activeSection, setActiveSection }: MakePredictionsProps) {
+export default function MakePredictions({ activeSection, setActiveSection }: MakePredictionsProps) {
   const { address, isConnected } = useAccount();
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const queryClient = useQueryClient();
@@ -146,6 +147,15 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
   const [selectedMarketForVoting, setSelectedMarketForVoting] = useState<string | null>(null);
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState<boolean>(false);
   
+  // New state for collapsible sections and prediction history
+  const [isMainSectionCollapsed, setIsMainSectionCollapsed] = useState<boolean>(false);
+  const [predictionHistory, setPredictionHistory] = useState<Array<{
+    questionName: string;
+    prediction: 'positive' | 'negative';
+    predictionDate: string;
+    createdAt: Date;
+  }>>([]);
+  
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -154,6 +164,12 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
 
   
   const [timeUntilNewQuestion, setTimeUntilNewQuestion] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }>({ hours: 0, minutes: 0, seconds: 0 });
+
+  const [timeUntilNextElimination, setTimeUntilNextElimination] = useState<{
     hours: number;
     minutes: number;
     seconds: number;
@@ -234,6 +250,19 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       setTimeUntilNewQuestion({ hours, minutes, seconds });
     } else {
       setTimeUntilNewQuestion({ hours: 0, minutes: 0, seconds: 0 });
+    }
+
+    // Time until next elimination (tomorrow's midnight - 24 hours after new question)
+    const tomorrowMidnight = getTomorrowMidnight();
+    const diffToElimination = tomorrowMidnight.getTime() - ukNow.getTime();
+    
+    if (diffToElimination > 0) {
+      const hours = Math.floor(diffToElimination / (1000 * 60 * 60));
+      const minutes = Math.floor((diffToElimination % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diffToElimination % (1000 * 60)) / 1000);
+      setTimeUntilNextElimination({ hours, minutes, seconds });
+    } else {
+      setTimeUntilNextElimination({ hours: 0, minutes: 0, seconds: 0 });
     }
   };
 
@@ -523,6 +552,18 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     }
   }, [address, selectedTableType]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Load prediction history for the current contract and user
+  const loadPredictionHistory = useCallback(async () => {
+    if (!address || !contractAddress) return;
+    
+    try {
+      const history = await getUserPredictionsByContract(address, contractAddress);
+      setPredictionHistory(history);
+    } catch (error) {
+      console.error('Error loading prediction history:', error);
+    }
+  }, [address, contractAddress]);
+
   // Load data on component mount and when key dependencies change
   useEffect(() => {
     const loadAllData = async () => {
@@ -531,7 +572,8 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
         try {
           await Promise.all([
             loadBets(),
-            loadMarketOutcome() // This will also load evidence submission after outcome is loaded
+            loadMarketOutcome(), // This will also load evidence submission after outcome is loaded
+            loadPredictionHistory() // Load prediction history for the dashboard
           ]);
         } finally {
           setIsDataLoaded(true);
@@ -542,7 +584,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     };
     
     loadAllData();
-  }, [address, isParticipant, selectedTableType, loadBets, loadMarketOutcome]);
+  }, [address, isParticipant, selectedTableType, loadBets, loadMarketOutcome, loadPredictionHistory]);
 
   // Handle transaction confirmation
   useEffect(() => {
@@ -603,8 +645,8 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
     
     setIsLoading(true);
     try {
-      // Pass the table type string instead of the table object
-      await placeBitcoinBet(address, prediction, selectedTableType);
+      // Pass the table type string instead of the table object, include the market question and contract address
+      await placeBitcoinBet(address, prediction, selectedTableType, marketQuestion, contractAddress);
       
       
       const tomorrow = new Date();
@@ -612,6 +654,12 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
       const tomorrowFormatted = tomorrow.toLocaleDateString();
       showMessage(`Bet placed successfully for ${tomorrowFormatted}!`);
       await loadBets(); // Reload to show the new bet
+      await loadPredictionHistory(); // Reload prediction history
+      
+      // Auto-collapse after successful prediction for cleaner UX
+      setTimeout(() => {
+        setIsMainSectionCollapsed(true);
+      }, 2000);
     } catch (error: unknown) {
       console.error('Error placing bet:', error);
       showMessage(error instanceof Error ? error.message : 'Failed to place bet. Please try again.');
@@ -1036,11 +1084,11 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 <div className="p-4 text-center">
                   <div className="flex items-center justify-center gap-6 mb-6">
                     <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg ${
-                      tomorrowsBet.prediction === 'positive' 
+                      (tomorrowsBet as TodaysBet).prediction === 'positive' 
                         ? 'bg-black' 
                         : 'bg-purple-700'
                     }`}>
-                      {tomorrowsBet.prediction === 'positive' ? (
+                      {(tomorrowsBet as TodaysBet).prediction === 'positive' ? (
                         <TrendingUp className="w-10 h-10 text-white" />
                       ) : (
                         <TrendingDown className="w-10 h-10 text-white" />
@@ -1049,7 +1097,7 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                     
                     <div className="text-left">
                       <div className="text-5xl font-black text-black tracking-tight mb-2">
-                        {tomorrowsBet.prediction === 'positive' ? 'YES' : 'NO'}
+                        {(tomorrowsBet as TodaysBet).prediction === 'positive' ? 'YES' : 'NO'}
                       </div>
                       {/* <div className="text-gray-600 text-sm font-medium">
                         Set at {new Date(tomorrowsBet.createdAt).toLocaleTimeString('en-GB', {
@@ -1155,156 +1203,309 @@ export default function MakePredicitions({ activeSection, setActiveSection }: Ma
                 </div>
               </div>
             ) : (
-              // Premium betting interface
-          <div className="bg-white border-2 border-black rounded-3xl p-8 mb-8 shadow-2xl relative overflow-hidden">
-            {/* Red accent line */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-purple-700"></div>
-            
-            <div className="relative z-10">
-              <div className="text-center mb-6">
-                {votingPreference && !tomorrowsBet ? (
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-black text-purple-700 mb-2 tracking-tight">
-                      Auto-Submitting Your Choice
-                    </h2>
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-3 max-w-md mx-auto">
-                      <p className="text-gray-700 text-sm">
-                        Submitting: <span className="font-bold text-purple-700">
-                          {votingPreference === 'positive' ? 'Yes' : 'No'}
-                        </span>
+              // Combined Collapsible Voting and Timer Interface
+              <div className="bg-gradient-to-br from-white via-purple-50/30 to-white border border-gray-200/50 rounded-3xl mb-8 shadow-2xl shadow-gray-900/5 relative overflow-hidden">
+                {/* Header with collapse toggle */}
+                <div 
+                  onClick={() => setIsMainSectionCollapsed(!isMainSectionCollapsed)}
+                  className="flex items-center justify-between p-6 cursor-pointer hover:bg-purple-50/20 transition-all duration-200 border-b border-gray-100/50"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-black rounded-xl flex items-center justify-center shadow-lg">
+                      {tomorrowsBet ? (
+                        (tomorrowsBet as TodaysBet).prediction === 'positive' ? (
+                          <TrendingUp className="w-5 h-5 text-white" />
+                        ) : (
+                          <TrendingDown className="w-5 h-5 text-white" />
+                        )
+                      ) : (
+                        <Clock className="w-5 h-5 text-white" />
+                      )}
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-gray-900 tracking-tight">
+                        {tomorrowsBet ? 'Active Prediction' : 'Make Prediction'}
+                      </h2>
+                      <p className="text-gray-500 text-xs font-medium">
+                        {tomorrowsBet ? 'Manage your current prediction' : 'Place your prediction for tomorrow'}
                       </p>
                     </div>
                   </div>
-                ) : (
-                  <h2 className="text-3xl font-black text-black mb-3 tracking-tight">Your Call?</h2>
-                )}
-                {marketQuestion && (
-                  <div className="bg-black text-white rounded-2xl p-3 mb-4 mx-auto max-w-md">
-                    <p className="text-white font-semibold text-sm leading-relaxed">
-                      {marketQuestion.replace(/\?$/, '')} <span className="text-purple-400">tomorrow?</span>
-                    </p>
-                  </div>
-                )}
-                <p className="text-black text-base font-semibold">
-                  Predict for {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* YES Button - Black */}
-                <button
-                  onClick={() => handlePlaceBet('positive')}
-                  disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-black hover:bg-[#009900] disabled:opacity-50 disabled:cursor-not-allowed text-white p-6 rounded-2xl font-black text-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl border-2 border-black overflow-hidden"
-                >
-                  <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-2 bg-white/10 rounded-lg mb-3 backdrop-blur-sm flex items-center justify-center">
-                      <TrendingUp className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
-                    </div>
-                    <div className="tracking-wide">YES</div>
-                  </div>
-                  
-                  {/* Hover glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-purple-700 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                </button>
-
-                {/* NO Button - White with red accent */}
-                <button
-                  onClick={() => handlePlaceBet('negative')}
-                  disabled={isLoading || !isBettingAllowed()}
-                  className="group relative bg-white hover:bg-purple-100 border-2 border-black hover:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-black hover:text-purple-700 p-6 rounded-2xl font-black text-xl transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl overflow-hidden"
-                >
-                  <div className="relative z-10 flex flex-col items-center justify-center">
-                    <div className="p-2 bg-black/10 group-hover:bg-purple-100 rounded-lg mb-3 backdrop-blur-sm flex items-center justify-center transition-colors duration-300">
-                      <TrendingDown className="w-7 h-7 group-hover:scale-110 transition-transform duration-300" />
-                    </div>
-                    <div className="tracking-wide">NO</div>
-                  </div>
-                </button>
-              </div>
-
-              {isLoading && (
-                <div className="text-center mt-8">
-                  <div className="inline-flex items-center gap-3 text-black bg-white border-2 border-black px-6 py-3 rounded-xl shadow-lg">
-                    <div className="relative">
-                      <Zap className="w-6 h-6 text-purple-700" />
-                      <div className="absolute inset-0 animate-ping">
-                        <Zap className="w-6 h-6 text-purple-700 opacity-30" />
+                  <div className="flex items-center gap-3">
+                    {tomorrowsBet && (
+                      <div className={`px-3 py-1 rounded-full text-xs font-black shadow-sm ${
+                        (tomorrowsBet as TodaysBet).prediction === 'positive' 
+                          ? 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-200' 
+                          : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-200'
+                      }`}>
+                        {(tomorrowsBet as TodaysBet).prediction === 'positive' ? 'YES' : 'NO'}
                       </div>
+                    )}
+                    <div className={`p-2 rounded-lg transition-colors duration-200 ${
+                      isMainSectionCollapsed ? 'bg-gray-100 hover:bg-gray-200' : 'bg-purple-100 hover:bg-purple-200'
+                    }`}>
+                      {isMainSectionCollapsed ? (
+                        <ChevronDown className="w-4 h-4 text-gray-700" />
+                      ) : (
+                        <ChevronUp className="w-4 h-4 text-purple-700" />
+                      )}
                     </div>
-                    <span className="font-bold">Placing bet...</span>
                   </div>
                 </div>
-              )}
+
+                {/* Collapsible Content */}
+                {!isMainSectionCollapsed && (
+                  <div className="px-6 pb-6">
+                    {/* Voting Interface */}
+                    <div className="mb-6">
+                      <div className="text-center mb-6">
+                        {votingPreference && !tomorrowsBet ? (
+                          <div className="mb-4">
+                            <h3 className="text-xl font-black text-purple-700 mb-3 tracking-tight">
+                              Auto-Submitting Your Choice
+                            </h3>
+                            <div className="bg-gradient-to-r from-purple-50/80 to-white border border-purple-200/50 rounded-2xl p-4 max-w-sm mx-auto">
+                              <p className="text-gray-700 text-sm font-medium">
+                                Submitting: <span className="font-black text-purple-700">
+                                  {votingPreference === 'positive' ? 'YES' : 'NO'}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight">Your Prediction</h3>
+                        )}
+                        
+                        {marketQuestion && (
+                          <div className="bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl p-4 mb-4 mx-auto max-w-md shadow-lg">
+                            <p className="text-white font-semibold text-sm leading-relaxed">
+                              {marketQuestion.replace(/\?$/, '')} <span className="text-purple-300">tomorrow?</span>
+                            </p>
+                          </div>
+                        )}
+                        
+                        <p className="text-gray-600 text-sm font-medium">
+                          For {new Date(new Date().getTime() + 24*60*60*1000).toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* YES Button - Black */}
+                        <button
+                          onClick={() => handlePlaceBet('positive')}
+                          disabled={isLoading || !isBettingAllowed()}
+                          className="group relative bg-gradient-to-br from-gray-900 to-black hover:from-purple-900 hover:to-black disabled:opacity-50 disabled:cursor-not-allowed text-white p-5 rounded-2xl font-black text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl border border-gray-800 hover:border-purple-700"
+                        >
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="p-2 bg-white/10 rounded-lg mb-2 flex items-center justify-center">
+                              <TrendingUp className="w-6 h-6" />
+                            </div>
+                            <div className="tracking-wide">YES</div>
+                          </div>
+                        </button>
+
+                        {/* NO Button - White */}
+                        <button
+                          onClick={() => handlePlaceBet('negative')}
+                          disabled={isLoading || !isBettingAllowed()}
+                          className="group relative bg-white hover:bg-purple-50 border-2 border-gray-900 hover:border-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 hover:text-purple-700 p-5 rounded-2xl font-black text-lg transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+                        >
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="p-2 bg-gray-900/10 group-hover:bg-purple-700/10 rounded-lg mb-2 flex items-center justify-center transition-colors duration-200">
+                              <TrendingDown className="w-6 h-6" />
+                            </div>
+                            <div className="tracking-wide">NO</div>
+                          </div>
+                        </button>
+                      </div>
+
+                      {isLoading && (
+                        <div className="text-center mt-6">
+                          <div className="inline-flex items-center gap-3 text-purple-700 bg-purple-50 border border-purple-200 px-6 py-3 rounded-2xl shadow-lg">
+                            <div className="relative">
+                              <Zap className="w-5 h-5 text-purple-700" />
+                              <div className="absolute inset-0 animate-ping">
+                                <Zap className="w-5 h-5 text-purple-700 opacity-30" />
+                              </div>
+                            </div>
+                            <span className="font-bold text-sm">Placing prediction...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Timer Section */}
+                    <div className="border-t border-gray-100 pt-6">
+                      <h4 className="text-lg font-black text-gray-900 text-center mb-6">Game Timers</h4>
+                      <div className="space-y-3">
+                      
+                      {/* New Question Timer */}
+                      {(() => {
+                        const urgency = getTimerUrgency(timeUntilNewQuestion.hours, timeUntilNewQuestion.minutes, timeUntilNewQuestion.seconds);
+                        
+                        let containerClass = 'bg-white border border-gray-200';
+                        let textClass = 'text-gray-700';
+                        let timerClass = 'text-gray-900';
+                        let iconClass = 'bg-purple-600';
+                        
+                        if (urgency === 'critical') {
+                          containerClass = 'bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 animate-pulse';
+                          textClass = 'text-purple-800';
+                          timerClass = 'text-purple-900';
+                          iconClass = 'bg-purple-700';
+                        } else if (urgency === 'urgent') {
+                          containerClass = 'bg-gradient-to-r from-purple-25 to-purple-50 border border-purple-200';
+                          textClass = 'text-purple-700';
+                          timerClass = 'text-purple-800';
+                          iconClass = 'bg-purple-600';
+                        }
+                        
+                        return (
+                          <div className={`${containerClass} rounded-xl p-4`}>
+                            <div className="flex items-center justify-between">
+                              <div className={`${textClass} font-semibold text-sm`}>Next Question</div>
+                              <div className="flex items-center gap-3">
+                                <div className={`w-6 h-6 ${iconClass} rounded-full flex items-center justify-center`}>
+                                  <Clock className="w-3 h-3 text-white" />
+                                </div>
+                                <span className={`font-black ${timerClass} text-lg tracking-wider`}>
+                                  {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
+                                  {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
+                                  {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Next Elimination Timer */}
+                      {(() => {
+                        const urgency = getTimerUrgency(timeUntilNextElimination.hours, timeUntilNextElimination.minutes, timeUntilNextElimination.seconds);
+                        
+                        let containerClass = 'bg-white border border-gray-200';
+                        let textClass = 'text-gray-700';
+                        let timerClass = 'text-gray-900';
+                        let iconClass = 'bg-gray-600';
+                        
+                        if (urgency === 'critical') {
+                          containerClass = 'bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-400 animate-pulse';
+                          textClass = 'text-gray-800';
+                          timerClass = 'text-gray-900';
+                          iconClass = 'bg-gray-700';
+                        } else if (urgency === 'urgent') {
+                          containerClass = 'bg-gradient-to-r from-gray-25 to-gray-50 border border-gray-300';
+                          textClass = 'text-gray-700';
+                          timerClass = 'text-gray-800';
+                          iconClass = 'bg-gray-600';
+                        }
+                        
+                        return (
+                          <div className={`${containerClass} rounded-xl p-4`}>
+                            <div className="flex items-center justify-between">
+                              <div className={`${textClass} font-semibold text-sm`}>Results Reveal</div>
+                              <div className="flex items-center gap-3">
+                                <div className={`w-6 h-6 ${iconClass} rounded-full flex items-center justify-center`}>
+                                  <AlertTriangle className="w-3 h-3 text-white" />
+                                </div>
+                                <span className={`font-black ${timerClass} text-lg tracking-wider`}>
+                                  {timeUntilNextElimination.hours.toString().padStart(2, '0')}:
+                                  {timeUntilNextElimination.minutes.toString().padStart(2, '0')}:
+                                  {timeUntilNextElimination.seconds.toString().padStart(2, '0')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
             )}
           </>
         )}
 
         {/* Enhanced Status Message */}
         {message && (
-          <div className={`p-6 rounded-2xl mb-8 text-center backdrop-blur-xl border shadow-xl transform animate-in fade-in duration-500 ${
+          <div className={`p-6 rounded-2xl mb-8 text-center border shadow-lg transform animate-in fade-in duration-500 ${
             message.includes('Failed') || message.includes('Error') 
-              ? 'bg-purple-100/80 border-purple-200/50 text-purple-700 shadow-purple-900/10' 
-              : 'bg-green-50/80 border-green-200/50 text-green-700 shadow-green-900/10'
+              ? 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 text-purple-800' 
+              : 'bg-gradient-to-r from-purple-50 to-purple-100 border-purple-200 text-purple-800'
           }`}>
-            <p className="font-bold text-lg">{message}</p>
+            <p className="font-black text-base">{message}</p>
           </div>
         )}
 
-        {/* Universal Dual Timer System - Always Visible */}
-        <div className="bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-3xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-2xl shadow-gray-900/10">
-          <div className="space-y-3 sm:space-y-4">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-4 sm:mb-6">You must return tomorrow</h3>
+        {/* Prediction History Dashboard */}
+        {predictionHistory.length > 0 && (
+          <div className="bg-gradient-to-br from-white via-purple-50/20 to-white border border-gray-200/50 rounded-3xl p-6 mb-8 shadow-lg">
+            <div className="mb-6">
+              <h3 className="text-xl font-black text-gray-900 mb-2 tracking-tight">Prediction History</h3>
+              <p className="text-gray-500 text-sm font-medium">Your predictions for this market</p>
+            </div>
             
-
-            {/* New Question Timer */}
-            {(() => {
-              const urgency = getTimerUrgency(timeUntilNewQuestion.hours, timeUntilNewQuestion.minutes, timeUntilNewQuestion.seconds);
-              
-              // Custom styling for purple/black/white theme
-              let containerClass, textClass, iconClass, timerClass;
-              
-              if (urgency === 'critical') {
-                containerClass = 'bg-gradient-to-r from-purple-100 to-white border-2 border-purple-500 animate-pulse';
-                textClass = 'text-purple-900';
-                iconClass = 'bg-purple-700';
-                timerClass = 'text-purple-900';
-              } else if (urgency === 'urgent') {
-                containerClass = 'bg-gradient-to-r from-purple-50 to-white border-2 border-purple-300 animate-pulse';
-                textClass = 'text-purple-800';
-                iconClass = 'bg-purple-600';
-                timerClass = 'text-purple-900';
-              } else {
-                containerClass = 'bg-gradient-to-r from-black to-gray-900 border border-gray-800';
-                textClass = 'text-white';
-                iconClass = 'bg-purple-700';
-                timerClass = 'text-white';
-              }
-              
-              return (
-                <div className={`${containerClass} rounded-xl p-3 sm:p-4`}>
-                  <div className="flex items-center justify-between">
-                    <div className={`${textClass} font-bold text-sm sm:text-base`}>Next Question in:</div>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className={`w-5 h-5 sm:w-6 sm:h-6 ${iconClass} rounded-full flex items-center justify-center`}>
-                        <Clock className="w-3 h-3 text-white" />
+            <div className="space-y-3">
+              {predictionHistory.slice(0, 5).map((prediction, index) => (
+                <div 
+                  key={index}
+                  className="bg-white border border-gray-100 rounded-2xl p-4 hover:border-purple-200 hover:shadow-md transition-all duration-200"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Prediction Icon */}
+                    <div className={`p-2 rounded-xl ${
+                      prediction.prediction === 'positive' 
+                        ? 'bg-gradient-to-br from-purple-600 to-purple-700' 
+                        : 'bg-gradient-to-br from-gray-600 to-gray-700'
+                    }`}>
+                      {prediction.prediction === 'positive' ? (
+                        <TrendingUp className="w-4 h-4 text-white" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                    
+                    {/* Prediction Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className={`font-black text-base ${
+                          prediction.prediction === 'positive' ? 'text-purple-700' : 'text-gray-700'
+                        }`}>
+                          {prediction.prediction === 'positive' ? 'YES' : 'NO'}
+                        </span>
+                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
+                          {new Date(prediction.predictionDate).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric'
+                          })}
+                        </span>
                       </div>
-                      <span className={`font-bold ${timerClass} text-base sm:text-lg tracking-wider`}>
-                        {timeUntilNewQuestion.hours.toString().padStart(2, '0')}:
-                        {timeUntilNewQuestion.minutes.toString().padStart(2, '0')}:
-                        {timeUntilNewQuestion.seconds.toString().padStart(2, '0')}
-                      </span>
+                      <p className="text-gray-700 text-sm font-medium line-clamp-1 mb-1">
+                        {prediction.questionName}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        {new Date(prediction.createdAt).toLocaleDateString()} • {' '}
+                        {new Date(prediction.createdAt).toLocaleTimeString('en-GB', {
+                          hour: '2-digit', 
+                          minute: '2-digit'
+                        })}
+                      </p>
                     </div>
                   </div>
                 </div>
-              );
-            })()}
-
+              ))}
+            </div>
             
+            {predictionHistory.length > 5 && (
+              <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                <p className="text-gray-500 text-xs font-medium">
+                  Showing latest 5 of {predictionHistory.length} predictions
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Previous Prediction Section - Below Main Interface */}
         {todaysBet && (

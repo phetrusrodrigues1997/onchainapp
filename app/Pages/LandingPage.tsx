@@ -714,8 +714,12 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       // Set loading state for this market
       setVoteChangeLoading(prev => ({ ...prev, [marketId]: true }));
 
-      // Place/update the prediction
-      await placeBitcoinBet(address, newVote, tableType);
+      // Get the market question for tracking
+      const marketData = getMarkets(getTranslation(currentLanguage), marketId);
+      const marketQuestion = marketData[0]?.question || 'Market prediction';
+
+      // Place/update the prediction  
+      await placeBitcoinBet(address, newVote, tableType, marketQuestion, contractAddress);
       
       // Update local state immediately for better UX
       const updatedPrediction: TodaysBet = {
