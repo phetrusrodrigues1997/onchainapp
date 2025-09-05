@@ -75,7 +75,11 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
     try {
       const tableType = getTableTypeFromContract(contractAddress);
       // Use display name as fallback for question name in admin context
-      const questionName = getMarketDisplayName(tableType);
+      // Handle fallback case for unknown contracts
+      const mappedTableType = CONTRACT_TO_TABLE_MAPPING[contractAddress as keyof typeof CONTRACT_TO_TABLE_MAPPING];
+      const questionName = mappedTableType 
+        ? getMarketDisplayName(mappedTableType)
+        : tableType; // Use the fallback string directly
       const provisionalOutcomeData = await getProvisionalOutcome(tableType, questionName);
       
       if (provisionalOutcomeData) {
