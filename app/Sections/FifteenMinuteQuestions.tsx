@@ -484,7 +484,7 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
       
       try {
         // Get provisional outcome set by admin
-        const outcome = await getProvisionalOutcome('live');
+        const outcome = await getProvisionalOutcome('live', 'Live Question');
         setMarketOutcome(outcome);
         
         if (outcome) {
@@ -606,14 +606,14 @@ export default function FifteenMinuteQuestions({ className = '', setActiveSectio
       console.log('🟡 Setting provisional outcome for live:', { outcome: outcomeInput, tableType: 'live' });
       
       // setProvisionalOutcome returns plain object on success, throws on error
-      const result = await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live');
+      const result = await setProvisionalOutcome(outcomeInput as 'positive' | 'negative', 'live', 'Live Question');
       console.log('✅ setProvisionalOutcome result:', result);
       
       setProcessMessage('Provisional outcome set! Evidence window is now open.');
       
       // Reload market outcome and evidence data
       console.log('Loading market outcome...');
-      const outcome = await getProvisionalOutcome('live');
+      const outcome = await getProvisionalOutcome('live', 'Live Question');
       console.log('Market outcome loaded:', outcome);
       setMarketOutcome(outcome);
       

@@ -5,7 +5,7 @@ import { getAllEvidenceSubmissions } from '../Database/actions';
 import { getProvisionalOutcome } from '../Database/OwnerActions';
 import { getMarkets } from '../Constants/markets';
 import { getTranslation } from '../Languages/languages';
-import { CONTRACT_TO_TABLE_MAPPING } from '../Database/config';
+import { CONTRACT_TO_TABLE_MAPPING, getMarketDisplayName } from '../Database/config';
 
 // Dynamic market discovery
 const getMarketsWithContracts = () => {
@@ -73,7 +73,9 @@ const AdminEvidenceReviewPage: React.FC<AdminEvidenceReviewPageProps> = ({
   const loadMarketOutcome = async (contractAddress: string) => {
     try {
       const tableType = getTableTypeFromContract(contractAddress);
-      const provisionalOutcomeData = await getProvisionalOutcome(tableType);
+      // Use display name as fallback for question name in admin context
+      const questionName = getMarketDisplayName(tableType as TableType);
+      const provisionalOutcomeData = await getProvisionalOutcome(tableType, questionName);
       
       if (provisionalOutcomeData) {
         setMarketOutcome({
