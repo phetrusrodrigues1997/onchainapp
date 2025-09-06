@@ -263,7 +263,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
             {/* Apple-like Email Collection UI */}
             {!isLoadingEmail && showEmailCollection && isConnected && (
-              <div className="w-full px-6 md:px-12">
+              <div className="w-full mt-16 md:mt-0 px-6 md:px-12">
                 {/* Email form container */}
                 <div className="relative max-w-2xl mx-auto animate-fade-in-up opacity-0" style={{ 
                   animation: 'fadeInUp 0.8s ease-out 0.2s forwards' 
@@ -302,7 +302,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
                           Saving
                         </span>
                       ) : (
-                        'Continue'
+                        'Submit'
                       )}
                     </button>
                   </div>

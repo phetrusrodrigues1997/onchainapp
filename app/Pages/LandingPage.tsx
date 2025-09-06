@@ -1390,7 +1390,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                               handleMarketClick(market.id);
                             }, 300);
                           })}
-                          className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 border border-green-200 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
+                          className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
                         >
                           {getButtonContent(market.id, 'positive')}
                         </button>
@@ -1409,7 +1409,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                               handleMarketClick(market.id);
                             }, 300);
                           })}
-                          className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 border border-red-200 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
+                          className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
                         >
                           {getButtonContent(market.id, 'negative')}
                         </button>
@@ -1879,7 +1879,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                           handleMarketClick(market.id);
                                         }, 300);
                                       })}
-                                      className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 border border-green-200 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
+                                      className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
                                     >
                                       {getButtonContent(market.id, 'positive')}
                                     </button>
@@ -1898,7 +1898,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                           handleMarketClick(market.id);
                                         }, 300);
                                       })}
-                                      className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 border border-red-200 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
+                                      className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
                                     >
                                       {getButtonContent(market.id, 'negative')}
                                     </button>
