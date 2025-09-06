@@ -1180,7 +1180,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             <div className="flex items-center gap-3 mb-3 relative">
               {/* Small Square Image */}
               <div className="flex-shrink-0">
-                <div className="rounded-lg w-16 h-16 bg-white overflow-hidden relative">
+                <div className="rounded-lg w-12 h-12 bg-white overflow-hidden relative">
                   {market.icon?.slice(0, 4) === 'http' ? (
                     <img 
                       src={market.icon} 
@@ -1196,8 +1196,12 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               </div>
               
               {/* Question */}
-              <div className="flex-1 flex items-center pr-4">
-                <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
+<div className={`flex-1 flex items-center ${
+  (() => {
+    const index = marketOptions.findIndex(m => m.id === market.id);
+    return (index + 1) % 4 === 0 ? 'pr-16' : 'pr-0';
+  })()
+}`}>                <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
                   color: '#374151', 
                   fontWeight: '650',
                   minHeight: '2.5rem',

@@ -388,6 +388,78 @@ require(successfulTransfers > 0, "All transfers failed");
 
 This fix ensures pot distribution will **never fail again** due to recipient address types.
 
+## Adding New Contract Addresses for Markets
+
+When deploying a new smart contract for a market, follow these **essential steps** to ensure full integration:
+
+### **Step-by-Step Integration Checklist:**
+
+#### **1. Update Markets Configuration (`app/Constants/markets.ts`)**
+- Add `contractAddress` to the market in the `options` category
+- Add complete market data (question, icon, name, etc.) - cannot be empty
+- Update the corresponding category-specific section with matching `id` and `contractAddress`
+- Ensure both references have identical market information
+
+#### **2. Update Contract Mapping (`app/Database/config.ts`)**
+- Add new contract address to `CONTRACT_TO_TABLE_MAPPING`
+- Add new table mappings to `TABLE_MAPPINGS.BETS` and `TABLE_MAPPINGS.WRONG_PREDICTIONS`
+- Update `getMarketDisplayName()` function with proper display name
+- Follow naming convention: `{market}_bets` and `wrong_predictions_{market}`
+
+#### **3. Update Database Schema (`app/Database/schema.ts`)**
+- Create new `{Market}Bets` table with standard prediction schema
+- Create new `Wrong_Predictions{Market}` table with standard penalty schema
+- Export both tables for Drizzle ORM usage
+
+#### **4. Enable Prediction Percentages (`app/Pages/LandingPage.tsx`)**
+- Add market ID to `marketsWithContracts` array in `loadPredictionPercentages()`
+- This enables thermometer display and live percentage updates
+
+#### **5. Database Migration (Production)**
+- Run migrations to create the new tables in production database
+- Ensure both bets and wrong predictions tables are created
+
+### **Example Integration (Music Market):**
+
+```typescript
+// 1. markets.ts - options category
+{
+  id: 'music',
+  name: 'Music Charts',
+  contractAddress: '0xb85D3aE374b8098A6cA553dB90C0978401a34f71',
+  question: 'Will "Espresso" be the #1 track on Spotify Global?',
+  icon: 'https://...',
+  // ... other properties
+}
+
+// 2. config.ts
+export const CONTRACT_TO_TABLE_MAPPING = {
+  "0xb85D3aE374b8098A6cA553dB90C0978401a34f71": "music",
+} as const;
+
+// 3. schema.ts
+export const MusicBets = pgTable("music_bets", { /* schema */ });
+export const WrongPredictionsMusic = pgTable("wrong_predictions_music", { /* schema */ });
+
+// 4. LandingPage.tsx
+const marketsWithContracts = ['Trending', 'Crypto', 'stocks', 'music'];
+```
+
+### **⚠️ Common Mistakes to Avoid:**
+- **Missing question/icon**: Markets with empty questions will show "undefined market coming soon"
+- **Inconsistent IDs**: Market ID must match between options category and specific category  
+- **Missing from percentages**: Forgetting to add to `marketsWithContracts` means no thermometer
+- **Database schema**: Missing either bets or wrong predictions table will cause errors
+- **Case sensitivity**: Ensure consistent casing in all table and function names
+
+### **Testing Verification:**
+After integration, verify:
+- ✅ Market appears in landing page with proper layout (big/small buttons based on index)
+- ✅ Clicking market navigates properly (no "coming soon" error)
+- ✅ Thermometer appears after first predictions are made
+- ✅ Prediction percentages load and display correctly
+- ✅ Users can make predictions and data saves to correct database tables
+
 ## Development Notes
 
 - **OnchainKit Version**: Currently on `0.37.5` (downgraded from `0.38.19`). Reverted to stable pre-upgrade version to avoid mobile wallet modal issues and desktop z-index problems found in newer versions.
