@@ -109,6 +109,7 @@ export const UsersTable = pgTable("users_table", {
   id: serial("id").primaryKey(),
   walletAddress: text("wallet_address").notNull().unique(), // Each wallet can only have one entry
   imageUrl: text("image_url"), // Optional profile image URL
+  email: text("email"), // Optional email address for marketing and updates
   collectedAt: timestamp("collected_at").defaultNow().notNull(),
   lastWordlePlay: timestamp("last_wordle_play"), // Last time user played Wordle
   wordlePlaysToday: integer("wordle_plays_today").default(0).notNull(), // Number of plays today
@@ -187,6 +188,7 @@ export const Bookmarks = pgTable("bookmarks", {
   contractAddress: text("contract_address"), // Contract address if available
   // Note: marketName and marketQuestion columns removed - we get live data from markets.ts
 });
+
 
 // Pot participation history - tracks entry/exit events for fair prediction requirements
 export const PotParticipationHistory = pgTable("pot_participation_history", {

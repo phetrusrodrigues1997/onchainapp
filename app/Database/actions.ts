@@ -2822,4 +2822,83 @@ export async function getAnnouncementStats() {
   }
 }
 
+// ========== EMAIL MANAGEMENT ==========
+
+/**
+ * Check if a user has an email address stored
+ */
+export async function getUserEmail(walletAddress: string) {
+  try {
+    if (!walletAddress) {
+      return null;
+    }
+
+    const result = await db.select({ 
+      email: UsersTable.email
+    })
+    .from(UsersTable)
+    .where(eq(UsersTable.walletAddress, walletAddress.toLowerCase()))
+    .limit(1);
+
+    return result[0] || null;
+  } catch (error) {
+    console.error("❌ Error getting user email:", error);
+    return null;
+  }
+}
+
+/**
+ * Save or update a user's email address
+ */
+export async function saveUserEmail(walletAddress: string, email: string) {
+  try {
+    if (!walletAddress || !email) {
+      return { success: false, error: "Invalid wallet address or email" };
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return { success: false, error: "Invalid email format" };
+    }
+
+    // Comprehensive email sanitization
+    const sanitizedWalletAddress = walletAddress.toLowerCase().trim();
+    const sanitizedEmail = email
+      .trim()
+      .toLowerCase()
+      .replace(/[<>"\\'`]/g, '') // Remove dangerous characters
+      .substring(0, 254); // Limit length (email standard max is 254)
+
+    // Validate sanitized email still matches regex
+    if (!emailRegex.test(sanitizedEmail)) {
+      return { success: false, error: "Invalid email format after sanitization" };
+    }
+
+    // Try to update existing user or create new user
+    const result = await db.select()
+      .from(UsersTable)
+      .where(eq(UsersTable.walletAddress, sanitizedWalletAddress))
+      .limit(1);
+
+    if (result.length > 0) {
+      // Update existing user
+      await db.update(UsersTable)
+        .set({ email: sanitizedEmail })
+        .where(eq(UsersTable.walletAddress, sanitizedWalletAddress));
+    } else {
+      // Create new user
+      await db.insert(UsersTable).values({
+        walletAddress: sanitizedWalletAddress,
+        email: sanitizedEmail
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Error saving user email:", error);
+    return { success: false, error: "Failed to save email" };
+  }
+}
+
 
