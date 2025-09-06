@@ -1199,7 +1199,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
 <div className={`flex-1 flex items-center ${
   (() => {
     const index = marketOptions.findIndex(m => m.id === market.id);
-    return (index + 1) % 4 === 0 ? 'pr-16' : 'pr-0';
+    return ((index + 1) % 5 === 0) || index === 1 ? 'pr-16' : 'pr-0';
   })()
 }`}>                <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
                   color: '#374151', 
@@ -1215,7 +1215,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               {(() => {
                 // Mobile: Alternating layout system
                 const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
+                const useTraditionalLayout = ((marketIndex + 1) % 5 === 0) || marketIndex === 1;
                 const contractAddress = getContractAddress(market.id);
                 const isEliminated = contractAddress && eliminationStatus[contractAddress];
                 
@@ -1276,7 +1276,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             {(() => {
               // Mobile: Alternating button layout system
               const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-              const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
+              const useTraditionalLayout = ((marketIndex + 1) % 5 === 0) || marketIndex === 1;
               
               if (useTraditionalLayout) {
                 // Traditional buttons (even index markets)
@@ -1687,7 +1687,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           {(() => {
                             // Determine if thermometer will be shown to adjust question width
                             const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                            const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
+                            const useTraditionalLayout = ((marketIndex + 1) % 5 === 0) || marketIndex === 1;
                             const contractAddress = getContractAddress(market.id);
                             const isEliminated = contractAddress && eliminationStatus[contractAddress];
                             const showThermometer = useTraditionalLayout && predictionPercentages[market.tabId || market.id] && !isEliminated;
@@ -1704,7 +1704,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           {(() => {
                             // Alternating layout system
                             const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                            const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
+                            const useTraditionalLayout = ((marketIndex + 1) % 5 === 0) || marketIndex === 1;
                             const contractAddress = getContractAddress(market.id);
                             const isEliminated = contractAddress && eliminationStatus[contractAddress];
                             
@@ -1765,7 +1765,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                         {(() => {
                           // Alternating button layout system
                           const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                          const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
+                          const useTraditionalLayout = ((marketIndex + 1) % 5 === 0) || marketIndex === 1;
                           
                           if (useTraditionalLayout) {
                             // Traditional buttons (even index markets)
