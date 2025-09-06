@@ -1199,7 +1199,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
 <div className={`flex-1 flex items-center ${
   (() => {
     const index = marketOptions.findIndex(m => m.id === market.id);
-    return ((index + 1) % 5 === 0) || index === 1 ? 'pr-24' : 'pr-0';
+    return ((index + 1) % 5 === 0) || index === 1 ? 'pr-16' : 'pr-0';
   })()
 }`}>                <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
                   color: '#374151', 
@@ -1693,7 +1693,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             const showThermometer = useTraditionalLayout && predictionPercentages[market.tabId || market.id] && !isEliminated;
                             
                             return (
-                              <div className={`flex-1 ${showThermometer ? 'pr-24' : 'pr-0'}`}>
+                              <div className={`flex-1 ${showThermometer ? 'pr-16' : 'pr-4'}`}>
                                 <p className="text-sm leading-tight line-clamp-3 font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{color: '#374151', fontWeight: '650'}}>
                                   {market.question}
                                 </p>
