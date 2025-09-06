@@ -1014,7 +1014,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
         <div className="md:max-w-7xl md:mx-auto">
           
 {/* Mobile Markets Display - All Markets */}
-<div className="md:hidden space-y-4 -translate-y-2">
+<div className="md:hidden space-y-2 -translate-y-2">
   {(() => {
     // Get all markets and deduplicate by ID
     const allMarkets = marketOptions.map(option => {
