@@ -1,6 +1,6 @@
 // Database configuration constants
 // TESTING TOGGLE - Set to false to allow betting on Saturdays for testing
-export const ENFORCE_SATURDAY_RESTRICTIONS = true; // Toggle this on/off as needed
+export const ENFORCE_SATURDAY_RESTRICTIONS = false; // Toggle this on/off as needed
 
 // Centralized contract address to table type mappings
 // Used across PredictionPotTest, MakePredictionsPage, LandingPage, BookmarksPage, TutorialBridge, AdminEvidenceReviewPage
@@ -8,6 +8,7 @@ export const CONTRACT_TO_TABLE_MAPPING = {
   "0xd1547F5bC0390F5020B2A80F262e28ccfeF2bf9c": "featured",
   "0xe9b69d0EA3a6E018031931d300319769c6629866": "crypto", 
   "0xf07E717e1dB49dDdB207C68cCb433BaE4Bc65fC9": "stocks",
+  "0xb85D3aE374b8098A6cA553dB90C0978401a34f71": "music",
 } as const;
 
 // Type for contract addresses
@@ -20,14 +21,16 @@ export const TABLE_MAPPINGS = {
   BETS: {
     featured: 'featured_bets',
     crypto: 'crypto_bets', 
-    stocks: 'stocks_bets'
+    stocks: 'stocks_bets',
+    music: 'music_bets'
   } as const,
   
   // Wrong predictions tables (penalties/eliminations)
   WRONG_PREDICTIONS: {
     featured: 'wrong_Predictions', // Note: Capital P for legacy reasons
     crypto: 'wrong_predictions_crypto',
-    stocks: 'wrong_predictions_stocks'
+    stocks: 'wrong_predictions_stocks',
+    music: 'wrong_predictions_music'
   } as const
 } as const;
 
@@ -53,6 +56,8 @@ export const getMarketDisplayName = (tableType: TableType): string => {
       return 'Crypto';
     case 'stocks':
       return 'stocks';
+    case 'music':
+      return 'Music Charts';
     default:
       return tableType; // fallback to the original table type
   }

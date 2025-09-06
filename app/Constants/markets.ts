@@ -80,9 +80,10 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
     id: 'music',
     name: 'Music Charts',
     symbol: '',
+    contractAddress: '0xb85D3aE374b8098A6cA553dB90C0978401a34f71',
     color: '#DA70D6',
-    question: '',
-    icon: '',
+    question: 'Will "Espresso" be the #1 track on Spotify Global?',
+    icon: 'https://hips.hearstapps.com/hmg-prod/images/sabrina-carpenter-2-67d15874f2a23.jpg?crop=1xw:0.4999663797740721xh;center,top&resize=1200:*',
     currentPrice: '$130',
     participants: 42,
     potSize: '$420',
@@ -279,13 +280,14 @@ export const getMarkets = (t: Translation, category: string): Market[] => {
  else if (category === 'music') {
   return [
     {
-  id: 'spotify-global-1',
-  name: 'Global #1',
+  id: 'music',
+  name: 'Music Charts',
   symbol: '',
-  color: '#1DB954',
-  question: 'Will “Espresso” be the #1 track on Spotify Global?',
+  contractAddress: '0xb85D3aE374b8098A6cA553dB90C0978401a34f71',
+  color: '#DA70D6',
+  question: 'Will "Espresso" be the #1 track on Spotify Global?',
   icon: 'https://hips.hearstapps.com/hmg-prod/images/sabrina-carpenter-2-67d15874f2a23.jpg?crop=1xw:0.4999663797740721xh;center,top&resize=1200:*',
-  currentPrice: '$150',
+  currentPrice: '$130',
   participants: 42,
   potSize: '$420',
 }

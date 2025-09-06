@@ -49,7 +49,6 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const selectedMarket = propSelectedMarket;
   const { alertState, showAlert, closeAlert } = useCustomAlert();
-  const availableMarkets = ["random topics", "crypto", "stocks"];
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -392,7 +391,7 @@ const LandingPage = ({ activeSection, setActiveSection, isMobileSearchActive = f
       try {
         console.log('📊 Loading prediction percentages...');
         
-        const marketsWithContracts = ['Trending', 'Crypto', 'stocks']; // Markets that have prediction data
+        const marketsWithContracts = ['Trending', 'Crypto', 'stocks', 'music']; // Markets that have prediction data
         const percentagePromises = marketsWithContracts.map(async (marketId) => {
           const percentages = await getPredictionPercentages(marketId);
           return { marketId, percentages };
@@ -1178,7 +1177,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             
             
             {/* Header with Icon, Question, and Percentage */}
-            <div className="flex items-start gap-3 mb-3 relative">
+            <div className="flex items-center gap-3 mb-3 relative">
               {/* Small Square Image */}
               <div className="flex-shrink-0">
                 <div className="rounded-lg w-16 h-16 bg-white overflow-hidden relative">
@@ -1197,13 +1196,13 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               </div>
               
               {/* Question */}
-              <div className="flex-1 flex items-start pr-16">
+              <div className="flex-1 flex items-center pr-4">
                 <p className="text-sm leading-tight font-['Inter','system-ui','-apple-system','Segoe_UI','Roboto','Helvetica_Neue',sans-serif]" style={{
                   color: '#374151', 
                   fontWeight: '650',
                   minHeight: '2.5rem',
                   display: 'flex',
-                  alignItems: market.question.length > 50 ? 'flex-start' : 'center'
+                  alignItems: 'center'
                 }}>
                   {market.question}
                 </p>
@@ -1212,7 +1211,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
               {(() => {
                 // Mobile: Alternating layout system
                 const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                const useTraditionalLayout = marketIndex % 2 === 0;
+                const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
                 const contractAddress = getContractAddress(market.id);
                 const isEliminated = contractAddress && eliminationStatus[contractAddress];
                 
@@ -1222,8 +1221,8 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                     <div className="absolute top-0 right-0">
                       <div className="text-right flex flex-col items-end">
                         {/* Thermometer Arc */}
-                        <div className="w-12 h-6 mb-1 relative">
-                          <svg className="w-12 h-6" viewBox="0 0 100 50">
+                        <div className="w-16 h-8 mb-1 relative">
+                          <svg className="w-16 h-8" viewBox="0 0 100 50">
                             {/* Background arc */}
                             <path
                               d="M 10 45 A 40 40 0 0 1 90 45"
@@ -1247,17 +1246,21 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                               className="transition-all duration-300"
                             />
                           </svg>
+                          
+                          {/* Text overlaid inside the arc */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
+                            <div className="text-base font-bold text-gray-900 leading-none">
+                              {(() => {
+                                const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
+                                const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
+                                const negative = totalVotes - positive;
+                                const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
+                                return smoothedPercentage;
+                              })()}%
+                            </div>
+                            <div className="text-xs text-gray-500 leading-none -mt-0.5">chance</div>
+                          </div>
                         </div>
-                        <div className="text-lg font-bold text-gray-900 -mt-1">
-                                      {(() => {
-                                        const totalVotes = predictionPercentages[market.tabId || market.id]?.totalPredictions ?? 0;
-                                        const positive = Math.round((predictionPercentages[market.tabId || market.id]?.positivePercentage ?? 0) / 100 * totalVotes);
-                                        const negative = totalVotes - positive;
-                                        const smoothedPercentage = (((positive + 0.5) / (positive + negative + 1)) * 100).toFixed(0);
-                                        return smoothedPercentage;
-                                      })()}%
-                                    </div>
-                                    <div className="text-xs text-gray-500 -mt-1">chance</div>
                       </div>
                     </div>
                   );
@@ -1269,12 +1272,12 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
             {(() => {
               // Mobile: Alternating button layout system
               const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-              const useTraditionalLayout = marketIndex % 2 === 0;
+              const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
               
               if (useTraditionalLayout) {
                 // Traditional buttons (even index markets)
                 return (
-                  <div className="flex justify-center gap-2 mb-3">
+                  <div className="flex justify-center gap-2 mb-3 translate-y-3">
                     <button 
                       onClick={handleButtonClick(market.id, 'positive', (e) => {
                         e.stopPropagation();
@@ -1321,7 +1324,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                 if (!percentages) {
                   // Fallback to traditional if no data
                   return (
-                    <div className="flex justify-center gap-2 mb-3">
+                    <div className="flex justify-center gap-2 mb-3 translate-y-3">
                       <button 
                         onClick={handleButtonClick(market.id, 'positive', (e) => {
                           e.stopPropagation();
@@ -1357,8 +1360,8 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                   <div className="flex items-center justify-between mb-3 px-2">
                     {/* Left side: Yes/No labels stacked */}
                     <div className="flex flex-col gap-2">
-                      <div className="text-base font-semibold text-black">Yes</div>
-                      <div className="text-base font-semibold text-black">No</div>
+                      <div className="text-base font-normal text-black">Yes</div>
+                      <div className="text-base font-normal text-black">No</div>
                     </div>
                     
                     {/* Right side: Percentages and buttons */}
@@ -1375,13 +1378,17 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             console.log('Yes button clicked for market:', market.id);
                             Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
                             Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                            // Visual feedback
+                            (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                            (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                            // Navigate to market after brief visual feedback
                             setTimeout(() => {
                               handleMarketClick(market.id);
                             }, 300);
                           })}
-                          className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
+                          className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 border border-green-200 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
                         >
-                          Yes
+                          {getButtonContent(market.id, 'positive')}
                         </button>
                         <button 
                           onClick={handleButtonClick(market.id, 'negative', (e) => {
@@ -1390,13 +1397,17 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             console.log('No button clicked for market:', market.id);
                             Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
                             Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                            // Visual feedback
+                            (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                            (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                            // Navigate to market after brief visual feedback
                             setTimeout(() => {
                               handleMarketClick(market.id);
                             }, 300);
                           })}
-                          className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
+                          className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 border border-red-200 px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200 min-w-[45px]")}`}
                         >
-                          No
+                          {getButtonContent(market.id, 'negative')}
                         </button>
                       </div>
                     </div>
@@ -1672,7 +1683,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           {(() => {
                             // Determine if thermometer will be shown to adjust question width
                             const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                            const useTraditionalLayout = marketIndex % 2 === 0;
+                            const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
                             const contractAddress = getContractAddress(market.id);
                             const isEliminated = contractAddress && eliminationStatus[contractAddress];
                             const showThermometer = useTraditionalLayout && predictionPercentages[market.tabId || market.id] && !isEliminated;
@@ -1689,7 +1700,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                           {(() => {
                             // Alternating layout system
                             const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                            const useTraditionalLayout = marketIndex % 2 === 0;
+                            const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
                             const contractAddress = getContractAddress(market.id);
                             const isEliminated = contractAddress && eliminationStatus[contractAddress];
                             
@@ -1750,12 +1761,12 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                         {(() => {
                           // Alternating button layout system
                           const marketIndex = marketOptions.findIndex(m => m.id === market.id);
-                          const useTraditionalLayout = marketIndex % 2 === 0;
+                          const useTraditionalLayout = (marketIndex + 1) % 4 === 0;
                           
                           if (useTraditionalLayout) {
                             // Traditional buttons (even index markets)
                             return (
-                              <div className="flex justify-center gap-2 mb-3">
+                              <div className="flex justify-center gap-2 mb-3 translate-y-2">
                                 <button 
                                   onClick={handleButtonClick(market.id, 'positive', (e) => {
                                     e.stopPropagation();
@@ -1802,7 +1813,7 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                             if (!percentages) {
                               // Fallback to traditional if no data
                               return (
-                                <div className="flex justify-center gap-2 mb-3">
+                                <div className="flex justify-center gap-2 mb-3 translate-y-2">
                                   <button 
                                     onClick={handleButtonClick(market.id, 'positive', (e) => {
                                       e.stopPropagation();
@@ -1838,8 +1849,8 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                               <div className="flex items-center justify-between mb-3">
                                 {/* Left side: Yes/No labels stacked */}
                                 <div className="flex flex-col gap-1">
-                                  <div className="text-sm font-semibold text-black">Yes</div>
-                                  <div className="text-sm font-semibold text-black">No</div>
+                                  <div className="text-sm font-normal text-black">Yes</div>
+                                  <div className="text-sm font-normal text-black">No</div>
                                 </div>
                                 
                                 {/* Right side: Percentages and buttons */}
@@ -1856,13 +1867,17 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                         console.log('Yes button clicked for market:', market.id);
                                         Cookies.set('votingPreference', 'positive', { sameSite: 'lax', expires: 1 });
                                         Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                        // Visual feedback
+                                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#10b981';
+                                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                                        // Navigate to market after brief visual feedback
                                         setTimeout(() => {
                                           handleMarketClick(market.id);
                                         }, 300);
                                       })}
-                                      className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
+                                      className={`${getButtonStyles(market.id, 'positive', "bg-green-50 hover:bg-blue-200 text-green-700 border border-green-200 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
                                     >
-                                      Yes
+                                      {getButtonContent(market.id, 'positive')}
                                     </button>
                                     <button 
                                       onClick={handleButtonClick(market.id, 'negative', (e) => {
@@ -1871,13 +1886,17 @@ const handleMarketClick = (marketId: string, reentry: boolean = false) => {
                                         console.log('No button clicked for market:', market.id);
                                         Cookies.set('votingPreference', 'negative', { sameSite: 'lax', expires: 1 });
                                         Cookies.set('selectedMarketForVoting', market.id, { sameSite: 'lax', expires: 1 });
+                                        // Visual feedback
+                                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                                        (e.currentTarget as HTMLButtonElement).style.color = 'white';
+                                        // Navigate to market after brief visual feedback
                                         setTimeout(() => {
                                           handleMarketClick(market.id);
                                         }, 300);
                                       })}
-                                      className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
+                                      className={`${getButtonStyles(market.id, 'negative', "bg-red-50 hover:bg-purple-200 text-red-700 border border-red-200 px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 min-w-[35px]")}`}
                                     >
-                                      No
+                                      {getButtonContent(market.id, 'negative')}
                                     </button>
                                   </div>
                                 </div>
