@@ -252,7 +252,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
   return (
     <div className="min-h-screen bg-white text-black w-full overflow-x-hidden">
       <div className="w-full mx-auto p-6">
-        <div className="flex items-start justify-center pt-16 md:pt-32">
+        <div className="flex items-start justify-center pt-4 md:pt-8">
           <div className="text-center w-full max-w-4xl">
             {/* Loading State */}
             {isLoadingEmail && isConnected && (
@@ -263,7 +263,7 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
 
             {/* Apple-like Email Collection UI */}
             {!isLoadingEmail && showEmailCollection && isConnected && (
-              <div className="w-full mt-16 md:mt-0 px-6 md:px-12">
+              <div className="w-full translate-y-28 px-6 md:px-12">
                 {/* Email form container */}
                 <div className="relative max-w-2xl mx-auto animate-fade-in-up opacity-0" style={{ 
                   animation: 'fadeInUp 0.8s ease-out 0.2s forwards' 
@@ -328,83 +328,85 @@ const Dashboard = ({ activeSection, setActiveSection, selectedMarket }: Dashboar
               <div className="max-w-4xl mx-auto opacity-100">
                 {/* Tutorial Content */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-12 mb-8">
-                  <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-8 text-center">
-                    How to Play
-                  </h2>
+                  <div className="flex items-center mb-8 relative">
+                    <div className="flex-1"></div>
+                    <h2 className="text-3xl md:text-4xl font-light text-gray-900">
+                      How It Works
+                    </h2>
+                    <div className="flex-1 flex justify-end">
+                        <button
+                        onClick={() => setActiveSection(marketInfo.section)}
+                        className="bg-[#E8D9F3] text-purple-800 border border-purple-200 hover:from-purple-800 hover:to-purple-900 translate-x-2 md:translate-x-0 px-2 py-1.5 md:px-6 md:py-2 rounded-md md:rounded-lg transition-all duration-200 font-semibold hover:shadow-lg flex items-center justify-center gap-1 md:gap-2 text-xs md:text-sm transform hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                        {/* <Wallet className="w-3 h-3 md:w-4 md:h-4" /> */}
+                        Skip &gt;
+                        </button>
+                    </div>
+                  </div>
                   
-                  <div className="space-y-6 text-gray-700 leading-relaxed">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-1">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-700 rounded-full w-7 h-7 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-0.5">
                         1
                       </div>
-                      <p className="text-base md:text-lg">
-                        <strong>Anyone in the world can enter your pot.</strong> Players from around the globe compete in the same prediction tournaments.
+                      <p className="text-sm md:text-base">
+                        <strong>Global competition.</strong> Players worldwide compete in the same prediction tournaments.
                       </p>
                     </div>
                     
-                    <div className="flex items-start gap-4">
-                      <div className="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-1">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-700 rounded-full w-7 h-7 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-0.5">
                         2
                       </div>
-                      <p className="text-base md:text-lg">
-                        <strong>Predict tomorrow's outcome</strong> every day. Will the price go up or down? Make your prediction and wait for results.
+                      <p className="text-sm md:text-base">
+                        <strong>Daily predictions.</strong> Predict what's gonna happen tomorrow!
                       </p>
                     </div>
                     
-                    <div className="flex items-start gap-4">
-                      <div className="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-1">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-700 rounded-full w-7 h-7 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-0.5">
                         3
                       </div>
-                      <p className="text-base md:text-lg">
-                        <strong>Entry fees increase daily.</strong> Sunday is cheapest (~$0.01), rising to Friday (~$0.06). Join early to save money!
+                      <p className="text-sm md:text-base">
+                        <strong>Dynamic pricing.</strong> Entry fees rise daily from $0.01 (Sun) to $0.06 (Fri).
                       </p>
                     </div>
                     
-                    <div className="flex items-start gap-4">
-                      <div className="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-1">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-700 rounded-full w-7 h-7 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-0.5">
                         4
                       </div>
-                      <p className="text-base md:text-lg">
-                        <strong>Eliminated? Re-enter anytime!</strong> Pay today's entry fee to rejoin this pot, or find another pot to enter.
+                      <p className="text-sm md:text-base">
+                        <strong>Second chances.</strong> Eliminated? Pay today's fee to re-enter anytime.
                       </p>
                     </div>
                     
-                    <div className="flex items-start gap-4">
-                      <div className="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-1">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-700 rounded-full w-7 h-7 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-0.5">
                         5
                       </div>
-                      <p className="text-base md:text-lg">
-                        <strong>Tournament continues until final 10.</strong> When players drop below 10, we have one final prediction day to determine the winners.
+                      <p className="text-sm md:text-base">
+                        <strong>Final showdown.</strong> Tournament runs until final 10 players remain.
                       </p>
                     </div>
                     
-                    <div className="flex items-start gap-4">
-                      <div className="bg-purple-100 text-purple-700 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-1">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-700 rounded-full w-7 h-7 flex items-center justify-center font-semibold text-sm flex-shrink-0 mt-0.5">
                         6
                       </div>
-                      <p className="text-base md:text-lg">
-                        <strong>Check player counts on the home page.</strong> Every pot shows current players and minimum needed to begin the tournament.
+                      <p className="text-sm md:text-base">
+                        <strong>Live stats.</strong> Stay informed with up-to-date information for each pot.
                       </p>
                     </div>
                   </div>
                   
                   <div className="mt-10 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-100">
                     <p className="text-center text-base md:text-lg text-gray-800 font-medium">
-                      🎯 <strong>Your Goal:</strong> Keep predicting correctly until you win or get eliminated. Last players standing share the pot!
+                      🎯 <strong>Your Goal:</strong> Keep predicting correctly until you're one of the last 10.
                     </p>
                   </div>
                 </div>
 
-                {/* View Pot Button */}
-                <div className="text-center">
-                  <button
-                    onClick={() => setActiveSection(marketInfo.section)}
-                    className="bg-gradient-to-r from-purple-700 to-purple-800 hover:from-purple-800 hover:to-purple-900 text-white px-10 py-4 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-lg mx-auto transform hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <Wallet className="w-5 h-5" />
-                    Enter the Pot
-                  </button>
-                </div>
               </div>
             )}
           </div>
